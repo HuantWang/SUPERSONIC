@@ -25,11 +25,12 @@ copyright = "Facebook AI Research"
 author = "Facebook AI Research"
 
 # Read the version from the //:VERSION file.
-with open("../../VERSION") as f:	
-	try:
+try:
+	with open("../../VERSION") as f:	
+	
     		version = f.read().strip()
-	except:
-		version = 0.1
+except:
+	version = 0.1
 release = version
 
 
