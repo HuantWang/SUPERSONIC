@@ -1,0 +1,281 @@
+// The CompilerGym service interface description.
+//
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the root directory of this source tree.
+
+syntax = "proto3";
+
+package compiler_gym;
+
+option go_package = "compiler_gympb";
+option java_multiple_files = true;
+option java_outer_classname = "CompilerGymServiceProto";
+option java_package = "com.compiler_gym";
+
+service CompilerGymService {
+  // Request version strings from the service.
+  rpc GetVersion(GetVersionRequest) returns (GetVersionReply);
+  // Request the action and observation spaces that this service supports. The
+  // service responds with an initial action space, and a list of available
+  // observation and reward spaces.
+  rpc GetSpaces(GetSpacesRequest) returns (GetSpacesReply);
+  // Start a new CompilerGym service session. This allocates a new session on
+  // the service and returns a session ID. To terminate the session, call
+  // EndSession() once done. Raises grpc::StatusCode::NOT_FOUND if the requested
+  // benchmark URI is not found.
+  rpc StartSession(StartSessionRequest) returns (StartSessionReply);
+  // Fork a session. This creates a new session in exactly the same state. The
+  // new session must be terminated with EndSession() once done. This returns
+  // an error if the session to fork does not exist.
+  rpc ForkSession(ForkSessionRequest) returns (ForkSessionReply);
+  // End a CompilerGym service session. If the requested session does not exist,
+  // this returns an error.
+  rpc EndSession(EndSessionRequest) returns (EndSessionReply);
+  // Apply a list of optimization decisions and compute a list of observations
+  // for a session. Optimization decisions are selected from the last
+  // ActionSpace returned by a call to GetSpaces() or Step(). Valid observations
+  // are queried using GetSpaces(). This returns an error if the requested
+  // session does not exist.
+  rpc Step(StepRequest) returns (StepReply);
+  // Register a new benchmark.
+  rpc AddBenchmark(AddBenchmarkRequest) returns (AddBenchmarkReply);
+}
+
+// ===========================================================================
+// GetVersion().
+
+message GetVersionRequest {}
+
+message GetVersionReply {
+  // The version string for this service.
+  string service_version = 1;
+  // The version string for the underlying compiler.
+  string compiler_version = 2;
+}
+
+// ===========================================================================
+// StartSession().
+
+message StartSessionRequest {
+  // The name of the benchmark to use for this session. If not provided, a
+  // benchmark is chosen randomly by the service.
+  string benchmark = 1;
+  // An index into the GetSpacesReply.action_space_list selecting the action
+  // space that is to be used for this session. Once set, the action space
+  // cannot be changed for the duration of the session.
+  int32 action_space = 2;
+  // A list of indices into the GetSpacesReply.observation_space_list
+  repeated int32 observation_space = 3;
+}
+
+message StartSessionReply {
+  // The ID that has been assigned to the session. The client must use this ID
+  // in all subsequent interactions with the service for this session.
+  int64 session_id = 1;
+  // The name of the benchmark.
+  string benchmark = 2;
+  // A new action space. This is set only if, after initializing the session,
+  // the action space has changed from the default action space returned by
+  // GetSpaces(). If set, the environment should discard the previous action
+  // space and replace it with this one. Else, the action space remains
+  // unchanged.
+  ActionSpace new_action_space = 3;
+  // Observed states after completing the action.
+  repeated Observation observation = 4;
+}
+
+// ===========================================================================
+// Step().
+
+message StepRequest {
+  // The ID of the session.
+  int64 session_id = 1;
+  // A list of indices into the ActionSpace.action list. Actions are executed
+  // in the order they appear in this list.
+  repeated int32 action = 2;
+  // A list of indices into the GetSpacesReply.observation_space_list
+  repeated int32 observation_space = 3;
+}
+
+message StepReply {
+  // Indicates that the session has ended. This could be because there are no
+  // further actions that can be made, or because the action has led to an
+  // invalid state. Once this field has been set, you should make no further
+  // calls to step(). However, you mays still request reward and new
+  // observations.
+  bool end_of_session = 1;
+  // A service may set this field to true if the action is known not to have
+  // any effect. This allows an agent to assume that observations or rewards
+  // computed before this action remain valid, providing that they are
+  // deterministic.
+  bool action_had_no_effect = 2;
+  // A new action space. This field is set if, as a result of running the
+  // requested action, the action space has changed. Else, the action space
+  // remains unchanged.
+  ActionSpace new_action_space = 3;
+  // Observed states after completing the action.
+  repeated Observation observation = 4;
+}
+
+// ===========================================================================
+// Actions.
+
+message ActionSpace {
+  // The name of the action space.
+  string name = 1;
+  // A list of discrete action names.
+  // NOTE(cummins): This currently only supports flat action spaces of
+  // categorical values. In the future we will want to replace this with a more
+  // extensible representation that supports parameterized actions, and actions
+  // of different types (e.g. optimization passes vs optimization contexts).
+  repeated string action = 2;
+}
+
+// ===========================================================================
+// Observations.
+
+message Observation {
+  // A point in an ObservationSpace is _either_ a scalar or vector of integers
+  // or real values, a string, or an opaque byte array.
+  oneof value {
+    Int64List int64_list = 1;
+    DoubleList double_list = 2;
+    string string_value = 3;
+    bytes binary_value = 4;
+    int64 scalar_int64 = 5;
+    double scalar_double = 6;
+  }
+}
+
+message Int64List {
+  repeated int64 value = 1;
+}
+
+message DoubleList {
+  repeated double value = 1;
+}
+
+message ScalarRange {
+  // The minimum value (inclusive). If not set, the value is -inf.
+  ScalarLimit min = 1;
+  // The maximum value (inclusive). If not set, the value is +inf.
+  ScalarLimit max = 2;
+}
+
+message ScalarLimit {
+  double value = 1;
+}
+
+message ScalarRangeList {
+  repeated ScalarRange range = 1;
+}
+
+message ObservationSpace {
+  // The name of the observation space.
+  string name = 1;
+  // The shape of the observation space. All Observations
+  // from an ObservationSpace have the same shape.
+  oneof shape {
+    ScalarRangeList int64_range_list = 2;
+    ScalarRangeList double_range_list = 3;
+    // For character and byte arrays, the _size_range field describes the range of
+    // possible sizes, e.g. a string_size_range of [10, +inf] means that
+    // observations are strings of at least 10 characters in length.
+    ScalarRange string_size_range = 4;
+    ScalarRange binary_size_range = 5;
+    // For scalar values, the _range field describes the bounds of the scalar
+    // value.
+    ScalarRange scalar_int64_range = 10;
+    ScalarRange scalar_double_range = 11;
+  }
+  // An optional string describing an opaque data format, e.g. a data structure
+  // that is serialized to a string/binary array for transmission back to the
+  // client. It is up to the client and service to agree on how to decode
+  // observations using this value. For example, an opaque_data_format of
+  // "string_json" could be used to indicate that the observation is a
+  // string-serialized JSON value.
+  string opaque_data_format = 6;
+  // Whether the observation space is deterministic.
+  bool deterministic = 7;
+  // Whether the observations depend on the service execution environment.
+  bool platform_dependent = 8;
+  // A default observation. This value should be used by the client in lieu
+  // of a true observation if the compiler service terminates abruptly, such as
+  // a crash while applying an action.
+  Observation default_value = 9;
+}
+
+// ===========================================================================
+// Fork().
+
+message ForkSessionRequest {
+  // The ID of the session to fork.
+  int64 session_id = 1;
+}
+
+message ForkSessionReply {
+  // The ID of the newly created session.
+  int64 session_id = 1;
+}
+
+// ===========================================================================
+// EndSession().
+
+message EndSessionRequest {
+  // The ID of the session.
+  int64 session_id = 1;
+}
+
+message EndSessionReply {
+  // The number of sessions that the service currently has.
+  int32 remaining_sessions = 1;
+}
+
+// ===========================================================================
+// GetSpaces().
+
+message GetSpacesRequest {}
+
+message GetSpacesReply {
+  // The initial space of actions. Subsequent calls to step() may produce
+  // a new action space.
+  repeated ActionSpace action_space_list = 1;
+  // A list of available observation spaces. A service may support one or more
+  // observation spaces.
+  repeated ObservationSpace observation_space_list = 2;
+}
+
+// ===========================================================================
+// AddBenchmark().
+
+// A Benchmark message is used to register a new benchmark with a compiler
+// service.
+message Benchmark {
+  // The name of the benchmark to add. In case of conflict with an existing
+  // benchmark, this new benchmark replaces the existing one.
+  string uri = 1;
+  // The description of the program that is being compiled. It is up to the
+  // service to determine how to interpret this file, and it is the
+  // responsibility of the client to ensure that it provides the correct format.
+  // For example, the service could expect that this file contains serialized
+  // IR data, or an input source file.
+  File program = 2;
+}
+
+// A File message represents a file object.
+message File {
+  oneof data {
+    // The raw data of the file.
+    bytes contents = 1;
+    // The URI of the file which can be accessed.
+    string uri = 2;
+  }
+}
+
+message AddBenchmarkRequest {
+  repeated Benchmark benchmark = 1;
+}
+
+message AddBenchmarkReply {}
