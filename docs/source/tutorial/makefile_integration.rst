@@ -1,4 +1,0 @@
-LLVM Makefile Integration
-=========================
-
-TODO.
