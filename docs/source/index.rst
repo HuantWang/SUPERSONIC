@@ -1,22 +1,36 @@
-Welcome to Lumache's documentation!
-===================================
-
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
-
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
-
-.. note::
-
-   This project is under active development.
-
-Contents
---------
+`SUPERSONIC <https://github.com/NWU-NISL-Optimization/SuperSonic>`_ is a toolkit
+for applying reinforcement learning to compiler optimizations.
 
 .. toctree::
+   :maxdepth: 1
+   :caption: User Guide
 
-   usage
-   api
+   getting_started
+   about
+   contributing
+   changelog
+   faq
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Python API Reference
+
+   supersonic/service
+   supersonic/PolSear_MTL
+   supersonic/utils
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Tutorial Reference
+
+   tasks/Stoke
+   tasks/Halide
+   tasks/TVM
+   tasks/CodeSizeReduction
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
