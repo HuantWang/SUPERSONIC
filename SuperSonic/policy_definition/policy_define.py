@@ -12,7 +12,7 @@ import sklearn.model_selection
 class SuperOptimizer:
     def __init__(
         self,
-        StateFunctions=["Word2vec", "Doc2vec", "Bert", "Actionhistory"],
+        StateFunctions=["Word2vec", "Doc2vec", "Bert"],
         RewardFunctions=["relative_measure", "tan", "func", "weight"],
         RLAlgorithms=["MCTS", "PPO", "DQN", "QLearning"],
         ActionFunctions=["init"],

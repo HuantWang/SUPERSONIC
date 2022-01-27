@@ -7,26 +7,29 @@ class reward_function:
     def __init__(self):
         self.rew_fun = "tanh"
 
-    def get_reward(self, input, baseline, weight=1, method="relative_measure"):
+    def get_reward(self, input, baseline=1, weight=1, reward_function="usr_define"):
         self.baseline = (
             baseline  # eg: using grpc to obtain hamming distance as baseline
         )
         self.current = input
-        if method == "relative_measure":
+        if reward_function == "usr_define":
+            reward = self.current
+
+        if reward_function == "relative_measure":
             # hamming = random.randint(-5, 5)  # eg: using grpc to obtain hamming distance
             reward = self.current / self.baseline
 
-        if method == "tan":
+        if reward_function == "tan":
             reward = np.tan(self.current)
 
-        if method == "func":
+        if reward_function == "func":
             if self.current < self.baseline:
                 reward = 0
             else:
                 reward = 1
             return reward, self.baseline
 
-        if method == "weight":
+        if reward_function == "weight":
             if self.current < self.baseline:
                 exec_diff = self.baseline - self.current
                 self.current = self.current

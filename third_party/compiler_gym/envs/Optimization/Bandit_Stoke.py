@@ -1,3 +1,8 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+"""This module defines policy search environments for STOKE"""
 import math
 import gym
 from gym.utils import seeding
@@ -16,21 +21,27 @@ import sqlite3
 
 
 class BanditStokeEnv(gym.Env):
+    """A :class:
+        we formulate RL component search as a multi-armed bandit (MAB) problem.
+    Observation:
+        Type: Box(20)
+        By default, the meta-optimizer runs each client RL for past few exploration
+    steps during a trial to allow it to converge before taking the
+    observation. We use the 20 most recently chosen policy architectures as the state.
+    Actions:
+        Type: Discrete(n)
+        Given a budget of 𝑛 candidate RL component configurations (or slot machines)
+    Reward:
+        We then use the most frequently chosen policy architecture as the outcome of policy search.
+
+
     """
-               Bandit environment base to allow agents to interact with the class n-armed bandit
-               in different variations
-               p_dist:
-                   A list of probabilities of the likelihood that a particular bandit will pay out
-               r_dist:
-                   A list of either rewards (if number) or means and standard deviations (if list)
-                   of the payout that bandit has
-               info:
-                   Info about the environment that the agents is not supposed to know. For instance,
-                   info can releal the index of the optimal arm, or the value of prior parameter.
-                   Can be useful to evaluate the agent's perfomance
-               """
 
     def __init__(self, policy, data):
+        """Initialise with an environment.
+        :param policy: The candidate policy list.
+        :param data: The program that programer intend to optimize.
+        """
         self.info = {}
         self.all_policy, self.n_bandits = policy[0], policy[1]
         self.dataset = data
@@ -50,20 +61,18 @@ class BanditStokeEnv(gym.Env):
         return [seed]
 
     def get_observation(self, action):
-        # print("actionspace",self.action_space)
-        # print("action",action)
+        """ feedback the observation."""
+
         if len(self.actions) < self.obsv_size:
             self.observation = np.hstack(
                 (np.array(self.actions), np.zeros(self.obsv_size - len(self.actions)))
             )[: self.obsv_size]
-            # print("observation111111",self.observation)
         else:
             self.observation = self.actions[-self.obsv_size :]
-            # print("observation222222", self.observation)
         return self.observation
 
     def generate_reward(self, action):
-
+        """ feedback the reward."""
         # the path to save execution performance
         DocSave = "../../SuperSonic/logs/model_save"
 
@@ -100,92 +109,91 @@ class BanditStokeEnv(gym.Env):
 
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
-
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
                                                               VALUES (?, ?, ?, ?)"
         c.execute(sql, (self.num, "STOKE", action, reward))
-        # c.execute("INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \
-        #                               VALUES (code, self.actions, reward, self.min_exec_time_sec )")
-
         conn.commit()
-
         conn.close()
 
         return reward
 
-    def get_reward_1(self, action):
-
-        # the path to save execution performance
-        DocSave = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
-        name = "result.json"
-
-        # Delete dir
-        if os.path.exists(DocSave):
-            shutil.rmtree(DocSave)
-
-        exist_policy = self.all_policy[action]
-
-        self.num = self.num + 1
-        print("self.num : ", self.num)
-        import random
-
-        if action == 0:
-            reward = 0
-        else:
-            reward = random.randint(1, 10)
-
-        # load loss from json
-
-        print("reward is finished!!!!!!!!!!!!!!!!!!!!")
-        # result['policy'].append(action)
-        # result['reward_mean'].append(reward_mean)
-        # result['reward_min'].append(reward_min)
-        # result['reward_max'].append(reward_max)
-        # result['total_loss'].append(total_loss)
-
-        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
-        c = conn.cursor()
-
-        sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) VALUES (?, ?, ?, ?)"
-        c.execute(sql, (self.num, "HALIDE", action, reward))
-        # c.execute("INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \
-        #                               VALUES (code, self.actions, reward, self.min_exec_time_sec )")
-
-        conn.commit()
-        conn.close()
-
-        # cursor = c.execute("SELECT ID,TASK,ACTION,REWARD,LOG  from SUPERSONIC")
-        # for row in cursor:
-        #     print("TASK = ", row[0])
-        #     print("ACTION = ", row[1])
-        #     print("REWARD = ", row[2])
-        #     print("LOG = ", row[3], "\n")
-        # conn.close()
-        # print("reward",reward)
-        return reward
+    # def get_reward_1(self, action):
+    #
+    #     # the path to save execution performance
+    #     DocSave = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
+    #     name = "result.json"
+    #
+    #     # Delete dir
+    #     if os.path.exists(DocSave):
+    #         shutil.rmtree(DocSave)
+    #
+    #     exist_policy = self.all_policy[action]
+    #
+    #     self.num = self.num + 1
+    #     print("self.num : ", self.num)
+    #     import random
+    #
+    #     if action == 0:
+    #         reward = 0
+    #     else:
+    #         reward = random.randint(1, 10)
+    #
+    #     # load loss from json
+    #
+    #     print("reward is finished!!!!!!!!!!!!!!!!!!!!")
+    #     # result['policy'].append(action)
+    #     # result['reward_mean'].append(reward_mean)
+    #     # result['reward_min'].append(reward_min)
+    #     # result['reward_max'].append(reward_max)
+    #     # result['total_loss'].append(total_loss)
+    #
+    #     conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
+    #     c = conn.cursor()
+    #
+    #     sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) VALUES (?, ?, ?, ?)"
+    #     c.execute(sql, (self.num, "HALIDE", action, reward))
+    #     # c.execute("INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \
+    #     #                               VALUES (code, self.actions, reward, self.min_exec_time_sec )")
+    #
+    #     conn.commit()
+    #     conn.close()
+    #
+    #     # cursor = c.execute("SELECT ID,TASK,ACTION,REWARD,LOG  from SUPERSONIC")
+    #     # for row in cursor:
+    #     #     print("TASK = ", row[0])
+    #     #     print("ACTION = ", row[1])
+    #     #     print("REWARD = ", row[2])
+    #     #     print("LOG = ", row[3], "\n")
+    #     # conn.close()
+    #     # print("reward",reward)
+    #     return reward
 
     def step(self, action):
+        """Take a step.
+
+                :param action: An action, or a sequence of actions. When multiple
+                    actions are provided the observation and reward are returned after
+                    running all of the actions.
+
+                :return: A tuple of observation, reward, done, and info. Observation and
+                    reward are None if default observation/reward is not set. If done is
+                    True, observation and reward may also be None (e.g. because the
+                    service failed).
+        """
         assert self.action_space.contains(action)
         self.num = self.num + 1
         self.actions.append(action)
         # reward = self.get_reward_1(action)
         reward = self.generate_reward(action)
         obs = self.get_observation(action)
-        # print(obs)
-        # print("action", action)
-
         done = True
 
-        # if np.random.uniform() < self.p_dist[action]:
-        #     if not isinstance(self.r_dist[action], list):
-        #         reward = self.r_dist[action]
-        #     else:
-        #         reward = np.random.normal(self.r_dist[action][0], self.r_dist[action][1])
-
-        return [0], reward, done, self.info  #
+        return [0], reward, done, self.info
 
     def reset(self):
-        return np.random.rand(20)  #
+        """ reset the RL environment.
+                """
+        return np.random.rand(20)
 
     def render(self, mode="human", close=False):
         pass

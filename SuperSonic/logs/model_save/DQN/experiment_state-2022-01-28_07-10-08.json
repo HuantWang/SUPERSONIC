@@ -2,7 +2,7 @@
   "checkpoints": [
     {
       "trainable_name": "DQN",
-      "trial_id": "ca4f0_00000",
+      "trial_id": "45147_00000",
       "config": {
         "env": {
           "_type": "CLOUDPICKLE_FALLBACK",
@@ -93,8 +93,8 @@
       "metric_n_steps": {},
       "export_formats": [],
       "status": "ERROR",
-      "start_time": 1643305904.2690332,
-      "logdir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/DQN_stoke_rl_0_2022-01-28_01-51-440lmwepos",
+      "start_time": 1643325008.10052,
+      "logdir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/DQN_stoke_rl_0_2022-01-28_07-10-08i1h6v47z",
       "runner": null,
       "result_logger": null,
       "last_debug": 0,
@@ -146,15 +146,15 @@
       "value": "80059527000000000000008c107261792e74756e652e73746f70706572948c0b4e6f6f7053746f707065729493942981942e"
     },
     "_resumed": false,
-    "_start_time": 1643305904.2545981,
-    "_last_checkpoint_time": 1643305907.3337803,
+    "_start_time": 1643325008.0865586,
+    "_last_checkpoint_time": 1643325011.373202,
     "_checkpoint_period": 10,
-    "_session_str": "2022-01-28_01-51-44",
-    "checkpoint_file": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/experiment_state-2022-01-28_01-51-44.json",
+    "_session_str": "2022-01-28_07-10-08",
+    "checkpoint_file": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/experiment_state-2022-01-28_07-10-08.json",
     "launch_web_server": false
   },
   "stats": {
-    "start_time": 1643305904.2545981,
-    "timestamp": 1643305907.3337803
+    "start_time": 1643325008.0865586,
+    "timestamp": 1643325011.373202
   }
 }
