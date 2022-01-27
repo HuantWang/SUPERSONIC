@@ -58,23 +58,21 @@ class InputReader:
         if hasattr(self, "_queue_runner"):
             raise ValueError(
                 "A queue runner already exists for this input reader. "
-                "You can only call tf_input_ops() once per reader.")
+                "You can only call tf_input_ops() once per reader."
+            )
 
         logger.info("Reading initial batch of data from input reader.")
         batch = self.next()
         if isinstance(batch, MultiAgentBatch):
             raise NotImplementedError(
-                "tf_input_ops() is not implemented for multi agent batches")
+                "tf_input_ops() is not implemented for multi agent batches"
+            )
 
         keys = [
-            k for k in sorted(batch.keys())
-            if np.issubdtype(batch[k].dtype, np.number)
+            k for k in sorted(batch.keys()) if np.issubdtype(batch[k].dtype, np.number)
         ]
         dtypes = [batch[k].dtype for k in keys]
-        shapes = {
-            k: (-1, ) + s[1:]
-            for (k, s) in [(k, batch[k].shape) for k in keys]
-        }
+        shapes = {k: (-1,) + s[1:] for (k, s) in [(k, batch[k].shape) for k in keys]}
         queue = tf.FIFOQueue(capacity=queue_size, dtypes=dtypes, names=keys)
         tensors = queue.dequeue()
 
@@ -101,10 +99,7 @@ class _QueueRunner(threading.Thread):
         self.enqueue_op = queue.enqueue(dict(zip(keys, self.placeholders)))
 
     def enqueue(self, batch):
-        data = {
-            self.placeholders[i]: batch[key]
-            for i, key in enumerate(self.keys)
-        }
+        data = {self.placeholders[i]: batch[key] for i, key in enumerate(self.keys)}
         self.sess.run(self.enqueue_op, feed_dict=data)
 
     def run(self):

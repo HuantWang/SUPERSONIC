@@ -30,12 +30,9 @@ class DistributedTorchRunner(TorchRunner):
         kwargs: Keyword arguments for TorchRunner.
     """
 
-    def __init__(self,
-                 *args,
-                 backend="gloo",
-                 add_dist_sampler=True,
-                 wrap_ddp=False,
-                 **kwargs):
+    def __init__(
+        self, *args, backend="gloo", add_dist_sampler=True, wrap_ddp=False, **kwargs
+    ):
         super(DistributedTorchRunner, self).__init__(*args, **kwargs)
         if backend not in ("gloo", "nccl"):
             raise ValueError("Backend must be one of 'gloo' or 'nccl'.")
@@ -56,13 +53,17 @@ class DistributedTorchRunner(TorchRunner):
             world_size (int): the total number of runners.
         """
         self.world_rank = world_rank
-        logger.debug("Connecting to {} world_rank: {} world_size: {}".format(
-            url, world_rank, world_size))
+        logger.debug(
+            "Connecting to {} world_rank: {} world_size: {}".format(
+                url, world_rank, world_size
+            )
+        )
         logger.debug("using {}".format(self.backend))
         if self.backend == "nccl" and "NCCL_BLOCKING_WAIT" not in os.environ:
             logger.debug(
                 "Setting NCCL_BLOCKING_WAIT for detecting node failure. "
-                "To override this behavior, you can set NCCL_BLOCKING_WAIT=0.")
+                "To override this behavior, you can set NCCL_BLOCKING_WAIT=0."
+            )
             os.environ["NCCL_BLOCKING_WAIT"] = "1"
 
         timeout = timedelta(seconds=NCCL_TIMEOUT_S)
@@ -71,7 +72,8 @@ class DistributedTorchRunner(TorchRunner):
             init_method=url,
             rank=world_rank,
             world_size=world_size,
-            timeout=timeout)
+            timeout=timeout,
+        )
 
     def setup_ddp_and_operator(self):
         """Runs distributed coordination components.
@@ -105,7 +107,8 @@ class DistributedTorchRunner(TorchRunner):
             device_ids=device_ids,
             use_gpu=self.use_gpu,
             use_fp16=self.use_fp16,
-            use_tqdm=self.use_tqdm)
+            use_tqdm=self.use_tqdm,
+        )
 
     def get_device_ids(self):
         """Needed for SyncBatchNorm, which needs 1 GPU per process."""
@@ -124,8 +127,8 @@ class DistributedTorchRunner(TorchRunner):
         to_gpu = self.use_gpu and torch.cuda.is_available()
         state_dict = torch.load(
             _buffer,
-            map_location=("cpu" if not to_gpu else
-                          lambda storage, loc: storage.cuda()))
+            map_location=("cpu" if not to_gpu else lambda storage, loc: storage.cuda()),
+        )
         return self.load_state_dict(state_dict)
 
     def _wrap_dataloaders(self):
@@ -141,20 +144,20 @@ class DistributedTorchRunner(TorchRunner):
                 "drop_last": loader.drop_last,
                 "timeout": loader.timeout,
                 "worker_init_fn": loader.worker_init_fn,
-                "sampler": DistributedSampler(loader.dataset)
+                "sampler": DistributedSampler(loader.dataset),
             }
             return DataLoader(**data_loader_args)
 
         def should_wrap_dataloader(loader):
-            return (isinstance(loader, DataLoader)
-                    and not isinstance(loader.dataset, IterableDataset))
+            return isinstance(loader, DataLoader) and not isinstance(
+                loader.dataset, IterableDataset
+            )
 
         if should_wrap_dataloader(self.train_loader):
             if self.add_dist_sampler:
                 self.train_loader = with_sampler(self.train_loader)
 
-        if self.validation_loader and should_wrap_dataloader(
-                self.validation_loader):
+        if self.validation_loader and should_wrap_dataloader(self.validation_loader):
             if self.add_dist_sampler:
                 self.validation_loader = with_sampler(self.validation_loader)
 
@@ -164,7 +167,8 @@ class DistributedTorchRunner(TorchRunner):
         Automatically sets epoch of sampler if possible.
         """
         if hasattr(self.train_loader, "sampler") and hasattr(
-                self.train_loader.sampler, "set_epoch"):
+            self.train_loader.sampler, "set_epoch"
+        ):
             self.train_loader.sampler.set_epoch(self.epochs)
         return super(DistributedTorchRunner, self).train_epoch(**kwargs)
 
@@ -226,15 +230,18 @@ def reserve_cuda_device(retries=20):
     success = False
     for _ in range(retries):
         if _dummy_actor is None:
-            _dummy_actor = ray.remote(
-                num_gpus=1,
-                resources={"node:" + ip: 0.1})(_DummyActor).remote()
+            _dummy_actor = ray.remote(num_gpus=1, resources={"node:" + ip: 0.1})(
+                _DummyActor
+            ).remote()
 
         reserved_device = ray.get(_dummy_actor.cuda_devices.remote())
 
         if match_devices and reserved_device not in cuda_device_set:
-            logger.debug("Device %s not in list of visible devices %s",
-                         reserved_device, cuda_device_set)
+            logger.debug(
+                "Device %s not in list of visible devices %s",
+                reserved_device,
+                cuda_device_set,
+            )
             unused_actors.append(_dummy_actor)
             _dummy_actor = None
         else:
@@ -248,7 +255,8 @@ def reserve_cuda_device(retries=20):
         raise RuntimeError(
             "Unable to reserve the set CUDA VISIBLE DEVICES on Ray. Please "
             "make sure that Ray has access to all the visible devices: "
-            "{}".format(os.environ.get("CUDA_VISIBLE_DEVICES")))
+            "{}".format(os.environ.get("CUDA_VISIBLE_DEVICES"))
+        )
 
     return reserved_device
 
@@ -276,8 +284,10 @@ class LocalDistributedRunner(DistributedTorchRunner):
         super(LocalDistributedRunner, self).__init__(*args, **kwargs)
 
     def _try_reserve_and_set_cuda(self):
-        use_found_device = os.environ.get("CUDA_VISIBLE_DEVICES") is None \
-                           and torch.cuda.is_initialized()
+        use_found_device = (
+            os.environ.get("CUDA_VISIBLE_DEVICES") is None
+            and torch.cuda.is_initialized()
+        )
         device = reserve_cuda_device()
         # This needs to be set even if torch.cuda is already
         # initialized because the env var is used later when
@@ -331,4 +341,5 @@ class DeactivatedRunner:
     def __getattr__(self, *args, **kwargs):
         raise RuntimeError(
             "This TorchTrainer is not active (it is likely shutdown already). "
-            "Create a new TorchTrainer.")
+            "Create a new TorchTrainer."
+        )

@@ -18,14 +18,13 @@ import os
 
 import pkg_resources
 
-_ROOT_CERTIFICATES_RESOURCE_PATH = 'credentials/ca.pem'
-_PRIVATE_KEY_RESOURCE_PATH = 'credentials/server1.key'
-_CERTIFICATE_CHAIN_RESOURCE_PATH = 'credentials/server1.pem'
+_ROOT_CERTIFICATES_RESOURCE_PATH = "credentials/ca.pem"
+_PRIVATE_KEY_RESOURCE_PATH = "credentials/server1.key"
+_CERTIFICATE_CHAIN_RESOURCE_PATH = "credentials/server1.pem"
 
 
 def test_root_certificates():
-    return pkg_resources.resource_string(__name__,
-                                         _ROOT_CERTIFICATES_RESOURCE_PATH)
+    return pkg_resources.resource_string(__name__, _ROOT_CERTIFICATES_RESOURCE_PATH)
 
 
 def private_key():
@@ -33,13 +32,12 @@ def private_key():
 
 
 def certificate_chain():
-    return pkg_resources.resource_string(__name__,
-                                         _CERTIFICATE_CHAIN_RESOURCE_PATH)
+    return pkg_resources.resource_string(__name__, _CERTIFICATE_CHAIN_RESOURCE_PATH)
 
 
 def parse_bool(value):
-    if value == 'true':
+    if value == "true":
         return True
-    if value == 'false':
+    if value == "false":
         return False
-    raise argparse.ArgumentTypeError('Only true/false allowed')
+    raise argparse.ArgumentTypeError("Only true/false allowed")

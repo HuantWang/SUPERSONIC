@@ -21,7 +21,8 @@ class FilterManager:
             update_remote (bool): Whether to push updates to remote filters.
         """
         remote_filters = ray.get(
-            [r.get_filters.remote(flush_after=True) for r in remotes])
+            [r.get_filters.remote(flush_after=True) for r in remotes]
+        )
         for rf in remote_filters:
             for k in local_filters:
                 local_filters[k].apply_changes(rf[k], with_buffer=False)

@@ -50,20 +50,15 @@ class NoSuchMethodError(Exception):
         self.method = method
 
     def __repr__(self):
-        return 'face.NoSuchMethodError(%s, %s)' % (
-            self.group,
-            self.method,
-        )
+        return "face.NoSuchMethodError(%s, %s)" % (self.group, self.method,)
 
 
 class Abortion(
-        collections.namedtuple('Abortion', (
-            'kind',
-            'initial_metadata',
-            'terminal_metadata',
-            'code',
-            'details',
-        ))):
+    collections.namedtuple(
+        "Abortion",
+        ("kind", "initial_metadata", "terminal_metadata", "code", "details",),
+    )
+):
     """A value describing RPC abortion.
 
   Attributes:
@@ -82,13 +77,13 @@ class Abortion(
     class Kind(enum.Enum):
         """Types of RPC abortion."""
 
-        CANCELLED = 'cancelled'
-        EXPIRED = 'expired'
-        LOCAL_SHUTDOWN = 'local shutdown'
-        REMOTE_SHUTDOWN = 'remote shutdown'
-        NETWORK_FAILURE = 'network failure'
-        LOCAL_FAILURE = 'local failure'
-        REMOTE_FAILURE = 'remote failure'
+        CANCELLED = "cancelled"
+        EXPIRED = "expired"
+        LOCAL_SHUTDOWN = "local shutdown"
+        REMOTE_SHUTDOWN = "remote shutdown"
+        NETWORK_FAILURE = "network failure"
+        LOCAL_FAILURE = "local failure"
+        REMOTE_FAILURE = "remote failure"
 
 
 class AbortionError(six.with_metaclass(abc.ABCMeta, Exception)):
@@ -112,8 +107,11 @@ class AbortionError(six.with_metaclass(abc.ABCMeta, Exception)):
         self.details = details
 
     def __str__(self):
-        return '%s(code=%s, details="%s")' % (self.__class__.__name__,
-                                              self.code, self.details)
+        return '%s(code=%s, details="%s")' % (
+            self.__class__.__name__,
+            self.code,
+            self.details,
+        )
 
 
 class CancellationError(AbortionError):
@@ -356,12 +354,9 @@ class UnaryUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
     """Affords invoking a unary-unary RPC in any call style."""
 
     @abc.abstractmethod
-    def __call__(self,
-                 request,
-                 timeout,
-                 metadata=None,
-                 with_call=False,
-                 protocol_options=None):
+    def __call__(
+        self, request, timeout, metadata=None, with_call=False, protocol_options=None
+    ):
         """Synchronously invokes the underlying RPC.
 
     Args:
@@ -404,13 +399,15 @@ class UnaryUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event(self,
-              request,
-              receiver,
-              abortion_callback,
-              timeout,
-              metadata=None,
-              protocol_options=None):
+    def event(
+        self,
+        request,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Asynchronously invokes the underlying RPC.
 
     Args:
@@ -453,13 +450,15 @@ class UnaryStreamMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event(self,
-              request,
-              receiver,
-              abortion_callback,
-              timeout,
-              metadata=None,
-              protocol_options=None):
+    def event(
+        self,
+        request,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Asynchronously invokes the underlying RPC.
 
     Args:
@@ -483,12 +482,14 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
     """Affords invoking a stream-unary RPC in any call style."""
 
     @abc.abstractmethod
-    def __call__(self,
-                 request_iterator,
-                 timeout,
-                 metadata=None,
-                 with_call=False,
-                 protocol_options=None):
+    def __call__(
+        self,
+        request_iterator,
+        timeout,
+        metadata=None,
+        with_call=False,
+        protocol_options=None,
+    ):
         """Synchronously invokes the underlying RPC.
 
     Args:
@@ -511,11 +512,7 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def future(self,
-               request_iterator,
-               timeout,
-               metadata=None,
-               protocol_options=None):
+    def future(self, request_iterator, timeout, metadata=None, protocol_options=None):
         """Asynchronously invokes the underlying RPC.
 
     Args:
@@ -535,12 +532,9 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event(self,
-              receiver,
-              abortion_callback,
-              timeout,
-              metadata=None,
-              protocol_options=None):
+    def event(
+        self, receiver, abortion_callback, timeout, metadata=None, protocol_options=None
+    ):
         """Asynchronously invokes the underlying RPC.
 
     Args:
@@ -564,11 +558,7 @@ class StreamStreamMultiCallable(six.with_metaclass(abc.ABCMeta)):
     """Affords invoking a stream-stream RPC in any call style."""
 
     @abc.abstractmethod
-    def __call__(self,
-                 request_iterator,
-                 timeout,
-                 metadata=None,
-                 protocol_options=None):
+    def __call__(self, request_iterator, timeout, metadata=None, protocol_options=None):
         """Invokes the underlying RPC.
 
     Args:
@@ -587,12 +577,9 @@ class StreamStreamMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event(self,
-              receiver,
-              abortion_callback,
-              timeout,
-              metadata=None,
-              protocol_options=None):
+    def event(
+        self, receiver, abortion_callback, timeout, metadata=None, protocol_options=None
+    ):
         """Asynchronously invokes the underlying RPC.
 
     Args:
@@ -692,14 +679,16 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
     """Affords RPC invocation via generic methods."""
 
     @abc.abstractmethod
-    def blocking_unary_unary(self,
-                             group,
-                             method,
-                             request,
-                             timeout,
-                             metadata=None,
-                             with_call=False,
-                             protocol_options=None):
+    def blocking_unary_unary(
+        self,
+        group,
+        method,
+        request,
+        timeout,
+        metadata=None,
+        with_call=False,
+        protocol_options=None,
+    ):
         """Invokes a unary-request-unary-response method.
 
     This method blocks until either returning the response value of the RPC
@@ -727,13 +716,9 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def future_unary_unary(self,
-                           group,
-                           method,
-                           request,
-                           timeout,
-                           metadata=None,
-                           protocol_options=None):
+    def future_unary_unary(
+        self, group, method, request, timeout, metadata=None, protocol_options=None
+    ):
         """Invokes a unary-request-unary-response method.
 
     Args:
@@ -754,13 +739,9 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def inline_unary_stream(self,
-                            group,
-                            method,
-                            request,
-                            timeout,
-                            metadata=None,
-                            protocol_options=None):
+    def inline_unary_stream(
+        self, group, method, request, timeout, metadata=None, protocol_options=None
+    ):
         """Invokes a unary-request-stream-response method.
 
     Args:
@@ -780,14 +761,16 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def blocking_stream_unary(self,
-                              group,
-                              method,
-                              request_iterator,
-                              timeout,
-                              metadata=None,
-                              with_call=False,
-                              protocol_options=None):
+    def blocking_stream_unary(
+        self,
+        group,
+        method,
+        request_iterator,
+        timeout,
+        metadata=None,
+        with_call=False,
+        protocol_options=None,
+    ):
         """Invokes a stream-request-unary-response method.
 
     This method blocks until either returning the response value of the RPC
@@ -815,13 +798,15 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def future_stream_unary(self,
-                            group,
-                            method,
-                            request_iterator,
-                            timeout,
-                            metadata=None,
-                            protocol_options=None):
+    def future_stream_unary(
+        self,
+        group,
+        method,
+        request_iterator,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Invokes a stream-request-unary-response method.
 
     Args:
@@ -842,13 +827,15 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def inline_stream_stream(self,
-                             group,
-                             method,
-                             request_iterator,
-                             timeout,
-                             metadata=None,
-                             protocol_options=None):
+    def inline_stream_stream(
+        self,
+        group,
+        method,
+        request_iterator,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Invokes a stream-request-stream-response method.
 
     Args:
@@ -868,15 +855,17 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event_unary_unary(self,
-                          group,
-                          method,
-                          request,
-                          receiver,
-                          abortion_callback,
-                          timeout,
-                          metadata=None,
-                          protocol_options=None):
+    def event_unary_unary(
+        self,
+        group,
+        method,
+        request,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Event-driven invocation of a unary-request-unary-response method.
 
     Args:
@@ -897,15 +886,17 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event_unary_stream(self,
-                           group,
-                           method,
-                           request,
-                           receiver,
-                           abortion_callback,
-                           timeout,
-                           metadata=None,
-                           protocol_options=None):
+    def event_unary_stream(
+        self,
+        group,
+        method,
+        request,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Event-driven invocation of a unary-request-stream-response method.
 
     Args:
@@ -926,14 +917,16 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event_stream_unary(self,
-                           group,
-                           method,
-                           receiver,
-                           abortion_callback,
-                           timeout,
-                           metadata=None,
-                           protocol_options=None):
+    def event_stream_unary(
+        self,
+        group,
+        method,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Event-driven invocation of a unary-request-unary-response method.
 
     Args:
@@ -954,14 +947,16 @@ class GenericStub(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def event_stream_stream(self,
-                            group,
-                            method,
-                            receiver,
-                            abortion_callback,
-                            timeout,
-                            metadata=None,
-                            protocol_options=None):
+    def event_stream_stream(
+        self,
+        group,
+        method,
+        receiver,
+        abortion_callback,
+        timeout,
+        metadata=None,
+        protocol_options=None,
+    ):
         """Event-driven invocation of a unary-request-stream-response method.
 
     Args:

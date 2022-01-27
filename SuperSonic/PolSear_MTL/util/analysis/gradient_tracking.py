@@ -7,29 +7,30 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 
-def uniquify(path, sep=''):
+def uniquify(path, sep=""):
     def name_sequence():
         count = it.count()
-        yield ''
+        yield ""
         while True:
-            yield '{s}{n:d}'.format(s = sep, n = next(count))
+            yield "{s}{n:d}".format(s=sep, n=next(count))
+
     orig = tempfile._name_sequence
     with tempfile._once_lock:
         tempfile._name_sequence = name_sequence()
         path = os.path.normpath(path)
         dirname, basename = os.path.split(path)
         filename, ext = os.path.splitext(basename)
-        fd, filename = tempfile.mkstemp(dir = dirname, prefix = filename, suffix = ext)
+        fd, filename = tempfile.mkstemp(dir=dirname, prefix=filename, suffix=ext)
         tempfile._name_sequence = orig
     return filename
 
 
 def plot_grad_flow(named_parameters, flags):
-    '''Plots the gradients flowing through different layers in the net during training.
+    """Plots the gradients flowing through different layers in the net during training.
     Can be used for checking for possible gradient vanishing / exploding problems.
 
     Usage: Plug this function in Trainer class after loss.backwards() as
-    "plot_grad_flow(self.model.named_parameters())" to visualize the gradient flow'''
+    "plot_grad_flow(self.model.named_parameters())" to visualize the gradient flow"""
     ave_grads = []
     max_grads = []
     layers = []
@@ -49,17 +50,23 @@ def plot_grad_flow(named_parameters, flags):
     plt.ylabel("average gradient")
     plt.title("Gradient flow")
     plt.grid(True)
-    plt.legend([Line2D([0], [0], color="c", lw=4),
-                Line2D([0], [0], color="b", lw=4),
-                Line2D([0], [0], color="k", lw=4)], ['max-gradient', 'mean-gradient', 'zero-gradient'])
+    plt.legend(
+        [
+            Line2D([0], [0], color="c", lw=4),
+            Line2D([0], [0], color="b", lw=4),
+            Line2D([0], [0], color="k", lw=4),
+        ],
+        ["max-gradient", "mean-gradient", "zero-gradient"],
+    )
     plt.tight_layout()
 
-    path = os.path.expandvars(os.path.expanduser("%s/%s/%s" % (flags.savedir, flags.xpid, "gradients.png")))
+    path = os.path.expandvars(
+        os.path.expanduser("%s/%s/%s" % (flags.savedir, flags.xpid, "gradients.png"))
+    )
     plt.savefig(uniquify(path))
 
 
 class GradientTracker:
-
     def __init__(self):
         self.avg_grad = {}
         self.max_grad = {}
@@ -88,8 +95,19 @@ class GradientTracker:
                 current_grad[-1].append(self.max_grad[n][-1])
 
         if verbose:
-            print("\nCurrent gradients at learning step {:d}:".format(self.learning_step_count))
-            print(tabulate.tabulate(current_grad, headers=["layer", "mean", "std", "max"], tablefmt="presto"), "\n")
+            print(
+                "\nCurrent gradients at learning step {:d}:".format(
+                    self.learning_step_count
+                )
+            )
+            print(
+                tabulate.tabulate(
+                    current_grad,
+                    headers=["layer", "mean", "std", "max"],
+                    tablefmt="presto",
+                ),
+                "\n",
+            )
 
         self.learning_step_count += 1
 
@@ -100,5 +118,12 @@ class GradientTracker:
             grad[-1].append(np.mean(self.avg_grad[n]))
             grad[-1].append(np.max(self.max_grad[n]))
 
-        print("\nTotal gradients at learning step {:d}:".format(self.learning_step_count))
-        print(tabulate.tabulate(grad, headers=["layer", "mean", "max"], tablefmt="presto"), "\n")
+        print(
+            "\nTotal gradients at learning step {:d}:".format(self.learning_step_count)
+        )
+        print(
+            tabulate.tabulate(
+                grad, headers=["layer", "mean", "max"], tablefmt="presto"
+            ),
+            "\n",
+        )

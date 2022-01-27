@@ -7,8 +7,11 @@ import logging
 import gym
 
 from ray.rllib.agents.impala import vtrace_tf as vtrace
-from ray.rllib.agents.impala.vtrace_tf_policy import _make_time_major, \
-    clip_gradients, choose_optimizer
+from ray.rllib.agents.impala.vtrace_tf_policy import (
+    _make_time_major,
+    clip_gradients,
+    choose_optimizer,
+)
 from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.models.tf.tf_action_dist import Categorical
 from ray.rllib.policy.sample_batch import SampleBatch
@@ -49,20 +52,22 @@ class PPOSurrogateLoss:
         use_kl_loss (bool): If true, use KL loss.
     """
 
-    def __init__(self,
-                 prev_actions_logp,
-                 actions_logp,
-                 action_kl,
-                 actions_entropy,
-                 values,
-                 valid_mask,
-                 advantages,
-                 value_targets,
-                 vf_loss_coeff=0.5,
-                 entropy_coeff=0.01,
-                 clip_param=0.3,
-                 cur_kl_coeff=None,
-                 use_kl_loss=False):
+    def __init__(
+        self,
+        prev_actions_logp,
+        actions_logp,
+        action_kl,
+        actions_entropy,
+        values,
+        valid_mask,
+        advantages,
+        value_targets,
+        vf_loss_coeff=0.5,
+        entropy_coeff=0.01,
+        clip_param=0.3,
+        cur_kl_coeff=None,
+        use_kl_loss=False,
+    ):
         def reduce_mean_valid(t):
             return tf.reduce_mean(tf.boolean_mask(t, valid_mask))
 
@@ -70,8 +75,8 @@ class PPOSurrogateLoss:
 
         surrogate_loss = tf.minimum(
             advantages * logp_ratio,
-            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param,
-                                          1 + clip_param))
+            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param, 1 + clip_param),
+        )
 
         self.mean_kl = reduce_mean_valid(action_kl)
         self.pi_loss = -reduce_mean_valid(surrogate_loss)
@@ -85,8 +90,9 @@ class PPOSurrogateLoss:
         self.entropy = reduce_mean_valid(actions_entropy)
 
         # The summed weighted loss
-        self.total_loss = (self.pi_loss + self.vf_loss * vf_loss_coeff -
-                           self.entropy * entropy_coeff)
+        self.total_loss = (
+            self.pi_loss + self.vf_loss * vf_loss_coeff - self.entropy * entropy_coeff
+        )
 
         # Optional additional KL Loss
         if use_kl_loss:
@@ -94,31 +100,33 @@ class PPOSurrogateLoss:
 
 
 class VTraceSurrogateLoss:
-    def __init__(self,
-                 actions,
-                 prev_actions_logp,
-                 actions_logp,
-                 old_policy_actions_logp,
-                 action_kl,
-                 actions_entropy,
-                 dones,
-                 behaviour_logits,
-                 old_policy_behaviour_logits,
-                 target_logits,
-                 discount,
-                 rewards,
-                 values,
-                 bootstrap_value,
-                 dist_class,
-                 model,
-                 valid_mask,
-                 vf_loss_coeff=0.5,
-                 entropy_coeff=0.01,
-                 clip_rho_threshold=1.0,
-                 clip_pg_rho_threshold=1.0,
-                 clip_param=0.3,
-                 cur_kl_coeff=None,
-                 use_kl_loss=False):
+    def __init__(
+        self,
+        actions,
+        prev_actions_logp,
+        actions_logp,
+        old_policy_actions_logp,
+        action_kl,
+        actions_entropy,
+        dones,
+        behaviour_logits,
+        old_policy_behaviour_logits,
+        target_logits,
+        discount,
+        rewards,
+        values,
+        bootstrap_value,
+        dist_class,
+        model,
+        valid_mask,
+        vf_loss_coeff=0.5,
+        entropy_coeff=0.01,
+        clip_rho_threshold=1.0,
+        clip_pg_rho_threshold=1.0,
+        clip_param=0.3,
+        cur_kl_coeff=None,
+        use_kl_loss=False,
+    ):
         """APPO Loss, with IS modifications and V-trace for Advantage Estimation
 
         VTraceLoss takes tensors of shape [T, B, ...], where `B` is the
@@ -167,18 +175,19 @@ class VTraceSurrogateLoss:
                 dist_class=dist_class,
                 model=model,
                 clip_rho_threshold=tf.cast(clip_rho_threshold, tf.float32),
-                clip_pg_rho_threshold=tf.cast(clip_pg_rho_threshold,
-                                              tf.float32))
+                clip_pg_rho_threshold=tf.cast(clip_pg_rho_threshold, tf.float32),
+            )
 
         self.is_ratio = tf.clip_by_value(
-            tf.exp(prev_actions_logp - old_policy_actions_logp), 0.0, 2.0)
+            tf.exp(prev_actions_logp - old_policy_actions_logp), 0.0, 2.0
+        )
         logp_ratio = self.is_ratio * tf.exp(actions_logp - prev_actions_logp)
 
         advantages = self.vtrace_returns.pg_advantages
         surrogate_loss = tf.minimum(
             advantages * logp_ratio,
-            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param,
-                                          1 + clip_param))
+            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param, 1 + clip_param),
+        )
 
         self.mean_kl = reduce_mean_valid(action_kl)
         self.pi_loss = -reduce_mean_valid(surrogate_loss)
@@ -192,8 +201,9 @@ class VTraceSurrogateLoss:
         self.entropy = reduce_mean_valid(actions_entropy)
 
         # The summed weighted loss
-        self.total_loss = (self.pi_loss + self.vf_loss * vf_loss_coeff -
-                           self.entropy * entropy_coeff)
+        self.total_loss = (
+            self.pi_loss + self.vf_loss * vf_loss_coeff - self.entropy * entropy_coeff
+        )
 
         # Optional additional KL Loss
         if use_kl_loss:
@@ -209,7 +219,8 @@ def build_appo_model(policy, obs_space, action_space, config):
         logit_dim,
         config["model"],
         name=POLICY_SCOPE,
-        framework="torch" if config["framework"] == "torch" else "tf")
+        framework="torch" if config["framework"] == "torch" else "tf",
+    )
     policy.model_variables = policy.model.variables()
 
     policy.target_model = ModelCatalog.get_model_v2(
@@ -218,7 +229,8 @@ def build_appo_model(policy, obs_space, action_space, config):
         logit_dim,
         config["model"],
         name=TARGET_POLICY_SCOPE,
-        framework="torch" if config["framework"] == "torch" else "tf")
+        framework="torch" if config["framework"] == "torch" else "tf",
+    )
     policy.target_model_variables = policy.target_model.variables()
 
     return policy.model
@@ -231,8 +243,7 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
     if isinstance(policy.action_space, gym.spaces.Discrete):
         is_multidiscrete = False
         output_hidden_shape = [policy.action_space.n]
-    elif isinstance(policy.action_space,
-                    gym.spaces.multi_discrete.MultiDiscrete):
+    elif isinstance(policy.action_space, gym.spaces.multi_discrete.MultiDiscrete):
         is_multidiscrete = True
         output_hidden_shape = policy.action_space.nvec.astype(np.int32)
     else:
@@ -240,8 +251,7 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
         output_hidden_shape = 1
 
     def make_time_major(*args, **kw):
-        return _make_time_major(policy, train_batch.get("seq_lens"), *args,
-                                **kw)
+        return _make_time_major(policy, train_batch.get("seq_lens"), *args, **kw)
 
     actions = train_batch[SampleBatch.ACTIONS]
     dones = train_batch[SampleBatch.DONES]
@@ -251,10 +261,10 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
     target_model_out, _ = policy.target_model.from_batch(train_batch)
     old_policy_behaviour_logits = tf.stop_gradient(target_model_out)
 
-    unpacked_behaviour_logits = tf.split(
-        behaviour_logits, output_hidden_shape, axis=1)
+    unpacked_behaviour_logits = tf.split(behaviour_logits, output_hidden_shape, axis=1)
     unpacked_old_policy_behaviour_logits = tf.split(
-        old_policy_behaviour_logits, output_hidden_shape, axis=1)
+        old_policy_behaviour_logits, output_hidden_shape, axis=1
+    )
     unpacked_outputs = tf.split(model_out, output_hidden_shape, axis=1)
     old_policy_action_dist = dist_class(old_policy_behaviour_logits, model)
     prev_action_dist = dist_class(behaviour_logits, policy.model)
@@ -274,30 +284,31 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
         logger.debug("Using V-Trace surrogate loss (vtrace=True)")
 
         # Prepare actions for loss
-        loss_actions = actions if is_multidiscrete else tf.expand_dims(
-            actions, axis=1)
+        loss_actions = actions if is_multidiscrete else tf.expand_dims(actions, axis=1)
 
         # Prepare KL for Loss
         mean_kl = make_time_major(
-            old_policy_action_dist.multi_kl(action_dist), drop_last=True)
+            old_policy_action_dist.multi_kl(action_dist), drop_last=True
+        )
 
         policy.loss = VTraceSurrogateLoss(
             actions=make_time_major(loss_actions, drop_last=True),
             prev_actions_logp=make_time_major(
-                prev_action_dist.logp(actions), drop_last=True),
-            actions_logp=make_time_major(
-                action_dist.logp(actions), drop_last=True),
+                prev_action_dist.logp(actions), drop_last=True
+            ),
+            actions_logp=make_time_major(action_dist.logp(actions), drop_last=True),
             old_policy_actions_logp=make_time_major(
-                old_policy_action_dist.logp(actions), drop_last=True),
-            action_kl=tf.reduce_mean(mean_kl, axis=0)
-            if is_multidiscrete else mean_kl,
+                old_policy_action_dist.logp(actions), drop_last=True
+            ),
+            action_kl=tf.reduce_mean(mean_kl, axis=0) if is_multidiscrete else mean_kl,
             actions_entropy=make_time_major(
-                action_dist.multi_entropy(), drop_last=True),
+                action_dist.multi_entropy(), drop_last=True
+            ),
             dones=make_time_major(dones, drop_last=True),
-            behaviour_logits=make_time_major(
-                unpacked_behaviour_logits, drop_last=True),
+            behaviour_logits=make_time_major(unpacked_behaviour_logits, drop_last=True),
             old_policy_behaviour_logits=make_time_major(
-                unpacked_old_policy_behaviour_logits, drop_last=True),
+                unpacked_old_policy_behaviour_logits, drop_last=True
+            ),
             target_logits=make_time_major(unpacked_outputs, drop_last=True),
             discount=policy.config["gamma"],
             rewards=make_time_major(rewards, drop_last=True),
@@ -309,11 +320,11 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
             vf_loss_coeff=policy.config["vf_loss_coeff"],
             entropy_coeff=policy.config["entropy_coeff"],
             clip_rho_threshold=policy.config["vtrace_clip_rho_threshold"],
-            clip_pg_rho_threshold=policy.config[
-                "vtrace_clip_pg_rho_threshold"],
+            clip_pg_rho_threshold=policy.config["vtrace_clip_pg_rho_threshold"],
             clip_param=policy.config["clip_param"],
             cur_kl_coeff=policy.kl_coeff,
-            use_kl_loss=policy.config["use_kl_loss"])
+            use_kl_loss=policy.config["use_kl_loss"],
+        )
     else:
         logger.debug("Using PPO surrogate loss (vtrace=False)")
 
@@ -323,19 +334,18 @@ def build_appo_surrogate_loss(policy, model, dist_class, train_batch):
         policy.loss = PPOSurrogateLoss(
             prev_actions_logp=make_time_major(prev_action_dist.logp(actions)),
             actions_logp=make_time_major(action_dist.logp(actions)),
-            action_kl=tf.reduce_mean(mean_kl, axis=0)
-            if is_multidiscrete else mean_kl,
+            action_kl=tf.reduce_mean(mean_kl, axis=0) if is_multidiscrete else mean_kl,
             actions_entropy=make_time_major(action_dist.multi_entropy()),
             values=make_time_major(values),
             valid_mask=make_time_major(mask),
             advantages=make_time_major(train_batch[Postprocessing.ADVANTAGES]),
-            value_targets=make_time_major(
-                train_batch[Postprocessing.VALUE_TARGETS]),
+            value_targets=make_time_major(train_batch[Postprocessing.VALUE_TARGETS]),
             vf_loss_coeff=policy.config["vf_loss_coeff"],
             entropy_coeff=policy.config["entropy_coeff"],
             clip_param=policy.config["clip_param"],
             cur_kl_coeff=policy.kl_coeff,
-            use_kl_loss=policy.config["use_kl_loss"])
+            use_kl_loss=policy.config["use_kl_loss"],
+        )
 
     return policy.loss.total_loss
 
@@ -345,7 +355,8 @@ def stats(policy, train_batch):
         policy,
         train_batch.get("seq_lens"),
         policy.model.value_function(),
-        drop_last=policy.config["vtrace"])
+        drop_last=policy.config["vtrace"],
+    )
 
     stats_dict = {
         "cur_lr": tf.cast(policy.cur_lr, tf.float64),
@@ -355,7 +366,8 @@ def stats(policy, train_batch):
         "vf_loss": policy.loss.vf_loss,
         "vf_explained_var": explained_variance(
             tf.reshape(policy.loss.value_targets, [-1]),
-            tf.reshape(values_batched, [-1])),
+            tf.reshape(values_batched, [-1]),
+        ),
     }
 
     if policy.config["vtrace"]:
@@ -370,10 +382,9 @@ def stats(policy, train_batch):
     return stats_dict
 
 
-def postprocess_trajectory(policy,
-                           sample_batch,
-                           other_agent_batches=None,
-                           episode=None):
+def postprocess_trajectory(
+    policy, sample_batch, other_agent_batches=None, episode=None
+):
     if not policy.config["vtrace"]:
         completed = sample_batch["dones"][-1]
         if completed:
@@ -382,17 +393,20 @@ def postprocess_trajectory(policy,
             next_state = []
             for i in range(policy.num_state_tensors()):
                 next_state.append([sample_batch["state_out_{}".format(i)][-1]])
-            last_r = policy._value(sample_batch[SampleBatch.NEXT_OBS][-1],
-                                   sample_batch[SampleBatch.ACTIONS][-1],
-                                   sample_batch[SampleBatch.REWARDS][-1],
-                                   *next_state)
+            last_r = policy._value(
+                sample_batch[SampleBatch.NEXT_OBS][-1],
+                sample_batch[SampleBatch.ACTIONS][-1],
+                sample_batch[SampleBatch.REWARDS][-1],
+                *next_state
+            )
         batch = compute_advantages(
             sample_batch,
             last_r,
             policy.config["gamma"],
             policy.config["lambda"],
             use_gae=policy.config["use_gae"],
-            use_critic=policy.config["use_critic"])
+            use_critic=policy.config["use_critic"],
+        )
     else:
         batch = sample_batch
     del batch.data["new_obs"]  # not used, so save some bandwidth
@@ -418,8 +432,7 @@ class TargetNetworkMixin:
         def do_update():
             assign_ops = []
             assert len(self.model_vars) == len(self.target_model_vars)
-            for var, var_target in zip(self.model_vars,
-                                       self.target_model_vars):
+            for var, var_target in zip(self.model_vars, self.target_model_vars):
                 assign_ops.append(var_target.assign(var))
             return tf.group(*assign_ops)
 
@@ -451,8 +464,6 @@ AsyncPPOTFPolicy = build_tf_policy(
     extra_action_fetches_fn=add_values,
     before_loss_init=setup_mixins,
     after_init=setup_late_mixins,
-    mixins=[
-        LearningRateSchedule, KLCoeffMixin, TargetNetworkMixin,
-        ValueNetworkMixin
-    ],
-    get_batch_divisibility_req=lambda p: p.config["rollout_fragment_length"])
+    mixins=[LearningRateSchedule, KLCoeffMixin, TargetNetworkMixin, ValueNetworkMixin],
+    get_batch_divisibility_req=lambda p: p.config["rollout_fragment_length"],
+)

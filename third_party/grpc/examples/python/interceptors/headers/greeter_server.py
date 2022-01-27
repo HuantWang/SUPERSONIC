@@ -26,20 +26,19 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
-
     def SayHello(self, request, context):
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+        return helloworld_pb2.HelloReply(message="Hello, %s!" % request.name)
 
 
 def serve():
     header_validator = RequestHeaderValidatorInterceptor(
-        'one-time-password', '42', grpc.StatusCode.UNAUTHENTICATED,
-        'Access denied!')
+        "one-time-password", "42", grpc.StatusCode.UNAUTHENTICATED, "Access denied!"
+    )
     server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=10),
-        interceptors=(header_validator,))
+        futures.ThreadPoolExecutor(max_workers=10), interceptors=(header_validator,)
+    )
     helloworld_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port("[::]:50051")
     server.start()
     try:
         while True:
@@ -48,5 +47,5 @@ def serve():
         server.stop(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     serve()

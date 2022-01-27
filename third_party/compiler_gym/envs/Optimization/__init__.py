@@ -2,7 +2,7 @@ from gym.envs.registration import make, register, registry, spec
 
 from compiler_gym.envs.Optimization.Stoke import StokeEnv
 from compiler_gym.envs.Optimization.Halide import HalideEnv
-from compiler_gym.envs.Optimization.Tvm import  TvmEnv
+from compiler_gym.envs.Optimization.Tvm import TvmEnv
 from compiler_gym.envs.Optimization.Bandit_Halide import BanditHalideEnv
 from compiler_gym.envs.Optimization.Bandit_CSR import BanditCSREnv
 from compiler_gym.envs.Optimization.Bandit_Tvm import BanditTvmEnv
@@ -16,15 +16,15 @@ register(
 )
 
 register(
-    id='Tvm-v0',
-    entry_point='compiler_gym.envs.Optimization:TvmEnv',
+    id="Tvm-v0",
+    entry_point="compiler_gym.envs.Optimization:TvmEnv",
     # max_episode_steps=200,
     # reward_threshold=25.0,
 )
 
 register(
-    id='Halide-v0',
-    entry_point='compiler_gym.envs.Optimization:HalideEnv',
+    id="Halide-v0",
+    entry_point="compiler_gym.envs.Optimization:HalideEnv",
     # max_episode_steps=200,
     # reward_threshold=25.0,
 )

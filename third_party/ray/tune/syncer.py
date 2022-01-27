@@ -8,15 +8,18 @@ from shlex import quote
 from ray import ray_constants
 from ray import services
 from ray.tune.cluster_info import get_ssh_key, get_ssh_user
-from ray.tune.sync_client import (CommandBasedClient, get_sync_client,
-                                  get_cloud_sync_client, NOOP)
+from ray.tune.sync_client import (
+    CommandBasedClient,
+    get_sync_client,
+    get_cloud_sync_client,
+    NOOP,
+)
 
 logger = logging.getLogger(__name__)
 
 # Syncing period for syncing local checkpoints to cloud.
 # In env variable is not set, sync happens every 300 seconds.
-CLOUD_SYNC_PERIOD = ray_constants.env_integer(
-    key="TUNE_CLOUD_SYNC_S", default=300)
+CLOUD_SYNC_PERIOD = ray_constants.env_integer(key="TUNE_CLOUD_SYNC_S", default=300)
 
 # Syncing period for syncing worker logs to driver.
 NODE_SYNC_PERIOD = 300
@@ -49,8 +52,7 @@ def log_sync_template(options=""):
     ssh_key = get_ssh_key()
     if ssh_key is None:
         if not _log_sync_warned:
-            logger.debug("Log sync requires cluster to be setup with "
-                         "`ray up`.")
+            logger.debug("Log sync requires cluster to be setup with " "`ray up`.")
             _log_sync_warned = True
         return None
 
@@ -70,8 +72,7 @@ class Syncer:
             sync_client (SyncClient): Client for syncing between local_dir and
                 remote_dir. Defaults to a Noop.
         """
-        self._local_dir = (os.path.join(local_dir, "")
-                           if local_dir else local_dir)
+        self._local_dir = os.path.join(local_dir, "") if local_dir else local_dir
         self._remote_dir = remote_dir
         self.last_sync_up_time = float("-inf")
         self.last_sync_down_time = float("-inf")
@@ -105,8 +106,7 @@ class Syncer:
         result = False
         if self.validate_hosts(self._local_dir, self._remote_path):
             try:
-                result = self.sync_client.sync_up(self._local_dir,
-                                                  self._remote_path)
+                result = self.sync_client.sync_up(self._local_dir, self._remote_path)
                 self.last_sync_up_time = time.time()
             except Exception:
                 logger.exception("Sync execution failed.")
@@ -121,8 +121,7 @@ class Syncer:
         result = False
         if self.validate_hosts(self._local_dir, self._remote_path):
             try:
-                result = self.sync_client.sync_down(self._remote_path,
-                                                    self._local_dir)
+                result = self.sync_client.sync_down(self._remote_path, self._local_dir)
                 self.last_sync_down_time = time.time()
             except Exception:
                 logger.exception("Sync execution failed.")
@@ -130,8 +129,10 @@ class Syncer:
 
     def validate_hosts(self, source, target):
         if not (source and target):
-            logger.debug("Source or target is empty, skipping log sync for "
-                         "{}".format(self._local_dir))
+            logger.debug(
+                "Source or target is empty, skipping log sync for "
+                "{}".format(self._local_dir)
+            )
             return False
         return True
 
@@ -177,12 +178,10 @@ class NodeSyncer(Syncer):
     def has_remote_target(self):
         """Returns whether the Syncer has a remote target."""
         if not self.worker_ip:
-            logger.debug("Worker IP unknown, skipping sync for %s",
-                         self._local_dir)
+            logger.debug("Worker IP unknown, skipping sync for %s", self._local_dir)
             return False
         if self.worker_ip == self.local_ip:
-            logger.debug("Worker IP is local IP, skipping sync for %s",
-                         self._local_dir)
+            logger.debug("Worker IP is local IP, skipping sync for %s", self._local_dir)
             return False
         return True
 
@@ -203,7 +202,8 @@ class NodeSyncer(Syncer):
             self.reset()
             if not self.sync_up():
                 logger.warning(
-                    "Sync up to new location skipped. This should not occur.")
+                    "Sync up to new location skipped. This should not occur."
+                )
         else:
             logger.warning("Sync attempted to same IP %s.", worker_ip)
 
@@ -215,8 +215,7 @@ class NodeSyncer(Syncer):
     def sync_down(self):
         if not self.has_remote_target():
             return True
-        logger.debug("Syncing from %s to %s", self._remote_path,
-                     self._local_dir)
+        logger.debug("Syncing from %s to %s", self._remote_path, self._local_dir)
         return super(NodeSyncer, self).sync_down()
 
     @property
@@ -227,8 +226,7 @@ class NodeSyncer(Syncer):
             return None
         if ssh_user is None:
             if not _log_sync_warned:
-                logger.error("Syncer requires cluster to be setup with "
-                             "`ray up`.")
+                logger.error("Syncer requires cluster to be setup with " "`ray up`.")
                 _log_sync_warned = True
             return None
         return "{}@{}:{}/".format(ssh_user, self.worker_ip, self._remote_dir)

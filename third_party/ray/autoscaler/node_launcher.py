@@ -1,9 +1,14 @@
 import logging
 import threading
 
-from ray.autoscaler.tags import (TAG_RAY_LAUNCH_CONFIG, TAG_RAY_NODE_STATUS,
-                                 TAG_RAY_NODE_TYPE, TAG_RAY_NODE_NAME,
-                                 STATUS_UNINITIALIZED, NODE_TYPE_WORKER)
+from ray.autoscaler.tags import (
+    TAG_RAY_LAUNCH_CONFIG,
+    TAG_RAY_NODE_STATUS,
+    TAG_RAY_NODE_TYPE,
+    TAG_RAY_NODE_NAME,
+    STATUS_UNINITIALIZED,
+    NODE_TYPE_WORKER,
+)
 from ray.autoscaler.util import hash_launch_conf
 
 logger = logging.getLogger(__name__)
@@ -33,8 +38,9 @@ class NodeLauncher(threading.Thread):
         }
         if instance_type:
             # node_tags[TAG_RAY_INSTANCE_TYPE] = instance_type
-            self.provider.create_node_of_type(node_config, node_tags,
-                                              instance_type, count)
+            self.provider.create_node_of_type(
+                node_config, node_tags, instance_type, count
+            )
         else:
             self.provider.create_node(node_config, node_tags, count)
         after = self.provider.non_terminated_nodes(tag_filters=worker_filter)

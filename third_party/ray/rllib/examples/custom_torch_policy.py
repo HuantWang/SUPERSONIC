@@ -19,14 +19,10 @@ def policy_gradient_loss(policy, model, dist_class, train_batch):
 
 
 # <class 'ray.rllib.policy.torch_policy_template.MyTorchPolicy'>
-MyTorchPolicy = build_torch_policy(
-    name="MyTorchPolicy", loss_fn=policy_gradient_loss)
+MyTorchPolicy = build_torch_policy(name="MyTorchPolicy", loss_fn=policy_gradient_loss)
 
 # <class 'ray.rllib.agents.trainer_template.MyCustomTrainer'>
-MyTrainer = build_trainer(
-    name="MyCustomTrainer",
-    default_policy=MyTorchPolicy,
-)
+MyTrainer = build_trainer(name="MyCustomTrainer", default_policy=MyTorchPolicy,)
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -34,8 +30,5 @@ if __name__ == "__main__":
     tune.run(
         MyTrainer,
         stop={"training_iteration": args.stop_iters},
-        config={
-            "env": "CartPole-v0",
-            "num_workers": 2,
-            "framework": "torch",
-        })
+        config={"env": "CartPole-v0", "num_workers": 2, "framework": "torch",},
+    )

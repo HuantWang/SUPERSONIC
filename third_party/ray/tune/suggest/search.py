@@ -10,6 +10,7 @@ class SearchAlgorithm:
 
     See also: `ray.tune.suggest.BasicVariantGenerator`.
     """
+
     _finished = False
 
     def add_configurations(self, experiments):

@@ -22,9 +22,13 @@ from ray.rllib.agents.ppo import ppo
 from ray.rllib.agents.trainer import with_base_config
 from ray.rllib.execution.rollout_ops import ParallelRollouts
 from ray.rllib.execution.metric_ops import StandardMetricsReporting
-from ray.rllib.execution.common import STEPS_SAMPLED_COUNTER, \
-    STEPS_TRAINED_COUNTER, LEARNER_INFO, LEARN_ON_BATCH_TIMER, \
-    _get_shared_metrics
+from ray.rllib.execution.common import (
+    STEPS_SAMPLED_COUNTER,
+    STEPS_TRAINED_COUNTER,
+    LEARNER_INFO,
+    LEARN_ON_BATCH_TIMER,
+    _get_shared_metrics,
+)
 from ray.rllib.evaluation.rollout_worker import get_global_worker
 from ray.rllib.utils.sgd import do_minibatch_sgd
 
@@ -65,24 +69,25 @@ def validate_config(config):
     if config["train_batch_size"] == -1:
         # Auto set.
         config["train_batch_size"] = (
-            config["rollout_fragment_length"] * config["num_envs_per_worker"])
+            config["rollout_fragment_length"] * config["num_envs_per_worker"]
+        )
     else:
         raise ValueError(
-            "Set rollout_fragment_length instead of train_batch_size "
-            "for DDPPO.")
+            "Set rollout_fragment_length instead of train_batch_size " "for DDPPO."
+        )
     if config["framework"] != "torch":
-        raise ValueError(
-            "Distributed data parallel is only supported for PyTorch")
+        raise ValueError("Distributed data parallel is only supported for PyTorch")
     if config["num_gpus"]:
         raise ValueError(
             "When using distributed data parallel, you should set "
             "num_gpus=0 since all optimization "
             "is happening on workers. Enable GPUs for workers by setting "
-            "num_gpus_per_worker=1.")
+            "num_gpus_per_worker=1."
+        )
     if config["batch_mode"] != "truncate_episodes":
         raise ValueError(
-            "Distributed data parallel requires truncate_episodes "
-            "batch mode.")
+            "Distributed data parallel requires truncate_episodes " "batch mode."
+        )
     ppo.validate_config(config)
 
 
@@ -98,27 +103,42 @@ def execution_plan(workers, config):
     logger.info("Creating torch process group with leader {}".format(address))
 
     # Get setup tasks in order to throw errors on failure.
-    ray.get([
-        worker.setup_torch_data_parallel.remote(
-            address, i, len(workers.remote_workers()), backend="gloo")
-        for i, worker in enumerate(workers.remote_workers())
-    ])
+    ray.get(
+        [
+            worker.setup_torch_data_parallel.remote(
+                address, i, len(workers.remote_workers()), backend="gloo"
+            )
+            for i, worker in enumerate(workers.remote_workers())
+        ]
+    )
     logger.info("Torch process group init completed")
 
     # This function is applied remotely on each rollout worker.
     def train_torch_distributed_allreduce(batch):
         expected_batch_size = (
-            config["rollout_fragment_length"] * config["num_envs_per_worker"])
+            config["rollout_fragment_length"] * config["num_envs_per_worker"]
+        )
         this_worker = get_global_worker()
-        assert batch.count == expected_batch_size, \
-            ("Batch size possibly out of sync between workers, expected:",
-             expected_batch_size, "got:", batch.count)
-        logger.info("Executing distributed minibatch SGD "
-                    "with epoch size {}, minibatch size {}".format(
-                        batch.count, config["sgd_minibatch_size"]))
-        info = do_minibatch_sgd(batch, this_worker.policy_map, this_worker,
-                                config["num_sgd_iter"],
-                                config["sgd_minibatch_size"], ["advantages"])
+        assert batch.count == expected_batch_size, (
+            "Batch size possibly out of sync between workers, expected:",
+            expected_batch_size,
+            "got:",
+            batch.count,
+        )
+        logger.info(
+            "Executing distributed minibatch SGD "
+            "with epoch size {}, minibatch size {}".format(
+                batch.count, config["sgd_minibatch_size"]
+            )
+        )
+        info = do_minibatch_sgd(
+            batch,
+            this_worker.policy_map,
+            this_worker,
+            config["num_sgd_iter"],
+            config["sgd_minibatch_size"],
+            ["advantages"],
+        )
         return info, batch.count
 
     # Have to manually record stats since we are using "raw" rollouts mode.
@@ -135,13 +155,15 @@ def execution_plan(workers, config):
                 metrics.info[LEARNER_INFO] = info
             # Since SGD happens remotely, the time delay between fetch and
             # completion is approximately the SGD step time.
-            metrics.timers[LEARN_ON_BATCH_TIMER].push(time.perf_counter() -
-                                                      self.fetch_start_time)
+            metrics.timers[LEARN_ON_BATCH_TIMER].push(
+                time.perf_counter() - self.fetch_start_time
+            )
 
     train_op = (
         rollouts.for_each(train_torch_distributed_allreduce)  # allreduce
         .batch_across_shards()  # List[(grad_info, count)]
-        .for_each(RecordStats()))
+        .for_each(RecordStats())
+    )
 
     # Sync down the weights. As with the sync up, this is not really
     # needed unless the user is reading the local weights.
@@ -149,7 +171,8 @@ def execution_plan(workers, config):
 
         def download_weights(item):
             workers.local_worker().set_weights(
-                ray.get(workers.remote_workers()[0].get_weights.remote()))
+                ray.get(workers.remote_workers()[0].get_weights.remote())
+            )
             return item
 
         train_op = train_op.for_each(download_weights)
@@ -159,7 +182,8 @@ def execution_plan(workers, config):
 
         def check_sync(item):
             weights = ray.get(
-                [w.get_weights.remote() for w in workers.remote_workers()])
+                [w.get_weights.remote() for w in workers.remote_workers()]
+            )
             sums = []
             for w in weights:
                 acc = 0
@@ -179,4 +203,5 @@ DDPPOTrainer = ppo.PPOTrainer.with_updates(
     name="DDPPO",
     default_config=DEFAULT_CONFIG,
     execution_plan=execution_plan,
-    validate_config=validate_config)
+    validate_config=validate_config,
+)

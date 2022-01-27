@@ -16,8 +16,11 @@ from ray.exceptions import RayError
 from ray.util.iter import ParallelIteratorWorker
 from ray.rllib.evaluation.metrics import get_learner_stats
 from ray.rllib.policy.policy import LEARNER_STATS_KEY
-from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
-    MultiAgentBatch
+from ray.rllib.policy.sample_batch import (
+    SampleBatch,
+    DEFAULT_POLICY_ID,
+    MultiAgentBatch,
+)
 from ray.rllib.optimizers.policy_optimizer import PolicyOptimizer
 from ray.rllib.optimizers.replay_buffer import PrioritizedReplayBuffer
 from ray.rllib.utils.annotations import override
@@ -47,20 +50,22 @@ class AsyncReplayOptimizer(PolicyOptimizer):
     "td_error" array in the info return of compute_gradients(). This error
     term will be used for sample prioritization."""
 
-    def __init__(self,
-                 workers,
-                 learning_starts=1000,
-                 buffer_size=10000,
-                 prioritized_replay=True,
-                 prioritized_replay_alpha=0.6,
-                 prioritized_replay_beta=0.4,
-                 prioritized_replay_eps=1e-6,
-                 train_batch_size=512,
-                 rollout_fragment_length=50,
-                 num_replay_buffer_shards=1,
-                 max_weight_sync_delay=400,
-                 debug=False,
-                 batch_replay=False):
+    def __init__(
+        self,
+        workers,
+        learning_starts=1000,
+        buffer_size=10000,
+        prioritized_replay=True,
+        prioritized_replay_alpha=0.6,
+        prioritized_replay_beta=0.4,
+        prioritized_replay_eps=1e-6,
+        train_batch_size=512,
+        rollout_fragment_length=50,
+        num_replay_buffer_shards=1,
+        max_weight_sync_delay=400,
+        debug=False,
+        batch_replay=False,
+    ):
         """Initialize an async replay optimizer.
 
         Arguments:
@@ -99,22 +104,31 @@ class AsyncReplayOptimizer(PolicyOptimizer):
             replay_cls = BatchReplayActor
         else:
             replay_cls = ReplayActor
-        self.replay_actors = create_colocated(replay_cls, [
+        self.replay_actors = create_colocated(
+            replay_cls,
+            [
+                num_replay_buffer_shards,
+                learning_starts,
+                buffer_size,
+                train_batch_size,
+                prioritized_replay_alpha,
+                prioritized_replay_beta,
+                prioritized_replay_eps,
+            ],
             num_replay_buffer_shards,
-            learning_starts,
-            buffer_size,
-            train_batch_size,
-            prioritized_replay_alpha,
-            prioritized_replay_beta,
-            prioritized_replay_eps,
-        ], num_replay_buffer_shards)
+        )
 
         # Stats
         self.timers = {
             k: TimerStat()
             for k in [
-                "put_weights", "get_samples", "sample_processing",
-                "replay_processing", "update_priorities", "train", "sample"
+                "put_weights",
+                "get_samples",
+                "sample_processing",
+                "replay_processing",
+                "update_priorities",
+                "train",
+                "sample",
             ]
         }
         self.num_weight_syncs = 0
@@ -170,13 +184,12 @@ class AsyncReplayOptimizer(PolicyOptimizer):
             "{}_time_ms".format(k): round(1000 * self.timers[k].mean, 3)
             for k in self.timers
         }
-        timing["learner_grad_time_ms"] = round(
-            1000 * self.learner.grad_timer.mean, 3)
+        timing["learner_grad_time_ms"] = round(1000 * self.learner.grad_timer.mean, 3)
         timing["learner_dequeue_time_ms"] = round(
-            1000 * self.learner.queue_timer.mean, 3)
+            1000 * self.learner.queue_timer.mean, 3
+        )
         stats = {
-            "sample_throughput": round(self.timers["sample"].mean_throughput,
-                                       3),
+            "sample_throughput": round(self.timers["sample"].mean_throughput, 3),
             "train_throughput": round(self.timers["train"].mean_throughput, 3),
             "num_weight_syncs": self.num_weight_syncs,
             "num_samples_dropped": self.num_samples_dropped,
@@ -214,9 +227,7 @@ class AsyncReplayOptimizer(PolicyOptimizer):
             ray_error = None
             try:
                 counts = {
-                    i: v
-                    for i, v in enumerate(
-                        ray.get([c[1][1] for c in completed]))
+                    i: v for i, v in enumerate(ray.get([c[1][1] for c in completed]))
                 }
             # If there are failed workers, try to recover the still good ones
             # (via non-batched ray.get()) and store the first error (to raise
@@ -227,8 +238,7 @@ class AsyncReplayOptimizer(PolicyOptimizer):
                     try:
                         counts[i] = ray.get(c[1][1])
                     except RayError as e:
-                        logger.exception(
-                            "Error in completed task: {}".format(e))
+                        logger.exception("Error in completed task: {}".format(e))
                         ray_error = ray_error if ray_error is not None else e
 
             for i, (ev, (sample_batch, count)) in enumerate(completed):
@@ -238,8 +248,7 @@ class AsyncReplayOptimizer(PolicyOptimizer):
 
                 sample_timesteps += counts[i]
                 # Send the data to the replay buffer
-                random.choice(
-                    self.replay_actors).add_batch.remote(sample_batch)
+                random.choice(self.replay_actors).add_batch.remote(sample_batch)
 
                 # Update weights if needed.
                 self.steps_since_update[ev] += counts[i]
@@ -249,8 +258,7 @@ class AsyncReplayOptimizer(PolicyOptimizer):
                     if weights is None or self.learner.weights_updated:
                         self.learner.weights_updated = False
                         with self.timers["put_weights"]:
-                            weights = ray.put(
-                                self.workers.local_worker().get_weights())
+                            weights = ray.put(self.workers.local_worker().get_weights())
                     ev.set_weights.remote(weights)
                     self.num_weight_syncs += 1
                     self.steps_since_update[ev] = 0
@@ -294,15 +302,17 @@ class LocalReplayBuffer(ParallelIteratorWorker):
     Ray actors are single-threaded, so for scalability multiple replay actors
     may be created to increase parallelism."""
 
-    def __init__(self,
-                 num_shards,
-                 learning_starts,
-                 buffer_size,
-                 replay_batch_size,
-                 prioritized_replay_alpha=0.6,
-                 prioritized_replay_beta=0.4,
-                 prioritized_replay_eps=1e-6,
-                 multiagent_sync_replay=False):
+    def __init__(
+        self,
+        num_shards,
+        learning_starts,
+        buffer_size,
+        replay_batch_size,
+        prioritized_replay_alpha=0.6,
+        prioritized_replay_beta=0.4,
+        prioritized_replay_eps=1e-6,
+        multiagent_sync_replay=False,
+    ):
         self.replay_starts = learning_starts // num_shards
         self.buffer_size = buffer_size // num_shards
         self.replay_batch_size = replay_batch_size
@@ -318,7 +328,8 @@ class LocalReplayBuffer(ParallelIteratorWorker):
 
         def new_buffer():
             return PrioritizedReplayBuffer(
-                self.buffer_size, alpha=prioritized_replay_alpha)
+                self.buffer_size, alpha=prioritized_replay_alpha
+            )
 
         self.replay_buffers = collections.defaultdict(new_buffer)
 
@@ -352,17 +363,19 @@ class LocalReplayBuffer(ParallelIteratorWorker):
             for policy_id, s in batch.policy_batches.items():
                 for row in s.rows():
                     self.replay_buffers[policy_id].add(
-                        row["obs"], row["actions"], row["rewards"],
-                        row["new_obs"], row["dones"], row["weights"]
-                        if "weights" in row else None)
+                        row["obs"],
+                        row["actions"],
+                        row["rewards"],
+                        row["new_obs"],
+                        row["dones"],
+                        row["weights"] if "weights" in row else None,
+                    )
         self.num_added += batch.count
 
     def replay(self):
         if self._fake_batch:
             fake_batch = SampleBatch(self._fake_batch)
-            return MultiAgentBatch({
-                DEFAULT_POLICY_ID: fake_batch
-            }, fake_batch.count)
+            return MultiAgentBatch({DEFAULT_POLICY_ID: fake_batch}, fake_batch.count)
 
         if self.num_added < self.replay_starts:
             return None
@@ -373,43 +386,53 @@ class LocalReplayBuffer(ParallelIteratorWorker):
             for policy_id, replay_buffer in self.replay_buffers.items():
                 if self.multiagent_sync_replay:
                     if idxes is None:
-                        idxes = replay_buffer.sample_idxes(
-                            self.replay_batch_size)
+                        idxes = replay_buffer.sample_idxes(self.replay_batch_size)
                 else:
                     idxes = replay_buffer.sample_idxes(self.replay_batch_size)
-                (obses_t, actions, rewards, obses_tp1, dones, weights,
-                 batch_indexes) = replay_buffer.sample_with_idxes(
-                     idxes, beta=self.prioritized_replay_beta)
-                samples[policy_id] = SampleBatch({
-                    "obs": obses_t,
-                    "actions": actions,
-                    "rewards": rewards,
-                    "new_obs": obses_tp1,
-                    "dones": dones,
-                    "weights": weights,
-                    "batch_indexes": batch_indexes
-                })
+                (
+                    obses_t,
+                    actions,
+                    rewards,
+                    obses_tp1,
+                    dones,
+                    weights,
+                    batch_indexes,
+                ) = replay_buffer.sample_with_idxes(
+                    idxes, beta=self.prioritized_replay_beta
+                )
+                samples[policy_id] = SampleBatch(
+                    {
+                        "obs": obses_t,
+                        "actions": actions,
+                        "rewards": rewards,
+                        "new_obs": obses_tp1,
+                        "dones": dones,
+                        "weights": weights,
+                        "batch_indexes": batch_indexes,
+                    }
+                )
             return MultiAgentBatch(samples, self.replay_batch_size)
 
     def update_priorities(self, prio_dict):
         with self.update_priorities_timer:
             for policy_id, (batch_indexes, td_errors) in prio_dict.items():
-                new_priorities = (
-                    np.abs(td_errors) + self.prioritized_replay_eps)
+                new_priorities = np.abs(td_errors) + self.prioritized_replay_eps
                 self.replay_buffers[policy_id].update_priorities(
-                    batch_indexes, new_priorities)
+                    batch_indexes, new_priorities
+                )
 
     def stats(self, debug=False):
         stat = {
             "add_batch_time_ms": round(1000 * self.add_batch_timer.mean, 3),
             "replay_time_ms": round(1000 * self.replay_timer.mean, 3),
             "update_priorities_time_ms": round(
-                1000 * self.update_priorities_timer.mean, 3),
+                1000 * self.update_priorities_timer.mean, 3
+            ),
         }
         for policy_id, replay_buffer in self.replay_buffers.items():
-            stat.update({
-                "policy_{}".format(policy_id): replay_buffer.stats(debug=debug)
-            })
+            stat.update(
+                {"policy_{}".format(policy_id): replay_buffer.stats(debug=debug)}
+            )
         return stat
 
 
@@ -425,14 +448,16 @@ class LocalBatchReplayBuffer(LocalReplayBuffer):
     This allows for RNN models, but ignores prioritization params.
     """
 
-    def __init__(self,
-                 num_shards,
-                 learning_starts,
-                 buffer_size,
-                 train_batch_size,
-                 prioritized_replay_alpha=0.6,
-                 prioritized_replay_beta=0.4,
-                 prioritized_replay_eps=1e-6):
+    def __init__(
+        self,
+        num_shards,
+        learning_starts,
+        buffer_size,
+        train_batch_size,
+        prioritized_replay_alpha=0.6,
+        prioritized_replay_beta=0.4,
+        prioritized_replay_eps=1e-6,
+    ):
         self.replay_starts = learning_starts // num_shards
         self.buffer_size = buffer_size // num_shards
         self.train_batch_size = train_batch_size
@@ -508,14 +533,15 @@ class LearnerThread(threading.Thread):
                     grad_out = self.local_worker.learn_on_batch(replay)
                     for pid, info in grad_out.items():
                         td_error = info.get(
-                            "td_error",
-                            info[LEARNER_STATS_KEY].get("td_error"))
-                        prio_dict[pid] = (replay.policy_batches[pid].data.get(
-                            "batch_indexes"), td_error)
+                            "td_error", info[LEARNER_STATS_KEY].get("td_error")
+                        )
+                        prio_dict[pid] = (
+                            replay.policy_batches[pid].data.get("batch_indexes"),
+                            td_error,
+                        )
                         self.stats[pid] = get_learner_stats(info)
                     self.grad_timer.push_units_processed(replay.count)
                 self.outqueue.put((ra, prio_dict, replay.count))
             self.learner_queue_size.push(self.inqueue.qsize())
             self.weights_updated = True
-            self.overall_timer.push_units_processed(replay and replay.count
-                                                    or 0)
+            self.overall_timer.push_units_processed(replay and replay.count or 0)

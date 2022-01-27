@@ -19,6 +19,7 @@ class NodeType(enum.Enum):
     SINK: Sinks consume DataStreams and forward them to files, sockets,
      external systems, or print them.
     """
+
     SOURCE = 0
     TRANSFORM = 1
     SINK = 2
@@ -27,22 +28,17 @@ class NodeType(enum.Enum):
 class ExecutionNode:
     def __init__(self, node_pb):
         self.node_id = node_pb.node_id
-        self.node_type = NodeType[streaming_pb.NodeType.Name(
-            node_pb.node_type)]
+        self.node_type = NodeType[streaming_pb.NodeType.Name(node_pb.node_type)]
         self.parallelism = node_pb.parallelism
         if node_pb.language == Language.PYTHON:
             operator_bytes = node_pb.operator  # python operator descriptor
             self.stream_operator = operator.load_operator(operator_bytes)
-        self.execution_tasks = [
-            ExecutionTask(task) for task in node_pb.execution_tasks
-        ]
+        self.execution_tasks = [ExecutionTask(task) for task in node_pb.execution_tasks]
         self.input_edges = [
-            ExecutionEdge(edge, node_pb.language)
-            for edge in node_pb.input_edges
+            ExecutionEdge(edge, node_pb.language) for edge in node_pb.input_edges
         ]
         self.output_edges = [
-            ExecutionEdge(edge, node_pb.language)
-            for edge in node_pb.output_edges
+            ExecutionEdge(edge, node_pb.language) for edge in node_pb.output_edges
         ]
 
 
@@ -61,8 +57,9 @@ class ExecutionTask:
     def __init__(self, task_pb):
         self.task_id = task_pb.task_id
         self.task_index = task_pb.task_index
-        self.worker_actor = ray.actor.ActorHandle.\
-            _deserialization_helper(task_pb.worker_actor)
+        self.worker_actor = ray.actor.ActorHandle._deserialization_helper(
+            task_pb.worker_actor
+        )
 
 
 class ExecutionGraph:

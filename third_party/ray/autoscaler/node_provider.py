@@ -11,59 +11,66 @@ logger = logging.getLogger(__name__)
 def import_aws():
     from ray.autoscaler.aws.config import bootstrap_aws
     from ray.autoscaler.aws.node_provider import AWSNodeProvider
+
     return bootstrap_aws, AWSNodeProvider
 
 
 def import_gcp():
     from ray.autoscaler.gcp.config import bootstrap_gcp
     from ray.autoscaler.gcp.node_provider import GCPNodeProvider
+
     return bootstrap_gcp, GCPNodeProvider
 
 
 def import_azure():
     from ray.autoscaler.azure.config import bootstrap_azure
     from ray.autoscaler.azure.node_provider import AzureNodeProvider
+
     return bootstrap_azure, AzureNodeProvider
 
 
 def import_local():
     from ray.autoscaler.local.config import bootstrap_local
     from ray.autoscaler.local.node_provider import LocalNodeProvider
+
     return bootstrap_local, LocalNodeProvider
 
 
 def import_kubernetes():
     from ray.autoscaler.kubernetes.config import bootstrap_kubernetes
     from ray.autoscaler.kubernetes.node_provider import KubernetesNodeProvider
+
     return bootstrap_kubernetes, KubernetesNodeProvider
 
 
 def load_local_example_config():
     import ray.autoscaler.local as ray_local
-    return os.path.join(
-        os.path.dirname(ray_local.__file__), "example-full.yaml")
+
+    return os.path.join(os.path.dirname(ray_local.__file__), "example-full.yaml")
 
 
 def load_kubernetes_example_config():
     import ray.autoscaler.kubernetes as ray_kubernetes
-    return os.path.join(
-        os.path.dirname(ray_kubernetes.__file__), "example-full.yaml")
+
+    return os.path.join(os.path.dirname(ray_kubernetes.__file__), "example-full.yaml")
 
 
 def load_aws_example_config():
     import ray.autoscaler.aws as ray_aws
+
     return os.path.join(os.path.dirname(ray_aws.__file__), "example-full.yaml")
 
 
 def load_gcp_example_config():
     import ray.autoscaler.gcp as ray_gcp
+
     return os.path.join(os.path.dirname(ray_gcp.__file__), "example-full.yaml")
 
 
 def load_azure_example_config():
     import ray.autoscaler.azure as ray_azure
-    return os.path.join(
-        os.path.dirname(ray_azure.__file__), "example-full.yaml")
+
+    return os.path.join(os.path.dirname(ray_azure.__file__), "example-full.yaml")
 
 
 def import_external():
@@ -82,7 +89,7 @@ NODE_PROVIDERS = {
     "azure": import_azure,
     "kubernetes": import_kubernetes,
     "docker": None,
-    "external": import_external  # Import an external module
+    "external": import_external,  # Import an external module
 }
 
 DEFAULT_CONFIGS = {
@@ -103,8 +110,7 @@ def load_class(path):
     """
     class_data = path.split(".")
     if len(class_data) < 2:
-        raise ValueError(
-            "You need to pass a valid path like mymodule.provider_class")
+        raise ValueError("You need to pass a valid path like mymodule.provider_class")
     module_path = ".".join(class_data[:-1])
     class_str = class_data[-1]
     module = importlib.import_module(module_path)
@@ -119,8 +125,9 @@ def get_node_provider(provider_config, cluster_name):
     importer = NODE_PROVIDERS.get(provider_config["type"])
 
     if importer is None:
-        raise NotImplementedError("Unsupported node provider: {}".format(
-            provider_config["type"]))
+        raise NotImplementedError(
+            "Unsupported node provider: {}".format(provider_config["type"])
+        )
     _, provider_cls = importer()
     return provider_cls(provider_config, cluster_name)
 
@@ -130,8 +137,9 @@ def get_default_config(provider_config):
         return {}
     load_config = DEFAULT_CONFIGS.get(provider_config["type"])
     if load_config is None:
-        raise NotImplementedError("Unsupported node provider: {}".format(
-            provider_config["type"]))
+        raise NotImplementedError(
+            "Unsupported node provider: {}".format(provider_config["type"])
+        )
     path_to_default = load_config()
     with open(path_to_default) as f:
         defaults = yaml.safe_load(f)
@@ -203,16 +211,22 @@ class NodeProvider:
     def terminate_nodes(self, node_ids):
         """Terminates a set of nodes. May be overridden with a batch method."""
         for node_id in node_ids:
-            logger.info("NodeProvider: "
-                        "{}: Terminating node".format(node_id))
+            logger.info("NodeProvider: " "{}: Terminating node".format(node_id))
             self.terminate_node(node_id)
 
     def cleanup(self):
         """Clean-up when a Provider is no longer required."""
         pass
 
-    def get_command_runner(self, log_prefix, node_id, auth_config,
-                           cluster_name, process_runner, use_internal_ip):
+    def get_command_runner(
+        self,
+        log_prefix,
+        node_id,
+        auth_config,
+        cluster_name,
+        process_runner,
+        use_internal_ip,
+    ):
         """ Returns the CommandRunner class used to perform SSH commands.
 
         Args:
@@ -228,5 +242,12 @@ class NodeProvider:
             or external ip.
         """
 
-        return SSHCommandRunner(log_prefix, node_id, self, auth_config,
-                                cluster_name, process_runner, use_internal_ip)
+        return SSHCommandRunner(
+            log_prefix,
+            node_id,
+            self,
+            auth_config,
+            cluster_name,
+            process_runner,
+            use_internal_ip,
+        )

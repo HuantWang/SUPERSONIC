@@ -48,9 +48,9 @@ def _get_distance(start, end):
     delta_lat_rad = math.radians(lat_2 - lat_1)
     delta_lon_rad = math.radians(lon_2 - lon_1)
 
-    a = (pow(math.sin(delta_lat_rad / 2), 2) +
-         (math.cos(lat_rad_1) * math.cos(lat_rad_2) * pow(
-             math.sin(delta_lon_rad / 2), 2)))
+    a = pow(math.sin(delta_lat_rad / 2), 2) + (
+        math.cos(lat_rad_1) * math.cos(lat_rad_2) * pow(math.sin(delta_lon_rad / 2), 2)
+    )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     R = 6371000
     # metres
@@ -58,10 +58,8 @@ def _get_distance(start, end):
 
 
 class _GreeterServicer(helloworld_pb2_grpc.GreeterServicer):
-
     def SayHello(self, request, context):
-        return helloworld_pb2.HelloReply(
-            message='Hello, {}!'.format(request.name))
+        return helloworld_pb2.HelloReply(message="Hello, {}!".format(request.name))
 
 
 class _RouteGuideServicer(route_guide_pb2_grpc.RouteGuideServicer):
@@ -83,10 +81,12 @@ class _RouteGuideServicer(route_guide_pb2_grpc.RouteGuideServicer):
         top = max(request.lo.latitude, request.hi.latitude)
         bottom = min(request.lo.latitude, request.hi.latitude)
         for feature in self.db:
-            if (feature.location.longitude >= left and
-                    feature.location.longitude <= right and
-                    feature.location.latitude >= bottom and
-                    feature.location.latitude <= top):
+            if (
+                feature.location.longitude >= left
+                and feature.location.longitude <= right
+                and feature.location.latitude >= bottom
+                and feature.location.latitude <= top
+            ):
                 yield feature
 
     def RecordRoute(self, request_iterator, context):
@@ -109,7 +109,8 @@ class _RouteGuideServicer(route_guide_pb2_grpc.RouteGuideServicer):
             point_count=point_count,
             feature_count=feature_count,
             distance=int(distance),
-            elapsed_time=int(elapsed_time))
+            elapsed_time=int(elapsed_time),
+        )
 
     def RouteChat(self, request_iterator, context):
         prev_notes = []
@@ -122,11 +123,9 @@ class _RouteGuideServicer(route_guide_pb2_grpc.RouteGuideServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    helloworld_pb2_grpc.add_GreeterServicer_to_server(_GreeterServicer(),
-                                                      server)
-    route_guide_pb2_grpc.add_RouteGuideServicer_to_server(
-        _RouteGuideServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    helloworld_pb2_grpc.add_GreeterServicer_to_server(_GreeterServicer(), server)
+    route_guide_pb2_grpc.add_RouteGuideServicer_to_server(_RouteGuideServicer(), server)
+    server.add_insecure_port("[::]:50051")
     server.start()
     try:
         while True:
@@ -135,5 +134,5 @@ def serve():
         server.stop(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     serve()

@@ -9,19 +9,13 @@ from ray.rllib.agents.registry import get_agent_class
 from ray.tune.trial import ExportFormat
 
 CONFIGS = {
-    "A3C": {
-        "explore": False,
-        "num_workers": 1,
-        "framework": "tf",
-    },
+    "A3C": {"explore": False, "num_workers": 1, "framework": "tf",},
     "APEX_DDPG": {
         "explore": False,
         "observation_filter": "MeanStdFilter",
         "num_workers": 2,
         "min_iter_time_s": 1,
-        "optimizer": {
-            "num_replay_buffer_shards": 1,
-        },
+        "optimizer": {"num_replay_buffer_shards": 1,},
         "framework": "tf",
     },
     "ARS": {
@@ -32,15 +26,8 @@ CONFIGS = {
         "observation_filter": "MeanStdFilter",
         "framework": "tf",
     },
-    "DDPG": {
-        "explore": False,
-        "timesteps_per_iteration": 100,
-        "framework": "tf",
-    },
-    "DQN": {
-        "explore": False,
-        "framework": "tf",
-    },
+    "DDPG": {"explore": False, "timesteps_per_iteration": 100, "framework": "tf",},
+    "DQN": {"explore": False, "framework": "tf",},
     "ES": {
         "explore": False,
         "episodes_per_batch": 10,
@@ -57,22 +44,22 @@ CONFIGS = {
         "num_workers": 2,
         "framework": "tf",
     },
-    "SAC": {
-        "explore": False,
-        "framework": "tf",
-    },
+    "SAC": {"explore": False, "framework": "tf",},
 }
 
 
 def export_test(alg_name, failures):
     def valid_tf_model(model_dir):
-        return os.path.exists(os.path.join(model_dir, "saved_model.pb")) \
-            and os.listdir(os.path.join(model_dir, "variables"))
+        return os.path.exists(os.path.join(model_dir, "saved_model.pb")) and os.listdir(
+            os.path.join(model_dir, "variables")
+        )
 
     def valid_tf_checkpoint(checkpoint_dir):
-        return os.path.exists(os.path.join(checkpoint_dir, "model.meta")) \
-            and os.path.exists(os.path.join(checkpoint_dir, "model.index")) \
+        return (
+            os.path.exists(os.path.join(checkpoint_dir, "model.meta"))
+            and os.path.exists(os.path.join(checkpoint_dir, "model.index"))
             and os.path.exists(os.path.join(checkpoint_dir, "checkpoint"))
+        )
 
     cls = get_agent_class(alg_name)
     if "DDPG" in alg_name or "SAC" in alg_name:
@@ -84,8 +71,7 @@ def export_test(alg_name, failures):
         res = algo.train()
         print("current status: " + str(res))
 
-    export_dir = os.path.join(ray.utils.get_user_temp_dir(),
-                              "export_dir_%s" % alg_name)
+    export_dir = os.path.join(ray.utils.get_user_temp_dir(), "export_dir_%s" % alg_name)
     print("Exporting model ", alg_name, export_dir)
     algo.export_policy_model(export_dir)
     if not valid_tf_model(export_dir):
@@ -99,11 +85,10 @@ def export_test(alg_name, failures):
     shutil.rmtree(export_dir)
 
     print("Exporting default policy", alg_name, export_dir)
-    algo.export_model([ExportFormat.CHECKPOINT, ExportFormat.MODEL],
-                      export_dir)
-    if not valid_tf_model(os.path.join(export_dir, ExportFormat.MODEL)) \
-            or not valid_tf_checkpoint(os.path.join(export_dir,
-                                                    ExportFormat.CHECKPOINT)):
+    algo.export_model([ExportFormat.CHECKPOINT, ExportFormat.MODEL], export_dir)
+    if not valid_tf_model(
+        os.path.join(export_dir, ExportFormat.MODEL)
+    ) or not valid_tf_checkpoint(os.path.join(export_dir, ExportFormat.CHECKPOINT)):
         failures.append(alg_name)
     shutil.rmtree(export_dir)
 
@@ -111,8 +96,7 @@ def export_test(alg_name, failures):
 class TestExport(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        ray.init(
-            num_cpus=10, object_store_memory=1e9, ignore_reinit_error=True)
+        ray.init(num_cpus=10, object_store_memory=1e9, ignore_reinit_error=True)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -129,4 +113,5 @@ class TestExport(unittest.TestCase):
 if __name__ == "__main__":
     import pytest
     import sys
+
     sys.exit(pytest.main(["-v", __file__]))

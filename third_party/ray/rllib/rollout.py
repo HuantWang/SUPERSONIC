@@ -59,13 +59,15 @@ class RolloutSaver:
     If outfile is None, this class does nothing.
     """
 
-    def __init__(self,
-                 outfile=None,
-                 use_shelve=False,
-                 write_update_file=False,
-                 target_steps=None,
-                 target_episodes=None,
-                 save_info=False):
+    def __init__(
+        self,
+        outfile=None,
+        use_shelve=False,
+        write_update_file=False,
+        target_steps=None,
+        target_episodes=None,
+        save_info=False,
+    ):
         self._outfile = outfile
         self._update_file = None
         self._use_shelve = use_shelve
@@ -101,13 +103,15 @@ class RolloutSaver:
                     with open(self._outfile, "wb") as _:
                         pass
                 except IOError as x:
-                    print("Can not open {} for writing - cancelling rollouts.".
-                          format(self._outfile))
+                    print(
+                        "Can not open {} for writing - cancelling rollouts.".format(
+                            self._outfile
+                        )
+                    )
                     raise x
             if self._write_update_file:
                 # Open a file to track rollout progress:
-                self._update_file = self._get_tmp_progress_filename().open(
-                    mode="w")
+                self._update_file = self._get_tmp_progress_filename().open(mode="w")
         return self
 
     def __exit__(self, type, value, traceback):
@@ -125,11 +129,13 @@ class RolloutSaver:
 
     def _get_progress(self):
         if self._target_episodes:
-            return "{} / {} episodes completed".format(self._num_episodes,
-                                                       self._target_episodes)
+            return "{} / {} episodes completed".format(
+                self._num_episodes, self._target_episodes
+            )
         elif self._target_steps:
-            return "{} / {} steps completed".format(self._total_steps,
-                                                    self._target_steps)
+            return "{} / {} steps completed".format(
+                self._total_steps, self._target_steps
+            )
         else:
             return "{} episodes completed".format(self._num_episodes)
 
@@ -156,10 +162,10 @@ class RolloutSaver:
         if self._outfile:
             if self._save_info:
                 self._current_rollout.append(
-                    [obs, action, next_obs, reward, done, info])
+                    [obs, action, next_obs, reward, done, info]
+                )
             else:
-                self._current_rollout.append(
-                    [obs, action, next_obs, reward, done])
+                self._current_rollout.append([obs, action, next_obs, reward, done])
         self._total_steps += 1
 
 
@@ -167,12 +173,13 @@ def create_parser(parser_creator=None):
     parser_creator = parser_creator or argparse.ArgumentParser
     parser = parser_creator(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Roll out a reinforcement learning agent "
-        "given a checkpoint.",
-        epilog=EXAMPLE_USAGE)
+        description="Roll out a reinforcement learning agent " "given a checkpoint.",
+        epilog=EXAMPLE_USAGE,
+    )
 
     parser.add_argument(
-        "checkpoint", type=str, help="Checkpoint from which to roll out.")
+        "checkpoint", type=str, help="Checkpoint from which to roll out."
+    )
     required_named = parser.add_argument_group("required named arguments")
     required_named.add_argument(
         "--run",
@@ -181,35 +188,40 @@ def create_parser(parser_creator=None):
         help="The algorithm or model to train. This may refer to the name "
         "of a built-on algorithm (e.g. RLLib's DQN or PPO), or a "
         "user-defined trainable function or class registered in the "
-        "tune registry.")
-    required_named.add_argument(
-        "--env", type=str, help="The gym environment to use.")
+        "tune registry.",
+    )
+    required_named.add_argument("--env", type=str, help="The gym environment to use.")
     parser.add_argument(
         "--no-render",
         default=False,
         action="store_const",
         const=True,
-        help="Suppress rendering of the environment.")
+        help="Suppress rendering of the environment.",
+    )
     parser.add_argument(
         "--monitor",
         default=False,
         action="store_true",
         help="Wrap environment in gym Monitor to record video. NOTE: This "
-        "option is deprecated: Use `--video-dir [some dir]` instead.")
+        "option is deprecated: Use `--video-dir [some dir]` instead.",
+    )
     parser.add_argument(
         "--video-dir",
         type=str,
         default=None,
         help="Specifies the directory into which videos of all episode "
-        "rollouts will be stored.")
+        "rollouts will be stored.",
+    )
     parser.add_argument(
         "--steps",
         default=10000,
-        help="Number of timesteps to roll out (overwritten by --episodes).")
+        help="Number of timesteps to roll out (overwritten by --episodes).",
+    )
     parser.add_argument(
         "--episodes",
         default=0,
-        help="Number of complete episodes to roll out (overrides --steps).")
+        help="Number of complete episodes to roll out (overrides --steps).",
+    )
     parser.add_argument("--out", default=None, help="Output filename.")
     parser.add_argument(
         "--config",
@@ -217,26 +229,30 @@ def create_parser(parser_creator=None):
         type=json.loads,
         help="Algorithm-specific configuration (e.g. env, hyperparams). "
         "Gets merged with loaded configuration from checkpoint file and "
-        "`evaluation_config` settings therein.")
+        "`evaluation_config` settings therein.",
+    )
     parser.add_argument(
         "--save-info",
         default=False,
         action="store_true",
         help="Save the info field generated by the step() method, "
-        "as well as the action, observations, rewards and done fields.")
+        "as well as the action, observations, rewards and done fields.",
+    )
     parser.add_argument(
         "--use-shelve",
         default=False,
         action="store_true",
         help="Save rollouts into a python shelf file (will save each episode "
-        "as it is generated). An output filename must be set using --out.")
+        "as it is generated). An output filename must be set using --out.",
+    )
     parser.add_argument(
         "--track-progress",
         default=False,
         action="store_true",
         help="Write progress to a temporary file (updated "
         "after each episode). An output filename must be set using --out; "
-        "the progress file will live in the same folder.")
+        "the progress file will live in the same folder.",
+    )
     return parser
 
 
@@ -254,7 +270,8 @@ def run(args, parser):
         if not args.config:
             raise ValueError(
                 "Could not find params.pkl in either the checkpoint dir or "
-                "its parent directory AND no config given on command line!")
+                "its parent directory AND no config given on command line!"
+            )
 
     # Load the config from pickled.
     else:
@@ -290,22 +307,25 @@ def run(args, parser):
     video_dir = None
     if args.monitor:
         video_dir = os.path.join(
-            os.path.dirname(args.out or "")
-            or os.path.expanduser("~/ray_results/"), "monitor")
+            os.path.dirname(args.out or "") or os.path.expanduser("~/ray_results/"),
+            "monitor",
+        )
     # New way: Allow user to specify a video output path.
     elif args.video_dir:
         video_dir = os.path.expanduser(args.video_dir)
 
     # Do the actual rollout.
     with RolloutSaver(
-            args.out,
-            args.use_shelve,
-            write_update_file=args.track_progress,
-            target_steps=num_steps,
-            target_episodes=num_episodes,
-            save_info=args.save_info) as saver:
-        rollout(agent, args.env, num_steps, num_episodes, saver,
-                args.no_render, video_dir)
+        args.out,
+        args.use_shelve,
+        write_update_file=args.track_progress,
+        target_steps=num_steps,
+        target_episodes=num_episodes,
+        save_info=args.save_info,
+    ) as saver:
+        rollout(
+            agent, args.env, num_steps, num_episodes, saver, args.no_render, video_dir
+        )
 
 
 class DefaultMapping(collections.defaultdict):
@@ -332,13 +352,15 @@ def keep_going(steps, num_steps, episodes, num_episodes):
     return True
 
 
-def rollout(agent,
-            env_name,
-            num_steps,
-            num_episodes=0,
-            saver=None,
-            no_render=True,
-            video_dir=None):
+def rollout(
+    agent,
+    env_name,
+    num_steps,
+    num_episodes=0,
+    saver=None,
+    no_render=True,
+    video_dir=None,
+):
     policy_agent_mapping = default_policy_agent_mapping
 
     if saver is None:
@@ -348,8 +370,7 @@ def rollout(agent,
         env = agent.workers.local_worker().env
         multiagent = isinstance(env, MultiAgentEnv)
         if agent.workers.local_worker().multiagent:
-            policy_agent_mapping = agent.config["multiagent"][
-                "policy_mapping_fn"]
+            policy_agent_mapping = agent.config["multiagent"]["policy_mapping_fn"]
 
         policy_map = agent.workers.local_worker().policy_map
         state_init = {p: m.get_initial_state() for p, m in policy_map.items()}
@@ -362,7 +383,8 @@ def rollout(agent,
         except AttributeError:
             raise AttributeError(
                 "Agent ({}) does not have a `policy` property! This is needed "
-                "for performing (trained) agent rollouts.".format(agent))
+                "for performing (trained) agent rollouts.".format(agent)
+            )
         use_lstm = {DEFAULT_POLICY_ID: False}
 
     action_init = {
@@ -374,10 +396,8 @@ def rollout(agent,
     # gym monitor, which is set to record every episode.
     if video_dir:
         env = gym.wrappers.Monitor(
-            env=env,
-            directory=video_dir,
-            video_callable=lambda x: True,
-            force=True)
+            env=env, directory=video_dir, video_callable=lambda x: True, force=True
+        )
 
     steps = 0
     episodes = 0
@@ -386,20 +406,22 @@ def rollout(agent,
         saver.begin_rollout()
         obs = env.reset()
         agent_states = DefaultMapping(
-            lambda agent_id: state_init[mapping_cache[agent_id]])
+            lambda agent_id: state_init[mapping_cache[agent_id]]
+        )
         prev_actions = DefaultMapping(
-            lambda agent_id: action_init[mapping_cache[agent_id]])
-        prev_rewards = collections.defaultdict(lambda: 0.)
+            lambda agent_id: action_init[mapping_cache[agent_id]]
+        )
+        prev_rewards = collections.defaultdict(lambda: 0.0)
         done = False
         reward_total = 0.0
-        while not done and keep_going(steps, num_steps, episodes,
-                                      num_episodes):
+        while not done and keep_going(steps, num_steps, episodes, num_episodes):
             multi_obs = obs if multiagent else {_DUMMY_AGENT_ID: obs}
             action_dict = {}
             for agent_id, a_obs in multi_obs.items():
                 if a_obs is not None:
                     policy_id = mapping_cache.setdefault(
-                        agent_id, policy_agent_mapping(agent_id))
+                        agent_id, policy_agent_mapping(agent_id)
+                    )
                     p_use_lstm = use_lstm[policy_id]
                     if p_use_lstm:
                         a_action, p_state, _ = agent.compute_action(
@@ -407,14 +429,16 @@ def rollout(agent,
                             state=agent_states[agent_id],
                             prev_action=prev_actions[agent_id],
                             prev_reward=prev_rewards[agent_id],
-                            policy_id=policy_id)
+                            policy_id=policy_id,
+                        )
                         agent_states[agent_id] = p_state
                     else:
                         a_action = agent.compute_action(
                             a_obs,
                             prev_action=prev_actions[agent_id],
                             prev_reward=prev_rewards[agent_id],
-                            policy_id=policy_id)
+                            policy_id=policy_id,
+                        )
                     a_action = flatten_to_single_ndarray(a_action)
                     action_dict[agent_id] = a_action
                     prev_actions[agent_id] = a_action
@@ -456,16 +480,19 @@ if __name__ == "__main__":
         raise ValueError(
             "You have --no-render set, but are trying to record rollout videos"
             " (via options --video-dir/--monitor)! "
-            "Either unset --no-render or do not use --video-dir/--monitor.")
+            "Either unset --no-render or do not use --video-dir/--monitor."
+        )
     # --use_shelve w/o --out option.
     if args.use_shelve and not args.out:
         raise ValueError(
             "If you set --use-shelve, you must provide an output file via "
-            "--out as well!")
+            "--out as well!"
+        )
     # --track-progress w/o --out option.
     if args.track_progress and not args.out:
         raise ValueError(
             "If you set --track-progress, you must provide an output file via "
-            "--out as well!")
+            "--out as well!"
+        )
 
     run(args, parser)

@@ -1,58 +1,85 @@
-compiler_gym
-============
+SuperSonic.PolicySearch
+=====================
+
+An instance of a CompilerGym environment uses a :class:`Benchmark
+<compiler_gym.datasets.Benchmark>` as the program being optimized. A
+:class:`Dataset <compiler_gym.datasets.Dataset>` is collection of benchmarks
+that can be installed and made available for use.
 
 .. contents::
-    :local:
+  :local:
 
-.. currentmodule:: compiler_gym
-
-
-CompilerEnvState
-----------------
-
-.. autoclass:: CompilerEnvState
-   :members:
-
-.. autoclass:: CompilerEnvStateWriter
-   :members:
-
-   .. automethod:: __init__
-
-.. autoclass:: CompilerEnvStateReader
-   :members:
-
-   .. automethod:: __init__
-
-   .. automethod:: __iter__
+.. currentmodule:: compiler_gym.datasets
 
 
-Validation
-----------
-
-.. autoclass:: ValidationResult
-   :members:
-
-.. autoclass:: ValidationError
-   :members:
-
-.. autofunction:: validate_states
-
-Filesystem Paths
-----------------
-
-.. autofunction:: cache_path
-
-.. autofunction:: site_data_path
-
-.. autofunction:: transient_cache_path
-
-.. autofunction:: download
-
-Debugging
+Benchmark
 ---------
 
-.. autofunction:: get_debug_level
+.. autoclass:: Benchmark
+  :members:
 
-.. autofunction:: get_logging_level
+.. autoclass:: BenchmarkSource
+  :members:
 
-.. autofunction:: set_debug_level
+.. autoclass:: BenchmarkInitError
+
+Dataset
+-------
+
+.. autoclass:: Dataset
+ :members:
+
+ .. automethod:: __init__
+
+ .. automethod:: __len__
+
+ .. automethod:: __getitem__
+
+ .. automethod:: __iter__
+
+.. autoclass:: DatasetInitError
+
+FilesDataset
+-------------
+
+.. autoclass:: FilesDataset
+  :members:
+
+  .. automethod:: __init__
+
+
+TarDataset
+----------
+
+.. autoclass:: TarDataset
+  :members:
+
+  .. automethod:: __init__
+
+
+TarDatasetWithManifest
+----------------------
+
+.. autoclass:: TarDatasetWithManifest
+  :members:
+
+  .. automethod:: __init__
+
+
+Datasets
+--------
+
+ .. autoclass:: Datasets
+  :members:
+
+  .. automethod:: __len__
+
+  .. automethod:: __getitem__
+
+  .. automethod:: __setitem__
+
+  .. automethod:: __delitem__
+
+  .. automethod:: __contains__
+
+  .. automethod:: __iter__

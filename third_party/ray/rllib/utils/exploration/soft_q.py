@@ -30,18 +30,18 @@ class SoftQ(StochasticSampling):
         self.temperature = temperature
 
     @override(StochasticSampling)
-    def get_exploration_action(self,
-                               action_distribution: ActionDistribution,
-                               timestep: Union[int, TensorType],
-                               explore: bool = True):
+    def get_exploration_action(
+        self,
+        action_distribution: ActionDistribution,
+        timestep: Union[int, TensorType],
+        explore: bool = True,
+    ):
         cls = type(action_distribution)
         assert cls in [Categorical, TorchCategorical]
         # Re-create the action distribution with the correct temperature
         # applied.
-        dist = cls(
-            action_distribution.inputs,
-            self.model,
-            temperature=self.temperature)
+        dist = cls(action_distribution.inputs, self.model, temperature=self.temperature)
         # Delegate to super method.
         return super().get_exploration_action(
-            action_distribution=dist, timestep=timestep, explore=explore)
+            action_distribution=dist, timestep=timestep, explore=explore
+        )

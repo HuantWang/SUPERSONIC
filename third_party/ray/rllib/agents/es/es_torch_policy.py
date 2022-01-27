@@ -11,8 +11,7 @@ from ray.rllib.policy.torch_policy_template import build_torch_policy
 from ray.rllib.utils import try_import_tree
 from ray.rllib.utils.filter import get_filter
 from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.utils.spaces.space_utils import get_base_struct_from_space, \
-    unbatch
+from ray.rllib.utils.spaces.space_utils import get_base_struct_from_space, unbatch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 
 torch, _ = try_import_torch()
@@ -22,10 +21,10 @@ tree = try_import_tree()
 def before_init(policy, observation_space, action_space, config):
     policy.action_noise_std = config["action_noise_std"]
     policy.action_space_struct = get_base_struct_from_space(action_space)
-    policy.preprocessor = ModelCatalog.get_preprocessor_for_space(
-        observation_space)
-    policy.observation_filter = get_filter(config["observation_filter"],
-                                           policy.preprocessor.shape)
+    policy.preprocessor = ModelCatalog.get_preprocessor_for_space(observation_space)
+    policy.observation_filter = get_filter(
+        config["observation_filter"], policy.preprocessor.shape
+    )
     policy.single_threaded = config.get("single_threaded", False)
 
     def _set_flat_weights(policy, theta):
@@ -37,7 +36,8 @@ def before_init(policy, observation_space, action_space, config):
             shape = policy.param_shapes[k]
             num_params = int(np.prod(shape))
             new_theta_dict[k] = torch.from_numpy(
-                np.reshape(theta[pos:pos + num_params], shape))
+                np.reshape(theta[pos : pos + num_params], shape)
+            )
             pos += num_params
         policy.model.load_state_dict(new_theta_dict)
 
@@ -47,7 +47,7 @@ def before_init(policy, observation_space, action_space, config):
         # Flatten it into a single np.ndarray.
         theta_list = []
         for k in sorted(theta_dict.keys()):
-            theta_list.append(torch.reshape(theta_dict[k], (-1, )))
+            theta_list.append(torch.reshape(theta_dict[k], (-1,)))
         cat = torch.cat(theta_list, dim=0)
         return cat.numpy()
 
@@ -56,25 +56,22 @@ def before_init(policy, observation_space, action_space, config):
 
     def _compute_actions(policy, obs_batch, add_noise=False, update=True):
         observation = policy.preprocessor.transform(obs_batch)
-        observation = policy.observation_filter(
-            observation[None], update=update)
+        observation = policy.observation_filter(observation[None], update=update)
 
         observation = convert_to_torch_tensor(observation)
-        dist_inputs, _ = policy.model({
-            SampleBatch.CUR_OBS: observation
-        }, [], None)
+        dist_inputs, _ = policy.model({SampleBatch.CUR_OBS: observation}, [], None)
         dist = policy.dist_class(dist_inputs, policy.model)
         action = dist.sample()
 
         def _add_noise(single_action, single_action_space):
             single_action = single_action.detach().numpy()
             if add_noise and isinstance(single_action_space, gym.spaces.Box):
-                single_action += np.random.randn(*single_action.shape) * \
-                                 policy.action_noise_std
+                single_action += (
+                    np.random.randn(*single_action.shape) * policy.action_noise_std
+                )
             return single_action
 
-        action = tree.map_structure(_add_noise, action,
-                                    policy.action_space_struct)
+        action = tree.map_structure(_add_noise, action, policy.action_space_struct)
         action = unbatch(action)
         return action
 
@@ -84,26 +81,26 @@ def before_init(policy, observation_space, action_space, config):
 def after_init(policy, observation_space, action_space, config):
     state_dict = policy.model.state_dict()
     policy.param_shapes = {
-        k: tuple(state_dict[k].size())
-        for k in sorted(state_dict.keys())
+        k: tuple(state_dict[k].size()) for k in sorted(state_dict.keys())
     }
     policy.num_params = sum(np.prod(s) for s in policy.param_shapes.values())
 
 
-def make_model_and_action_dist(policy, observation_space, action_space,
-                               config):
+def make_model_and_action_dist(policy, observation_space, action_space, config):
     # Policy network.
     dist_class, dist_dim = ModelCatalog.get_action_dist(
         action_space,
         config["model"],  # model_options
         dist_type="deterministic",
-        framework="torch")
+        framework="torch",
+    )
     model = ModelCatalog.get_model_v2(
         policy.preprocessor.observation_space,
         action_space,
         num_outputs=dist_dim,
         model_config=config["model"],
-        framework="torch")
+        framework="torch",
+    )
     # Make all model params not require any gradients.
     for p in model.parameters():
         p.requires_grad = False
@@ -116,4 +113,5 @@ ESTorchPolicy = build_torch_policy(
     get_default_config=lambda: ray.rllib.agents.es.es.DEFAULT_CONFIG,
     before_init=before_init,
     after_init=after_init,
-    make_model_and_action_dist=make_model_and_action_dist)
+    make_model_and_action_dist=make_model_and_action_dist,
+)

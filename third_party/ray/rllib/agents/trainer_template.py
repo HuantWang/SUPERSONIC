@@ -18,10 +18,9 @@ def default_execution_plan(workers, config):
 
     # Combine experiences batches until we hit `train_batch_size` in size.
     # Then, train the policy on those experiences and update the workers.
-    train_op = rollouts \
-        .combine(ConcatBatches(
-            min_batch_size=config["train_batch_size"])) \
-        .for_each(TrainOneStep(workers))
+    train_op = rollouts.combine(
+        ConcatBatches(min_batch_size=config["train_batch_size"])
+    ).for_each(TrainOneStep(workers))
 
     # Add on the standard episode reward, etc. metrics reporting. This returns
     # a LocalIterator[metrics_dict] representing metrics for each train step.
@@ -30,23 +29,24 @@ def default_execution_plan(workers, config):
 
 @DeveloperAPI
 def build_trainer(
-        name,
-        default_policy,
-        default_config=None,
-        validate_config=None,
-        get_initial_state=None,  # DEPRECATED
-        get_policy_class=None,
-        before_init=None,
-        make_workers=None,  # DEPRECATED
-        make_policy_optimizer=None,  # DEPRECATED
-        after_init=None,
-        before_train_step=None,  # DEPRECATED
-        after_optimizer_step=None,  # DEPRECATED
-        after_train_result=None,  # DEPRECATED
-        collect_metrics_fn=None,  # DEPRECATED
-        before_evaluate_fn=None,
-        mixins=None,
-        execution_plan=default_execution_plan):
+    name,
+    default_policy,
+    default_config=None,
+    validate_config=None,
+    get_initial_state=None,  # DEPRECATED
+    get_policy_class=None,
+    before_init=None,
+    make_workers=None,  # DEPRECATED
+    make_policy_optimizer=None,  # DEPRECATED
+    after_init=None,
+    before_train_step=None,  # DEPRECATED
+    after_optimizer_step=None,  # DEPRECATED
+    after_train_result=None,  # DEPRECATED
+    collect_metrics_fn=None,  # DEPRECATED
+    before_evaluate_fn=None,
+    mixins=None,
+    execution_plan=default_execution_plan,
+):
     """Helper function for defining a custom trainer.
 
     Functions will be run in this order to initialize the trainer:
@@ -107,12 +107,11 @@ def build_trainer(
             # Creating all workers (excluding evaluation workers).
             if make_workers and not execution_plan:
                 deprecation_warning("make_workers", "execution_plan")
-                self.workers = make_workers(self, env_creator, self._policy,
-                                            config)
+                self.workers = make_workers(self, env_creator, self._policy, config)
             else:
-                self.workers = self._make_workers(env_creator, self._policy,
-                                                  config,
-                                                  self.config["num_workers"])
+                self.workers = self._make_workers(
+                    env_creator, self._policy, config, self.config["num_workers"]
+                )
             self.train_exec_impl = None
             self.optimizer = None
             self.execution_plan = execution_plan
@@ -142,12 +141,13 @@ def build_trainer(
                 fetches = self.optimizer.step()
                 optimizer_steps_this_iter += 1
                 if after_optimizer_step:
-                    deprecation_warning("after_optimizer_step",
-                                        "execution_plan")
+                    deprecation_warning("after_optimizer_step", "execution_plan")
                     after_optimizer_step(self, fetches)
-                if (time.time() - start >= self.config["min_iter_time_s"]
-                        and self.optimizer.num_steps_sampled - prev_steps >=
-                        self.config["timesteps_per_iteration"]):
+                if (
+                    time.time() - start >= self.config["min_iter_time_s"]
+                    and self.optimizer.num_steps_sampled - prev_steps
+                    >= self.config["timesteps_per_iteration"]
+                ):
                     break
 
             if collect_metrics_fn:
@@ -157,9 +157,9 @@ def build_trainer(
                 res = self.collect_metrics()
             res.update(
                 optimizer_steps_this_iter=optimizer_steps_this_iter,
-                timesteps_this_iter=self.optimizer.num_steps_sampled -
-                prev_steps,
-                info=res.get("info", {}))
+                timesteps_this_iter=self.optimizer.num_steps_sampled - prev_steps,
+                info=res.get("info", {}),
+            )
 
             if after_train_result:
                 deprecation_warning("after_train_result", "execution_plan")
@@ -179,8 +179,9 @@ def build_trainer(
             state = Trainer.__getstate__(self)
             state["trainer_state"] = self.state.copy()
             if self.train_exec_impl:
-                state["train_exec_impl"] = (
-                    self.train_exec_impl.shared_metrics.get().save())
+                state[
+                    "train_exec_impl"
+                ] = self.train_exec_impl.shared_metrics.get().save()
             return state
 
         def __setstate__(self, state):
@@ -188,7 +189,8 @@ def build_trainer(
             self.state = state["trainer_state"].copy()
             if self.train_exec_impl:
                 self.train_exec_impl.shared_metrics.get().restore(
-                    state["train_exec_impl"])
+                    state["train_exec_impl"]
+                )
 
     def with_updates(**overrides):
         """Build a copy of this trainer with the specified overrides.

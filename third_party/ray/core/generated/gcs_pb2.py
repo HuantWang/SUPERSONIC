@@ -3,12 +3,14 @@
 # source: src/ray/protobuf/gcs.proto
 
 import sys
-_b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+
+_b = sys.version_info[0] < 3 and (lambda x: x) or (lambda x: x.encode("latin1"))
 from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -18,254 +20,298 @@ from . import common_pb2 as src_dot_ray_dot_protobuf_dot_common__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='src/ray/protobuf/gcs.proto',
-  package='ray.rpc',
-  syntax='proto3',
-  serialized_options=_b('\n\030io.ray.runtime.generated'),
-  serialized_pb=_b('\n\x1asrc/ray/protobuf/gcs.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto\"m\n\x08GcsEntry\x12\x37\n\x0b\x63hange_mode\x18\x01 \x01(\x0e\x32\x16.ray.rpc.GcsChangeModeR\nchangeMode\x12\x0e\n\x02id\x18\x02 \x01(\x0cR\x02id\x12\x18\n\x07\x65ntries\x18\x03 \x03(\x0cR\x07\x65ntries\"L\n\x0fObjectTableData\x12\x1f\n\x0bobject_size\x18\x01 \x01(\x04R\nobjectSize\x12\x18\n\x07manager\x18\x02 \x01(\x0cR\x07manager\"\x8a\x01\n\x16TaskReconstructionData\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12/\n\x13num_reconstructions\x18\x02 \x01(\x04R\x12numReconstructions\x12&\n\x0fnode_manager_id\x18\x03 \x01(\x0cR\rnodeManagerId\"2\n\rTaskTableData\x12!\n\x04task\x18\x01 \x01(\x0b\x32\r.ray.rpc.TaskR\x04task\"\xc9\x04\n\x0e\x41\x63torTableData\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12\x1b\n\tparent_id\x18\x02 \x01(\x0cR\x08parentId\x12\x42\n\x1e\x61\x63tor_creation_dummy_object_id\x18\x03 \x01(\x0cR\x1a\x61\x63torCreationDummyObjectId\x12\x15\n\x06job_id\x18\x04 \x01(\x0cR\x05jobId\x12\x38\n\x05state\x18\x06 \x01(\x0e\x32\".ray.rpc.ActorTableData.ActorStateR\x05state\x12!\n\x0cmax_restarts\x18\x07 \x01(\x03R\x0bmaxRestarts\x12!\n\x0cnum_restarts\x18\x08 \x01(\x04R\x0bnumRestarts\x12*\n\x07\x61\x64\x64ress\x18\t \x01(\x0b\x32\x10.ray.rpc.AddressR\x07\x61\x64\x64ress\x12\x35\n\rowner_address\x18\n \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12\x1f\n\x0bis_detached\x18\x0b \x01(\x08R\nisDetached\x12\x12\n\x04name\x18\x0c \x01(\tR\x04name\x12\x1c\n\ttimestamp\x18\r \x01(\x01R\ttimestamp\x12.\n\ttask_spec\x18\x0e \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x08taskSpec\">\n\nActorState\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x41LIVE\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\x08\n\x04\x44\x45\x41\x44\x10\x03\"~\n\x0e\x45rrorTableData\x12\x15\n\x06job_id\x18\x01 \x01(\x0cR\x05jobId\x12\x12\n\x04type\x18\x02 \x01(\tR\x04type\x12#\n\rerror_message\x18\x03 \x01(\tR\x0c\x65rrorMessage\x12\x1c\n\ttimestamp\x18\x04 \x01(\x01R\ttimestamp\"\xdc\x02\n\x10ProfileTableData\x12%\n\x0e\x63omponent_type\x18\x01 \x01(\tR\rcomponentType\x12!\n\x0c\x63omponent_id\x18\x02 \x01(\x0cR\x0b\x63omponentId\x12&\n\x0fnode_ip_address\x18\x03 \x01(\tR\rnodeIpAddress\x12M\n\x0eprofile_events\x18\x04 \x03(\x0b\x32&.ray.rpc.ProfileTableData.ProfileEventR\rprofileEvents\x1a\x86\x01\n\x0cProfileEvent\x12\x1d\n\nevent_type\x18\x01 \x01(\tR\teventType\x12\x1d\n\nstart_time\x18\x02 \x01(\x01R\tstartTime\x12\x19\n\x08\x65nd_time\x18\x03 \x01(\x01R\x07\x65ndTime\x12\x1d\n\nextra_data\x18\x04 \x01(\tR\textraData\"@\n\x11ResourceTableData\x12+\n\x11resource_capacity\x18\x01 \x01(\x01R\x10resourceCapacity\"\xad\x03\n\x0bGcsNodeInfo\x12\x17\n\x07node_id\x18\x01 \x01(\x0cR\x06nodeId\x12\x30\n\x14node_manager_address\x18\x02 \x01(\tR\x12nodeManagerAddress\x12,\n\x12raylet_socket_name\x18\x03 \x01(\tR\x10rayletSocketName\x12\x37\n\x18object_store_socket_name\x18\x04 \x01(\tR\x15objectStoreSocketName\x12*\n\x11node_manager_port\x18\x05 \x01(\x05R\x0fnodeManagerPort\x12.\n\x13object_manager_port\x18\x06 \x01(\x05R\x11objectManagerPort\x12\x37\n\x05state\x18\x07 \x01(\x0e\x32!.ray.rpc.GcsNodeInfo.GcsNodeStateR\x05state\x12\x32\n\x15node_manager_hostname\x18\x08 \x01(\tR\x13nodeManagerHostname\"#\n\x0cGcsNodeState\x12\t\n\x05\x41LIVE\x10\x00\x12\x08\n\x04\x44\x45\x41\x44\x10\x01\"\xd7\x03\n\x12HeartbeatTableData\x12\x1b\n\tclient_id\x18\x01 \x01(\x0cR\x08\x63lientId\x12:\n\x19resources_available_label\x18\x02 \x03(\tR\x17resourcesAvailableLabel\x12@\n\x1cresources_available_capacity\x18\x03 \x03(\x01R\x1aresourcesAvailableCapacity\x12\x32\n\x15resources_total_label\x18\x04 \x03(\tR\x13resourcesTotalLabel\x12\x38\n\x18resources_total_capacity\x18\x05 \x03(\x01R\x16resourcesTotalCapacity\x12.\n\x13resource_load_label\x18\x06 \x03(\tR\x11resourceLoadLabel\x12\x34\n\x16resource_load_capacity\x18\x07 \x03(\x01R\x14resourceLoadCapacity\x12(\n\x10\x61\x63tive_object_id\x18\x08 \x03(\x0cR\x0e\x61\x63tiveObjectId\x12(\n\x10should_global_gc\x18\t \x01(\x08R\x0eshouldGlobalGc\"L\n\x17HeartbeatBatchTableData\x12\x31\n\x05\x62\x61tch\x18\x01 \x03(\x0b\x32\x1b.ray.rpc.HeartbeatTableDataR\x05\x62\x61tch\"\x8b\x01\n\rTaskLeaseData\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12&\n\x0fnode_manager_id\x18\x02 \x01(\x0cR\rnodeManagerId\x12\x1f\n\x0b\x61\x63quired_at\x18\x03 \x01(\x04R\nacquiredAt\x12\x18\n\x07timeout\x18\x04 \x01(\x04R\x07timeout\"\xa7\x01\n\x0cJobTableData\x12\x15\n\x06job_id\x18\x01 \x01(\x0cR\x05jobId\x12\x17\n\x07is_dead\x18\x02 \x01(\x08R\x06isDead\x12\x1c\n\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12*\n\x11\x64river_ip_address\x18\x04 \x01(\tR\x0f\x64riverIpAddress\x12\x1d\n\ndriver_pid\x18\x05 \x01(\x03R\tdriverPid\"\xfe\x02\n\x13\x41\x63torCheckpointData\x12#\n\rcheckpoint_id\x18\x01 \x01(\x0cR\x0c\x63heckpointId\x12\x19\n\x08\x61\x63tor_id\x18\x02 \x01(\x0cR\x07\x61\x63torId\x12\x31\n\x14\x65xecution_dependency\x18\x03 \x01(\x0cR\x13\x65xecutionDependency\x12\x1d\n\nhandle_ids\x18\x04 \x03(\x0cR\thandleIds\x12#\n\rtask_counters\x18\x05 \x03(\x04R\x0ctaskCounters\x12\x33\n\x15\x66rontier_dependencies\x18\x06 \x03(\x0cR\x14\x66rontierDependencies\x12\x38\n\x18unreleased_dummy_objects\x18\x07 \x03(\x0cR\x16unreleasedDummyObjects\x12\x41\n\x1dnum_dummy_object_dependencies\x18\x08 \x03(\rR\x1anumDummyObjectDependencies\"y\n\x15\x41\x63torCheckpointIdData\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12%\n\x0e\x63heckpoint_ids\x18\x02 \x03(\x0cR\rcheckpointIds\x12\x1e\n\ntimestamps\x18\x03 \x03(\x04R\ntimestamps\"\xa1\x01\n\x11WorkerFailureData\x12\x37\n\x0eworker_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\rworkerAddress\x12\x1c\n\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12\x35\n\x16intentional_disconnect\x18\x04 \x01(\x08R\x15intentionalDisconnect\"\x9a\x01\n\x0bResourceMap\x12\x35\n\x05items\x18\x01 \x03(\x0b\x32\x1f.ray.rpc.ResourceMap.ItemsEntryR\x05items\x1aT\n\nItemsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x30\n\x05value\x18\x02 \x01(\x0b\x32\x1a.ray.rpc.ResourceTableDataR\x05value:\x02\x38\x01\"E\n\x13ObjectTableDataList\x12.\n\x05items\x18\x01 \x03(\x0b\x32\x18.ray.rpc.ObjectTableDataR\x05items\"i\n\x12ObjectLocationInfo\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x36\n\tlocations\x18\x02 \x03(\x0b\x32\x18.ray.rpc.ObjectTableDataR\tlocations\"[\n\x14ObjectLocationChange\x12\x15\n\x06is_add\x18\x01 \x01(\x08R\x05isAdd\x12,\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x18.ray.rpc.ObjectTableDataR\x04\x64\x61ta\"\xff\x01\n\x12NodeResourceChange\x12\x17\n\x07node_id\x18\x01 \x01(\x0cR\x06nodeId\x12^\n\x11updated_resources\x18\x02 \x03(\x0b\x32\x31.ray.rpc.NodeResourceChange.UpdatedResourcesEntryR\x10updatedResources\x12+\n\x11\x64\x65leted_resources\x18\x03 \x03(\tR\x10\x64\x65letedResources\x1a\x43\n\x15UpdatedResourcesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\x01R\x05value:\x02\x38\x01\"3\n\rPubSubMessage\x12\x0e\n\x02id\x18\x01 \x01(\x0cR\x02id\x12\x12\n\x04\x64\x61ta\x18\x02 \x01(\x0cR\x04\x64\x61ta*\xec\x02\n\x0bTablePrefix\x12\x14\n\x10TABLE_PREFIX_MIN\x10\x00\x12\n\n\x06UNUSED\x10\x01\x12\x08\n\x04TASK\x10\x02\x12\x0f\n\x0bRAYLET_TASK\x10\x03\x12\n\n\x06\x43LIENT\x10\x04\x12\n\n\x06OBJECT\x10\x05\x12\t\n\x05\x41\x43TOR\x10\x06\x12\x0c\n\x08\x46UNCTION\x10\x07\x12\x17\n\x13TASK_RECONSTRUCTION\x10\x08\x12\r\n\tHEARTBEAT\x10\t\x12\x13\n\x0fHEARTBEAT_BATCH\x10\n\x12\x0e\n\nERROR_INFO\x10\x0b\x12\x07\n\x03JOB\x10\x0c\x12\x0b\n\x07PROFILE\x10\r\x12\x0e\n\nTASK_LEASE\x10\x0e\x12\x14\n\x10\x41\x43TOR_CHECKPOINT\x10\x0f\x12\x17\n\x13\x41\x43TOR_CHECKPOINT_ID\x10\x10\x12\x11\n\rNODE_RESOURCE\x10\x11\x12\x10\n\x0c\x44IRECT_ACTOR\x10\x12\x12\x12\n\x0eWORKER_FAILURE\x10\x13\x12\x14\n\x10TABLE_PREFIX_MAX\x10\x14*\xe8\x02\n\x0bTablePubsub\x12\x14\n\x10TABLE_PUBSUB_MIN\x10\x00\x12\x0e\n\nNO_PUBLISH\x10\x01\x12\x0f\n\x0bTASK_PUBSUB\x10\x02\x12\x16\n\x12RAYLET_TASK_PUBSUB\x10\x03\x12\x11\n\rCLIENT_PUBSUB\x10\x04\x12\x11\n\rOBJECT_PUBSUB\x10\x05\x12\x10\n\x0c\x41\x43TOR_PUBSUB\x10\x06\x12\x14\n\x10HEARTBEAT_PUBSUB\x10\x07\x12\x1a\n\x16HEARTBEAT_BATCH_PUBSUB\x10\x08\x12\x15\n\x11\x45RROR_INFO_PUBSUB\x10\t\x12\x15\n\x11TASK_LEASE_PUBSUB\x10\n\x12\x0e\n\nJOB_PUBSUB\x10\x0b\x12\x18\n\x14NODE_RESOURCE_PUBSUB\x10\x0c\x12\x17\n\x13\x44IRECT_ACTOR_PUBSUB\x10\r\x12\x19\n\x15WORKER_FAILURE_PUBSUB\x10\x0e\x12\x14\n\x10TABLE_PUBSUB_MAX\x10\x0f*.\n\rGcsChangeMode\x12\x11\n\rAPPEND_OR_ADD\x10\x00\x12\n\n\x06REMOVE\x10\x01*\xad\x01\n\tErrorType\x12\x0f\n\x0bWORKER_DIED\x10\x00\x12\x0e\n\nACTOR_DIED\x10\x01\x12\x1c\n\x18OBJECT_UNRECONSTRUCTABLE\x10\x02\x12\x1c\n\x18TASK_EXECUTION_EXCEPTION\x10\x03\x12\x14\n\x10OBJECT_IN_PLASMA\x10\x04\x12\x12\n\x0eTASK_CANCELLED\x10\x05\x12\x19\n\x15\x41\x43TOR_CREATION_FAILED\x10\x06\x42\x1a\n\x18io.ray.runtime.generatedb\x06proto3')
-  ,
-  dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,])
+    name="src/ray/protobuf/gcs.proto",
+    package="ray.rpc",
+    syntax="proto3",
+    serialized_options=_b("\n\030io.ray.runtime.generated"),
+    serialized_pb=_b(
+        '\n\x1asrc/ray/protobuf/gcs.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto"m\n\x08GcsEntry\x12\x37\n\x0b\x63hange_mode\x18\x01 \x01(\x0e\x32\x16.ray.rpc.GcsChangeModeR\nchangeMode\x12\x0e\n\x02id\x18\x02 \x01(\x0cR\x02id\x12\x18\n\x07\x65ntries\x18\x03 \x03(\x0cR\x07\x65ntries"L\n\x0fObjectTableData\x12\x1f\n\x0bobject_size\x18\x01 \x01(\x04R\nobjectSize\x12\x18\n\x07manager\x18\x02 \x01(\x0cR\x07manager"\x8a\x01\n\x16TaskReconstructionData\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12/\n\x13num_reconstructions\x18\x02 \x01(\x04R\x12numReconstructions\x12&\n\x0fnode_manager_id\x18\x03 \x01(\x0cR\rnodeManagerId"2\n\rTaskTableData\x12!\n\x04task\x18\x01 \x01(\x0b\x32\r.ray.rpc.TaskR\x04task"\xc9\x04\n\x0e\x41\x63torTableData\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12\x1b\n\tparent_id\x18\x02 \x01(\x0cR\x08parentId\x12\x42\n\x1e\x61\x63tor_creation_dummy_object_id\x18\x03 \x01(\x0cR\x1a\x61\x63torCreationDummyObjectId\x12\x15\n\x06job_id\x18\x04 \x01(\x0cR\x05jobId\x12\x38\n\x05state\x18\x06 \x01(\x0e\x32".ray.rpc.ActorTableData.ActorStateR\x05state\x12!\n\x0cmax_restarts\x18\x07 \x01(\x03R\x0bmaxRestarts\x12!\n\x0cnum_restarts\x18\x08 \x01(\x04R\x0bnumRestarts\x12*\n\x07\x61\x64\x64ress\x18\t \x01(\x0b\x32\x10.ray.rpc.AddressR\x07\x61\x64\x64ress\x12\x35\n\rowner_address\x18\n \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12\x1f\n\x0bis_detached\x18\x0b \x01(\x08R\nisDetached\x12\x12\n\x04name\x18\x0c \x01(\tR\x04name\x12\x1c\n\ttimestamp\x18\r \x01(\x01R\ttimestamp\x12.\n\ttask_spec\x18\x0e \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x08taskSpec">\n\nActorState\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x41LIVE\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\x08\n\x04\x44\x45\x41\x44\x10\x03"~\n\x0e\x45rrorTableData\x12\x15\n\x06job_id\x18\x01 \x01(\x0cR\x05jobId\x12\x12\n\x04type\x18\x02 \x01(\tR\x04type\x12#\n\rerror_message\x18\x03 \x01(\tR\x0c\x65rrorMessage\x12\x1c\n\ttimestamp\x18\x04 \x01(\x01R\ttimestamp"\xdc\x02\n\x10ProfileTableData\x12%\n\x0e\x63omponent_type\x18\x01 \x01(\tR\rcomponentType\x12!\n\x0c\x63omponent_id\x18\x02 \x01(\x0cR\x0b\x63omponentId\x12&\n\x0fnode_ip_address\x18\x03 \x01(\tR\rnodeIpAddress\x12M\n\x0eprofile_events\x18\x04 \x03(\x0b\x32&.ray.rpc.ProfileTableData.ProfileEventR\rprofileEvents\x1a\x86\x01\n\x0cProfileEvent\x12\x1d\n\nevent_type\x18\x01 \x01(\tR\teventType\x12\x1d\n\nstart_time\x18\x02 \x01(\x01R\tstartTime\x12\x19\n\x08\x65nd_time\x18\x03 \x01(\x01R\x07\x65ndTime\x12\x1d\n\nextra_data\x18\x04 \x01(\tR\textraData"@\n\x11ResourceTableData\x12+\n\x11resource_capacity\x18\x01 \x01(\x01R\x10resourceCapacity"\xad\x03\n\x0bGcsNodeInfo\x12\x17\n\x07node_id\x18\x01 \x01(\x0cR\x06nodeId\x12\x30\n\x14node_manager_address\x18\x02 \x01(\tR\x12nodeManagerAddress\x12,\n\x12raylet_socket_name\x18\x03 \x01(\tR\x10rayletSocketName\x12\x37\n\x18object_store_socket_name\x18\x04 \x01(\tR\x15objectStoreSocketName\x12*\n\x11node_manager_port\x18\x05 \x01(\x05R\x0fnodeManagerPort\x12.\n\x13object_manager_port\x18\x06 \x01(\x05R\x11objectManagerPort\x12\x37\n\x05state\x18\x07 \x01(\x0e\x32!.ray.rpc.GcsNodeInfo.GcsNodeStateR\x05state\x12\x32\n\x15node_manager_hostname\x18\x08 \x01(\tR\x13nodeManagerHostname"#\n\x0cGcsNodeState\x12\t\n\x05\x41LIVE\x10\x00\x12\x08\n\x04\x44\x45\x41\x44\x10\x01"\xd7\x03\n\x12HeartbeatTableData\x12\x1b\n\tclient_id\x18\x01 \x01(\x0cR\x08\x63lientId\x12:\n\x19resources_available_label\x18\x02 \x03(\tR\x17resourcesAvailableLabel\x12@\n\x1cresources_available_capacity\x18\x03 \x03(\x01R\x1aresourcesAvailableCapacity\x12\x32\n\x15resources_total_label\x18\x04 \x03(\tR\x13resourcesTotalLabel\x12\x38\n\x18resources_total_capacity\x18\x05 \x03(\x01R\x16resourcesTotalCapacity\x12.\n\x13resource_load_label\x18\x06 \x03(\tR\x11resourceLoadLabel\x12\x34\n\x16resource_load_capacity\x18\x07 \x03(\x01R\x14resourceLoadCapacity\x12(\n\x10\x61\x63tive_object_id\x18\x08 \x03(\x0cR\x0e\x61\x63tiveObjectId\x12(\n\x10should_global_gc\x18\t \x01(\x08R\x0eshouldGlobalGc"L\n\x17HeartbeatBatchTableData\x12\x31\n\x05\x62\x61tch\x18\x01 \x03(\x0b\x32\x1b.ray.rpc.HeartbeatTableDataR\x05\x62\x61tch"\x8b\x01\n\rTaskLeaseData\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12&\n\x0fnode_manager_id\x18\x02 \x01(\x0cR\rnodeManagerId\x12\x1f\n\x0b\x61\x63quired_at\x18\x03 \x01(\x04R\nacquiredAt\x12\x18\n\x07timeout\x18\x04 \x01(\x04R\x07timeout"\xa7\x01\n\x0cJobTableData\x12\x15\n\x06job_id\x18\x01 \x01(\x0cR\x05jobId\x12\x17\n\x07is_dead\x18\x02 \x01(\x08R\x06isDead\x12\x1c\n\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12*\n\x11\x64river_ip_address\x18\x04 \x01(\tR\x0f\x64riverIpAddress\x12\x1d\n\ndriver_pid\x18\x05 \x01(\x03R\tdriverPid"\xfe\x02\n\x13\x41\x63torCheckpointData\x12#\n\rcheckpoint_id\x18\x01 \x01(\x0cR\x0c\x63heckpointId\x12\x19\n\x08\x61\x63tor_id\x18\x02 \x01(\x0cR\x07\x61\x63torId\x12\x31\n\x14\x65xecution_dependency\x18\x03 \x01(\x0cR\x13\x65xecutionDependency\x12\x1d\n\nhandle_ids\x18\x04 \x03(\x0cR\thandleIds\x12#\n\rtask_counters\x18\x05 \x03(\x04R\x0ctaskCounters\x12\x33\n\x15\x66rontier_dependencies\x18\x06 \x03(\x0cR\x14\x66rontierDependencies\x12\x38\n\x18unreleased_dummy_objects\x18\x07 \x03(\x0cR\x16unreleasedDummyObjects\x12\x41\n\x1dnum_dummy_object_dependencies\x18\x08 \x03(\rR\x1anumDummyObjectDependencies"y\n\x15\x41\x63torCheckpointIdData\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12%\n\x0e\x63heckpoint_ids\x18\x02 \x03(\x0cR\rcheckpointIds\x12\x1e\n\ntimestamps\x18\x03 \x03(\x04R\ntimestamps"\xa1\x01\n\x11WorkerFailureData\x12\x37\n\x0eworker_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\rworkerAddress\x12\x1c\n\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12\x35\n\x16intentional_disconnect\x18\x04 \x01(\x08R\x15intentionalDisconnect"\x9a\x01\n\x0bResourceMap\x12\x35\n\x05items\x18\x01 \x03(\x0b\x32\x1f.ray.rpc.ResourceMap.ItemsEntryR\x05items\x1aT\n\nItemsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x30\n\x05value\x18\x02 \x01(\x0b\x32\x1a.ray.rpc.ResourceTableDataR\x05value:\x02\x38\x01"E\n\x13ObjectTableDataList\x12.\n\x05items\x18\x01 \x03(\x0b\x32\x18.ray.rpc.ObjectTableDataR\x05items"i\n\x12ObjectLocationInfo\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x36\n\tlocations\x18\x02 \x03(\x0b\x32\x18.ray.rpc.ObjectTableDataR\tlocations"[\n\x14ObjectLocationChange\x12\x15\n\x06is_add\x18\x01 \x01(\x08R\x05isAdd\x12,\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x18.ray.rpc.ObjectTableDataR\x04\x64\x61ta"\xff\x01\n\x12NodeResourceChange\x12\x17\n\x07node_id\x18\x01 \x01(\x0cR\x06nodeId\x12^\n\x11updated_resources\x18\x02 \x03(\x0b\x32\x31.ray.rpc.NodeResourceChange.UpdatedResourcesEntryR\x10updatedResources\x12+\n\x11\x64\x65leted_resources\x18\x03 \x03(\tR\x10\x64\x65letedResources\x1a\x43\n\x15UpdatedResourcesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\x01R\x05value:\x02\x38\x01"3\n\rPubSubMessage\x12\x0e\n\x02id\x18\x01 \x01(\x0cR\x02id\x12\x12\n\x04\x64\x61ta\x18\x02 \x01(\x0cR\x04\x64\x61ta*\xec\x02\n\x0bTablePrefix\x12\x14\n\x10TABLE_PREFIX_MIN\x10\x00\x12\n\n\x06UNUSED\x10\x01\x12\x08\n\x04TASK\x10\x02\x12\x0f\n\x0bRAYLET_TASK\x10\x03\x12\n\n\x06\x43LIENT\x10\x04\x12\n\n\x06OBJECT\x10\x05\x12\t\n\x05\x41\x43TOR\x10\x06\x12\x0c\n\x08\x46UNCTION\x10\x07\x12\x17\n\x13TASK_RECONSTRUCTION\x10\x08\x12\r\n\tHEARTBEAT\x10\t\x12\x13\n\x0fHEARTBEAT_BATCH\x10\n\x12\x0e\n\nERROR_INFO\x10\x0b\x12\x07\n\x03JOB\x10\x0c\x12\x0b\n\x07PROFILE\x10\r\x12\x0e\n\nTASK_LEASE\x10\x0e\x12\x14\n\x10\x41\x43TOR_CHECKPOINT\x10\x0f\x12\x17\n\x13\x41\x43TOR_CHECKPOINT_ID\x10\x10\x12\x11\n\rNODE_RESOURCE\x10\x11\x12\x10\n\x0c\x44IRECT_ACTOR\x10\x12\x12\x12\n\x0eWORKER_FAILURE\x10\x13\x12\x14\n\x10TABLE_PREFIX_MAX\x10\x14*\xe8\x02\n\x0bTablePubsub\x12\x14\n\x10TABLE_PUBSUB_MIN\x10\x00\x12\x0e\n\nNO_PUBLISH\x10\x01\x12\x0f\n\x0bTASK_PUBSUB\x10\x02\x12\x16\n\x12RAYLET_TASK_PUBSUB\x10\x03\x12\x11\n\rCLIENT_PUBSUB\x10\x04\x12\x11\n\rOBJECT_PUBSUB\x10\x05\x12\x10\n\x0c\x41\x43TOR_PUBSUB\x10\x06\x12\x14\n\x10HEARTBEAT_PUBSUB\x10\x07\x12\x1a\n\x16HEARTBEAT_BATCH_PUBSUB\x10\x08\x12\x15\n\x11\x45RROR_INFO_PUBSUB\x10\t\x12\x15\n\x11TASK_LEASE_PUBSUB\x10\n\x12\x0e\n\nJOB_PUBSUB\x10\x0b\x12\x18\n\x14NODE_RESOURCE_PUBSUB\x10\x0c\x12\x17\n\x13\x44IRECT_ACTOR_PUBSUB\x10\r\x12\x19\n\x15WORKER_FAILURE_PUBSUB\x10\x0e\x12\x14\n\x10TABLE_PUBSUB_MAX\x10\x0f*.\n\rGcsChangeMode\x12\x11\n\rAPPEND_OR_ADD\x10\x00\x12\n\n\x06REMOVE\x10\x01*\xad\x01\n\tErrorType\x12\x0f\n\x0bWORKER_DIED\x10\x00\x12\x0e\n\nACTOR_DIED\x10\x01\x12\x1c\n\x18OBJECT_UNRECONSTRUCTABLE\x10\x02\x12\x1c\n\x18TASK_EXECUTION_EXCEPTION\x10\x03\x12\x14\n\x10OBJECT_IN_PLASMA\x10\x04\x12\x12\n\x0eTASK_CANCELLED\x10\x05\x12\x19\n\x15\x41\x43TOR_CREATION_FAILED\x10\x06\x42\x1a\n\x18io.ray.runtime.generatedb\x06proto3'
+    ),
+    dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,],
+)
 
 _TABLEPREFIX = _descriptor.EnumDescriptor(
-  name='TablePrefix',
-  full_name='ray.rpc.TablePrefix',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='TABLE_PREFIX_MIN', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='UNUSED', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RAYLET_TASK', index=3, number=3,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='CLIENT', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='OBJECT', index=5, number=5,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR', index=6, number=6,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='FUNCTION', index=7, number=7,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_RECONSTRUCTION', index=8, number=8,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='HEARTBEAT', index=9, number=9,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='HEARTBEAT_BATCH', index=10, number=10,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ERROR_INFO', index=11, number=11,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='JOB', index=12, number=12,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='PROFILE', index=13, number=13,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_LEASE', index=14, number=14,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR_CHECKPOINT', index=15, number=15,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR_CHECKPOINT_ID', index=16, number=16,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='NODE_RESOURCE', index=17, number=17,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='DIRECT_ACTOR', index=18, number=18,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='WORKER_FAILURE', index=19, number=19,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TABLE_PREFIX_MAX', index=20, number=20,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=4293,
-  serialized_end=4657,
+    name="TablePrefix",
+    full_name="ray.rpc.TablePrefix",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="TABLE_PREFIX_MIN",
+            index=0,
+            number=0,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="UNUSED", index=1, number=1, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK", index=2, number=2, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="RAYLET_TASK", index=3, number=3, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="CLIENT", index=4, number=4, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="OBJECT", index=5, number=5, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR", index=6, number=6, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="FUNCTION", index=7, number=7, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_RECONSTRUCTION",
+            index=8,
+            number=8,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="HEARTBEAT", index=9, number=9, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="HEARTBEAT_BATCH",
+            index=10,
+            number=10,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ERROR_INFO", index=11, number=11, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="JOB", index=12, number=12, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="PROFILE", index=13, number=13, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_LEASE", index=14, number=14, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR_CHECKPOINT",
+            index=15,
+            number=15,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR_CHECKPOINT_ID",
+            index=16,
+            number=16,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="NODE_RESOURCE",
+            index=17,
+            number=17,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="DIRECT_ACTOR", index=18, number=18, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="WORKER_FAILURE",
+            index=19,
+            number=19,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TABLE_PREFIX_MAX",
+            index=20,
+            number=20,
+            serialized_options=None,
+            type=None,
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=4293,
+    serialized_end=4657,
 )
 _sym_db.RegisterEnumDescriptor(_TABLEPREFIX)
 
 TablePrefix = enum_type_wrapper.EnumTypeWrapper(_TABLEPREFIX)
 _TABLEPUBSUB = _descriptor.EnumDescriptor(
-  name='TablePubsub',
-  full_name='ray.rpc.TablePubsub',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='TABLE_PUBSUB_MIN', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='NO_PUBLISH', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_PUBSUB', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RAYLET_TASK_PUBSUB', index=3, number=3,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='CLIENT_PUBSUB', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='OBJECT_PUBSUB', index=5, number=5,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR_PUBSUB', index=6, number=6,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='HEARTBEAT_PUBSUB', index=7, number=7,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='HEARTBEAT_BATCH_PUBSUB', index=8, number=8,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ERROR_INFO_PUBSUB', index=9, number=9,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_LEASE_PUBSUB', index=10, number=10,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='JOB_PUBSUB', index=11, number=11,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='NODE_RESOURCE_PUBSUB', index=12, number=12,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='DIRECT_ACTOR_PUBSUB', index=13, number=13,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='WORKER_FAILURE_PUBSUB', index=14, number=14,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TABLE_PUBSUB_MAX', index=15, number=15,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=4660,
-  serialized_end=5020,
+    name="TablePubsub",
+    full_name="ray.rpc.TablePubsub",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="TABLE_PUBSUB_MIN",
+            index=0,
+            number=0,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="NO_PUBLISH", index=1, number=1, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_PUBSUB", index=2, number=2, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="RAYLET_TASK_PUBSUB",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="CLIENT_PUBSUB", index=4, number=4, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="OBJECT_PUBSUB", index=5, number=5, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR_PUBSUB", index=6, number=6, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="HEARTBEAT_PUBSUB",
+            index=7,
+            number=7,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="HEARTBEAT_BATCH_PUBSUB",
+            index=8,
+            number=8,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ERROR_INFO_PUBSUB",
+            index=9,
+            number=9,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_LEASE_PUBSUB",
+            index=10,
+            number=10,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="JOB_PUBSUB", index=11, number=11, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="NODE_RESOURCE_PUBSUB",
+            index=12,
+            number=12,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="DIRECT_ACTOR_PUBSUB",
+            index=13,
+            number=13,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="WORKER_FAILURE_PUBSUB",
+            index=14,
+            number=14,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TABLE_PUBSUB_MAX",
+            index=15,
+            number=15,
+            serialized_options=None,
+            type=None,
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=4660,
+    serialized_end=5020,
 )
 _sym_db.RegisterEnumDescriptor(_TABLEPUBSUB)
 
 TablePubsub = enum_type_wrapper.EnumTypeWrapper(_TABLEPUBSUB)
 _GCSCHANGEMODE = _descriptor.EnumDescriptor(
-  name='GcsChangeMode',
-  full_name='ray.rpc.GcsChangeMode',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='APPEND_OR_ADD', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='REMOVE', index=1, number=1,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=5022,
-  serialized_end=5068,
+    name="GcsChangeMode",
+    full_name="ray.rpc.GcsChangeMode",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="APPEND_OR_ADD", index=0, number=0, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="REMOVE", index=1, number=1, serialized_options=None, type=None
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=5022,
+    serialized_end=5068,
 )
 _sym_db.RegisterEnumDescriptor(_GCSCHANGEMODE)
 
 GcsChangeMode = enum_type_wrapper.EnumTypeWrapper(_GCSCHANGEMODE)
 _ERRORTYPE = _descriptor.EnumDescriptor(
-  name='ErrorType',
-  full_name='ray.rpc.ErrorType',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='WORKER_DIED', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR_DIED', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='OBJECT_UNRECONSTRUCTABLE', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_EXECUTION_EXCEPTION', index=3, number=3,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='OBJECT_IN_PLASMA', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='TASK_CANCELLED', index=5, number=5,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ACTOR_CREATION_FAILED', index=6, number=6,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=5071,
-  serialized_end=5244,
+    name="ErrorType",
+    full_name="ray.rpc.ErrorType",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="WORKER_DIED", index=0, number=0, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR_DIED", index=1, number=1, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="OBJECT_UNRECONSTRUCTABLE",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_EXECUTION_EXCEPTION",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="OBJECT_IN_PLASMA",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="TASK_CANCELLED", index=5, number=5, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ACTOR_CREATION_FAILED",
+            index=6,
+            number=6,
+            serialized_options=None,
+            type=None,
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=5071,
+    serialized_end=5244,
 )
 _sym_db.RegisterEnumDescriptor(_ERRORTYPE)
 
@@ -319,1518 +365,2635 @@ ACTOR_CREATION_FAILED = 6
 
 
 _ACTORTABLEDATA_ACTORSTATE = _descriptor.EnumDescriptor(
-  name='ActorState',
-  full_name='ray.rpc.ActorTableData.ActorState',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='PENDING', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ALIVE', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RESTARTING', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='DEAD', index=3, number=3,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=976,
-  serialized_end=1038,
+    name="ActorState",
+    full_name="ray.rpc.ActorTableData.ActorState",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="PENDING", index=0, number=0, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ALIVE", index=1, number=1, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="RESTARTING", index=2, number=2, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="DEAD", index=3, number=3, serialized_options=None, type=None
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=976,
+    serialized_end=1038,
 )
 _sym_db.RegisterEnumDescriptor(_ACTORTABLEDATA_ACTORSTATE)
 
 _GCSNODEINFO_GCSNODESTATE = _descriptor.EnumDescriptor(
-  name='GcsNodeState',
-  full_name='ray.rpc.GcsNodeInfo.GcsNodeState',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='ALIVE', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='DEAD', index=1, number=1,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1980,
-  serialized_end=2015,
+    name="GcsNodeState",
+    full_name="ray.rpc.GcsNodeInfo.GcsNodeState",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="ALIVE", index=0, number=0, serialized_options=None, type=None
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="DEAD", index=1, number=1, serialized_options=None, type=None
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=1980,
+    serialized_end=2015,
 )
 _sym_db.RegisterEnumDescriptor(_GCSNODEINFO_GCSNODESTATE)
 
 
 _GCSENTRY = _descriptor.Descriptor(
-  name='GcsEntry',
-  full_name='ray.rpc.GcsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='change_mode', full_name='ray.rpc.GcsEntry.change_mode', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='changeMode', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='id', full_name='ray.rpc.GcsEntry.id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='id', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='entries', full_name='ray.rpc.GcsEntry.entries', index=2,
-      number=3, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='entries', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=70,
-  serialized_end=179,
+    name="GcsEntry",
+    full_name="ray.rpc.GcsEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="change_mode",
+            full_name="ray.rpc.GcsEntry.change_mode",
+            index=0,
+            number=1,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="changeMode",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="id",
+            full_name="ray.rpc.GcsEntry.id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="id",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="entries",
+            full_name="ray.rpc.GcsEntry.entries",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="entries",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=70,
+    serialized_end=179,
 )
 
 
 _OBJECTTABLEDATA = _descriptor.Descriptor(
-  name='ObjectTableData',
-  full_name='ray.rpc.ObjectTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_size', full_name='ray.rpc.ObjectTableData.object_size', index=0,
-      number=1, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectSize', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='manager', full_name='ray.rpc.ObjectTableData.manager', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='manager', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=181,
-  serialized_end=257,
+    name="ObjectTableData",
+    full_name="ray.rpc.ObjectTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_size",
+            full_name="ray.rpc.ObjectTableData.object_size",
+            index=0,
+            number=1,
+            type=4,
+            cpp_type=4,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectSize",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="manager",
+            full_name="ray.rpc.ObjectTableData.manager",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="manager",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=181,
+    serialized_end=257,
 )
 
 
 _TASKRECONSTRUCTIONDATA = _descriptor.Descriptor(
-  name='TaskReconstructionData',
-  full_name='ray.rpc.TaskReconstructionData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_id', full_name='ray.rpc.TaskReconstructionData.task_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='num_reconstructions', full_name='ray.rpc.TaskReconstructionData.num_reconstructions', index=1,
-      number=2, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='numReconstructions', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_manager_id', full_name='ray.rpc.TaskReconstructionData.node_manager_id', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeManagerId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=260,
-  serialized_end=398,
+    name="TaskReconstructionData",
+    full_name="ray.rpc.TaskReconstructionData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="task_id",
+            full_name="ray.rpc.TaskReconstructionData.task_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="num_reconstructions",
+            full_name="ray.rpc.TaskReconstructionData.num_reconstructions",
+            index=1,
+            number=2,
+            type=4,
+            cpp_type=4,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="numReconstructions",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_manager_id",
+            full_name="ray.rpc.TaskReconstructionData.node_manager_id",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeManagerId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=260,
+    serialized_end=398,
 )
 
 
 _TASKTABLEDATA = _descriptor.Descriptor(
-  name='TaskTableData',
-  full_name='ray.rpc.TaskTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task', full_name='ray.rpc.TaskTableData.task', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='task', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=400,
-  serialized_end=450,
+    name="TaskTableData",
+    full_name="ray.rpc.TaskTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="task",
+            full_name="ray.rpc.TaskTableData.task",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="task",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=400,
+    serialized_end=450,
 )
 
 
 _ACTORTABLEDATA = _descriptor.Descriptor(
-  name='ActorTableData',
-  full_name='ray.rpc.ActorTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='actor_id', full_name='ray.rpc.ActorTableData.actor_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='parent_id', full_name='ray.rpc.ActorTableData.parent_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='parentId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_creation_dummy_object_id', full_name='ray.rpc.ActorTableData.actor_creation_dummy_object_id', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorCreationDummyObjectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='job_id', full_name='ray.rpc.ActorTableData.job_id', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='jobId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='state', full_name='ray.rpc.ActorTableData.state', index=4,
-      number=6, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='state', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='max_restarts', full_name='ray.rpc.ActorTableData.max_restarts', index=5,
-      number=7, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='maxRestarts', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='num_restarts', full_name='ray.rpc.ActorTableData.num_restarts', index=6,
-      number=8, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='numRestarts', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='address', full_name='ray.rpc.ActorTableData.address', index=7,
-      number=9, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='address', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='owner_address', full_name='ray.rpc.ActorTableData.owner_address', index=8,
-      number=10, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='is_detached', full_name='ray.rpc.ActorTableData.is_detached', index=9,
-      number=11, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='isDetached', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='ray.rpc.ActorTableData.name', index=10,
-      number=12, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='name', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ray.rpc.ActorTableData.timestamp', index=11,
-      number=13, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timestamp', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='task_spec', full_name='ray.rpc.ActorTableData.task_spec', index=12,
-      number=14, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskSpec', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _ACTORTABLEDATA_ACTORSTATE,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=453,
-  serialized_end=1038,
+    name="ActorTableData",
+    full_name="ray.rpc.ActorTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="actor_id",
+            full_name="ray.rpc.ActorTableData.actor_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="parent_id",
+            full_name="ray.rpc.ActorTableData.parent_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="parentId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_creation_dummy_object_id",
+            full_name="ray.rpc.ActorTableData.actor_creation_dummy_object_id",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorCreationDummyObjectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="job_id",
+            full_name="ray.rpc.ActorTableData.job_id",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="jobId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="state",
+            full_name="ray.rpc.ActorTableData.state",
+            index=4,
+            number=6,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="state",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="max_restarts",
+            full_name="ray.rpc.ActorTableData.max_restarts",
+            index=5,
+            number=7,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="maxRestarts",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="num_restarts",
+            full_name="ray.rpc.ActorTableData.num_restarts",
+            index=6,
+            number=8,
+            type=4,
+            cpp_type=4,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="numRestarts",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="address",
+            full_name="ray.rpc.ActorTableData.address",
+            index=7,
+            number=9,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="address",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="owner_address",
+            full_name="ray.rpc.ActorTableData.owner_address",
+            index=8,
+            number=10,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="is_detached",
+            full_name="ray.rpc.ActorTableData.is_detached",
+            index=9,
+            number=11,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="isDetached",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="ray.rpc.ActorTableData.name",
+            index=10,
+            number=12,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="name",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamp",
+            full_name="ray.rpc.ActorTableData.timestamp",
+            index=11,
+            number=13,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timestamp",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="task_spec",
+            full_name="ray.rpc.ActorTableData.task_spec",
+            index=12,
+            number=14,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskSpec",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[_ACTORTABLEDATA_ACTORSTATE,],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=453,
+    serialized_end=1038,
 )
 
 
 _ERRORTABLEDATA = _descriptor.Descriptor(
-  name='ErrorTableData',
-  full_name='ray.rpc.ErrorTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='job_id', full_name='ray.rpc.ErrorTableData.job_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='jobId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='type', full_name='ray.rpc.ErrorTableData.type', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='type', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='error_message', full_name='ray.rpc.ErrorTableData.error_message', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='errorMessage', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ray.rpc.ErrorTableData.timestamp', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timestamp', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1040,
-  serialized_end=1166,
+    name="ErrorTableData",
+    full_name="ray.rpc.ErrorTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="job_id",
+            full_name="ray.rpc.ErrorTableData.job_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="jobId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="type",
+            full_name="ray.rpc.ErrorTableData.type",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="type",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="error_message",
+            full_name="ray.rpc.ErrorTableData.error_message",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="errorMessage",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamp",
+            full_name="ray.rpc.ErrorTableData.timestamp",
+            index=3,
+            number=4,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timestamp",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1040,
+    serialized_end=1166,
 )
 
 
 _PROFILETABLEDATA_PROFILEEVENT = _descriptor.Descriptor(
-  name='ProfileEvent',
-  full_name='ray.rpc.ProfileTableData.ProfileEvent',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='event_type', full_name='ray.rpc.ProfileTableData.ProfileEvent.event_type', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='eventType', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='start_time', full_name='ray.rpc.ProfileTableData.ProfileEvent.start_time', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='startTime', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='end_time', full_name='ray.rpc.ProfileTableData.ProfileEvent.end_time', index=2,
-      number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='endTime', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='extra_data', full_name='ray.rpc.ProfileTableData.ProfileEvent.extra_data', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='extraData', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1383,
-  serialized_end=1517,
+    name="ProfileEvent",
+    full_name="ray.rpc.ProfileTableData.ProfileEvent",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="event_type",
+            full_name="ray.rpc.ProfileTableData.ProfileEvent.event_type",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="eventType",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="start_time",
+            full_name="ray.rpc.ProfileTableData.ProfileEvent.start_time",
+            index=1,
+            number=2,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="startTime",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="end_time",
+            full_name="ray.rpc.ProfileTableData.ProfileEvent.end_time",
+            index=2,
+            number=3,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="endTime",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="extra_data",
+            full_name="ray.rpc.ProfileTableData.ProfileEvent.extra_data",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="extraData",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1383,
+    serialized_end=1517,
 )
 
 _PROFILETABLEDATA = _descriptor.Descriptor(
-  name='ProfileTableData',
-  full_name='ray.rpc.ProfileTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='component_type', full_name='ray.rpc.ProfileTableData.component_type', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='componentType', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='component_id', full_name='ray.rpc.ProfileTableData.component_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='componentId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_ip_address', full_name='ray.rpc.ProfileTableData.node_ip_address', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeIpAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='profile_events', full_name='ray.rpc.ProfileTableData.profile_events', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='profileEvents', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_PROFILETABLEDATA_PROFILEEVENT, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1169,
-  serialized_end=1517,
+    name="ProfileTableData",
+    full_name="ray.rpc.ProfileTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="component_type",
+            full_name="ray.rpc.ProfileTableData.component_type",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="componentType",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="component_id",
+            full_name="ray.rpc.ProfileTableData.component_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="componentId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_ip_address",
+            full_name="ray.rpc.ProfileTableData.node_ip_address",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeIpAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="profile_events",
+            full_name="ray.rpc.ProfileTableData.profile_events",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="profileEvents",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_PROFILETABLEDATA_PROFILEEVENT,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1169,
+    serialized_end=1517,
 )
 
 
 _RESOURCETABLEDATA = _descriptor.Descriptor(
-  name='ResourceTableData',
-  full_name='ray.rpc.ResourceTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resource_capacity', full_name='ray.rpc.ResourceTableData.resource_capacity', index=0,
-      number=1, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceCapacity', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1519,
-  serialized_end=1583,
+    name="ResourceTableData",
+    full_name="ray.rpc.ResourceTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="resource_capacity",
+            full_name="ray.rpc.ResourceTableData.resource_capacity",
+            index=0,
+            number=1,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceCapacity",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1519,
+    serialized_end=1583,
 )
 
 
 _GCSNODEINFO = _descriptor.Descriptor(
-  name='GcsNodeInfo',
-  full_name='ray.rpc.GcsNodeInfo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='node_id', full_name='ray.rpc.GcsNodeInfo.node_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_manager_address', full_name='ray.rpc.GcsNodeInfo.node_manager_address', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeManagerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='raylet_socket_name', full_name='ray.rpc.GcsNodeInfo.raylet_socket_name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='rayletSocketName', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_store_socket_name', full_name='ray.rpc.GcsNodeInfo.object_store_socket_name', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectStoreSocketName', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_manager_port', full_name='ray.rpc.GcsNodeInfo.node_manager_port', index=4,
-      number=5, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeManagerPort', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_manager_port', full_name='ray.rpc.GcsNodeInfo.object_manager_port', index=5,
-      number=6, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectManagerPort', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='state', full_name='ray.rpc.GcsNodeInfo.state', index=6,
-      number=7, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='state', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_manager_hostname', full_name='ray.rpc.GcsNodeInfo.node_manager_hostname', index=7,
-      number=8, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeManagerHostname', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _GCSNODEINFO_GCSNODESTATE,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1586,
-  serialized_end=2015,
+    name="GcsNodeInfo",
+    full_name="ray.rpc.GcsNodeInfo",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="node_id",
+            full_name="ray.rpc.GcsNodeInfo.node_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_manager_address",
+            full_name="ray.rpc.GcsNodeInfo.node_manager_address",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeManagerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="raylet_socket_name",
+            full_name="ray.rpc.GcsNodeInfo.raylet_socket_name",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="rayletSocketName",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="object_store_socket_name",
+            full_name="ray.rpc.GcsNodeInfo.object_store_socket_name",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectStoreSocketName",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_manager_port",
+            full_name="ray.rpc.GcsNodeInfo.node_manager_port",
+            index=4,
+            number=5,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeManagerPort",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="object_manager_port",
+            full_name="ray.rpc.GcsNodeInfo.object_manager_port",
+            index=5,
+            number=6,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectManagerPort",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="state",
+            full_name="ray.rpc.GcsNodeInfo.state",
+            index=6,
+            number=7,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="state",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_manager_hostname",
+            full_name="ray.rpc.GcsNodeInfo.node_manager_hostname",
+            index=7,
+            number=8,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeManagerHostname",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[_GCSNODEINFO_GCSNODESTATE,],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1586,
+    serialized_end=2015,
 )
 
 
 _HEARTBEATTABLEDATA = _descriptor.Descriptor(
-  name='HeartbeatTableData',
-  full_name='ray.rpc.HeartbeatTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='client_id', full_name='ray.rpc.HeartbeatTableData.client_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='clientId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resources_available_label', full_name='ray.rpc.HeartbeatTableData.resources_available_label', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourcesAvailableLabel', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resources_available_capacity', full_name='ray.rpc.HeartbeatTableData.resources_available_capacity', index=2,
-      number=3, type=1, cpp_type=5, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourcesAvailableCapacity', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resources_total_label', full_name='ray.rpc.HeartbeatTableData.resources_total_label', index=3,
-      number=4, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourcesTotalLabel', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resources_total_capacity', full_name='ray.rpc.HeartbeatTableData.resources_total_capacity', index=4,
-      number=5, type=1, cpp_type=5, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourcesTotalCapacity', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resource_load_label', full_name='ray.rpc.HeartbeatTableData.resource_load_label', index=5,
-      number=6, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceLoadLabel', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resource_load_capacity', full_name='ray.rpc.HeartbeatTableData.resource_load_capacity', index=6,
-      number=7, type=1, cpp_type=5, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceLoadCapacity', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='active_object_id', full_name='ray.rpc.HeartbeatTableData.active_object_id', index=7,
-      number=8, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='activeObjectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='should_global_gc', full_name='ray.rpc.HeartbeatTableData.should_global_gc', index=8,
-      number=9, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='shouldGlobalGc', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2018,
-  serialized_end=2489,
+    name="HeartbeatTableData",
+    full_name="ray.rpc.HeartbeatTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="client_id",
+            full_name="ray.rpc.HeartbeatTableData.client_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="clientId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resources_available_label",
+            full_name="ray.rpc.HeartbeatTableData.resources_available_label",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourcesAvailableLabel",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resources_available_capacity",
+            full_name="ray.rpc.HeartbeatTableData.resources_available_capacity",
+            index=2,
+            number=3,
+            type=1,
+            cpp_type=5,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourcesAvailableCapacity",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resources_total_label",
+            full_name="ray.rpc.HeartbeatTableData.resources_total_label",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourcesTotalLabel",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resources_total_capacity",
+            full_name="ray.rpc.HeartbeatTableData.resources_total_capacity",
+            index=4,
+            number=5,
+            type=1,
+            cpp_type=5,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourcesTotalCapacity",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resource_load_label",
+            full_name="ray.rpc.HeartbeatTableData.resource_load_label",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceLoadLabel",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resource_load_capacity",
+            full_name="ray.rpc.HeartbeatTableData.resource_load_capacity",
+            index=6,
+            number=7,
+            type=1,
+            cpp_type=5,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceLoadCapacity",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="active_object_id",
+            full_name="ray.rpc.HeartbeatTableData.active_object_id",
+            index=7,
+            number=8,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="activeObjectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="should_global_gc",
+            full_name="ray.rpc.HeartbeatTableData.should_global_gc",
+            index=8,
+            number=9,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="shouldGlobalGc",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2018,
+    serialized_end=2489,
 )
 
 
 _HEARTBEATBATCHTABLEDATA = _descriptor.Descriptor(
-  name='HeartbeatBatchTableData',
-  full_name='ray.rpc.HeartbeatBatchTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='batch', full_name='ray.rpc.HeartbeatBatchTableData.batch', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='batch', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2491,
-  serialized_end=2567,
+    name="HeartbeatBatchTableData",
+    full_name="ray.rpc.HeartbeatBatchTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="batch",
+            full_name="ray.rpc.HeartbeatBatchTableData.batch",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="batch",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2491,
+    serialized_end=2567,
 )
 
 
 _TASKLEASEDATA = _descriptor.Descriptor(
-  name='TaskLeaseData',
-  full_name='ray.rpc.TaskLeaseData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_id', full_name='ray.rpc.TaskLeaseData.task_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_manager_id', full_name='ray.rpc.TaskLeaseData.node_manager_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeManagerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='acquired_at', full_name='ray.rpc.TaskLeaseData.acquired_at', index=2,
-      number=3, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='acquiredAt', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timeout', full_name='ray.rpc.TaskLeaseData.timeout', index=3,
-      number=4, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timeout', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2570,
-  serialized_end=2709,
+    name="TaskLeaseData",
+    full_name="ray.rpc.TaskLeaseData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="task_id",
+            full_name="ray.rpc.TaskLeaseData.task_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="node_manager_id",
+            full_name="ray.rpc.TaskLeaseData.node_manager_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeManagerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="acquired_at",
+            full_name="ray.rpc.TaskLeaseData.acquired_at",
+            index=2,
+            number=3,
+            type=4,
+            cpp_type=4,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="acquiredAt",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timeout",
+            full_name="ray.rpc.TaskLeaseData.timeout",
+            index=3,
+            number=4,
+            type=4,
+            cpp_type=4,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timeout",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2570,
+    serialized_end=2709,
 )
 
 
 _JOBTABLEDATA = _descriptor.Descriptor(
-  name='JobTableData',
-  full_name='ray.rpc.JobTableData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='job_id', full_name='ray.rpc.JobTableData.job_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='jobId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='is_dead', full_name='ray.rpc.JobTableData.is_dead', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='isDead', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ray.rpc.JobTableData.timestamp', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timestamp', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='driver_ip_address', full_name='ray.rpc.JobTableData.driver_ip_address', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='driverIpAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='driver_pid', full_name='ray.rpc.JobTableData.driver_pid', index=4,
-      number=5, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='driverPid', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2712,
-  serialized_end=2879,
+    name="JobTableData",
+    full_name="ray.rpc.JobTableData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="job_id",
+            full_name="ray.rpc.JobTableData.job_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="jobId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="is_dead",
+            full_name="ray.rpc.JobTableData.is_dead",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="isDead",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamp",
+            full_name="ray.rpc.JobTableData.timestamp",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timestamp",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="driver_ip_address",
+            full_name="ray.rpc.JobTableData.driver_ip_address",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="driverIpAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="driver_pid",
+            full_name="ray.rpc.JobTableData.driver_pid",
+            index=4,
+            number=5,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="driverPid",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2712,
+    serialized_end=2879,
 )
 
 
 _ACTORCHECKPOINTDATA = _descriptor.Descriptor(
-  name='ActorCheckpointData',
-  full_name='ray.rpc.ActorCheckpointData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='checkpoint_id', full_name='ray.rpc.ActorCheckpointData.checkpoint_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='checkpointId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_id', full_name='ray.rpc.ActorCheckpointData.actor_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='execution_dependency', full_name='ray.rpc.ActorCheckpointData.execution_dependency', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='executionDependency', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='handle_ids', full_name='ray.rpc.ActorCheckpointData.handle_ids', index=3,
-      number=4, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='handleIds', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='task_counters', full_name='ray.rpc.ActorCheckpointData.task_counters', index=4,
-      number=5, type=4, cpp_type=4, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskCounters', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='frontier_dependencies', full_name='ray.rpc.ActorCheckpointData.frontier_dependencies', index=5,
-      number=6, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='frontierDependencies', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='unreleased_dummy_objects', full_name='ray.rpc.ActorCheckpointData.unreleased_dummy_objects', index=6,
-      number=7, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='unreleasedDummyObjects', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='num_dummy_object_dependencies', full_name='ray.rpc.ActorCheckpointData.num_dummy_object_dependencies', index=7,
-      number=8, type=13, cpp_type=3, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='numDummyObjectDependencies', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2882,
-  serialized_end=3264,
+    name="ActorCheckpointData",
+    full_name="ray.rpc.ActorCheckpointData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="checkpoint_id",
+            full_name="ray.rpc.ActorCheckpointData.checkpoint_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="checkpointId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_id",
+            full_name="ray.rpc.ActorCheckpointData.actor_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="execution_dependency",
+            full_name="ray.rpc.ActorCheckpointData.execution_dependency",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="executionDependency",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="handle_ids",
+            full_name="ray.rpc.ActorCheckpointData.handle_ids",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="handleIds",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="task_counters",
+            full_name="ray.rpc.ActorCheckpointData.task_counters",
+            index=4,
+            number=5,
+            type=4,
+            cpp_type=4,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskCounters",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="frontier_dependencies",
+            full_name="ray.rpc.ActorCheckpointData.frontier_dependencies",
+            index=5,
+            number=6,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="frontierDependencies",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="unreleased_dummy_objects",
+            full_name="ray.rpc.ActorCheckpointData.unreleased_dummy_objects",
+            index=6,
+            number=7,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="unreleasedDummyObjects",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="num_dummy_object_dependencies",
+            full_name="ray.rpc.ActorCheckpointData.num_dummy_object_dependencies",
+            index=7,
+            number=8,
+            type=13,
+            cpp_type=3,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="numDummyObjectDependencies",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2882,
+    serialized_end=3264,
 )
 
 
 _ACTORCHECKPOINTIDDATA = _descriptor.Descriptor(
-  name='ActorCheckpointIdData',
-  full_name='ray.rpc.ActorCheckpointIdData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='actor_id', full_name='ray.rpc.ActorCheckpointIdData.actor_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='checkpoint_ids', full_name='ray.rpc.ActorCheckpointIdData.checkpoint_ids', index=1,
-      number=2, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='checkpointIds', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timestamps', full_name='ray.rpc.ActorCheckpointIdData.timestamps', index=2,
-      number=3, type=4, cpp_type=4, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timestamps', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3266,
-  serialized_end=3387,
+    name="ActorCheckpointIdData",
+    full_name="ray.rpc.ActorCheckpointIdData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="actor_id",
+            full_name="ray.rpc.ActorCheckpointIdData.actor_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="checkpoint_ids",
+            full_name="ray.rpc.ActorCheckpointIdData.checkpoint_ids",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="checkpointIds",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamps",
+            full_name="ray.rpc.ActorCheckpointIdData.timestamps",
+            index=2,
+            number=3,
+            type=4,
+            cpp_type=4,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timestamps",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3266,
+    serialized_end=3387,
 )
 
 
 _WORKERFAILUREDATA = _descriptor.Descriptor(
-  name='WorkerFailureData',
-  full_name='ray.rpc.WorkerFailureData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='worker_address', full_name='ray.rpc.WorkerFailureData.worker_address', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ray.rpc.WorkerFailureData.timestamp', index=1,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='timestamp', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='intentional_disconnect', full_name='ray.rpc.WorkerFailureData.intentional_disconnect', index=2,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intentionalDisconnect', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3390,
-  serialized_end=3551,
+    name="WorkerFailureData",
+    full_name="ray.rpc.WorkerFailureData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="worker_address",
+            full_name="ray.rpc.WorkerFailureData.worker_address",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamp",
+            full_name="ray.rpc.WorkerFailureData.timestamp",
+            index=1,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="timestamp",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="intentional_disconnect",
+            full_name="ray.rpc.WorkerFailureData.intentional_disconnect",
+            index=2,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intentionalDisconnect",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3390,
+    serialized_end=3551,
 )
 
 
 _RESOURCEMAP_ITEMSENTRY = _descriptor.Descriptor(
-  name='ItemsEntry',
-  full_name='ray.rpc.ResourceMap.ItemsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='ray.rpc.ResourceMap.ItemsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='key', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='ray.rpc.ResourceMap.ItemsEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='value', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3624,
-  serialized_end=3708,
+    name="ItemsEntry",
+    full_name="ray.rpc.ResourceMap.ItemsEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="ray.rpc.ResourceMap.ItemsEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="key",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="ray.rpc.ResourceMap.ItemsEntry.value",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="value",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=_b("8\001"),
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3624,
+    serialized_end=3708,
 )
 
 _RESOURCEMAP = _descriptor.Descriptor(
-  name='ResourceMap',
-  full_name='ray.rpc.ResourceMap',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='items', full_name='ray.rpc.ResourceMap.items', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='items', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_RESOURCEMAP_ITEMSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3554,
-  serialized_end=3708,
+    name="ResourceMap",
+    full_name="ray.rpc.ResourceMap",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="items",
+            full_name="ray.rpc.ResourceMap.items",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="items",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_RESOURCEMAP_ITEMSENTRY,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3554,
+    serialized_end=3708,
 )
 
 
 _OBJECTTABLEDATALIST = _descriptor.Descriptor(
-  name='ObjectTableDataList',
-  full_name='ray.rpc.ObjectTableDataList',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='items', full_name='ray.rpc.ObjectTableDataList.items', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='items', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3710,
-  serialized_end=3779,
+    name="ObjectTableDataList",
+    full_name="ray.rpc.ObjectTableDataList",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="items",
+            full_name="ray.rpc.ObjectTableDataList.items",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="items",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3710,
+    serialized_end=3779,
 )
 
 
 _OBJECTLOCATIONINFO = _descriptor.Descriptor(
-  name='ObjectLocationInfo',
-  full_name='ray.rpc.ObjectLocationInfo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.ObjectLocationInfo.object_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='locations', full_name='ray.rpc.ObjectLocationInfo.locations', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='locations', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3781,
-  serialized_end=3886,
+    name="ObjectLocationInfo",
+    full_name="ray.rpc.ObjectLocationInfo",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.ObjectLocationInfo.object_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="locations",
+            full_name="ray.rpc.ObjectLocationInfo.locations",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="locations",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3781,
+    serialized_end=3886,
 )
 
 
 _OBJECTLOCATIONCHANGE = _descriptor.Descriptor(
-  name='ObjectLocationChange',
-  full_name='ray.rpc.ObjectLocationChange',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='is_add', full_name='ray.rpc.ObjectLocationChange.is_add', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='isAdd', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='data', full_name='ray.rpc.ObjectLocationChange.data', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='data', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3888,
-  serialized_end=3979,
+    name="ObjectLocationChange",
+    full_name="ray.rpc.ObjectLocationChange",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="is_add",
+            full_name="ray.rpc.ObjectLocationChange.is_add",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="isAdd",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="data",
+            full_name="ray.rpc.ObjectLocationChange.data",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="data",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3888,
+    serialized_end=3979,
 )
 
 
 _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY = _descriptor.Descriptor(
-  name='UpdatedResourcesEntry',
-  full_name='ray.rpc.NodeResourceChange.UpdatedResourcesEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='ray.rpc.NodeResourceChange.UpdatedResourcesEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='key', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='ray.rpc.NodeResourceChange.UpdatedResourcesEntry.value', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='value', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4170,
-  serialized_end=4237,
+    name="UpdatedResourcesEntry",
+    full_name="ray.rpc.NodeResourceChange.UpdatedResourcesEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="ray.rpc.NodeResourceChange.UpdatedResourcesEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="key",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="ray.rpc.NodeResourceChange.UpdatedResourcesEntry.value",
+            index=1,
+            number=2,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="value",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=_b("8\001"),
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4170,
+    serialized_end=4237,
 )
 
 _NODERESOURCECHANGE = _descriptor.Descriptor(
-  name='NodeResourceChange',
-  full_name='ray.rpc.NodeResourceChange',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='node_id', full_name='ray.rpc.NodeResourceChange.node_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nodeId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='updated_resources', full_name='ray.rpc.NodeResourceChange.updated_resources', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='updatedResources', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='deleted_resources', full_name='ray.rpc.NodeResourceChange.deleted_resources', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='deletedResources', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_NODERESOURCECHANGE_UPDATEDRESOURCESENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3982,
-  serialized_end=4237,
+    name="NodeResourceChange",
+    full_name="ray.rpc.NodeResourceChange",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="node_id",
+            full_name="ray.rpc.NodeResourceChange.node_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nodeId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="updated_resources",
+            full_name="ray.rpc.NodeResourceChange.updated_resources",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="updatedResources",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="deleted_resources",
+            full_name="ray.rpc.NodeResourceChange.deleted_resources",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="deletedResources",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_NODERESOURCECHANGE_UPDATEDRESOURCESENTRY,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3982,
+    serialized_end=4237,
 )
 
 
 _PUBSUBMESSAGE = _descriptor.Descriptor(
-  name='PubSubMessage',
-  full_name='ray.rpc.PubSubMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='ray.rpc.PubSubMessage.id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='id', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='data', full_name='ray.rpc.PubSubMessage.data', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='data', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4239,
-  serialized_end=4290,
+    name="PubSubMessage",
+    full_name="ray.rpc.PubSubMessage",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="id",
+            full_name="ray.rpc.PubSubMessage.id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="id",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="data",
+            full_name="ray.rpc.PubSubMessage.data",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="data",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4239,
+    serialized_end=4290,
 )
 
-_GCSENTRY.fields_by_name['change_mode'].enum_type = _GCSCHANGEMODE
-_TASKTABLEDATA.fields_by_name['task'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
-_ACTORTABLEDATA.fields_by_name['state'].enum_type = _ACTORTABLEDATA_ACTORSTATE
-_ACTORTABLEDATA.fields_by_name['address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_ACTORTABLEDATA.fields_by_name['owner_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_ACTORTABLEDATA.fields_by_name['task_spec'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
+_GCSENTRY.fields_by_name["change_mode"].enum_type = _GCSCHANGEMODE
+_TASKTABLEDATA.fields_by_name[
+    "task"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
+_ACTORTABLEDATA.fields_by_name["state"].enum_type = _ACTORTABLEDATA_ACTORSTATE
+_ACTORTABLEDATA.fields_by_name[
+    "address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_ACTORTABLEDATA.fields_by_name[
+    "owner_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_ACTORTABLEDATA.fields_by_name[
+    "task_spec"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
 _ACTORTABLEDATA_ACTORSTATE.containing_type = _ACTORTABLEDATA
 _PROFILETABLEDATA_PROFILEEVENT.containing_type = _PROFILETABLEDATA
-_PROFILETABLEDATA.fields_by_name['profile_events'].message_type = _PROFILETABLEDATA_PROFILEEVENT
-_GCSNODEINFO.fields_by_name['state'].enum_type = _GCSNODEINFO_GCSNODESTATE
+_PROFILETABLEDATA.fields_by_name[
+    "profile_events"
+].message_type = _PROFILETABLEDATA_PROFILEEVENT
+_GCSNODEINFO.fields_by_name["state"].enum_type = _GCSNODEINFO_GCSNODESTATE
 _GCSNODEINFO_GCSNODESTATE.containing_type = _GCSNODEINFO
-_HEARTBEATBATCHTABLEDATA.fields_by_name['batch'].message_type = _HEARTBEATTABLEDATA
-_WORKERFAILUREDATA.fields_by_name['worker_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_RESOURCEMAP_ITEMSENTRY.fields_by_name['value'].message_type = _RESOURCETABLEDATA
+_HEARTBEATBATCHTABLEDATA.fields_by_name["batch"].message_type = _HEARTBEATTABLEDATA
+_WORKERFAILUREDATA.fields_by_name[
+    "worker_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_RESOURCEMAP_ITEMSENTRY.fields_by_name["value"].message_type = _RESOURCETABLEDATA
 _RESOURCEMAP_ITEMSENTRY.containing_type = _RESOURCEMAP
-_RESOURCEMAP.fields_by_name['items'].message_type = _RESOURCEMAP_ITEMSENTRY
-_OBJECTTABLEDATALIST.fields_by_name['items'].message_type = _OBJECTTABLEDATA
-_OBJECTLOCATIONINFO.fields_by_name['locations'].message_type = _OBJECTTABLEDATA
-_OBJECTLOCATIONCHANGE.fields_by_name['data'].message_type = _OBJECTTABLEDATA
+_RESOURCEMAP.fields_by_name["items"].message_type = _RESOURCEMAP_ITEMSENTRY
+_OBJECTTABLEDATALIST.fields_by_name["items"].message_type = _OBJECTTABLEDATA
+_OBJECTLOCATIONINFO.fields_by_name["locations"].message_type = _OBJECTTABLEDATA
+_OBJECTLOCATIONCHANGE.fields_by_name["data"].message_type = _OBJECTTABLEDATA
 _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY.containing_type = _NODERESOURCECHANGE
-_NODERESOURCECHANGE.fields_by_name['updated_resources'].message_type = _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY
-DESCRIPTOR.message_types_by_name['GcsEntry'] = _GCSENTRY
-DESCRIPTOR.message_types_by_name['ObjectTableData'] = _OBJECTTABLEDATA
-DESCRIPTOR.message_types_by_name['TaskReconstructionData'] = _TASKRECONSTRUCTIONDATA
-DESCRIPTOR.message_types_by_name['TaskTableData'] = _TASKTABLEDATA
-DESCRIPTOR.message_types_by_name['ActorTableData'] = _ACTORTABLEDATA
-DESCRIPTOR.message_types_by_name['ErrorTableData'] = _ERRORTABLEDATA
-DESCRIPTOR.message_types_by_name['ProfileTableData'] = _PROFILETABLEDATA
-DESCRIPTOR.message_types_by_name['ResourceTableData'] = _RESOURCETABLEDATA
-DESCRIPTOR.message_types_by_name['GcsNodeInfo'] = _GCSNODEINFO
-DESCRIPTOR.message_types_by_name['HeartbeatTableData'] = _HEARTBEATTABLEDATA
-DESCRIPTOR.message_types_by_name['HeartbeatBatchTableData'] = _HEARTBEATBATCHTABLEDATA
-DESCRIPTOR.message_types_by_name['TaskLeaseData'] = _TASKLEASEDATA
-DESCRIPTOR.message_types_by_name['JobTableData'] = _JOBTABLEDATA
-DESCRIPTOR.message_types_by_name['ActorCheckpointData'] = _ACTORCHECKPOINTDATA
-DESCRIPTOR.message_types_by_name['ActorCheckpointIdData'] = _ACTORCHECKPOINTIDDATA
-DESCRIPTOR.message_types_by_name['WorkerFailureData'] = _WORKERFAILUREDATA
-DESCRIPTOR.message_types_by_name['ResourceMap'] = _RESOURCEMAP
-DESCRIPTOR.message_types_by_name['ObjectTableDataList'] = _OBJECTTABLEDATALIST
-DESCRIPTOR.message_types_by_name['ObjectLocationInfo'] = _OBJECTLOCATIONINFO
-DESCRIPTOR.message_types_by_name['ObjectLocationChange'] = _OBJECTLOCATIONCHANGE
-DESCRIPTOR.message_types_by_name['NodeResourceChange'] = _NODERESOURCECHANGE
-DESCRIPTOR.message_types_by_name['PubSubMessage'] = _PUBSUBMESSAGE
-DESCRIPTOR.enum_types_by_name['TablePrefix'] = _TABLEPREFIX
-DESCRIPTOR.enum_types_by_name['TablePubsub'] = _TABLEPUBSUB
-DESCRIPTOR.enum_types_by_name['GcsChangeMode'] = _GCSCHANGEMODE
-DESCRIPTOR.enum_types_by_name['ErrorType'] = _ERRORTYPE
+_NODERESOURCECHANGE.fields_by_name[
+    "updated_resources"
+].message_type = _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY
+DESCRIPTOR.message_types_by_name["GcsEntry"] = _GCSENTRY
+DESCRIPTOR.message_types_by_name["ObjectTableData"] = _OBJECTTABLEDATA
+DESCRIPTOR.message_types_by_name["TaskReconstructionData"] = _TASKRECONSTRUCTIONDATA
+DESCRIPTOR.message_types_by_name["TaskTableData"] = _TASKTABLEDATA
+DESCRIPTOR.message_types_by_name["ActorTableData"] = _ACTORTABLEDATA
+DESCRIPTOR.message_types_by_name["ErrorTableData"] = _ERRORTABLEDATA
+DESCRIPTOR.message_types_by_name["ProfileTableData"] = _PROFILETABLEDATA
+DESCRIPTOR.message_types_by_name["ResourceTableData"] = _RESOURCETABLEDATA
+DESCRIPTOR.message_types_by_name["GcsNodeInfo"] = _GCSNODEINFO
+DESCRIPTOR.message_types_by_name["HeartbeatTableData"] = _HEARTBEATTABLEDATA
+DESCRIPTOR.message_types_by_name["HeartbeatBatchTableData"] = _HEARTBEATBATCHTABLEDATA
+DESCRIPTOR.message_types_by_name["TaskLeaseData"] = _TASKLEASEDATA
+DESCRIPTOR.message_types_by_name["JobTableData"] = _JOBTABLEDATA
+DESCRIPTOR.message_types_by_name["ActorCheckpointData"] = _ACTORCHECKPOINTDATA
+DESCRIPTOR.message_types_by_name["ActorCheckpointIdData"] = _ACTORCHECKPOINTIDDATA
+DESCRIPTOR.message_types_by_name["WorkerFailureData"] = _WORKERFAILUREDATA
+DESCRIPTOR.message_types_by_name["ResourceMap"] = _RESOURCEMAP
+DESCRIPTOR.message_types_by_name["ObjectTableDataList"] = _OBJECTTABLEDATALIST
+DESCRIPTOR.message_types_by_name["ObjectLocationInfo"] = _OBJECTLOCATIONINFO
+DESCRIPTOR.message_types_by_name["ObjectLocationChange"] = _OBJECTLOCATIONCHANGE
+DESCRIPTOR.message_types_by_name["NodeResourceChange"] = _NODERESOURCECHANGE
+DESCRIPTOR.message_types_by_name["PubSubMessage"] = _PUBSUBMESSAGE
+DESCRIPTOR.enum_types_by_name["TablePrefix"] = _TABLEPREFIX
+DESCRIPTOR.enum_types_by_name["TablePubsub"] = _TABLEPUBSUB
+DESCRIPTOR.enum_types_by_name["GcsChangeMode"] = _GCSCHANGEMODE
+DESCRIPTOR.enum_types_by_name["ErrorType"] = _ERRORTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-GcsEntry = _reflection.GeneratedProtocolMessageType('GcsEntry', (_message.Message,), {
-  'DESCRIPTOR' : _GCSENTRY,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GcsEntry)
-  })
+GcsEntry = _reflection.GeneratedProtocolMessageType(
+    "GcsEntry",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GCSENTRY,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GcsEntry)
+    },
+)
 _sym_db.RegisterMessage(GcsEntry)
 
-ObjectTableData = _reflection.GeneratedProtocolMessageType('ObjectTableData', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectTableData)
-  })
+ObjectTableData = _reflection.GeneratedProtocolMessageType(
+    "ObjectTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectTableData)
+    },
+)
 _sym_db.RegisterMessage(ObjectTableData)
 
-TaskReconstructionData = _reflection.GeneratedProtocolMessageType('TaskReconstructionData', (_message.Message,), {
-  'DESCRIPTOR' : _TASKRECONSTRUCTIONDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.TaskReconstructionData)
-  })
+TaskReconstructionData = _reflection.GeneratedProtocolMessageType(
+    "TaskReconstructionData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TASKRECONSTRUCTIONDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.TaskReconstructionData)
+    },
+)
 _sym_db.RegisterMessage(TaskReconstructionData)
 
-TaskTableData = _reflection.GeneratedProtocolMessageType('TaskTableData', (_message.Message,), {
-  'DESCRIPTOR' : _TASKTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.TaskTableData)
-  })
+TaskTableData = _reflection.GeneratedProtocolMessageType(
+    "TaskTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TASKTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.TaskTableData)
+    },
+)
 _sym_db.RegisterMessage(TaskTableData)
 
-ActorTableData = _reflection.GeneratedProtocolMessageType('ActorTableData', (_message.Message,), {
-  'DESCRIPTOR' : _ACTORTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ActorTableData)
-  })
+ActorTableData = _reflection.GeneratedProtocolMessageType(
+    "ActorTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACTORTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ActorTableData)
+    },
+)
 _sym_db.RegisterMessage(ActorTableData)
 
-ErrorTableData = _reflection.GeneratedProtocolMessageType('ErrorTableData', (_message.Message,), {
-  'DESCRIPTOR' : _ERRORTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ErrorTableData)
-  })
+ErrorTableData = _reflection.GeneratedProtocolMessageType(
+    "ErrorTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERRORTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ErrorTableData)
+    },
+)
 _sym_db.RegisterMessage(ErrorTableData)
 
-ProfileTableData = _reflection.GeneratedProtocolMessageType('ProfileTableData', (_message.Message,), {
-
-  'ProfileEvent' : _reflection.GeneratedProtocolMessageType('ProfileEvent', (_message.Message,), {
-    'DESCRIPTOR' : _PROFILETABLEDATA_PROFILEEVENT,
-    '__module__' : 'src.ray.protobuf.gcs_pb2'
-    # @@protoc_insertion_point(class_scope:ray.rpc.ProfileTableData.ProfileEvent)
-    })
-  ,
-  'DESCRIPTOR' : _PROFILETABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ProfileTableData)
-  })
+ProfileTableData = _reflection.GeneratedProtocolMessageType(
+    "ProfileTableData",
+    (_message.Message,),
+    {
+        "ProfileEvent": _reflection.GeneratedProtocolMessageType(
+            "ProfileEvent",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _PROFILETABLEDATA_PROFILEEVENT,
+                "__module__": "src.ray.protobuf.gcs_pb2"
+                # @@protoc_insertion_point(class_scope:ray.rpc.ProfileTableData.ProfileEvent)
+            },
+        ),
+        "DESCRIPTOR": _PROFILETABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ProfileTableData)
+    },
+)
 _sym_db.RegisterMessage(ProfileTableData)
 _sym_db.RegisterMessage(ProfileTableData.ProfileEvent)
 
-ResourceTableData = _reflection.GeneratedProtocolMessageType('ResourceTableData', (_message.Message,), {
-  'DESCRIPTOR' : _RESOURCETABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ResourceTableData)
-  })
+ResourceTableData = _reflection.GeneratedProtocolMessageType(
+    "ResourceTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RESOURCETABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ResourceTableData)
+    },
+)
 _sym_db.RegisterMessage(ResourceTableData)
 
-GcsNodeInfo = _reflection.GeneratedProtocolMessageType('GcsNodeInfo', (_message.Message,), {
-  'DESCRIPTOR' : _GCSNODEINFO,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GcsNodeInfo)
-  })
+GcsNodeInfo = _reflection.GeneratedProtocolMessageType(
+    "GcsNodeInfo",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GCSNODEINFO,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GcsNodeInfo)
+    },
+)
 _sym_db.RegisterMessage(GcsNodeInfo)
 
-HeartbeatTableData = _reflection.GeneratedProtocolMessageType('HeartbeatTableData', (_message.Message,), {
-  'DESCRIPTOR' : _HEARTBEATTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.HeartbeatTableData)
-  })
+HeartbeatTableData = _reflection.GeneratedProtocolMessageType(
+    "HeartbeatTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _HEARTBEATTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.HeartbeatTableData)
+    },
+)
 _sym_db.RegisterMessage(HeartbeatTableData)
 
-HeartbeatBatchTableData = _reflection.GeneratedProtocolMessageType('HeartbeatBatchTableData', (_message.Message,), {
-  'DESCRIPTOR' : _HEARTBEATBATCHTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.HeartbeatBatchTableData)
-  })
+HeartbeatBatchTableData = _reflection.GeneratedProtocolMessageType(
+    "HeartbeatBatchTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _HEARTBEATBATCHTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.HeartbeatBatchTableData)
+    },
+)
 _sym_db.RegisterMessage(HeartbeatBatchTableData)
 
-TaskLeaseData = _reflection.GeneratedProtocolMessageType('TaskLeaseData', (_message.Message,), {
-  'DESCRIPTOR' : _TASKLEASEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.TaskLeaseData)
-  })
+TaskLeaseData = _reflection.GeneratedProtocolMessageType(
+    "TaskLeaseData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TASKLEASEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.TaskLeaseData)
+    },
+)
 _sym_db.RegisterMessage(TaskLeaseData)
 
-JobTableData = _reflection.GeneratedProtocolMessageType('JobTableData', (_message.Message,), {
-  'DESCRIPTOR' : _JOBTABLEDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.JobTableData)
-  })
+JobTableData = _reflection.GeneratedProtocolMessageType(
+    "JobTableData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _JOBTABLEDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.JobTableData)
+    },
+)
 _sym_db.RegisterMessage(JobTableData)
 
-ActorCheckpointData = _reflection.GeneratedProtocolMessageType('ActorCheckpointData', (_message.Message,), {
-  'DESCRIPTOR' : _ACTORCHECKPOINTDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ActorCheckpointData)
-  })
+ActorCheckpointData = _reflection.GeneratedProtocolMessageType(
+    "ActorCheckpointData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACTORCHECKPOINTDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ActorCheckpointData)
+    },
+)
 _sym_db.RegisterMessage(ActorCheckpointData)
 
-ActorCheckpointIdData = _reflection.GeneratedProtocolMessageType('ActorCheckpointIdData', (_message.Message,), {
-  'DESCRIPTOR' : _ACTORCHECKPOINTIDDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ActorCheckpointIdData)
-  })
+ActorCheckpointIdData = _reflection.GeneratedProtocolMessageType(
+    "ActorCheckpointIdData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACTORCHECKPOINTIDDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ActorCheckpointIdData)
+    },
+)
 _sym_db.RegisterMessage(ActorCheckpointIdData)
 
-WorkerFailureData = _reflection.GeneratedProtocolMessageType('WorkerFailureData', (_message.Message,), {
-  'DESCRIPTOR' : _WORKERFAILUREDATA,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WorkerFailureData)
-  })
+WorkerFailureData = _reflection.GeneratedProtocolMessageType(
+    "WorkerFailureData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WORKERFAILUREDATA,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WorkerFailureData)
+    },
+)
 _sym_db.RegisterMessage(WorkerFailureData)
 
-ResourceMap = _reflection.GeneratedProtocolMessageType('ResourceMap', (_message.Message,), {
-
-  'ItemsEntry' : _reflection.GeneratedProtocolMessageType('ItemsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _RESOURCEMAP_ITEMSENTRY,
-    '__module__' : 'src.ray.protobuf.gcs_pb2'
-    # @@protoc_insertion_point(class_scope:ray.rpc.ResourceMap.ItemsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _RESOURCEMAP,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ResourceMap)
-  })
+ResourceMap = _reflection.GeneratedProtocolMessageType(
+    "ResourceMap",
+    (_message.Message,),
+    {
+        "ItemsEntry": _reflection.GeneratedProtocolMessageType(
+            "ItemsEntry",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _RESOURCEMAP_ITEMSENTRY,
+                "__module__": "src.ray.protobuf.gcs_pb2"
+                # @@protoc_insertion_point(class_scope:ray.rpc.ResourceMap.ItemsEntry)
+            },
+        ),
+        "DESCRIPTOR": _RESOURCEMAP,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ResourceMap)
+    },
+)
 _sym_db.RegisterMessage(ResourceMap)
 _sym_db.RegisterMessage(ResourceMap.ItemsEntry)
 
-ObjectTableDataList = _reflection.GeneratedProtocolMessageType('ObjectTableDataList', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTTABLEDATALIST,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectTableDataList)
-  })
+ObjectTableDataList = _reflection.GeneratedProtocolMessageType(
+    "ObjectTableDataList",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTTABLEDATALIST,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectTableDataList)
+    },
+)
 _sym_db.RegisterMessage(ObjectTableDataList)
 
-ObjectLocationInfo = _reflection.GeneratedProtocolMessageType('ObjectLocationInfo', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTLOCATIONINFO,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectLocationInfo)
-  })
+ObjectLocationInfo = _reflection.GeneratedProtocolMessageType(
+    "ObjectLocationInfo",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTLOCATIONINFO,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectLocationInfo)
+    },
+)
 _sym_db.RegisterMessage(ObjectLocationInfo)
 
-ObjectLocationChange = _reflection.GeneratedProtocolMessageType('ObjectLocationChange', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTLOCATIONCHANGE,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectLocationChange)
-  })
+ObjectLocationChange = _reflection.GeneratedProtocolMessageType(
+    "ObjectLocationChange",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTLOCATIONCHANGE,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectLocationChange)
+    },
+)
 _sym_db.RegisterMessage(ObjectLocationChange)
 
-NodeResourceChange = _reflection.GeneratedProtocolMessageType('NodeResourceChange', (_message.Message,), {
-
-  'UpdatedResourcesEntry' : _reflection.GeneratedProtocolMessageType('UpdatedResourcesEntry', (_message.Message,), {
-    'DESCRIPTOR' : _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY,
-    '__module__' : 'src.ray.protobuf.gcs_pb2'
-    # @@protoc_insertion_point(class_scope:ray.rpc.NodeResourceChange.UpdatedResourcesEntry)
-    })
-  ,
-  'DESCRIPTOR' : _NODERESOURCECHANGE,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.NodeResourceChange)
-  })
+NodeResourceChange = _reflection.GeneratedProtocolMessageType(
+    "NodeResourceChange",
+    (_message.Message,),
+    {
+        "UpdatedResourcesEntry": _reflection.GeneratedProtocolMessageType(
+            "UpdatedResourcesEntry",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _NODERESOURCECHANGE_UPDATEDRESOURCESENTRY,
+                "__module__": "src.ray.protobuf.gcs_pb2"
+                # @@protoc_insertion_point(class_scope:ray.rpc.NodeResourceChange.UpdatedResourcesEntry)
+            },
+        ),
+        "DESCRIPTOR": _NODERESOURCECHANGE,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.NodeResourceChange)
+    },
+)
 _sym_db.RegisterMessage(NodeResourceChange)
 _sym_db.RegisterMessage(NodeResourceChange.UpdatedResourcesEntry)
 
-PubSubMessage = _reflection.GeneratedProtocolMessageType('PubSubMessage', (_message.Message,), {
-  'DESCRIPTOR' : _PUBSUBMESSAGE,
-  '__module__' : 'src.ray.protobuf.gcs_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PubSubMessage)
-  })
+PubSubMessage = _reflection.GeneratedProtocolMessageType(
+    "PubSubMessage",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PUBSUBMESSAGE,
+        "__module__": "src.ray.protobuf.gcs_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PubSubMessage)
+    },
+)
 _sym_db.RegisterMessage(PubSubMessage)
 
 

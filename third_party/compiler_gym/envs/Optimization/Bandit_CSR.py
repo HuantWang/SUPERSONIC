@@ -13,6 +13,7 @@ import json
 import sqlite3
 from third_party import rm_port
 
+
 class BanditCSREnv(gym.Env):
     """
                Bandit environment base to allow agents to interact with the class n-armed bandit
@@ -33,7 +34,9 @@ class BanditCSREnv(gym.Env):
         self.all_policy, self.n_bandits = policy[0], policy[1]
         self.dataset = data
         self.action_space = spaces.Discrete(self.n_bandits)
-        self.observation_space = spaces.box.Box(-1.0, 1.0, shape=(20,), dtype=np.float64)  #
+        self.observation_space = spaces.box.Box(
+            -1.0, 1.0, shape=(20,), dtype=np.float64
+        )  #
         # self.observation_space = spaces.Discrete(1)
         self.num = 0
         self.obsv_size = 20
@@ -47,10 +50,11 @@ class BanditCSREnv(gym.Env):
 
     def get_observation(self, action):
         if len(self.actions) < self.obsv_size:
-            self.observation = np.hstack((np.array(self.actions), np.zeros(self.obsv_size - len(self.actions))))[
-                               :self.obsv_size]
+            self.observation = np.hstack(
+                (np.array(self.actions), np.zeros(self.obsv_size - len(self.actions)))
+            )[: self.obsv_size]
         else:
-            self.observation = self.actions[-self.obsv_size:]
+            self.observation = self.actions[-self.obsv_size :]
         return self.observation
 
     def generate_reward(self, action):
@@ -69,16 +73,15 @@ class BanditCSREnv(gym.Env):
 
         start_engine.CSR(exist_policy).main()
 
-
         # load loss from json
-        
+
         for relpath, dirs, files in os.walk(DocSave):
             for _ in files:
                 if _.split(".")[-1] == "json":
                     full_path = os.path.join(relpath, _)
-        with open(full_path, "r",encoding='utf-8') as f:
+        with open(full_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        reward = data['checkpoints'][0]['last_result']['episode_reward_max']
+        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
         # data = [json.loads(line) for line in open(full_path, "r")]
         # reward_mean = data[-1]["episode_reward_mean"]
         # reward_min = data[-1]["episode_reward_max"]
@@ -95,7 +98,7 @@ class BanditCSREnv(gym.Env):
         # print(rootpath)
         # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-        conn = sqlite3.connect('../../SuperSonic/SQL/supersonic.db')
+        conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
                                                               VALUES (?, ?, ?, ?)"
@@ -160,7 +163,7 @@ class BanditCSREnv(gym.Env):
         self.num = self.num + 1
         self.actions.append(action)
         reward = self.generate_reward(action)
-        #reward = self.generate_reward(action)
+        # reward = self.generate_reward(action)
         obs = self.get_observation(action)
         # print(obs)
         print("action", action)
@@ -178,9 +181,8 @@ class BanditCSREnv(gym.Env):
     def reset(self):
         return np.random.rand(20)  #
 
-    def render(self, mode='human', close=False):
+    def render(self, mode="human", close=False):
         pass
 
     def close(self):
         return None
-

@@ -10,27 +10,29 @@ tf = try_import_tf()
 
 
 @DeveloperAPI
-def build_tf_policy(name,
-                    *,
-                    loss_fn,
-                    get_default_config=None,
-                    postprocess_fn=None,
-                    stats_fn=None,
-                    optimizer_fn=None,
-                    gradients_fn=None,
-                    apply_gradients_fn=None,
-                    grad_stats_fn=None,
-                    extra_action_fetches_fn=None,
-                    extra_learn_fetches_fn=None,
-                    before_init=None,
-                    before_loss_init=None,
-                    after_init=None,
-                    make_model=None,
-                    action_sampler_fn=None,
-                    action_distribution_fn=None,
-                    mixins=None,
-                    get_batch_divisibility_req=None,
-                    obs_include_prev_action_reward=True):
+def build_tf_policy(
+    name,
+    *,
+    loss_fn,
+    get_default_config=None,
+    postprocess_fn=None,
+    stats_fn=None,
+    optimizer_fn=None,
+    gradients_fn=None,
+    apply_gradients_fn=None,
+    grad_stats_fn=None,
+    extra_action_fetches_fn=None,
+    extra_learn_fetches_fn=None,
+    before_init=None,
+    before_loss_init=None,
+    after_init=None,
+    make_model=None,
+    action_sampler_fn=None,
+    action_distribution_fn=None,
+    mixins=None,
+    get_batch_divisibility_req=None,
+    obs_include_prev_action_reward=True
+):
     """Helper function for creating a dynamic tf policy at runtime.
 
     Functions will be run in this order to initialize the policy:
@@ -104,20 +106,21 @@ def build_tf_policy(name,
     base = add_mixins(DynamicTFPolicy, mixins)
 
     class policy_cls(base):
-        def __init__(self,
-                     obs_space,
-                     action_space,
-                     config,
-                     existing_model=None,
-                     existing_inputs=None):
+        def __init__(
+            self,
+            obs_space,
+            action_space,
+            config,
+            existing_model=None,
+            existing_inputs=None,
+        ):
             if get_default_config:
                 config = dict(get_default_config(), **config)
 
             if before_init:
                 before_init(self, obs_space, action_space, config)
 
-            def before_loss_init_wrapper(policy, obs_space, action_space,
-                                         config):
+            def before_loss_init_wrapper(policy, obs_space, action_space, config):
                 if before_loss_init:
                     before_loss_init(policy, obs_space, action_space, config)
                 if extra_action_fetches_fn is None:
@@ -140,19 +143,18 @@ def build_tf_policy(name,
                 existing_model=existing_model,
                 existing_inputs=existing_inputs,
                 get_batch_divisibility_req=get_batch_divisibility_req,
-                obs_include_prev_action_reward=obs_include_prev_action_reward)
+                obs_include_prev_action_reward=obs_include_prev_action_reward,
+            )
 
             if after_init:
                 after_init(self, obs_space, action_space, config)
 
         @override(Policy)
-        def postprocess_trajectory(self,
-                                   sample_batch,
-                                   other_agent_batches=None,
-                                   episode=None):
+        def postprocess_trajectory(
+            self, sample_batch, other_agent_batches=None, episode=None
+        ):
             if postprocess_fn:
-                return postprocess_fn(self, sample_batch, other_agent_batches,
-                                      episode)
+                return postprocess_fn(self, sample_batch, other_agent_batches, episode)
             return sample_batch
 
         @override(TFPolicy)
@@ -179,16 +181,14 @@ def build_tf_policy(name,
         @override(TFPolicy)
         def extra_compute_action_fetches(self):
             return dict(
-                base.extra_compute_action_fetches(self),
-                **self._extra_action_fetches)
+                base.extra_compute_action_fetches(self), **self._extra_action_fetches
+            )
 
         @override(TFPolicy)
         def extra_compute_grad_fetches(self):
             if extra_learn_fetches_fn:
                 # Auto-add empty learner stats dict if needed.
-                return dict({
-                    LEARNER_STATS_KEY: {}
-                }, **extra_learn_fetches_fn(self))
+                return dict({LEARNER_STATS_KEY: {}}, **extra_learn_fetches_fn(self))
             else:
                 return base.extra_compute_grad_fetches(self)
 

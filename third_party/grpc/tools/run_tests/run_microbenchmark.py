@@ -25,25 +25,27 @@ import python_utils.start_port_server as start_port_server
 
 sys.path.append(
     os.path.join(
-        os.path.dirname(sys.argv[0]), '..', 'profiling', 'microbenchmarks',
-        'bm_diff'))
+        os.path.dirname(sys.argv[0]), "..", "profiling", "microbenchmarks", "bm_diff"
+    )
+)
 import bm_constants
 
-flamegraph_dir = os.path.join(os.path.expanduser('~'), 'FlameGraph')
+flamegraph_dir = os.path.join(os.path.expanduser("~"), "FlameGraph")
 
-os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
-if not os.path.exists('reports'):
-    os.makedirs('reports')
+os.chdir(os.path.join(os.path.dirname(sys.argv[0]), "../.."))
+if not os.path.exists("reports"):
+    os.makedirs("reports")
 
 start_port_server.start_port_server()
 
 
 def fnize(s):
-    out = ''
+    out = ""
     for c in s:
-        if c in '<>, /':
-            if len(out) and out[-1] == '_': continue
-            out += '_'
+        if c in "<>, /":
+            if len(out) and out[-1] == "_":
+                continue
+            out += "_"
         else:
             out += c
     return out
@@ -66,8 +68,10 @@ def heading(name):
 
 def link(txt, tgt):
     global index_html
-    index_html += "<p><a href=\"%s\">%s</a></p>\n" % (
-        cgi.escape(tgt, quote=True), cgi.escape(txt))
+    index_html += '<p><a href="%s">%s</a></p>\n' % (
+        cgi.escape(tgt, quote=True),
+        cgi.escape(txt),
+    )
 
 
 def text(txt):
@@ -81,35 +85,42 @@ def collect_latency(bm_name, args):
     profile_analysis = []
     cleanup = []
 
-    heading('Latency Profiles: %s' % bm_name)
-    subprocess.check_call([
-        'make', bm_name, 'CONFIG=basicprof', '-j',
-        '%d' % multiprocessing.cpu_count()
-    ])
+    heading("Latency Profiles: %s" % bm_name)
+    subprocess.check_call(
+        ["make", bm_name, "CONFIG=basicprof", "-j", "%d" % multiprocessing.cpu_count()]
+    )
     for line in subprocess.check_output(
-        ['bins/basicprof/%s' % bm_name, '--benchmark_list_tests']).splitlines():
-        link(line, '%s.txt' % fnize(line))
+        ["bins/basicprof/%s" % bm_name, "--benchmark_list_tests"]
+    ).splitlines():
+        link(line, "%s.txt" % fnize(line))
         benchmarks.append(
             jobset.JobSpec(
                 [
-                    'bins/basicprof/%s' % bm_name,
-                    '--benchmark_filter=^%s$' % line,
-                    '--benchmark_min_time=0.05'
+                    "bins/basicprof/%s" % bm_name,
+                    "--benchmark_filter=^%s$" % line,
+                    "--benchmark_min_time=0.05",
                 ],
-                environ={'LATENCY_TRACE': '%s.trace' % fnize(line)},
-                shortname='profile-%s' % fnize(line)))
+                environ={"LATENCY_TRACE": "%s.trace" % fnize(line)},
+                shortname="profile-%s" % fnize(line),
+            )
+        )
         profile_analysis.append(
             jobset.JobSpec(
                 [
                     sys.executable,
-                    'tools/profiling/latency_profile/profile_analyzer.py',
-                    '--source',
-                    '%s.trace' % fnize(line), '--fmt', 'simple', '--out',
-                    'reports/%s.txt' % fnize(line)
+                    "tools/profiling/latency_profile/profile_analyzer.py",
+                    "--source",
+                    "%s.trace" % fnize(line),
+                    "--fmt",
+                    "simple",
+                    "--out",
+                    "reports/%s.txt" % fnize(line),
                 ],
                 timeout_seconds=20 * 60,
-                shortname='analyze-%s' % fnize(line)))
-        cleanup.append(jobset.JobSpec(['rm', '%s.trace' % fnize(line)]))
+                shortname="analyze-%s" % fnize(line),
+            )
+        )
+        cleanup.append(jobset.JobSpec(["rm", "%s.trace" % fnize(line)]))
         # periodically flush out the list of jobs: profile_analysis jobs at least
         # consume upwards of five gigabytes of ram in some cases, and so analysing
         # hundreds of them at once is impractical -- but we want at least some
@@ -117,9 +128,7 @@ def collect_latency(bm_name, args):
         if len(benchmarks) >= min(16, multiprocessing.cpu_count()):
             # run up to half the cpu count: each benchmark can use up to two cores
             # (one for the microbenchmark, one for the data flush)
-            jobset.run(
-                benchmarks, maxjobs=max(1,
-                                        multiprocessing.cpu_count() / 2))
+            jobset.run(benchmarks, maxjobs=max(1, multiprocessing.cpu_count() / 2))
             jobset.run(profile_analysis, maxjobs=multiprocessing.cpu_count())
             jobset.run(cleanup, maxjobs=multiprocessing.cpu_count())
             benchmarks = []
@@ -134,39 +143,47 @@ def collect_latency(bm_name, args):
 
 def collect_perf(bm_name, args):
     """generate flamegraphs"""
-    heading('Flamegraphs: %s' % bm_name)
-    subprocess.check_call([
-        'make', bm_name, 'CONFIG=mutrace', '-j',
-        '%d' % multiprocessing.cpu_count()
-    ])
+    heading("Flamegraphs: %s" % bm_name)
+    subprocess.check_call(
+        ["make", bm_name, "CONFIG=mutrace", "-j", "%d" % multiprocessing.cpu_count()]
+    )
     benchmarks = []
     profile_analysis = []
     cleanup = []
     for line in subprocess.check_output(
-        ['bins/mutrace/%s' % bm_name, '--benchmark_list_tests']).splitlines():
-        link(line, '%s.svg' % fnize(line))
+        ["bins/mutrace/%s" % bm_name, "--benchmark_list_tests"]
+    ).splitlines():
+        link(line, "%s.svg" % fnize(line))
         benchmarks.append(
             jobset.JobSpec(
                 [
-                    'perf', 'record', '-o',
-                    '%s-perf.data' % fnize(line), '-g', '-F', '997',
-                    'bins/mutrace/%s' % bm_name,
-                    '--benchmark_filter=^%s$' % line, '--benchmark_min_time=10'
+                    "perf",
+                    "record",
+                    "-o",
+                    "%s-perf.data" % fnize(line),
+                    "-g",
+                    "-F",
+                    "997",
+                    "bins/mutrace/%s" % bm_name,
+                    "--benchmark_filter=^%s$" % line,
+                    "--benchmark_min_time=10",
                 ],
-                shortname='perf-%s' % fnize(line)))
+                shortname="perf-%s" % fnize(line),
+            )
+        )
         profile_analysis.append(
             jobset.JobSpec(
-                [
-                    'tools/run_tests/performance/process_local_perf_flamegraphs.sh'
-                ],
+                ["tools/run_tests/performance/process_local_perf_flamegraphs.sh"],
                 environ={
-                    'PERF_BASE_NAME': fnize(line),
-                    'OUTPUT_DIR': 'reports',
-                    'OUTPUT_FILENAME': fnize(line),
+                    "PERF_BASE_NAME": fnize(line),
+                    "OUTPUT_DIR": "reports",
+                    "OUTPUT_FILENAME": fnize(line),
                 },
-                shortname='flame-%s' % fnize(line)))
-        cleanup.append(jobset.JobSpec(['rm', '%s-perf.data' % fnize(line)]))
-        cleanup.append(jobset.JobSpec(['rm', '%s-out.perf' % fnize(line)]))
+                shortname="flame-%s" % fnize(line),
+            )
+        )
+        cleanup.append(jobset.JobSpec(["rm", "%s-perf.data" % fnize(line)]))
+        cleanup.append(jobset.JobSpec(["rm", "%s-out.perf" % fnize(line)]))
         # periodically flush out the list of jobs: temporary space required for this
         # processing is large
         if len(benchmarks) >= 20:
@@ -186,73 +203,77 @@ def collect_perf(bm_name, args):
 
 
 def run_summary(bm_name, cfg, base_json_name):
-    subprocess.check_call([
-        'make', bm_name,
-        'CONFIG=%s' % cfg, '-j',
-        '%d' % multiprocessing.cpu_count()
-    ])
+    subprocess.check_call(
+        ["make", bm_name, "CONFIG=%s" % cfg, "-j", "%d" % multiprocessing.cpu_count()]
+    )
     cmd = [
-        'bins/%s/%s' % (cfg, bm_name),
-        '--benchmark_out=%s.%s.json' % (base_json_name, cfg),
-        '--benchmark_out_format=json'
+        "bins/%s/%s" % (cfg, bm_name),
+        "--benchmark_out=%s.%s.json" % (base_json_name, cfg),
+        "--benchmark_out_format=json",
     ]
     if args.summary_time is not None:
-        cmd += ['--benchmark_min_time=%d' % args.summary_time]
+        cmd += ["--benchmark_min_time=%d" % args.summary_time]
     return subprocess.check_output(cmd)
 
 
 def collect_summary(bm_name, args):
-    heading('Summary: %s [no counters]' % bm_name)
-    text(run_summary(bm_name, 'opt', bm_name))
-    heading('Summary: %s [with counters]' % bm_name)
-    text(run_summary(bm_name, 'counters', bm_name))
+    heading("Summary: %s [no counters]" % bm_name)
+    text(run_summary(bm_name, "opt", bm_name))
+    heading("Summary: %s [with counters]" % bm_name)
+    text(run_summary(bm_name, "counters", bm_name))
     if args.bigquery_upload:
-        with open('%s.csv' % bm_name, 'w') as f:
+        with open("%s.csv" % bm_name, "w") as f:
             f.write(
-                subprocess.check_output([
-                    'tools/profiling/microbenchmarks/bm2bq.py',
-                    '%s.counters.json' % bm_name,
-                    '%s.opt.json' % bm_name
-                ]))
-        subprocess.check_call([
-            'bq', 'load', 'microbenchmarks.microbenchmarks',
-            '%s.csv' % bm_name
-        ])
+                subprocess.check_output(
+                    [
+                        "tools/profiling/microbenchmarks/bm2bq.py",
+                        "%s.counters.json" % bm_name,
+                        "%s.opt.json" % bm_name,
+                    ]
+                )
+            )
+        subprocess.check_call(
+            ["bq", "load", "microbenchmarks.microbenchmarks", "%s.csv" % bm_name]
+        )
 
 
 collectors = {
-    'latency': collect_latency,
-    'perf': collect_perf,
-    'summary': collect_summary,
+    "latency": collect_latency,
+    "perf": collect_perf,
+    "summary": collect_summary,
 }
 
-argp = argparse.ArgumentParser(description='Collect data from microbenchmarks')
+argp = argparse.ArgumentParser(description="Collect data from microbenchmarks")
 argp.add_argument(
-    '-c',
-    '--collect',
+    "-c",
+    "--collect",
     choices=sorted(collectors.keys()),
-    nargs='*',
+    nargs="*",
     default=sorted(collectors.keys()),
-    help='Which collectors should be run against each benchmark')
+    help="Which collectors should be run against each benchmark",
+)
 argp.add_argument(
-    '-b',
-    '--benchmarks',
+    "-b",
+    "--benchmarks",
     choices=bm_constants._AVAILABLE_BENCHMARK_TESTS,
     default=bm_constants._AVAILABLE_BENCHMARK_TESTS,
-    nargs='+',
+    nargs="+",
     type=str,
-    help='Which microbenchmarks should be run')
+    help="Which microbenchmarks should be run",
+)
 argp.add_argument(
-    '--bigquery_upload',
+    "--bigquery_upload",
     default=False,
-    action='store_const',
+    action="store_const",
     const=True,
-    help='Upload results from summary collection to bigquery')
+    help="Upload results from summary collection to bigquery",
+)
 argp.add_argument(
-    '--summary_time',
+    "--summary_time",
     default=None,
     type=int,
-    help='Minimum time to run benchmarks for the summary collection')
+    help="Minimum time to run benchmarks for the summary collection",
+)
 args = argp.parse_args()
 
 try:
@@ -260,8 +281,8 @@ try:
         for bm_name in args.benchmarks:
             collectors[collect](bm_name, args)
 finally:
-    if not os.path.exists('reports'):
-        os.makedirs('reports')
+    if not os.path.exists("reports"):
+        os.makedirs("reports")
     index_html += "</body>\n</html>\n"
-    with open('reports/index.html', 'w') as f:
+    with open("reports/index.html", "w") as f:
         f.write(index_html)

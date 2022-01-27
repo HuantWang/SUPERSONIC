@@ -18,8 +18,9 @@ class BackendConfig:
         self.num_replicas = config_dict.pop("num_replicas", 1)
         self.max_batch_size = config_dict.pop("max_batch_size", None)
         if len(config_dict) != 0:
-            raise ValueError("Unknown options in backend config: {}".format(
-                list(config_dict.keys())))
+            raise ValueError(
+                "Unknown options in backend config: {}".format(list(config_dict.keys()))
+            )
 
         self._validate()
 
@@ -34,8 +35,9 @@ class BackendConfig:
             self.max_batch_size = config_dict.pop("max_batch_size")
 
         if len(config_dict) != 0:
-            raise ValueError("Unknown options in backend config: {}".format(
-                list(config_dict.keys())))
+            raise ValueError(
+                "Unknown options in backend config: {}".format(list(config_dict.keys()))
+            )
 
         self._validate()
 
@@ -56,12 +58,12 @@ class BackendConfig:
                     "max_batch_size is set in config but the function or "
                     "method does not accept batching. Please use "
                     "@serve.accept_batch to explicitly mark the function or "
-                    "method as batchable and takes in list as arguments.")
+                    "method as batchable and takes in list as arguments."
+                )
 
 
 class ReplicaConfig:
-    def __init__(self, func_or_class, *actor_init_args,
-                 ray_actor_options=None):
+    def __init__(self, func_or_class, *actor_init_args, ray_actor_options=None):
         self.func_or_class = func_or_class
         self.accepts_batches = _callable_accepts_batch(func_or_class)
         self.actor_init_args = list(actor_init_args)
@@ -76,57 +78,59 @@ class ReplicaConfig:
         # Validate that func_or_class is a function or class.
         if inspect.isfunction(self.func_or_class):
             if len(self.actor_init_args) != 0:
-                raise ValueError(
-                    "actor_init_args not supported for function backend.")
+                raise ValueError("actor_init_args not supported for function backend.")
         elif not inspect.isclass(self.func_or_class):
             raise TypeError(
                 "Backend must be a function or class, it is {}.".format(
-                    type(self.func_or_class)))
+                    type(self.func_or_class)
+                )
+            )
 
         if not isinstance(self.ray_actor_options, dict):
             raise TypeError("ray_actor_options must be a dictionary.")
         elif "detached" in self.ray_actor_options:
-            raise ValueError(
-                "Specifying detached in actor_init_args is not allowed.")
+            raise ValueError("Specifying detached in actor_init_args is not allowed.")
         elif "name" in self.ray_actor_options:
-            raise ValueError(
-                "Specifying name in actor_init_args is not allowed.")
+            raise ValueError("Specifying name in actor_init_args is not allowed.")
         elif "max_restarts" in self.ray_actor_options:
-            raise ValueError("Specifying max_restarts in "
-                             "actor_init_args is not allowed.")
+            raise ValueError(
+                "Specifying max_restarts in " "actor_init_args is not allowed."
+            )
         else:
             num_cpus = self.ray_actor_options.get("num_cpus", 0)
             if not isinstance(num_cpus, (int, float)):
                 raise TypeError(
-                    "num_cpus in ray_actor_options must be an int or a float.")
+                    "num_cpus in ray_actor_options must be an int or a float."
+                )
             elif num_cpus < 0:
                 raise ValueError("num_cpus in ray_actor_options must be >= 0.")
 
             num_gpus = self.ray_actor_options.get("num_gpus", 0)
             if not isinstance(num_gpus, (int, float)):
                 raise TypeError(
-                    "num_gpus in ray_actor_options must be an int or a float.")
+                    "num_gpus in ray_actor_options must be an int or a float."
+                )
             elif num_gpus < 0:
                 raise ValueError("num_gpus in ray_actor_options must be >= 0.")
 
             memory = self.ray_actor_options.get("memory", 0)
             if not isinstance(memory, (int, float)):
                 raise TypeError(
-                    "memory in ray_actor_options must be an int or a float.")
+                    "memory in ray_actor_options must be an int or a float."
+                )
             elif memory < 0:
                 raise ValueError("num_gpus in ray_actor_options must be >= 0.")
 
-            object_store_memory = self.ray_actor_options.get(
-                "object_store_memory", 0)
+            object_store_memory = self.ray_actor_options.get("object_store_memory", 0)
             if not isinstance(object_store_memory, (int, float)):
                 raise TypeError(
                     "object_store_memory in ray_actor_options must be "
-                    "an int or a float.")
+                    "an int or a float."
+                )
             elif object_store_memory < 0:
                 raise ValueError(
-                    "object_store_memory in ray_actor_options must be >= 0.")
+                    "object_store_memory in ray_actor_options must be >= 0."
+                )
 
-            if not isinstance(
-                    self.ray_actor_options.get("resources", {}), dict):
-                raise TypeError(
-                    "resources in ray_actor_options must be a dictionary.")
+            if not isinstance(self.ray_actor_options.get("resources", {}), dict):
+                raise TypeError("resources in ray_actor_options must be a dictionary.")

@@ -5,6 +5,7 @@ from ray.rllib.models.modelv2 import restore_original_dimensions
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.framework import try_import_torch
+
 # import torchvision
 torch, nn = try_import_torch()
 
@@ -33,7 +34,7 @@ class ActorCriticModel(TorchModelV2, nn.Module, ABC):
 
         self._value_out = None
 
-    def simple_batch_norm_1d(self,x, gamma, beta):
+    def simple_batch_norm_1d(self, x, gamma, beta):
         eps = 1e-5
         x_mean = torch.mean(x, dim=0, keepdim=True)  # 保留维度进行 broadcast
         x_var = torch.mean((x - x_mean) ** 2, dim=0, keepdim=True)
@@ -42,7 +43,6 @@ class ActorCriticModel(TorchModelV2, nn.Module, ABC):
 
     def forward(self, input_dict, state, seq_lens):
         x = input_dict["obs"]
-
 
         ######This is a fix
         gamma = torch.ones(x.shape[1])

@@ -81,7 +81,8 @@ def _try_to_compute_deterministic_class_id(cls, depth=5):
     # same class definition being exported many many times.
     logger.warning(
         "WARNING: Could not produce a deterministic class ID for class "
-        "{}".format(cls))
+        "{}".format(cls)
+    )
     return hashlib.sha1(new_class_id).digest()
 
 
@@ -108,12 +109,14 @@ class SerializationContext:
             context = ray.worker.global_worker.get_serialization_context()
             outer_id = context.get_outer_object_id()
             return ray.actor.ActorHandle._deserialization_helper(
-                serialized_obj, outer_id)
+                serialized_obj, outer_id
+            )
 
         self._register_cloudpickle_serializer(
             ray.actor.ActorHandle,
             custom_serializer=actor_handle_serializer,
-            custom_deserializer=actor_handle_deserializer)
+            custom_deserializer=actor_handle_deserializer,
+        )
 
         def id_serializer(obj):
             return obj.__reduce__()
@@ -125,8 +128,11 @@ class SerializationContext:
             self.add_contained_object_id(obj)
             worker = ray.worker.global_worker
             worker.check_connected()
-            obj, owner_id, owner_address = (
-                worker.core_worker.serialize_and_promote_object_id(obj))
+            (
+                obj,
+                owner_id,
+                owner_address,
+            ) = worker.core_worker.serialize_and_promote_object_id(obj)
             obj = id_serializer(obj)
             owner_id = id_serializer(owner_id) if owner_id else owner_id
             return obj, owner_id, owner_address
@@ -153,21 +159,25 @@ class SerializationContext:
                 if outer_id is None:
                     outer_id = ray.ObjectID.nil()
                 worker.core_worker.deserialize_and_register_object_id(
-                    obj_id[1][0], outer_id, owner_id[1][0], owner_address)
+                    obj_id[1][0], outer_id, owner_id[1][0], owner_address
+                )
             return deserialized_object_id
 
         for id_type in ray._raylet._ID_TYPES:
             if id_type == ray._raylet.ObjectID:
                 self._register_cloudpickle_serializer(
-                    id_type, object_id_serializer, object_id_deserializer)
+                    id_type, object_id_serializer, object_id_deserializer
+                )
             else:
-                self._register_cloudpickle_serializer(id_type, id_serializer,
-                                                      id_deserializer)
+                self._register_cloudpickle_serializer(
+                    id_type, id_serializer, id_deserializer
+                )
 
-    def _register_cloudpickle_serializer(self, cls, custom_serializer,
-                                         custom_deserializer):
+    def _register_cloudpickle_serializer(
+        self, cls, custom_serializer, custom_deserializer
+    ):
         def _CloudPicklerReducer(obj):
-            return custom_deserializer, (custom_serializer(obj), )
+            return custom_deserializer, (custom_serializer(obj),)
 
         # construct a reducer
         pickle.CloudPickler.dispatch[cls] = _CloudPicklerReducer
@@ -209,8 +219,7 @@ class SerializationContext:
             # cloudpickle directly or captured in a remote function/actor),
             # then pin the object for the lifetime of this worker by adding
             # a local reference that won't ever be removed.
-            ray.worker.global_worker.core_worker.add_object_id_reference(
-                object_id)
+            ray.worker.global_worker.core_worker.add_object_id_reference(object_id)
 
     def _deserialize_pickle5_data(self, data):
         try:
@@ -237,8 +246,7 @@ class SerializationContext:
             def _python_deserializer(index):
                 return python_objects[index]
 
-            obj = MessagePackSerializer.loads(msgpack_data,
-                                              _python_deserializer)
+            obj = MessagePackSerializer.loads(msgpack_data, _python_deserializer)
         except Exception:
             raise DeserializationError()
         return obj
@@ -246,8 +254,8 @@ class SerializationContext:
     def _deserialize_object(self, data, metadata, object_id):
         if metadata:
             if metadata in [
-                    ray_constants.OBJECT_METADATA_TYPE_CROSS_LANGUAGE,
-                    ray_constants.OBJECT_METADATA_TYPE_PYTHON
+                ray_constants.OBJECT_METADATA_TYPE_CROSS_LANGUAGE,
+                ray_constants.OBJECT_METADATA_TYPE_PYTHON,
             ]:
                 return self._deserialize_msgpack_data(data, metadata)
             # Check if the object should be returned as raw bytes.
@@ -262,7 +270,9 @@ class SerializationContext:
             except Exception:
                 raise Exception(
                     "Can't deserialize object: {}, metadata: {}".format(
-                        object_id, metadata))
+                        object_id, metadata
+                    )
+                )
 
             # RayTaskError is serialized with pickle5 in the data field.
             # TODO (kfstorm): exception serialization should be language
@@ -280,8 +290,9 @@ class SerializationContext:
             elif error_type == ErrorType.Value("OBJECT_UNRECONSTRUCTABLE"):
                 return UnreconstructableError(ray.ObjectID(object_id.binary()))
             else:
-                assert error_type != ErrorType.Value("OBJECT_IN_PLASMA"), \
-                    "Tried to get object that has been promoted to plasma."
+                assert error_type != ErrorType.Value(
+                    "OBJECT_IN_PLASMA"
+                ), "Tried to get object that has been promoted to plasma."
                 assert False, "Unrecognized error type " + str(error_type)
         elif data:
             raise ValueError("non-null object should always have metadata")
@@ -292,10 +303,7 @@ class SerializationContext:
             # throws an exception.
             return PlasmaObjectNotAvailable
 
-    def deserialize_objects(self,
-                            data_metadata_pairs,
-                            object_ids,
-                            error_timeout=10):
+    def deserialize_objects(self, data_metadata_pairs, object_ids, error_timeout=10):
         assert len(data_metadata_pairs) == len(object_ids)
 
         start_time = time.time()
@@ -308,8 +316,7 @@ class SerializationContext:
             assert self.get_outer_object_id() is None
             self.set_outer_object_id(object_id)
             try:
-                results.append(
-                    self._deserialize_object(data, metadata, object_id))
+                results.append(self._deserialize_object(data, metadata, object_id))
                 i += 1
             except DeserializationError:
                 # Wait a little bit for the import thread to import the class.
@@ -318,17 +325,20 @@ class SerializationContext:
                 time.sleep(0.01)
 
                 if time.time() - start_time > error_timeout:
-                    warning_message = ("This worker or driver is waiting to "
-                                       "receive a class definition so that it "
-                                       "can deserialize an object from the "
-                                       "object store. This may be fine, or it "
-                                       "may be a bug.")
+                    warning_message = (
+                        "This worker or driver is waiting to "
+                        "receive a class definition so that it "
+                        "can deserialize an object from the "
+                        "object store. This may be fine, or it "
+                        "may be a bug."
+                    )
                     if not warning_sent:
                         ray.utils.push_error_to_driver(
                             self,
                             ray_constants.WAIT_FOR_CLASS_PUSH_ERROR,
                             warning_message,
-                            job_id=self.worker.current_job_id)
+                            job_id=self.worker.current_job_id,
+                        )
                     warning_sent = True
             finally:
                 # Must clear ObjectID to not hold a reference.
@@ -342,7 +352,8 @@ class SerializationContext:
         try:
             self.set_in_band_serialization()
             inband = pickle.dumps(
-                value, protocol=5, buffer_callback=writer.buffer_callback)
+                value, protocol=5, buffer_callback=writer.buffer_callback
+            )
         except Exception as e:
             self.get_and_clear_contained_object_ids()
             raise e
@@ -350,8 +361,8 @@ class SerializationContext:
             self.set_out_of_band_serialization()
 
         return Pickle5SerializedObject(
-            metadata, inband, writer,
-            self.get_and_clear_contained_object_ids())
+            metadata, inband, writer, self.get_and_clear_contained_object_ids()
+        )
 
     def _serialize_to_msgpack(self, metadata, value):
         python_objects = []
@@ -364,14 +375,16 @@ class SerializationContext:
         msgpack_data = MessagePackSerializer.dumps(value, _python_serializer)
 
         if python_objects:
-            pickle5_serialized_object = \
-                self._serialize_to_pickle5(metadata, python_objects)
+            pickle5_serialized_object = self._serialize_to_pickle5(
+                metadata, python_objects
+            )
         else:
             metadata = ray_constants.OBJECT_METADATA_TYPE_CROSS_LANGUAGE
             pickle5_serialized_object = None
 
-        return MessagePackSerializedObject(metadata, msgpack_data,
-                                           pickle5_serialized_object)
+        return MessagePackSerializedObject(
+            metadata, msgpack_data, pickle5_serialized_object
+        )
 
     def serialize(self, value):
         """Serialize an object.
@@ -388,20 +401,17 @@ class SerializationContext:
             # Only RayTaskError is possible to be serialized here. We don't
             # need to deal with other exception types here.
             if isinstance(value, RayTaskError):
-                metadata = str(ErrorType.Value(
-                    "TASK_EXECUTION_EXCEPTION")).encode("ascii")
+                metadata = str(ErrorType.Value("TASK_EXECUTION_EXCEPTION")).encode(
+                    "ascii"
+                )
             else:
                 metadata = ray_constants.OBJECT_METADATA_TYPE_PYTHON
 
             return self._serialize_to_msgpack(metadata, value)
 
-    def register_custom_serializer(self,
-                                   cls,
-                                   serializer,
-                                   deserializer,
-                                   local=False,
-                                   job_id=None,
-                                   class_id=None):
+    def register_custom_serializer(
+        self, cls, serializer, deserializer, local=False, job_id=None, class_id=None
+    ):
         """Enable serialization and deserialization for a particular class.
 
         This method runs the register_class function defined below on
@@ -423,8 +433,9 @@ class SerializationContext:
                 cannot be efficiently serialized by Ray.
             ValueError: Raised if ray could not autogenerate a class_id.
         """
-        assert serializer is not None and deserializer is not None, (
-            "Must provide serializer and deserializer.")
+        assert (
+            serializer is not None and deserializer is not None
+        ), "Must provide serializer and deserializer."
 
         if class_id is None:
             if not local:
@@ -443,7 +454,8 @@ class SerializationContext:
                 except Exception:
                     raise ValueError(
                         "Failed to use pickle in generating a unique id"
-                        "for '{}'. Provide a unique class_id.".format(cls))
+                        "for '{}'. Provide a unique class_id.".format(cls)
+                    )
             else:
                 # In this case, the class ID only needs to be meaningful on
                 # this worker and not across workers.
@@ -458,12 +470,10 @@ class SerializationContext:
 
         def register_class_for_serialization(worker_info):
             context = worker_info["worker"].get_serialization_context(job_id)
-            context._register_cloudpickle_serializer(cls, serializer,
-                                                     deserializer)
+            context._register_cloudpickle_serializer(cls, serializer, deserializer)
 
         if not local:
-            self.worker.run_function_on_all_workers(
-                register_class_for_serialization)
+            self.worker.run_function_on_all_workers(register_class_for_serialization)
         else:
             # Since we are pickling objects of this class, we don't actually
             # need to ship the class definition.

@@ -22,34 +22,32 @@ import re
 import subprocess
 import sys
 
-os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '../../..'))
+os.chdir(os.path.join(os.path.dirname(sys.argv[0]), "../../.."))
 
-git_hash_pattern = re.compile('[0-9a-f]{40}')
+git_hash_pattern = re.compile("[0-9a-f]{40}")
 
 # Parse git hashes from submodules
-git_submodules = subprocess.check_output(
-    'git submodule', shell=True).strip().split('\n')
-git_submodule_hashes = {
-    re.search(git_hash_pattern, s).group()
-    for s in git_submodules
-}
+git_submodules = (
+    subprocess.check_output("git submodule", shell=True).strip().split("\n")
+)
+git_submodule_hashes = {re.search(git_hash_pattern, s).group() for s in git_submodules}
 
-_BAZEL_TOOLCHAINS_DEP_NAME = 'com_github_bazelbuild_bazeltoolchains'
-_TWISTED_TWISTED_DEP_NAME = 'com_github_twisted_twisted'
-_YAML_PYYAML_DEP_NAME = 'com_github_yaml_pyyaml'
-_TWISTED_INCREMENTAL_DEP_NAME = 'com_github_twisted_incremental'
-_ZOPEFOUNDATION_ZOPE_INTERFACE_DEP_NAME = 'com_github_zopefoundation_zope_interface'
-_TWISTED_CONSTANTLY_DEP_NAME = 'com_github_twisted_constantly'
+_BAZEL_TOOLCHAINS_DEP_NAME = "com_github_bazelbuild_bazeltoolchains"
+_TWISTED_TWISTED_DEP_NAME = "com_github_twisted_twisted"
+_YAML_PYYAML_DEP_NAME = "com_github_yaml_pyyaml"
+_TWISTED_INCREMENTAL_DEP_NAME = "com_github_twisted_incremental"
+_ZOPEFOUNDATION_ZOPE_INTERFACE_DEP_NAME = "com_github_zopefoundation_zope_interface"
+_TWISTED_CONSTANTLY_DEP_NAME = "com_github_twisted_constantly"
 
 _GRPC_DEP_NAMES = [
-    'boringssl',
-    'com_github_madler_zlib',
-    'com_google_protobuf',
-    'com_github_google_googletest',
-    'com_github_gflags_gflags',
-    'com_github_google_benchmark',
-    'com_github_cares_cares',
-    'com_google_absl',
+    "boringssl",
+    "com_github_madler_zlib",
+    "com_google_protobuf",
+    "com_github_google_googletest",
+    "com_github_gflags_gflags",
+    "com_github_google_benchmark",
+    "com_github_cares_cares",
+    "com_google_absl",
     _BAZEL_TOOLCHAINS_DEP_NAME,
     _TWISTED_TWISTED_DEP_NAME,
     _YAML_PYYAML_DEP_NAME,
@@ -69,7 +67,6 @@ _GRPC_BAZEL_ONLY_DEPS = [
 
 
 class BazelEvalState(object):
-
     def __init__(self, names_and_urls, overridden_name=None):
         self.names_and_urls = names_and_urls
         self.overridden_name = overridden_name
@@ -89,25 +86,25 @@ class BazelEvalState(object):
         return []
 
     def archive(self, **args):
-        assert self.names_and_urls.get(args['name']) is None
-        if args['name'] in _GRPC_BAZEL_ONLY_DEPS:
-            self.names_and_urls[args['name']] = 'dont care'
+        assert self.names_and_urls.get(args["name"]) is None
+        if args["name"] in _GRPC_BAZEL_ONLY_DEPS:
+            self.names_and_urls[args["name"]] = "dont care"
             return
-        self.names_and_urls[args['name']] = args['url']
+        self.names_and_urls[args["name"]] = args["url"]
 
 
 # Parse git hashes from bazel/grpc_deps.bzl {new_}http_archive rules
-with open(os.path.join('bazel', 'grpc_deps.bzl'), 'r') as f:
+with open(os.path.join("bazel", "grpc_deps.bzl"), "r") as f:
     names_and_urls = {}
     eval_state = BazelEvalState(names_and_urls)
     bazel_file = f.read()
 
 # grpc_deps.bzl only defines 'grpc_deps' and 'grpc_test_only_deps', add these
 # lines to call them.
-bazel_file += '\ngrpc_deps()\n'
-bazel_file += '\ngrpc_test_only_deps()\n'
+bazel_file += "\ngrpc_deps()\n"
+bazel_file += "\ngrpc_test_only_deps()\n"
 build_rules = {
-    'native': eval_state,
+    "native": eval_state,
 }
 exec bazel_file in build_rules
 for name in _GRPC_DEP_NAMES:
@@ -121,8 +118,7 @@ for dep_name in _GRPC_BAZEL_ONLY_DEPS:
     names_without_bazel_only_deps.remove(dep_name)
 archive_urls = [names_and_urls[name] for name in names_without_bazel_only_deps]
 workspace_git_hashes = {
-    re.search(git_hash_pattern, url).group()
-    for url in archive_urls
+    re.search(git_hash_pattern, url).group() for url in archive_urls
 }
 if len(workspace_git_hashes) == 0:
     print("(Likely) parse error, did not find any bazel git dependencies.")
@@ -133,18 +129,15 @@ if len(workspace_git_hashes) == 0:
 # the workspace, but not necessarily conversely. E.g. Bloaty is a dependency
 # not used by any of the targets built by Bazel.
 if len(workspace_git_hashes - git_submodule_hashes) > 0:
-    print(
-        "Found discrepancies between git submodules and Bazel WORKSPACE dependencies"
-    )
+    print("Found discrepancies between git submodules and Bazel WORKSPACE dependencies")
     sys.exit(1)
 
 # Also check that we can override each dependency
 for name in _GRPC_DEP_NAMES:
     names_and_urls_with_overridden_name = {}
-    state = BazelEvalState(
-        names_and_urls_with_overridden_name, overridden_name=name)
+    state = BazelEvalState(names_and_urls_with_overridden_name, overridden_name=name)
     rules = {
-        'native': state,
+        "native": state,
     }
     exec bazel_file in rules
     assert name not in names_and_urls_with_overridden_name.keys()

@@ -53,7 +53,8 @@ class MyTrainableClass(Trainable):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing")
+        "--smoke-test", action="store_true", help="Finish quickly for testing"
+    )
     args, _ = parser.parse_known_args()
 
     trials = run(
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         loggers=[TestLogger],
         stop={"training_iteration": 1 if args.smoke_test else 99999},
         config={
-            "width": tune.sample_from(
-                lambda spec: 10 + int(90 * random.random())),
-            "height": tune.sample_from(lambda spec: int(100 * random.random()))
-        })
+            "width": tune.sample_from(lambda spec: 10 + int(90 * random.random())),
+            "height": tune.sample_from(lambda spec: int(100 * random.random())),
+        },
+    )

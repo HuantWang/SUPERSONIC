@@ -14,12 +14,15 @@ class OnlineLinearRegression(nn.Module):
         self.d = feature_dim
         self.alpha = alpha
         self.precision = nn.Parameter(
-            data=lambda_ * torch.eye(self.d), requires_grad=False)
-        self.f = nn.Parameter(data=torch.zeros(self.d, ), requires_grad=False)
+            data=lambda_ * torch.eye(self.d), requires_grad=False
+        )
+        self.f = nn.Parameter(data=torch.zeros(self.d,), requires_grad=False)
         self.covariance = nn.Parameter(
-            data=torch.inverse(self.precision), requires_grad=False)
+            data=torch.inverse(self.precision), requires_grad=False
+        )
         self.theta = nn.Parameter(
-            data=self.covariance.matmul(self.f), requires_grad=False)
+            data=self.covariance.matmul(self.f), requires_grad=False
+        )
         self._init_params()
 
     def _init_params(self):
@@ -28,8 +31,9 @@ class OnlineLinearRegression(nn.Module):
         self.delta_b = 0
         self.time = 0
         self.covariance.mul_(self.alpha)
-        self.dist = torch.distributions.multivariate_normal\
-            .MultivariateNormal(self.theta, self.covariance)
+        self.dist = torch.distributions.multivariate_normal.MultivariateNormal(
+            self.theta, self.covariance
+        )
 
     def partial_fit(self, x, y):
         # TODO: Handle batch of data rather than individual points
@@ -83,34 +87,40 @@ class OnlineLinearRegression(nn.Module):
         return scores
 
     def _check_inputs(self, x, y=None):
-        assert x.ndim in [2, 3], \
-            "Input context tensor must be 2 or 3 dimensional, where the" \
+        assert x.ndim in [2, 3], (
+            "Input context tensor must be 2 or 3 dimensional, where the"
             " first dimension is batch size"
-        assert x.shape[1] == self.d, \
-            "Feature dimensions of weights ({}) and context ({}) do not " \
+        )
+        assert x.shape[1] == self.d, (
+            "Feature dimensions of weights ({}) and context ({}) do not "
             "match!".format(self.d, x.shape[1])
+        )
         if y:
-            assert torch.is_tensor(y) and y.numel() == 1,\
-                "Target should be a tensor;" \
-                "Only online learning with a batch size of 1 is " \
+            assert torch.is_tensor(y) and y.numel() == 1, (
+                "Target should be a tensor;"
+                "Only online learning with a batch size of 1 is "
                 "supported for now!"
+            )
 
 
 class DiscreteLinearModel(TorchModelV2, nn.Module):
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
-        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
-                              model_config, name)
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        TorchModelV2.__init__(
+            self, obs_space, action_space, num_outputs, model_config, name
+        )
         nn.Module.__init__(self)
 
         alpha = model_config.get("alpha", 1)
         lambda_ = model_config.get("lambda_", 1)
         self.feature_dim = obs_space.sample().size
-        self.arms = nn.ModuleList([
-            OnlineLinearRegression(
-                feature_dim=self.feature_dim, alpha=alpha, lambda_=lambda_)
-            for i in range(self.num_outputs)
-        ])
+        self.arms = nn.ModuleList(
+            [
+                OnlineLinearRegression(
+                    feature_dim=self.feature_dim, alpha=alpha, lambda_=lambda_
+                )
+                for i in range(self.num_outputs)
+            ]
+        )
         self._cur_value = None
         self._cur_ctx = None
 
@@ -123,21 +133,23 @@ class DiscreteLinearModel(TorchModelV2, nn.Module):
     def predict(self, x, sample_theta=False, use_ucb=False):
         self._cur_ctx = x
         scores = torch.stack(
-            [self.arms[i](x, sample_theta) for i in range(self.num_outputs)],
-            dim=-1)
+            [self.arms[i](x, sample_theta) for i in range(self.num_outputs)], dim=-1
+        )
         self._cur_value = scores
         if use_ucb:
             ucbs = torch.stack(
-                [self.arms[i].get_ucbs(x) for i in range(self.num_outputs)],
-                dim=-1)
+                [self.arms[i].get_ucbs(x) for i in range(self.num_outputs)], dim=-1
+            )
             return scores + ucbs
         else:
             return scores
 
     def partial_fit(self, x, y, arm):
-        assert 0 <= arm.item() < len(self.arms), \
-            "Invalid arm: {}. It should be 0 <= arm < {}".format(
-                arm.item(), len(self.arms))
+        assert (
+            0 <= arm.item() < len(self.arms)
+        ), "Invalid arm: {}. It should be 0 <= arm < {}".format(
+            arm.item(), len(self.arms)
+        )
         self.arms[arm].partial_fit(x, y)
 
     @override(ModelV2)
@@ -154,7 +166,8 @@ class DiscreteLinearModelUCB(DiscreteLinearModel):
     def forward(self, input_dict, state, seq_lens):
         x = input_dict["obs"]
         scores = super(DiscreteLinearModelUCB, self).predict(
-            x, sample_theta=False, use_ucb=True)
+            x, sample_theta=False, use_ucb=True
+        )
         return scores, state
 
 
@@ -162,15 +175,16 @@ class DiscreteLinearModelThompsonSampling(DiscreteLinearModel):
     def forward(self, input_dict, state, seq_lens):
         x = input_dict["obs"]
         scores = super(DiscreteLinearModelThompsonSampling, self).predict(
-            x, sample_theta=True, use_ucb=False)
+            x, sample_theta=True, use_ucb=False
+        )
         return scores, state
 
 
 class ParametricLinearModel(TorchModelV2, nn.Module):
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
-        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
-                              model_config, name)
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        TorchModelV2.__init__(
+            self, obs_space, action_space, num_outputs, model_config, name
+        )
         nn.Module.__init__(self)
 
         alpha = model_config.get("alpha", 1)
@@ -179,19 +193,20 @@ class ParametricLinearModel(TorchModelV2, nn.Module):
         # RLlib preprocessors will flatten the observation space and unflatten
         # it later. Accessing the original space here.
         original_space = obs_space.original_space
-        assert isinstance(original_space, gym.spaces.Dict) and \
-            "item" in original_space.spaces, \
-            "This model only supports gym.spaces.Dict observation spaces."
+        assert (
+            isinstance(original_space, gym.spaces.Dict)
+            and "item" in original_space.spaces
+        ), "This model only supports gym.spaces.Dict observation spaces."
         self.feature_dim = original_space["item"].shape[-1]
         self.arm = OnlineLinearRegression(
-            feature_dim=self.feature_dim, alpha=alpha, lambda_=lambda_)
+            feature_dim=self.feature_dim, alpha=alpha, lambda_=lambda_
+        )
         self._cur_value = None
         self._cur_ctx = None
 
     def _check_inputs(self, x):
         if x.ndim == 3:
-            assert x.size()[
-                0] == 1, "Only batch size of 1 is supported for now."
+            assert x.size()[0] == 1, "Only batch size of 1 is supported for now."
 
     @override(ModelV2)
     def forward(self, input_dict, state, seq_lens):
@@ -233,7 +248,8 @@ class ParametricLinearModelUCB(ParametricLinearModel):
         self._check_inputs(x)
         x.squeeze_(dim=0)  # Remove the batch dimension
         scores = super(ParametricLinearModelUCB, self).predict(
-            x, sample_theta=False, use_ucb=True)
+            x, sample_theta=False, use_ucb=True
+        )
         scores.unsqueeze_(dim=0)  # Add the batch dimension
         return scores, state
 
@@ -244,6 +260,7 @@ class ParametricLinearModelThompsonSampling(ParametricLinearModel):
         self._check_inputs(x)
         x.squeeze_(dim=0)  # Remove the batch dimension
         scores = super(ParametricLinearModelThompsonSampling, self).predict(
-            x, sample_theta=True, use_ucb=False)
+            x, sample_theta=True, use_ucb=False
+        )
         scores.unsqueeze_(dim=0)  # Add the batch dimension
         return scores, state

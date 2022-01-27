@@ -22,19 +22,18 @@ of the list of dependencies.
 
 def get_lib(libs, name):
     try:
-        return next(lib for lib in libs if lib['name'] == name)
+        return next(lib for lib in libs if lib["name"] == name)
     except StopIteration:
         return None
 
 
 def transitive_deps(lib, libs):
-    if lib is not None and 'deps' in lib:
+    if lib is not None and "deps" in lib:
         # Recursively call transitive_deps on each dependency, and take the union
         return set.union(
-            set(lib['deps']), *[
-                set(transitive_deps(get_lib(libs, dep), libs))
-                for dep in lib['deps']
-            ])
+            set(lib["deps"]),
+            *[set(transitive_deps(get_lib(libs, dep), libs)) for dep in lib["deps"]]
+        )
     else:
         return set()
 
@@ -46,13 +45,12 @@ def mako_plugin(dictionary):
   transitive_deps property to each with the transitive closure of those
   dependency lists.
   """
-    libs = dictionary.get('libs')
+    libs = dictionary.get("libs")
 
     for target_name, target_list in dictionary.items():
         for target in target_list:
-            if isinstance(target, dict) and 'deps' in target:
-                target['transitive_deps'] = transitive_deps(target, libs)
+            if isinstance(target, dict) and "deps" in target:
+                target["transitive_deps"] = transitive_deps(target, libs)
 
-    python_dependencies = dictionary.get('python_dependencies')
-    python_dependencies['transitive_deps'] = (transitive_deps(
-        python_dependencies, libs))
+    python_dependencies = dictionary.get("python_dependencies")
+    python_dependencies["transitive_deps"] = transitive_deps(python_dependencies, libs)

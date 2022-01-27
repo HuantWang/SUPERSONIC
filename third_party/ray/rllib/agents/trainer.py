@@ -387,16 +387,24 @@ class Trainer(Trainable):
         config (obj): Algorithm-specific configuration data.
         logdir (str): Directory in which training outputs should be placed.
     """
+
     # Whether to allow unknown top-level config keys.
     _allow_unknown_configs = False
 
     # List of top-level keys with value=dict, for which new sub-keys are
     # allowed to be added to the value dict.
     _allow_unknown_subkeys = [
-        "tf_session_args", "local_tf_session_args", "env_config", "model",
-        "optimizer", "multiagent", "custom_resources_per_worker",
-        "evaluation_config", "exploration_config",
-        "extra_python_environs_for_driver", "extra_python_environs_for_worker"
+        "tf_session_args",
+        "local_tf_session_args",
+        "env_config",
+        "model",
+        "optimizer",
+        "multiagent",
+        "custom_resources_per_worker",
+        "evaluation_config",
+        "exploration_config",
+        "extra_python_environs_for_driver",
+        "extra_python_environs_for_worker",
     ]
 
     # List of top level keys with value=dict, for which we always override the
@@ -404,10 +412,12 @@ class Trainer(Trainable):
     _override_all_subkeys_if_type_changes = ["exploration_config"]
 
     @PublicAPI
-    def __init__(self,
-                 config: dict = None,
-                 env: str = None,
-                 logger_creator: Callable[[], Logger] = None):
+    def __init__(
+        self,
+        config: dict = None,
+        env: str = None,
+        logger_creator: Callable[[], Logger] = None,
+    ):
         """Initialize an RLLib trainer.
 
         Args:
@@ -432,8 +442,7 @@ class Trainer(Trainable):
         # Create a default logger creator if no logger_creator is specified
         if logger_creator is None:
             timestr = datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
-            logdir_prefix = "{}_{}_{}".format(self._name, self._env_id,
-                                              timestr)
+            logdir_prefix = "{}_{}_{}".format(self._name, self._env_id, timestr)
 
             def default_logger_creator(config):
                 """Creates a Unified logger with a default logdir prefix
@@ -441,8 +450,7 @@ class Trainer(Trainable):
                 """
                 if not os.path.exists(DEFAULT_RESULTS_DIR):
                     os.makedirs(DEFAULT_RESULTS_DIR)
-                logdir = tempfile.mkdtemp(
-                    prefix=logdir_prefix, dir=DEFAULT_RESULTS_DIR)
+                logdir = tempfile.mkdtemp(prefix=logdir_prefix, dir=DEFAULT_RESULTS_DIR)
                 return UnifiedLogger(config, logdir, loggers=None)
 
             logger_creator = default_logger_creator
@@ -464,8 +472,9 @@ class Trainer(Trainable):
             extra_cpu=cf["num_cpus_per_worker"] * num_workers,
             extra_gpu=cf["num_gpus_per_worker"] * num_workers,
             extra_memory=cf["memory_per_worker"] * num_workers,
-            extra_object_store_memory=cf["object_store_memory_per_worker"] *
-            num_workers)
+            extra_object_store_memory=cf["object_store_memory_per_worker"]
+            * num_workers,
+        )
 
     @override(Trainable)
     @PublicAPI
@@ -474,8 +483,7 @@ class Trainer(Trainable):
 
         if self._has_policy_optimizer():
             self.global_vars["timestep"] = self.optimizer.num_steps_sampled
-            self.optimizer.workers.local_worker().set_global_vars(
-                self.global_vars)
+            self.optimizer.workers.local_worker().set_global_vars(self.global_vars)
             for w in self.optimizer.workers.remote_workers():
                 w.set_global_vars.remote(self.global_vars)
             logger.debug("updated global vars: {}".format(self.global_vars))
@@ -486,14 +494,14 @@ class Trainer(Trainable):
                 result = Trainable.train(self)
             except RayError as e:
                 if self.config["ignore_worker_failures"]:
-                    logger.exception(
-                        "Error in train call, attempting to recover")
+                    logger.exception("Error in train call, attempting to recover")
                     self._try_recover()
                 else:
                     logger.info(
                         "Worker crashed during call to train(). To attempt to "
                         "continue training without the failed worker, set "
-                        "`'ignore_worker_failures': True`.")
+                        "`'ignore_worker_failures': True`."
+                    )
                     raise e
             except Exception as e:
                 time.sleep(0.5)  # allow logs messages to propagate
@@ -507,15 +515,17 @@ class Trainer(Trainable):
             self._sync_filters_if_needed(self.workers)
 
         if self._has_policy_optimizer():
-            result["num_healthy_workers"] = len(
-                self.optimizer.workers.remote_workers())
+            result["num_healthy_workers"] = len(self.optimizer.workers.remote_workers())
 
         if self.config["evaluation_interval"] == 1 or (
-                self._iteration > 0 and self.config["evaluation_interval"]
-                and self._iteration % self.config["evaluation_interval"] == 0):
+            self._iteration > 0
+            and self.config["evaluation_interval"]
+            and self._iteration % self.config["evaluation_interval"] == 0
+        ):
             evaluation_metrics = self._evaluate()
-            assert isinstance(evaluation_metrics, dict), \
-                "_evaluate() needs to return a dict."
+            assert isinstance(
+                evaluation_metrics, dict
+            ), "_evaluate() needs to return a dict."
             result.update(evaluation_metrics)
 
         return result
@@ -525,9 +535,11 @@ class Trainer(Trainable):
             FilterManager.synchronize(
                 workers.local_worker().filters,
                 workers.remote_workers(),
-                update_remote=self.config["synchronize_filters"])
-            logger.debug("synchronized filters: {}".format(
-                workers.local_worker().filters))
+                update_remote=self.config["synchronize_filters"],
+            )
+            logger.debug(
+                "synchronized filters: {}".format(workers.local_worker().filters)
+            )
 
     @override(Trainable)
     def _log_result(self, result: dict):
@@ -546,11 +558,11 @@ class Trainer(Trainable):
                 self.env_creator = _global_registry.get(ENV_CREATOR, env)
             # A class specifier.
             elif "." in env:
-                self.env_creator = \
-                    lambda env_config: from_config(env, env_config)
+                self.env_creator = lambda env_config: from_config(env, env_config)
             # Try gym.
             else:
                 import gym  # soft dependency
+
                 self.env_creator = lambda env_config: gym.make(env)
         else:
             self.env_creator = lambda env_config: None
@@ -558,12 +570,13 @@ class Trainer(Trainable):
         # Merge the supplied config with the class default, but store the
         # user-provided one.
         self.raw_user_config = config
-        self.config = Trainer.merge_trainer_configs(self._default_config,
-                                                    config)
+        self.config = Trainer.merge_trainer_configs(self._default_config, config)
 
         # Check and resolve DL framework settings.
-        if "use_pytorch" in self.config and \
-                self.config["use_pytorch"] != DEPRECATED_VALUE:
+        if (
+            "use_pytorch" in self.config
+            and self.config["use_pytorch"] != DEPRECATED_VALUE
+        ):
             deprecation_warning("use_pytorch", "framework=torch", error=False)
             if self.config["use_pytorch"]:
                 self.config["framework"] = "torch"
@@ -578,22 +591,29 @@ class Trainer(Trainable):
         if tf and self.config["framework"] == "tfe":
             if not tf.executing_eagerly():
                 tf.enable_eager_execution()
-            logger.info("Executing eagerly, with eager_tracing={}".format(
-                self.config["eager_tracing"]))
-        if tf and not tf.executing_eagerly() and \
-                self.config["framework"] != "torch":
-            logger.info("Tip: set framework=tfe or the --eager flag to enable "
-                        "TensorFlow eager execution")
+            logger.info(
+                "Executing eagerly, with eager_tracing={}".format(
+                    self.config["eager_tracing"]
+                )
+            )
+        if tf and not tf.executing_eagerly() and self.config["framework"] != "torch":
+            logger.info(
+                "Tip: set framework=tfe or the --eager flag to enable "
+                "TensorFlow eager execution"
+            )
 
         if self.config["normalize_actions"]:
             inner = self.env_creator
 
             def normalize(env):
                 import gym  # soft dependency
+
                 if not isinstance(env, gym.Env):
                     raise ValueError(
                         "Cannot apply NormalizeActionActionWrapper to env of "
-                        "type {}, which does not subclass gym.Env.", type(env))
+                        "type {}, which does not subclass gym.Env.",
+                        type(env),
+                    )
                 return NormalizeActionWrapper(env)
 
             self.env_creator = lambda env_config: normalize(inner(env_config))
@@ -603,13 +623,17 @@ class Trainer(Trainable):
             raise ValueError(
                 "`callbacks` must be a callable method that "
                 "returns a subclass of DefaultCallbacks, got {}".format(
-                    self.config["callbacks"]))
+                    self.config["callbacks"]
+                )
+            )
         self.callbacks = self.config["callbacks"]()
         log_level = self.config.get("log_level")
         if log_level in ["WARN", "ERROR"]:
-            logger.info("Current log_level is {}. For more information, "
-                        "set 'log_level': 'INFO' / 'DEBUG' or use the -v and "
-                        "-vv flags.".format(log_level))
+            logger.info(
+                "Current log_level is {}. For more information, "
+                "set 'log_level': 'INFO' / 'DEBUG' or use the -v and "
+                "-vv flags.".format(log_level)
+            )
         if self.config.get("log_level"):
             logging.getLogger("ray.rllib").setLevel(self.config["log_level"])
 
@@ -627,21 +651,25 @@ class Trainer(Trainable):
                 # Update env_config with evaluation settings:
                 extra_config = copy.deepcopy(self.config["evaluation_config"])
                 # Assert that user has not unset "in_evaluation".
-                assert "in_evaluation" not in extra_config or \
-                    extra_config["in_evaluation"] is True
-                extra_config.update({
-                    "batch_mode": "complete_episodes",
-                    "rollout_fragment_length": 1,
-                    "in_evaluation": True,
-                })
-                logger.debug(
-                    "using evaluation_config: {}".format(extra_config))
+                assert (
+                    "in_evaluation" not in extra_config
+                    or extra_config["in_evaluation"] is True
+                )
+                extra_config.update(
+                    {
+                        "batch_mode": "complete_episodes",
+                        "rollout_fragment_length": 1,
+                        "in_evaluation": True,
+                    }
+                )
+                logger.debug("using evaluation_config: {}".format(extra_config))
 
                 self.evaluation_workers = self._make_workers(
                     self.env_creator,
                     self._policy,
                     merge_dicts(self.config, extra_config),
-                    num_workers=self.config["evaluation_num_workers"])
+                    num_workers=self.config["evaluation_num_workers"],
+                )
                 self.evaluation_metrics = {}
 
     @override(Trainable)
@@ -653,8 +681,9 @@ class Trainer(Trainable):
 
     @override(Trainable)
     def _save(self, checkpoint_dir: str) -> str:
-        checkpoint_path = os.path.join(checkpoint_dir,
-                                       "checkpoint-{}".format(self.iteration))
+        checkpoint_path = os.path.join(
+            checkpoint_dir, "checkpoint-{}".format(self.iteration)
+        )
         pickle.dump(self.__getstate__(), open(checkpoint_path, "wb"))
 
         return checkpoint_path
@@ -665,9 +694,13 @@ class Trainer(Trainable):
         self.__setstate__(extra_data)
 
     @DeveloperAPI
-    def _make_workers(self, env_creator: Callable[[dict], EnvType],
-                      policy: type, config: dict,
-                      num_workers: int) -> WorkerSet:
+    def _make_workers(
+        self,
+        env_creator: Callable[[dict], EnvType],
+        policy: type,
+        config: dict,
+        num_workers: int,
+    ) -> WorkerSet:
         """Default factory method for a WorkerSet running under this Trainer.
 
         Override this method by passing a custom `make_workers` into
@@ -689,11 +722,8 @@ class Trainer(Trainable):
             WorkerSet: The created WorkerSet.
         """
         return WorkerSet(
-            env_creator,
-            policy,
-            config,
-            num_workers=num_workers,
-            logdir=self.logdir)
+            env_creator, policy, config, num_workers=num_workers, logdir=self.logdir
+        )
 
     @DeveloperAPI
     def _init(self, config, env_creator):
@@ -712,41 +742,57 @@ class Trainer(Trainable):
         # Broadcast the new policy weights to all evaluation workers.
         logger.info("Synchronizing weights to evaluation workers.")
         weights = ray.put(self.workers.local_worker().save())
-        self.evaluation_workers.foreach_worker(
-            lambda w: w.restore(ray.get(weights)))
+        self.evaluation_workers.foreach_worker(lambda w: w.restore(ray.get(weights)))
         self._sync_filters_if_needed(self.evaluation_workers)
 
         if self.config["custom_eval_function"]:
-            logger.info("Running custom eval function {}".format(
-                self.config["custom_eval_function"]))
-            metrics = self.config["custom_eval_function"](
-                self, self.evaluation_workers)
+            logger.info(
+                "Running custom eval function {}".format(
+                    self.config["custom_eval_function"]
+                )
+            )
+            metrics = self.config["custom_eval_function"](self, self.evaluation_workers)
             if not metrics or not isinstance(metrics, dict):
-                raise ValueError("Custom eval function must return "
-                                 "dict of metrics, got {}.".format(metrics))
+                raise ValueError(
+                    "Custom eval function must return "
+                    "dict of metrics, got {}.".format(metrics)
+                )
         else:
-            logger.info("Evaluating current policy for {} episodes.".format(
-                self.config["evaluation_num_episodes"]))
+            logger.info(
+                "Evaluating current policy for {} episodes.".format(
+                    self.config["evaluation_num_episodes"]
+                )
+            )
             if self.config["evaluation_num_workers"] == 0:
                 for _ in range(self.config["evaluation_num_episodes"]):
                     self.evaluation_workers.local_worker().sample()
             else:
                 num_rounds = int(
-                    math.ceil(self.config["evaluation_num_episodes"] /
-                              self.config["evaluation_num_workers"]))
+                    math.ceil(
+                        self.config["evaluation_num_episodes"]
+                        / self.config["evaluation_num_workers"]
+                    )
+                )
                 num_workers = len(self.evaluation_workers.remote_workers())
                 num_episodes = num_rounds * num_workers
                 for i in range(num_rounds):
-                    logger.info("Running round {} of parallel evaluation "
-                                "({}/{} episodes)".format(
-                                    i, (i + 1) * num_workers, num_episodes))
-                    ray.get([
-                        w.sample.remote()
-                        for w in self.evaluation_workers.remote_workers()
-                    ])
+                    logger.info(
+                        "Running round {} of parallel evaluation "
+                        "({}/{} episodes)".format(
+                            i, (i + 1) * num_workers, num_episodes
+                        )
+                    )
+                    ray.get(
+                        [
+                            w.sample.remote()
+                            for w in self.evaluation_workers.remote_workers()
+                        ]
+                    )
 
-            metrics = collect_metrics(self.evaluation_workers.local_worker(),
-                                      self.evaluation_workers.remote_workers())
+            metrics = collect_metrics(
+                self.evaluation_workers.local_worker(),
+                self.evaluation_workers.remote_workers(),
+            )
         return {"evaluation": metrics}
 
     @DeveloperAPI
@@ -755,15 +801,17 @@ class Trainer(Trainable):
         pass
 
     @PublicAPI
-    def compute_action(self,
-                       observation: TensorStructType,
-                       state: List[Any] = None,
-                       prev_action: TensorStructType = None,
-                       prev_reward: int = None,
-                       info: dict = None,
-                       policy_id: PolicyID = DEFAULT_POLICY_ID,
-                       full_fetch: bool = False,
-                       explore: bool = None) -> TensorStructType:
+    def compute_action(
+        self,
+        observation: TensorStructType,
+        state: List[Any] = None,
+        prev_action: TensorStructType = None,
+        prev_reward: int = None,
+        info: dict = None,
+        policy_id: PolicyID = DEFAULT_POLICY_ID,
+        full_fetch: bool = False,
+        explore: bool = None,
+    ) -> TensorStructType:
         """Computes an action for the specified policy on the local Worker.
 
         Note that you can also access the policy object through
@@ -792,10 +840,12 @@ class Trainer(Trainable):
         """
         if state is None:
             state = []
-        preprocessed = self.workers.local_worker().preprocessors[
-            policy_id].transform(observation)
+        preprocessed = (
+            self.workers.local_worker().preprocessors[policy_id].transform(observation)
+        )
         filtered_obs = self.workers.local_worker().filters[policy_id](
-            preprocessed, update=False)
+            preprocessed, update=False
+        )
 
         # Figure out the current (sample) time step and pass it into Policy.
         self.global_vars["timestep"] += 1
@@ -808,7 +858,8 @@ class Trainer(Trainable):
             info,
             clip_actions=self.config["clip_actions"],
             explore=explore,
-            timestep=self.global_vars["timestep"])
+            timestep=self.global_vars["timestep"],
+        )
 
         if state or full_fetch:
             return result
@@ -870,10 +921,12 @@ class Trainer(Trainable):
         self.workers.local_worker().export_policy_model(export_dir, policy_id)
 
     @DeveloperAPI
-    def export_policy_checkpoint(self,
-                                 export_dir: str,
-                                 filename_prefix: str = "model",
-                                 policy_id: PolicyID = DEFAULT_POLICY_ID):
+    def export_policy_checkpoint(
+        self,
+        export_dir: str,
+        filename_prefix: str = "model",
+        policy_id: PolicyID = DEFAULT_POLICY_ID,
+    ):
         """Export tensorflow policy model checkpoint to local directory.
 
         Arguments:
@@ -888,12 +941,13 @@ class Trainer(Trainable):
             >>> trainer.export_policy_checkpoint("/tmp/export_dir")
         """
         self.workers.local_worker().export_policy_checkpoint(
-            export_dir, filename_prefix, policy_id)
+            export_dir, filename_prefix, policy_id
+        )
 
     @DeveloperAPI
-    def import_policy_model_from_h5(self,
-                                    import_file: str,
-                                    policy_id: PolicyID = DEFAULT_POLICY_ID):
+    def import_policy_model_from_h5(
+        self, import_file: str, policy_id: PolicyID = DEFAULT_POLICY_ID
+    ):
         """Imports a policy's model with given policy_id from a local h5 file.
 
         Arguments:
@@ -906,12 +960,10 @@ class Trainer(Trainable):
             >>> for _ in range(10):
             >>>     trainer.train()
         """
-        self.workers.local_worker().import_policy_model_from_h5(
-            import_file, policy_id)
+        self.workers.local_worker().import_policy_model_from_h5(import_file, policy_id)
 
     @DeveloperAPI
-    def collect_metrics(self,
-                        selected_workers: List["ActorHandle"] = None) -> dict:
+    def collect_metrics(self, selected_workers: List["ActorHandle"] = None) -> dict:
         """Collects metrics from the remote workers of this agent.
 
         This is the same data as returned by a call to train().
@@ -919,14 +971,17 @@ class Trainer(Trainable):
         return self.optimizer.collect_metrics(
             self.config["collect_metrics_timeout"],
             min_history=self.config["metrics_smoothing_episodes"],
-            selected_workers=selected_workers)
+            selected_workers=selected_workers,
+        )
 
     @classmethod
     def resource_help(cls, config: dict) -> str:
-        return ("\n\nYou can adjust the resource requests of RLlib agents by "
-                "setting `num_workers`, `num_gpus`, and other configs. See "
-                "the DEFAULT_CONFIG defined by each agent for more info.\n\n"
-                "The config of this agent is: {}".format(config))
+        return (
+            "\n\nYou can adjust the resource requests of RLlib agents by "
+            "setting `num_workers`, `num_gpus`, and other configs. See "
+            "the DEFAULT_CONFIG defined by each agent for more info.\n\n"
+            "The config of this agent is: {}".format(config)
+        )
 
     @classmethod
     def merge_trainer_configs(cls, config1: dict, config2: dict) -> dict:
@@ -934,12 +989,14 @@ class Trainer(Trainable):
         # Error if trainer default has deprecated value.
         if config1["sample_batch_size"] != DEPRECATED_VALUE:
             deprecation_warning(
-                "sample_batch_size", new="rollout_fragment_length", error=True)
+                "sample_batch_size", new="rollout_fragment_length", error=True
+            )
         # Warning if user override config has deprecated value.
-        if ("sample_batch_size" in config2
-                and config2["sample_batch_size"] != DEPRECATED_VALUE):
-            deprecation_warning(
-                "sample_batch_size", new="rollout_fragment_length")
+        if (
+            "sample_batch_size" in config2
+            and config2["sample_batch_size"] != DEPRECATED_VALUE
+        ):
+            deprecation_warning("sample_batch_size", new="rollout_fragment_length")
             config2["rollout_fragment_length"] = config2["sample_batch_size"]
             del config2["sample_batch_size"]
         if "callbacks" in config2 and type(config2["callbacks"]) is dict:
@@ -947,39 +1004,44 @@ class Trainer(Trainable):
 
             def make_callbacks():
                 # Deprecation warning will be logged by DefaultCallbacks.
-                return DefaultCallbacks(
-                    legacy_callbacks_dict=legacy_callbacks_dict)
+                return DefaultCallbacks(legacy_callbacks_dict=legacy_callbacks_dict)
 
             config2["callbacks"] = make_callbacks
-        return deep_update(config1, config2, cls._allow_unknown_configs,
-                           cls._allow_unknown_subkeys,
-                           cls._override_all_subkeys_if_type_changes)
+        return deep_update(
+            config1,
+            config2,
+            cls._allow_unknown_configs,
+            cls._allow_unknown_subkeys,
+            cls._override_all_subkeys_if_type_changes,
+        )
 
     @staticmethod
     def _validate_config(config: dict):
         if "policy_graphs" in config["multiagent"]:
-            logger.warning(
-                "The `policy_graphs` config has been renamed to `policies`.")
+            logger.warning("The `policy_graphs` config has been renamed to `policies`.")
             # Backwards compatibility
-            config["multiagent"]["policies"] = config["multiagent"][
-                "policy_graphs"]
+            config["multiagent"]["policies"] = config["multiagent"]["policy_graphs"]
             del config["multiagent"]["policy_graphs"]
         if "gpu" in config:
             raise ValueError(
-                "The `gpu` config is deprecated, please use `num_gpus=0|1` "
-                "instead.")
+                "The `gpu` config is deprecated, please use `num_gpus=0|1` " "instead."
+            )
         if "gpu_fraction" in config:
             raise ValueError(
                 "The `gpu_fraction` config is deprecated, please use "
-                "`num_gpus=<fraction>` instead.")
+                "`num_gpus=<fraction>` instead."
+            )
         if "use_gpu_for_workers" in config:
             raise ValueError(
                 "The `use_gpu_for_workers` config is deprecated, please use "
-                "`num_gpus_per_worker=1` instead.")
+                "`num_gpus_per_worker=1` instead."
+            )
         if type(config["input_evaluation"]) != list:
             raise ValueError(
                 "`input_evaluation` must be a list of strings, got {}".format(
-                    config["input_evaluation"]))
+                    config["input_evaluation"]
+                )
+            )
 
     def _try_recover(self):
         """Try to identify and blacklist any unhealthy workers.
@@ -990,10 +1052,8 @@ class Trainer(Trainable):
         an error is raised.
         """
 
-        if (not self._has_policy_optimizer()
-                and not hasattr(self, "execution_plan")):
-            raise NotImplementedError(
-                "Recovery is not supported for this algorithm")
+        if not self._has_policy_optimizer() and not hasattr(self, "execution_plan"):
+            raise NotImplementedError("Recovery is not supported for this algorithm")
         if self._has_policy_optimizer():
             workers = self.optimizer.workers
         else:
@@ -1021,8 +1081,7 @@ class Trainer(Trainable):
                     logger.exception("Error terminating unhealthy worker")
 
         if len(healthy_workers) < 1:
-            raise RuntimeError(
-                "Not enough healthy workers remain to continue.")
+            raise RuntimeError("Not enough healthy workers remain to continue.")
 
         if self._has_policy_optimizer():
             self.optimizer.reset(healthy_workers)
@@ -1040,11 +1099,13 @@ class Trainer(Trainable):
                 property `self.optimizer`.
         """
         return hasattr(self, "optimizer") and isinstance(
-            self.optimizer, PolicyOptimizer)
+            self.optimizer, PolicyOptimizer
+        )
 
     @override(Trainable)
-    def _export_model(self, export_formats: List[str],
-                      export_dir: str) -> Dict[str, str]:
+    def _export_model(
+        self, export_formats: List[str], export_dir: str
+    ) -> Dict[str, str]:
         ExportFormat.validate(export_formats)
         exported = {}
         if ExportFormat.CHECKPOINT in export_formats:
@@ -1071,8 +1132,10 @@ class Trainer(Trainable):
         # Check for existence.
         if not os.path.exists(import_file):
             raise FileNotFoundError(
-                "`import_file` '{}' does not exist! Can't import Model.".
-                format(import_file))
+                "`import_file` '{}' does not exist! Can't import Model.".format(
+                    import_file
+                )
+            )
         # Get the format of the given file.
         import_format = "h5"  # TODO(sven): Support checkpoint loading.
 
@@ -1107,6 +1170,7 @@ class Trainer(Trainable):
             register_env(name, lambda config: env_object(config))
             return name
         raise ValueError(
-            "{} is an invalid env specification. ".format(env_object) +
-            "You can specify a custom env as either a class "
-            "(e.g., YourEnvCls) or a registered env id (e.g., \"your_env\").")
+            "{} is an invalid env specification. ".format(env_object)
+            + "You can specify a custom env as either a class "
+            '(e.g., YourEnvCls) or a registered env id (e.g., "your_env").'
+        )

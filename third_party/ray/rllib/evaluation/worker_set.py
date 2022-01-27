@@ -3,10 +3,17 @@ from types import FunctionType
 
 import ray
 from ray.rllib.utils.annotations import DeveloperAPI
-from ray.rllib.evaluation.rollout_worker import RolloutWorker, \
-    _validate_multiagent_config
-from ray.rllib.offline import NoopOutput, JsonReader, MixedInput, JsonWriter, \
-    ShuffledInput
+from ray.rllib.evaluation.rollout_worker import (
+    RolloutWorker,
+    _validate_multiagent_config,
+)
+from ray.rllib.offline import (
+    NoopOutput,
+    JsonReader,
+    MixedInput,
+    JsonWriter,
+    ShuffledInput,
+)
 from ray.rllib.utils import merge_dicts, try_import_tf
 
 tf = try_import_tf()
@@ -21,13 +28,15 @@ class WorkerSet:
     There must be one local worker copy, and zero or more remote workers.
     """
 
-    def __init__(self,
-                 env_creator,
-                 policy,
-                 trainer_config=None,
-                 num_workers=0,
-                 logdir=None,
-                 _setup=True):
+    def __init__(
+        self,
+        env_creator,
+        policy,
+        trainer_config=None,
+        num_workers=0,
+        logdir=None,
+        _setup=True,
+    ):
         """Create a new WorkerSet and initialize its workers.
 
         Arguments:
@@ -42,6 +51,7 @@ class WorkerSet:
 
         if not trainer_config:
             from ray.rllib.agents.trainer import COMMON_CONFIG
+
             trainer_config = COMMON_CONFIG
 
         self._env_creator = env_creator
@@ -52,11 +62,13 @@ class WorkerSet:
         if _setup:
             self._local_config = merge_dicts(
                 trainer_config,
-                {"tf_session_args": trainer_config["local_tf_session_args"]})
+                {"tf_session_args": trainer_config["local_tf_session_args"]},
+            )
 
             # Always create a local worker
             self._local_worker = self._make_worker(
-                RolloutWorker, env_creator, policy, 0, self._local_config)
+                RolloutWorker, env_creator, policy, 0, self._local_config
+            )
 
             # Create a number of remote workers
             self._remote_workers = []
@@ -89,14 +101,19 @@ class WorkerSet:
             "num_gpus": self._remote_config["num_gpus_per_worker"],
             "memory": self._remote_config["memory_per_worker"],
             "object_store_memory": self._remote_config[
-                "object_store_memory_per_worker"],
+                "object_store_memory_per_worker"
+            ],
             "resources": self._remote_config["custom_resources_per_worker"],
         }
         cls = RolloutWorker.as_remote(**remote_args).remote
-        self._remote_workers.extend([
-            self._make_worker(cls, self._env_creator, self._policy, i + 1,
-                              self._remote_config) for i in range(num_workers)
-        ])
+        self._remote_workers.extend(
+            [
+                self._make_worker(
+                    cls, self._env_creator, self._policy, i + 1, self._remote_config
+                )
+                for i in range(num_workers)
+            ]
+        )
 
     def reset(self, new_remote_workers):
         """Called to change the set of remote workers."""
@@ -114,8 +131,7 @@ class WorkerSet:
         """Apply the given function to each worker instance."""
 
         local_result = [func(self.local_worker())]
-        remote_results = ray.get(
-            [w.apply.remote(func) for w in self.remote_workers()])
+        remote_results = ray.get([w.apply.remote(func) for w in self.remote_workers()])
         return local_result + remote_results
 
     @DeveloperAPI
@@ -125,10 +141,9 @@ class WorkerSet:
         The index will be passed as the second arg to the given function.
         """
         local_result = [func(self.local_worker(), 0)]
-        remote_results = ray.get([
-            w.apply.remote(func, i + 1)
-            for i, w in enumerate(self.remote_workers())
-        ])
+        remote_results = ray.get(
+            [w.apply.remote(func, i + 1) for i, w in enumerate(self.remote_workers())]
+        )
         return local_result + remote_results
 
     @DeveloperAPI
@@ -146,8 +161,7 @@ class WorkerSet:
         local_results = self.local_worker().foreach_policy(func)
         remote_results = []
         for worker in self.remote_workers():
-            res = ray.get(
-                worker.apply.remote(lambda w: w.foreach_policy(func)))
+            res = ray.get(worker.apply.remote(lambda w: w.foreach_policy(func)))
             remote_results.extend(res)
         return local_results + remote_results
 
@@ -172,8 +186,8 @@ class WorkerSet:
         remote_results = []
         for worker in self.remote_workers():
             res = ray.get(
-                worker.apply.remote(
-                    lambda w: w.foreach_trainable_policy(func)))
+                worker.apply.remote(lambda w: w.foreach_trainable_policy(func))
+            )
             remote_results.extend(res)
         return local_results + remote_results
 
@@ -186,40 +200,40 @@ class WorkerSet:
 
     def _make_worker(self, cls, env_creator, policy, worker_index, config):
         def session_creator():
-            logger.debug("Creating TF session {}".format(
-                config["tf_session_args"]))
-            return tf.Session(
-                config=tf.ConfigProto(**config["tf_session_args"]))
+            logger.debug("Creating TF session {}".format(config["tf_session_args"]))
+            return tf.Session(config=tf.ConfigProto(**config["tf_session_args"]))
 
         if isinstance(config["input"], FunctionType):
             input_creator = config["input"]
         elif config["input"] == "sampler":
-            input_creator = (lambda ioctx: ioctx.default_sampler_input())
+            input_creator = lambda ioctx: ioctx.default_sampler_input()
         elif isinstance(config["input"], dict):
-            input_creator = (lambda ioctx: ShuffledInput(
-                MixedInput(config["input"], ioctx), config[
-                    "shuffle_buffer_size"]))
+            input_creator = lambda ioctx: ShuffledInput(
+                MixedInput(config["input"], ioctx), config["shuffle_buffer_size"]
+            )
         else:
-            input_creator = (lambda ioctx: ShuffledInput(
-                JsonReader(config["input"], ioctx), config[
-                    "shuffle_buffer_size"]))
+            input_creator = lambda ioctx: ShuffledInput(
+                JsonReader(config["input"], ioctx), config["shuffle_buffer_size"]
+            )
 
         if isinstance(config["output"], FunctionType):
             output_creator = config["output"]
         elif config["output"] is None:
-            output_creator = (lambda ioctx: NoopOutput())
+            output_creator = lambda ioctx: NoopOutput()
         elif config["output"] == "logdir":
-            output_creator = (lambda ioctx: JsonWriter(
+            output_creator = lambda ioctx: JsonWriter(
                 ioctx.log_dir,
                 ioctx,
                 max_file_size=config["output_max_file_size"],
-                compress_columns=config["output_compress_columns"]))
+                compress_columns=config["output_compress_columns"],
+            )
         else:
-            output_creator = (lambda ioctx: JsonWriter(
+            output_creator = lambda ioctx: JsonWriter(
                 config["output"],
                 ioctx,
                 max_file_size=config["output_max_file_size"],
-                compress_columns=config["output_compress_columns"]))
+                compress_columns=config["output_compress_columns"],
+            )
 
         if config["input"] == "sampler":
             input_evaluation = []
@@ -236,19 +250,16 @@ class WorkerSet:
             policy = tmp
 
         if worker_index == 0:
-            extra_python_environs = config.get(
-                "extra_python_environs_for_driver", None)
+            extra_python_environs = config.get("extra_python_environs_for_driver", None)
         else:
-            extra_python_environs = config.get(
-                "extra_python_environs_for_worker", None)
+            extra_python_environs = config.get("extra_python_environs_for_worker", None)
 
         worker = cls(
             env_creator,
             policy,
             policy_mapping_fn=config["multiagent"]["policy_mapping_fn"],
             policies_to_train=config["multiagent"]["policies_to_train"],
-            tf_session_creator=(session_creator
-                                if config["tf_session_args"] else None),
+            tf_session_creator=(session_creator if config["tf_session_args"] else None),
             rollout_fragment_length=config["rollout_fragment_length"],
             batch_mode=config["batch_mode"],
             episode_horizon=config["horizon"],
@@ -277,8 +288,10 @@ class WorkerSet:
             soft_horizon=config["soft_horizon"],
             no_done_at_end=config["no_done_at_end"],
             seed=(config["seed"] + worker_index)
-            if config["seed"] is not None else None,
+            if config["seed"] is not None
+            else None,
             fake_sampler=config["fake_sampler"],
-            extra_python_environs=extra_python_environs)
+            extra_python_environs=extra_python_environs,
+        )
 
         return worker

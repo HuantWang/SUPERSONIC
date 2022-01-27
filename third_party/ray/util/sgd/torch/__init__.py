@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 TorchTrainer = None
@@ -8,8 +9,7 @@ BaseTorchTrainable = None
 try:
     import torch  # noqa: F401
 
-    from ray.util.sgd.torch.torch_trainer import (TorchTrainer,
-                                                  BaseTorchTrainable)
+    from ray.util.sgd.torch.torch_trainer import TorchTrainer, BaseTorchTrainable
 
     from ray.util.sgd.torch.training_operator import TrainingOperator
 

@@ -3,11 +3,13 @@
 # source: src/ray/protobuf/core_worker.proto
 
 import sys
-_b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+
+_b = sys.version_info[0] < 3 and (lambda x: x) or (lambda x: x.encode("latin1"))
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -17,1618 +19,2433 @@ from . import common_pb2 as src_dot_ray_dot_protobuf_dot_common__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='src/ray/protobuf/core_worker.proto',
-  package='ray.rpc',
-  syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n\"src/ray/protobuf/core_worker.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto\"0\n\x0f\x41\x63tiveObjectIDs\x12\x1d\n\nobject_ids\x18\x01 \x03(\x0cR\tobjectIds\"\xc3\x03\n\x0b\x41\x63torHandle\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12\x19\n\x08owner_id\x18\x02 \x01(\x0cR\x07ownerId\x12\x35\n\rowner_address\x18\x03 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12&\n\x0f\x63reation_job_id\x18\x04 \x01(\x0cR\rcreationJobId\x12\x38\n\x0e\x61\x63tor_language\x18\x05 \x01(\x0e\x32\x11.ray.rpc.LanguageR\ractorLanguage\x12q\n\'actor_creation_task_function_descriptor\x18\x06 \x01(\x0b\x32\x1b.ray.rpc.FunctionDescriptorR#actorCreationTaskFunctionDescriptor\x12!\n\x0c\x61\x63tor_cursor\x18\x07 \x01(\x0cR\x0b\x61\x63torCursor\x12%\n\x0e\x65xtension_data\x18\x08 \x01(\x0cR\rextensionData\x12(\n\x10max_task_retries\x18\t \x01(\x03R\x0emaxTaskRetries\"\x87\x01\n\x11\x41ssignTaskRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12!\n\x04task\x18\x02 \x01(\x0b\x32\r.ray.rpc.TaskR\x04task\x12!\n\x0cresource_ids\x18\x03 \x01(\x0cR\x0bresourceIds\"\x11\n\x0f\x41ssignTaskReply\"\xba\x01\n\x0cReturnObject\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x1b\n\tin_plasma\x18\x02 \x01(\x08R\x08inPlasma\x12\x12\n\x04\x64\x61ta\x18\x03 \x01(\x0cR\x04\x64\x61ta\x12\x1a\n\x08metadata\x18\x04 \x01(\x0cR\x08metadata\x12,\n\x12nested_inlined_ids\x18\x05 \x03(\x0cR\x10nestedInlinedIds\x12\x12\n\x04size\x18\x06 \x01(\x03R\x04size\"\x93\x02\n\x0fPushTaskRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12.\n\ttask_spec\x18\x02 \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x08taskSpec\x12\'\n\x0fsequence_number\x18\x03 \x01(\x03R\x0esequenceNumber\x12\x33\n\x16\x63lient_processed_up_to\x18\x04 \x01(\x03R\x13\x63lientProcessedUpTo\x12\x44\n\x10resource_mapping\x18\x05 \x03(\x0b\x32\x19.ray.rpc.ResourceMapEntryR\x0fresourceMapping\"\xb8\x01\n\rPushTaskReply\x12<\n\x0ereturn_objects\x18\x01 \x03(\x0b\x32\x15.ray.rpc.ReturnObjectR\rreturnObjects\x12%\n\x0eworker_exiting\x18\x02 \x01(\x08R\rworkerExiting\x12\x42\n\rborrowed_refs\x18\x03 \x03(\x0b\x32\x1d.ray.rpc.ObjectReferenceCountR\x0c\x62orrowedRefs\"g\n%DirectActorCallArgWaitCompleteRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x10\n\x03tag\x18\x02 \x01(\x03R\x03tag\"%\n#DirectActorCallArgWaitCompleteReply\"P\n\x16GetObjectStatusRequest\x12\x19\n\x08owner_id\x18\x01 \x01(\x0cR\x07ownerId\x12\x1b\n\tobject_id\x18\x02 \x01(\x0cR\x08objectId\"w\n\x14GetObjectStatusReply\x12\x42\n\x06status\x18\x01 \x01(\x0e\x32*.ray.rpc.GetObjectStatusReply.ObjectStatusR\x06status\"\x1b\n\x0cObjectStatus\x12\x0b\n\x07\x43REATED\x10\x00\"h\n\x1dWaitForActorOutOfScopeRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x19\n\x08\x61\x63tor_id\x18\x02 \x01(\x0cR\x07\x61\x63torId\"\x1d\n\x1bWaitForActorOutOfScopeReply\"i\n\x1cWaitForObjectEvictionRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x1b\n\tobject_id\x18\x02 \x01(\x0cR\x08objectId\"\x1c\n\x1aWaitForObjectEvictionReply\"|\n\x10KillActorRequest\x12*\n\x11intended_actor_id\x18\x01 \x01(\x0cR\x0fintendedActorId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill\x12\x1d\n\nno_restart\x18\x03 \x01(\x08R\tnoRestart\"\x10\n\x0eKillActorReply\"\\\n\x11\x43\x61ncelTaskRequest\x12(\n\x10intended_task_id\x18\x01 \x01(\x0cR\x0eintendedTaskId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill\">\n\x0f\x43\x61ncelTaskReply\x12+\n\x11\x61ttempt_succeeded\x18\x01 \x01(\x08R\x10\x61ttemptSucceeded\"b\n\x17RemoteCancelTaskRequest\x12(\n\x10remote_object_id\x18\x01 \x01(\x0cR\x0eremoteObjectId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill\"\x17\n\x15RemoteCancelTaskReply\"y\n\x19GetCoreWorkerStatsRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12.\n\x13include_memory_info\x18\x02 \x01(\x08R\x11includeMemoryInfo\"_\n\x17GetCoreWorkerStatsReply\x12\x44\n\x11\x63ore_worker_stats\x18\x01 \x01(\x0b\x32\x18.ray.rpc.CoreWorkerStatsR\x0f\x63oreWorkerStats\"\x80\x01\n\x0fObjectReference\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x19\n\x08owner_id\x18\x02 \x01(\x0cR\x07ownerId\x12\x35\n\rowner_address\x18\x03 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\"\xa8\x01\n\x18WaitForRefRemovedRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x36\n\treference\x18\x02 \x01(\x0b\x32\x18.ray.rpc.ObjectReferenceR\treference\x12&\n\x0f\x63ontained_in_id\x18\x03 \x01(\x0cR\rcontainedInId\"\xbd\x02\n\x14ObjectReferenceCount\x12\x36\n\treference\x18\x01 \x01(\x0b\x32\x18.ray.rpc.ObjectReferenceR\treference\x12\"\n\rhas_local_ref\x18\x02 \x01(\x08R\x0bhasLocalRef\x12.\n\tborrowers\x18\x03 \x03(\x0b\x32\x10.ray.rpc.AddressR\tborrowers\x12\x44\n\x11stored_in_objects\x18\x04 \x03(\x0b\x32\x18.ray.rpc.ObjectReferenceR\x0fstoredInObjects\x12\x37\n\x18\x63ontained_in_borrowed_id\x18\x05 \x01(\x0cR\x15\x63ontainedInBorrowedId\x12\x1a\n\x08\x63ontains\x18\x06 \x03(\x0cR\x08\x63ontains\"\\\n\x16WaitForRefRemovedReply\x12\x42\n\rborrowed_refs\x18\x01 \x03(\x0b\x32\x1d.ray.rpc.ObjectReferenceCountR\x0c\x62orrowedRefs\"\x10\n\x0eLocalGCRequest\"\x0e\n\x0cLocalGCReply\"y\n\x18PlasmaObjectReadyRequest\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x1b\n\tdata_size\x18\x02 \x01(\x03R\x08\x64\x61taSize\x12#\n\rmetadata_size\x18\x03 \x01(\x03R\x0cmetadataSize\"\x18\n\x16PlasmaObjectReadyReply2\xd9\x08\n\x11\x43oreWorkerService\x12\x42\n\nAssignTask\x12\x1a.ray.rpc.AssignTaskRequest\x1a\x18.ray.rpc.AssignTaskReply\x12<\n\x08PushTask\x12\x18.ray.rpc.PushTaskRequest\x1a\x16.ray.rpc.PushTaskReply\x12~\n\x1e\x44irectActorCallArgWaitComplete\x12..ray.rpc.DirectActorCallArgWaitCompleteRequest\x1a,.ray.rpc.DirectActorCallArgWaitCompleteReply\x12Q\n\x0fGetObjectStatus\x12\x1f.ray.rpc.GetObjectStatusRequest\x1a\x1d.ray.rpc.GetObjectStatusReply\x12\x66\n\x16WaitForActorOutOfScope\x12&.ray.rpc.WaitForActorOutOfScopeRequest\x1a$.ray.rpc.WaitForActorOutOfScopeReply\x12\x63\n\x15WaitForObjectEviction\x12%.ray.rpc.WaitForObjectEvictionRequest\x1a#.ray.rpc.WaitForObjectEvictionReply\x12?\n\tKillActor\x12\x19.ray.rpc.KillActorRequest\x1a\x17.ray.rpc.KillActorReply\x12\x42\n\nCancelTask\x12\x1a.ray.rpc.CancelTaskRequest\x1a\x18.ray.rpc.CancelTaskReply\x12T\n\x10RemoteCancelTask\x12 .ray.rpc.RemoteCancelTaskRequest\x1a\x1e.ray.rpc.RemoteCancelTaskReply\x12Z\n\x12GetCoreWorkerStats\x12\".ray.rpc.GetCoreWorkerStatsRequest\x1a .ray.rpc.GetCoreWorkerStatsReply\x12W\n\x11WaitForRefRemoved\x12!.ray.rpc.WaitForRefRemovedRequest\x1a\x1f.ray.rpc.WaitForRefRemovedReply\x12\x39\n\x07LocalGC\x12\x17.ray.rpc.LocalGCRequest\x1a\x15.ray.rpc.LocalGCReply\x12W\n\x11PlasmaObjectReady\x12!.ray.rpc.PlasmaObjectReadyRequest\x1a\x1f.ray.rpc.PlasmaObjectReadyReplyb\x06proto3')
-  ,
-  dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,])
-
+    name="src/ray/protobuf/core_worker.proto",
+    package="ray.rpc",
+    syntax="proto3",
+    serialized_options=None,
+    serialized_pb=_b(
+        '\n"src/ray/protobuf/core_worker.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto"0\n\x0f\x41\x63tiveObjectIDs\x12\x1d\n\nobject_ids\x18\x01 \x03(\x0cR\tobjectIds"\xc3\x03\n\x0b\x41\x63torHandle\x12\x19\n\x08\x61\x63tor_id\x18\x01 \x01(\x0cR\x07\x61\x63torId\x12\x19\n\x08owner_id\x18\x02 \x01(\x0cR\x07ownerId\x12\x35\n\rowner_address\x18\x03 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12&\n\x0f\x63reation_job_id\x18\x04 \x01(\x0cR\rcreationJobId\x12\x38\n\x0e\x61\x63tor_language\x18\x05 \x01(\x0e\x32\x11.ray.rpc.LanguageR\ractorLanguage\x12q\n\'actor_creation_task_function_descriptor\x18\x06 \x01(\x0b\x32\x1b.ray.rpc.FunctionDescriptorR#actorCreationTaskFunctionDescriptor\x12!\n\x0c\x61\x63tor_cursor\x18\x07 \x01(\x0cR\x0b\x61\x63torCursor\x12%\n\x0e\x65xtension_data\x18\x08 \x01(\x0cR\rextensionData\x12(\n\x10max_task_retries\x18\t \x01(\x03R\x0emaxTaskRetries"\x87\x01\n\x11\x41ssignTaskRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12!\n\x04task\x18\x02 \x01(\x0b\x32\r.ray.rpc.TaskR\x04task\x12!\n\x0cresource_ids\x18\x03 \x01(\x0cR\x0bresourceIds"\x11\n\x0f\x41ssignTaskReply"\xba\x01\n\x0cReturnObject\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x1b\n\tin_plasma\x18\x02 \x01(\x08R\x08inPlasma\x12\x12\n\x04\x64\x61ta\x18\x03 \x01(\x0cR\x04\x64\x61ta\x12\x1a\n\x08metadata\x18\x04 \x01(\x0cR\x08metadata\x12,\n\x12nested_inlined_ids\x18\x05 \x03(\x0cR\x10nestedInlinedIds\x12\x12\n\x04size\x18\x06 \x01(\x03R\x04size"\x93\x02\n\x0fPushTaskRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12.\n\ttask_spec\x18\x02 \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x08taskSpec\x12\'\n\x0fsequence_number\x18\x03 \x01(\x03R\x0esequenceNumber\x12\x33\n\x16\x63lient_processed_up_to\x18\x04 \x01(\x03R\x13\x63lientProcessedUpTo\x12\x44\n\x10resource_mapping\x18\x05 \x03(\x0b\x32\x19.ray.rpc.ResourceMapEntryR\x0fresourceMapping"\xb8\x01\n\rPushTaskReply\x12<\n\x0ereturn_objects\x18\x01 \x03(\x0b\x32\x15.ray.rpc.ReturnObjectR\rreturnObjects\x12%\n\x0eworker_exiting\x18\x02 \x01(\x08R\rworkerExiting\x12\x42\n\rborrowed_refs\x18\x03 \x03(\x0b\x32\x1d.ray.rpc.ObjectReferenceCountR\x0c\x62orrowedRefs"g\n%DirectActorCallArgWaitCompleteRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x10\n\x03tag\x18\x02 \x01(\x03R\x03tag"%\n#DirectActorCallArgWaitCompleteReply"P\n\x16GetObjectStatusRequest\x12\x19\n\x08owner_id\x18\x01 \x01(\x0cR\x07ownerId\x12\x1b\n\tobject_id\x18\x02 \x01(\x0cR\x08objectId"w\n\x14GetObjectStatusReply\x12\x42\n\x06status\x18\x01 \x01(\x0e\x32*.ray.rpc.GetObjectStatusReply.ObjectStatusR\x06status"\x1b\n\x0cObjectStatus\x12\x0b\n\x07\x43REATED\x10\x00"h\n\x1dWaitForActorOutOfScopeRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x19\n\x08\x61\x63tor_id\x18\x02 \x01(\x0cR\x07\x61\x63torId"\x1d\n\x1bWaitForActorOutOfScopeReply"i\n\x1cWaitForObjectEvictionRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x1b\n\tobject_id\x18\x02 \x01(\x0cR\x08objectId"\x1c\n\x1aWaitForObjectEvictionReply"|\n\x10KillActorRequest\x12*\n\x11intended_actor_id\x18\x01 \x01(\x0cR\x0fintendedActorId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill\x12\x1d\n\nno_restart\x18\x03 \x01(\x08R\tnoRestart"\x10\n\x0eKillActorReply"\\\n\x11\x43\x61ncelTaskRequest\x12(\n\x10intended_task_id\x18\x01 \x01(\x0cR\x0eintendedTaskId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill">\n\x0f\x43\x61ncelTaskReply\x12+\n\x11\x61ttempt_succeeded\x18\x01 \x01(\x08R\x10\x61ttemptSucceeded"b\n\x17RemoteCancelTaskRequest\x12(\n\x10remote_object_id\x18\x01 \x01(\x0cR\x0eremoteObjectId\x12\x1d\n\nforce_kill\x18\x02 \x01(\x08R\tforceKill"\x17\n\x15RemoteCancelTaskReply"y\n\x19GetCoreWorkerStatsRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12.\n\x13include_memory_info\x18\x02 \x01(\x08R\x11includeMemoryInfo"_\n\x17GetCoreWorkerStatsReply\x12\x44\n\x11\x63ore_worker_stats\x18\x01 \x01(\x0b\x32\x18.ray.rpc.CoreWorkerStatsR\x0f\x63oreWorkerStats"\x80\x01\n\x0fObjectReference\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x19\n\x08owner_id\x18\x02 \x01(\x0cR\x07ownerId\x12\x35\n\rowner_address\x18\x03 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress"\xa8\x01\n\x18WaitForRefRemovedRequest\x12,\n\x12intended_worker_id\x18\x01 \x01(\x0cR\x10intendedWorkerId\x12\x36\n\treference\x18\x02 \x01(\x0b\x32\x18.ray.rpc.ObjectReferenceR\treference\x12&\n\x0f\x63ontained_in_id\x18\x03 \x01(\x0cR\rcontainedInId"\xbd\x02\n\x14ObjectReferenceCount\x12\x36\n\treference\x18\x01 \x01(\x0b\x32\x18.ray.rpc.ObjectReferenceR\treference\x12"\n\rhas_local_ref\x18\x02 \x01(\x08R\x0bhasLocalRef\x12.\n\tborrowers\x18\x03 \x03(\x0b\x32\x10.ray.rpc.AddressR\tborrowers\x12\x44\n\x11stored_in_objects\x18\x04 \x03(\x0b\x32\x18.ray.rpc.ObjectReferenceR\x0fstoredInObjects\x12\x37\n\x18\x63ontained_in_borrowed_id\x18\x05 \x01(\x0cR\x15\x63ontainedInBorrowedId\x12\x1a\n\x08\x63ontains\x18\x06 \x03(\x0cR\x08\x63ontains"\\\n\x16WaitForRefRemovedReply\x12\x42\n\rborrowed_refs\x18\x01 \x03(\x0b\x32\x1d.ray.rpc.ObjectReferenceCountR\x0c\x62orrowedRefs"\x10\n\x0eLocalGCRequest"\x0e\n\x0cLocalGCReply"y\n\x18PlasmaObjectReadyRequest\x12\x1b\n\tobject_id\x18\x01 \x01(\x0cR\x08objectId\x12\x1b\n\tdata_size\x18\x02 \x01(\x03R\x08\x64\x61taSize\x12#\n\rmetadata_size\x18\x03 \x01(\x03R\x0cmetadataSize"\x18\n\x16PlasmaObjectReadyReply2\xd9\x08\n\x11\x43oreWorkerService\x12\x42\n\nAssignTask\x12\x1a.ray.rpc.AssignTaskRequest\x1a\x18.ray.rpc.AssignTaskReply\x12<\n\x08PushTask\x12\x18.ray.rpc.PushTaskRequest\x1a\x16.ray.rpc.PushTaskReply\x12~\n\x1e\x44irectActorCallArgWaitComplete\x12..ray.rpc.DirectActorCallArgWaitCompleteRequest\x1a,.ray.rpc.DirectActorCallArgWaitCompleteReply\x12Q\n\x0fGetObjectStatus\x12\x1f.ray.rpc.GetObjectStatusRequest\x1a\x1d.ray.rpc.GetObjectStatusReply\x12\x66\n\x16WaitForActorOutOfScope\x12&.ray.rpc.WaitForActorOutOfScopeRequest\x1a$.ray.rpc.WaitForActorOutOfScopeReply\x12\x63\n\x15WaitForObjectEviction\x12%.ray.rpc.WaitForObjectEvictionRequest\x1a#.ray.rpc.WaitForObjectEvictionReply\x12?\n\tKillActor\x12\x19.ray.rpc.KillActorRequest\x1a\x17.ray.rpc.KillActorReply\x12\x42\n\nCancelTask\x12\x1a.ray.rpc.CancelTaskRequest\x1a\x18.ray.rpc.CancelTaskReply\x12T\n\x10RemoteCancelTask\x12 .ray.rpc.RemoteCancelTaskRequest\x1a\x1e.ray.rpc.RemoteCancelTaskReply\x12Z\n\x12GetCoreWorkerStats\x12".ray.rpc.GetCoreWorkerStatsRequest\x1a .ray.rpc.GetCoreWorkerStatsReply\x12W\n\x11WaitForRefRemoved\x12!.ray.rpc.WaitForRefRemovedRequest\x1a\x1f.ray.rpc.WaitForRefRemovedReply\x12\x39\n\x07LocalGC\x12\x17.ray.rpc.LocalGCRequest\x1a\x15.ray.rpc.LocalGCReply\x12W\n\x11PlasmaObjectReady\x12!.ray.rpc.PlasmaObjectReadyRequest\x1a\x1f.ray.rpc.PlasmaObjectReadyReplyb\x06proto3'
+    ),
+    dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,],
+)
 
 
 _GETOBJECTSTATUSREPLY_OBJECTSTATUS = _descriptor.EnumDescriptor(
-  name='ObjectStatus',
-  full_name='ray.rpc.GetObjectStatusReply.ObjectStatus',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='CREATED', index=0, number=0,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1711,
-  serialized_end=1738,
+    name="ObjectStatus",
+    full_name="ray.rpc.GetObjectStatusReply.ObjectStatus",
+    filename=None,
+    file=DESCRIPTOR,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="CREATED", index=0, number=0, serialized_options=None, type=None
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=1711,
+    serialized_end=1738,
 )
 _sym_db.RegisterEnumDescriptor(_GETOBJECTSTATUSREPLY_OBJECTSTATUS)
 
 
 _ACTIVEOBJECTIDS = _descriptor.Descriptor(
-  name='ActiveObjectIDs',
-  full_name='ray.rpc.ActiveObjectIDs',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_ids', full_name='ray.rpc.ActiveObjectIDs.object_ids', index=0,
-      number=1, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectIds', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=78,
-  serialized_end=126,
+    name="ActiveObjectIDs",
+    full_name="ray.rpc.ActiveObjectIDs",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_ids",
+            full_name="ray.rpc.ActiveObjectIDs.object_ids",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectIds",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=78,
+    serialized_end=126,
 )
 
 
 _ACTORHANDLE = _descriptor.Descriptor(
-  name='ActorHandle',
-  full_name='ray.rpc.ActorHandle',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='actor_id', full_name='ray.rpc.ActorHandle.actor_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='owner_id', full_name='ray.rpc.ActorHandle.owner_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='owner_address', full_name='ray.rpc.ActorHandle.owner_address', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='creation_job_id', full_name='ray.rpc.ActorHandle.creation_job_id', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='creationJobId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_language', full_name='ray.rpc.ActorHandle.actor_language', index=4,
-      number=5, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorLanguage', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_creation_task_function_descriptor', full_name='ray.rpc.ActorHandle.actor_creation_task_function_descriptor', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorCreationTaskFunctionDescriptor', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_cursor', full_name='ray.rpc.ActorHandle.actor_cursor', index=6,
-      number=7, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorCursor', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='extension_data', full_name='ray.rpc.ActorHandle.extension_data', index=7,
-      number=8, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='extensionData', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='max_task_retries', full_name='ray.rpc.ActorHandle.max_task_retries', index=8,
-      number=9, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='maxTaskRetries', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=129,
-  serialized_end=580,
+    name="ActorHandle",
+    full_name="ray.rpc.ActorHandle",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="actor_id",
+            full_name="ray.rpc.ActorHandle.actor_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="owner_id",
+            full_name="ray.rpc.ActorHandle.owner_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="owner_address",
+            full_name="ray.rpc.ActorHandle.owner_address",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="creation_job_id",
+            full_name="ray.rpc.ActorHandle.creation_job_id",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="creationJobId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_language",
+            full_name="ray.rpc.ActorHandle.actor_language",
+            index=4,
+            number=5,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorLanguage",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_creation_task_function_descriptor",
+            full_name="ray.rpc.ActorHandle.actor_creation_task_function_descriptor",
+            index=5,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorCreationTaskFunctionDescriptor",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_cursor",
+            full_name="ray.rpc.ActorHandle.actor_cursor",
+            index=6,
+            number=7,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorCursor",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="extension_data",
+            full_name="ray.rpc.ActorHandle.extension_data",
+            index=7,
+            number=8,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="extensionData",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="max_task_retries",
+            full_name="ray.rpc.ActorHandle.max_task_retries",
+            index=8,
+            number=9,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="maxTaskRetries",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=129,
+    serialized_end=580,
 )
 
 
 _ASSIGNTASKREQUEST = _descriptor.Descriptor(
-  name='AssignTaskRequest',
-  full_name='ray.rpc.AssignTaskRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.AssignTaskRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='task', full_name='ray.rpc.AssignTaskRequest.task', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='task', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resource_ids', full_name='ray.rpc.AssignTaskRequest.resource_ids', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceIds', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=583,
-  serialized_end=718,
+    name="AssignTaskRequest",
+    full_name="ray.rpc.AssignTaskRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.AssignTaskRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="task",
+            full_name="ray.rpc.AssignTaskRequest.task",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="task",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resource_ids",
+            full_name="ray.rpc.AssignTaskRequest.resource_ids",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceIds",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=583,
+    serialized_end=718,
 )
 
 
 _ASSIGNTASKREPLY = _descriptor.Descriptor(
-  name='AssignTaskReply',
-  full_name='ray.rpc.AssignTaskReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=720,
-  serialized_end=737,
+    name="AssignTaskReply",
+    full_name="ray.rpc.AssignTaskReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=720,
+    serialized_end=737,
 )
 
 
 _RETURNOBJECT = _descriptor.Descriptor(
-  name='ReturnObject',
-  full_name='ray.rpc.ReturnObject',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.ReturnObject.object_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='in_plasma', full_name='ray.rpc.ReturnObject.in_plasma', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='inPlasma', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='data', full_name='ray.rpc.ReturnObject.data', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='data', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='metadata', full_name='ray.rpc.ReturnObject.metadata', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='metadata', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='nested_inlined_ids', full_name='ray.rpc.ReturnObject.nested_inlined_ids', index=4,
-      number=5, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='nestedInlinedIds', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='size', full_name='ray.rpc.ReturnObject.size', index=5,
-      number=6, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='size', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=740,
-  serialized_end=926,
+    name="ReturnObject",
+    full_name="ray.rpc.ReturnObject",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.ReturnObject.object_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="in_plasma",
+            full_name="ray.rpc.ReturnObject.in_plasma",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="inPlasma",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="data",
+            full_name="ray.rpc.ReturnObject.data",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="data",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="metadata",
+            full_name="ray.rpc.ReturnObject.metadata",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="metadata",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="nested_inlined_ids",
+            full_name="ray.rpc.ReturnObject.nested_inlined_ids",
+            index=4,
+            number=5,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="nestedInlinedIds",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="size",
+            full_name="ray.rpc.ReturnObject.size",
+            index=5,
+            number=6,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="size",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=740,
+    serialized_end=926,
 )
 
 
 _PUSHTASKREQUEST = _descriptor.Descriptor(
-  name='PushTaskRequest',
-  full_name='ray.rpc.PushTaskRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.PushTaskRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='task_spec', full_name='ray.rpc.PushTaskRequest.task_spec', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskSpec', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='sequence_number', full_name='ray.rpc.PushTaskRequest.sequence_number', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='sequenceNumber', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='client_processed_up_to', full_name='ray.rpc.PushTaskRequest.client_processed_up_to', index=3,
-      number=4, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='clientProcessedUpTo', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resource_mapping', full_name='ray.rpc.PushTaskRequest.resource_mapping', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceMapping', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=929,
-  serialized_end=1204,
+    name="PushTaskRequest",
+    full_name="ray.rpc.PushTaskRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.PushTaskRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="task_spec",
+            full_name="ray.rpc.PushTaskRequest.task_spec",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskSpec",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="sequence_number",
+            full_name="ray.rpc.PushTaskRequest.sequence_number",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="sequenceNumber",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="client_processed_up_to",
+            full_name="ray.rpc.PushTaskRequest.client_processed_up_to",
+            index=3,
+            number=4,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="clientProcessedUpTo",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resource_mapping",
+            full_name="ray.rpc.PushTaskRequest.resource_mapping",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceMapping",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=929,
+    serialized_end=1204,
 )
 
 
 _PUSHTASKREPLY = _descriptor.Descriptor(
-  name='PushTaskReply',
-  full_name='ray.rpc.PushTaskReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='return_objects', full_name='ray.rpc.PushTaskReply.return_objects', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='returnObjects', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='worker_exiting', full_name='ray.rpc.PushTaskReply.worker_exiting', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workerExiting', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='borrowed_refs', full_name='ray.rpc.PushTaskReply.borrowed_refs', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='borrowedRefs', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1207,
-  serialized_end=1391,
+    name="PushTaskReply",
+    full_name="ray.rpc.PushTaskReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="return_objects",
+            full_name="ray.rpc.PushTaskReply.return_objects",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="returnObjects",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="worker_exiting",
+            full_name="ray.rpc.PushTaskReply.worker_exiting",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workerExiting",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="borrowed_refs",
+            full_name="ray.rpc.PushTaskReply.borrowed_refs",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="borrowedRefs",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1207,
+    serialized_end=1391,
 )
 
 
 _DIRECTACTORCALLARGWAITCOMPLETEREQUEST = _descriptor.Descriptor(
-  name='DirectActorCallArgWaitCompleteRequest',
-  full_name='ray.rpc.DirectActorCallArgWaitCompleteRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.DirectActorCallArgWaitCompleteRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='tag', full_name='ray.rpc.DirectActorCallArgWaitCompleteRequest.tag', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='tag', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1393,
-  serialized_end=1496,
+    name="DirectActorCallArgWaitCompleteRequest",
+    full_name="ray.rpc.DirectActorCallArgWaitCompleteRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.DirectActorCallArgWaitCompleteRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="tag",
+            full_name="ray.rpc.DirectActorCallArgWaitCompleteRequest.tag",
+            index=1,
+            number=2,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="tag",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1393,
+    serialized_end=1496,
 )
 
 
 _DIRECTACTORCALLARGWAITCOMPLETEREPLY = _descriptor.Descriptor(
-  name='DirectActorCallArgWaitCompleteReply',
-  full_name='ray.rpc.DirectActorCallArgWaitCompleteReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1498,
-  serialized_end=1535,
+    name="DirectActorCallArgWaitCompleteReply",
+    full_name="ray.rpc.DirectActorCallArgWaitCompleteReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1498,
+    serialized_end=1535,
 )
 
 
 _GETOBJECTSTATUSREQUEST = _descriptor.Descriptor(
-  name='GetObjectStatusRequest',
-  full_name='ray.rpc.GetObjectStatusRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='owner_id', full_name='ray.rpc.GetObjectStatusRequest.owner_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.GetObjectStatusRequest.object_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1537,
-  serialized_end=1617,
+    name="GetObjectStatusRequest",
+    full_name="ray.rpc.GetObjectStatusRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="owner_id",
+            full_name="ray.rpc.GetObjectStatusRequest.owner_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.GetObjectStatusRequest.object_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1537,
+    serialized_end=1617,
 )
 
 
 _GETOBJECTSTATUSREPLY = _descriptor.Descriptor(
-  name='GetObjectStatusReply',
-  full_name='ray.rpc.GetObjectStatusReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='status', full_name='ray.rpc.GetObjectStatusReply.status', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='status', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _GETOBJECTSTATUSREPLY_OBJECTSTATUS,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1619,
-  serialized_end=1738,
+    name="GetObjectStatusReply",
+    full_name="ray.rpc.GetObjectStatusReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="status",
+            full_name="ray.rpc.GetObjectStatusReply.status",
+            index=0,
+            number=1,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="status",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[_GETOBJECTSTATUSREPLY_OBJECTSTATUS,],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1619,
+    serialized_end=1738,
 )
 
 
 _WAITFORACTOROUTOFSCOPEREQUEST = _descriptor.Descriptor(
-  name='WaitForActorOutOfScopeRequest',
-  full_name='ray.rpc.WaitForActorOutOfScopeRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.WaitForActorOutOfScopeRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actor_id', full_name='ray.rpc.WaitForActorOutOfScopeRequest.actor_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='actorId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1740,
-  serialized_end=1844,
+    name="WaitForActorOutOfScopeRequest",
+    full_name="ray.rpc.WaitForActorOutOfScopeRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.WaitForActorOutOfScopeRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="actor_id",
+            full_name="ray.rpc.WaitForActorOutOfScopeRequest.actor_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="actorId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1740,
+    serialized_end=1844,
 )
 
 
 _WAITFORACTOROUTOFSCOPEREPLY = _descriptor.Descriptor(
-  name='WaitForActorOutOfScopeReply',
-  full_name='ray.rpc.WaitForActorOutOfScopeReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1846,
-  serialized_end=1875,
+    name="WaitForActorOutOfScopeReply",
+    full_name="ray.rpc.WaitForActorOutOfScopeReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1846,
+    serialized_end=1875,
 )
 
 
 _WAITFOROBJECTEVICTIONREQUEST = _descriptor.Descriptor(
-  name='WaitForObjectEvictionRequest',
-  full_name='ray.rpc.WaitForObjectEvictionRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.WaitForObjectEvictionRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.WaitForObjectEvictionRequest.object_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1877,
-  serialized_end=1982,
+    name="WaitForObjectEvictionRequest",
+    full_name="ray.rpc.WaitForObjectEvictionRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.WaitForObjectEvictionRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.WaitForObjectEvictionRequest.object_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1877,
+    serialized_end=1982,
 )
 
 
 _WAITFOROBJECTEVICTIONREPLY = _descriptor.Descriptor(
-  name='WaitForObjectEvictionReply',
-  full_name='ray.rpc.WaitForObjectEvictionReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1984,
-  serialized_end=2012,
+    name="WaitForObjectEvictionReply",
+    full_name="ray.rpc.WaitForObjectEvictionReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1984,
+    serialized_end=2012,
 )
 
 
 _KILLACTORREQUEST = _descriptor.Descriptor(
-  name='KillActorRequest',
-  full_name='ray.rpc.KillActorRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_actor_id', full_name='ray.rpc.KillActorRequest.intended_actor_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedActorId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='force_kill', full_name='ray.rpc.KillActorRequest.force_kill', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='forceKill', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='no_restart', full_name='ray.rpc.KillActorRequest.no_restart', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='noRestart', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2014,
-  serialized_end=2138,
+    name="KillActorRequest",
+    full_name="ray.rpc.KillActorRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_actor_id",
+            full_name="ray.rpc.KillActorRequest.intended_actor_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedActorId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="force_kill",
+            full_name="ray.rpc.KillActorRequest.force_kill",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="forceKill",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="no_restart",
+            full_name="ray.rpc.KillActorRequest.no_restart",
+            index=2,
+            number=3,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="noRestart",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2014,
+    serialized_end=2138,
 )
 
 
 _KILLACTORREPLY = _descriptor.Descriptor(
-  name='KillActorReply',
-  full_name='ray.rpc.KillActorReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2140,
-  serialized_end=2156,
+    name="KillActorReply",
+    full_name="ray.rpc.KillActorReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2140,
+    serialized_end=2156,
 )
 
 
 _CANCELTASKREQUEST = _descriptor.Descriptor(
-  name='CancelTaskRequest',
-  full_name='ray.rpc.CancelTaskRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_task_id', full_name='ray.rpc.CancelTaskRequest.intended_task_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedTaskId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='force_kill', full_name='ray.rpc.CancelTaskRequest.force_kill', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='forceKill', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2158,
-  serialized_end=2250,
+    name="CancelTaskRequest",
+    full_name="ray.rpc.CancelTaskRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_task_id",
+            full_name="ray.rpc.CancelTaskRequest.intended_task_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedTaskId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="force_kill",
+            full_name="ray.rpc.CancelTaskRequest.force_kill",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="forceKill",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2158,
+    serialized_end=2250,
 )
 
 
 _CANCELTASKREPLY = _descriptor.Descriptor(
-  name='CancelTaskReply',
-  full_name='ray.rpc.CancelTaskReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='attempt_succeeded', full_name='ray.rpc.CancelTaskReply.attempt_succeeded', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='attemptSucceeded', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2252,
-  serialized_end=2314,
+    name="CancelTaskReply",
+    full_name="ray.rpc.CancelTaskReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="attempt_succeeded",
+            full_name="ray.rpc.CancelTaskReply.attempt_succeeded",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="attemptSucceeded",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2252,
+    serialized_end=2314,
 )
 
 
 _REMOTECANCELTASKREQUEST = _descriptor.Descriptor(
-  name='RemoteCancelTaskRequest',
-  full_name='ray.rpc.RemoteCancelTaskRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='remote_object_id', full_name='ray.rpc.RemoteCancelTaskRequest.remote_object_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='remoteObjectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='force_kill', full_name='ray.rpc.RemoteCancelTaskRequest.force_kill', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='forceKill', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2316,
-  serialized_end=2414,
+    name="RemoteCancelTaskRequest",
+    full_name="ray.rpc.RemoteCancelTaskRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="remote_object_id",
+            full_name="ray.rpc.RemoteCancelTaskRequest.remote_object_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="remoteObjectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="force_kill",
+            full_name="ray.rpc.RemoteCancelTaskRequest.force_kill",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="forceKill",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2316,
+    serialized_end=2414,
 )
 
 
 _REMOTECANCELTASKREPLY = _descriptor.Descriptor(
-  name='RemoteCancelTaskReply',
-  full_name='ray.rpc.RemoteCancelTaskReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2416,
-  serialized_end=2439,
+    name="RemoteCancelTaskReply",
+    full_name="ray.rpc.RemoteCancelTaskReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2416,
+    serialized_end=2439,
 )
 
 
 _GETCOREWORKERSTATSREQUEST = _descriptor.Descriptor(
-  name='GetCoreWorkerStatsRequest',
-  full_name='ray.rpc.GetCoreWorkerStatsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.GetCoreWorkerStatsRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='include_memory_info', full_name='ray.rpc.GetCoreWorkerStatsRequest.include_memory_info', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='includeMemoryInfo', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2441,
-  serialized_end=2562,
+    name="GetCoreWorkerStatsRequest",
+    full_name="ray.rpc.GetCoreWorkerStatsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.GetCoreWorkerStatsRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="include_memory_info",
+            full_name="ray.rpc.GetCoreWorkerStatsRequest.include_memory_info",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="includeMemoryInfo",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2441,
+    serialized_end=2562,
 )
 
 
 _GETCOREWORKERSTATSREPLY = _descriptor.Descriptor(
-  name='GetCoreWorkerStatsReply',
-  full_name='ray.rpc.GetCoreWorkerStatsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='core_worker_stats', full_name='ray.rpc.GetCoreWorkerStatsReply.core_worker_stats', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='coreWorkerStats', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2564,
-  serialized_end=2659,
+    name="GetCoreWorkerStatsReply",
+    full_name="ray.rpc.GetCoreWorkerStatsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="core_worker_stats",
+            full_name="ray.rpc.GetCoreWorkerStatsReply.core_worker_stats",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="coreWorkerStats",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2564,
+    serialized_end=2659,
 )
 
 
 _OBJECTREFERENCE = _descriptor.Descriptor(
-  name='ObjectReference',
-  full_name='ray.rpc.ObjectReference',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.ObjectReference.object_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='owner_id', full_name='ray.rpc.ObjectReference.owner_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='owner_address', full_name='ray.rpc.ObjectReference.owner_address', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerAddress', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2662,
-  serialized_end=2790,
+    name="ObjectReference",
+    full_name="ray.rpc.ObjectReference",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.ObjectReference.object_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="owner_id",
+            full_name="ray.rpc.ObjectReference.owner_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="owner_address",
+            full_name="ray.rpc.ObjectReference.owner_address",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerAddress",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2662,
+    serialized_end=2790,
 )
 
 
 _WAITFORREFREMOVEDREQUEST = _descriptor.Descriptor(
-  name='WaitForRefRemovedRequest',
-  full_name='ray.rpc.WaitForRefRemovedRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='intended_worker_id', full_name='ray.rpc.WaitForRefRemovedRequest.intended_worker_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='intendedWorkerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='reference', full_name='ray.rpc.WaitForRefRemovedRequest.reference', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='reference', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='contained_in_id', full_name='ray.rpc.WaitForRefRemovedRequest.contained_in_id', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='containedInId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2793,
-  serialized_end=2961,
+    name="WaitForRefRemovedRequest",
+    full_name="ray.rpc.WaitForRefRemovedRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="intended_worker_id",
+            full_name="ray.rpc.WaitForRefRemovedRequest.intended_worker_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="intendedWorkerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="reference",
+            full_name="ray.rpc.WaitForRefRemovedRequest.reference",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="reference",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="contained_in_id",
+            full_name="ray.rpc.WaitForRefRemovedRequest.contained_in_id",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="containedInId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2793,
+    serialized_end=2961,
 )
 
 
 _OBJECTREFERENCECOUNT = _descriptor.Descriptor(
-  name='ObjectReferenceCount',
-  full_name='ray.rpc.ObjectReferenceCount',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='reference', full_name='ray.rpc.ObjectReferenceCount.reference', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='reference', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='has_local_ref', full_name='ray.rpc.ObjectReferenceCount.has_local_ref', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='hasLocalRef', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='borrowers', full_name='ray.rpc.ObjectReferenceCount.borrowers', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='borrowers', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='stored_in_objects', full_name='ray.rpc.ObjectReferenceCount.stored_in_objects', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='storedInObjects', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='contained_in_borrowed_id', full_name='ray.rpc.ObjectReferenceCount.contained_in_borrowed_id', index=4,
-      number=5, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='containedInBorrowedId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='contains', full_name='ray.rpc.ObjectReferenceCount.contains', index=5,
-      number=6, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='contains', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2964,
-  serialized_end=3281,
+    name="ObjectReferenceCount",
+    full_name="ray.rpc.ObjectReferenceCount",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="reference",
+            full_name="ray.rpc.ObjectReferenceCount.reference",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="reference",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="has_local_ref",
+            full_name="ray.rpc.ObjectReferenceCount.has_local_ref",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="hasLocalRef",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="borrowers",
+            full_name="ray.rpc.ObjectReferenceCount.borrowers",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="borrowers",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="stored_in_objects",
+            full_name="ray.rpc.ObjectReferenceCount.stored_in_objects",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="storedInObjects",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="contained_in_borrowed_id",
+            full_name="ray.rpc.ObjectReferenceCount.contained_in_borrowed_id",
+            index=4,
+            number=5,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="containedInBorrowedId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="contains",
+            full_name="ray.rpc.ObjectReferenceCount.contains",
+            index=5,
+            number=6,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="contains",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2964,
+    serialized_end=3281,
 )
 
 
 _WAITFORREFREMOVEDREPLY = _descriptor.Descriptor(
-  name='WaitForRefRemovedReply',
-  full_name='ray.rpc.WaitForRefRemovedReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='borrowed_refs', full_name='ray.rpc.WaitForRefRemovedReply.borrowed_refs', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='borrowedRefs', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3283,
-  serialized_end=3375,
+    name="WaitForRefRemovedReply",
+    full_name="ray.rpc.WaitForRefRemovedReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="borrowed_refs",
+            full_name="ray.rpc.WaitForRefRemovedReply.borrowed_refs",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="borrowedRefs",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3283,
+    serialized_end=3375,
 )
 
 
 _LOCALGCREQUEST = _descriptor.Descriptor(
-  name='LocalGCRequest',
-  full_name='ray.rpc.LocalGCRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3377,
-  serialized_end=3393,
+    name="LocalGCRequest",
+    full_name="ray.rpc.LocalGCRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3377,
+    serialized_end=3393,
 )
 
 
 _LOCALGCREPLY = _descriptor.Descriptor(
-  name='LocalGCReply',
-  full_name='ray.rpc.LocalGCReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3395,
-  serialized_end=3409,
+    name="LocalGCReply",
+    full_name="ray.rpc.LocalGCReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3395,
+    serialized_end=3409,
 )
 
 
 _PLASMAOBJECTREADYREQUEST = _descriptor.Descriptor(
-  name='PlasmaObjectReadyRequest',
-  full_name='ray.rpc.PlasmaObjectReadyRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='ray.rpc.PlasmaObjectReadyRequest.object_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='data_size', full_name='ray.rpc.PlasmaObjectReadyRequest.data_size', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='dataSize', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='metadata_size', full_name='ray.rpc.PlasmaObjectReadyRequest.metadata_size', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='metadataSize', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3411,
-  serialized_end=3532,
+    name="PlasmaObjectReadyRequest",
+    full_name="ray.rpc.PlasmaObjectReadyRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="object_id",
+            full_name="ray.rpc.PlasmaObjectReadyRequest.object_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="data_size",
+            full_name="ray.rpc.PlasmaObjectReadyRequest.data_size",
+            index=1,
+            number=2,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="dataSize",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="metadata_size",
+            full_name="ray.rpc.PlasmaObjectReadyRequest.metadata_size",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="metadataSize",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3411,
+    serialized_end=3532,
 )
 
 
 _PLASMAOBJECTREADYREPLY = _descriptor.Descriptor(
-  name='PlasmaObjectReadyReply',
-  full_name='ray.rpc.PlasmaObjectReadyReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3534,
-  serialized_end=3558,
+    name="PlasmaObjectReadyReply",
+    full_name="ray.rpc.PlasmaObjectReadyReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3534,
+    serialized_end=3558,
 )
 
-_ACTORHANDLE.fields_by_name['owner_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_ACTORHANDLE.fields_by_name['actor_language'].enum_type = src_dot_ray_dot_protobuf_dot_common__pb2._LANGUAGE
-_ACTORHANDLE.fields_by_name['actor_creation_task_function_descriptor'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._FUNCTIONDESCRIPTOR
-_ASSIGNTASKREQUEST.fields_by_name['task'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
-_PUSHTASKREQUEST.fields_by_name['task_spec'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
-_PUSHTASKREQUEST.fields_by_name['resource_mapping'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._RESOURCEMAPENTRY
-_PUSHTASKREPLY.fields_by_name['return_objects'].message_type = _RETURNOBJECT
-_PUSHTASKREPLY.fields_by_name['borrowed_refs'].message_type = _OBJECTREFERENCECOUNT
-_GETOBJECTSTATUSREPLY.fields_by_name['status'].enum_type = _GETOBJECTSTATUSREPLY_OBJECTSTATUS
+_ACTORHANDLE.fields_by_name[
+    "owner_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_ACTORHANDLE.fields_by_name[
+    "actor_language"
+].enum_type = src_dot_ray_dot_protobuf_dot_common__pb2._LANGUAGE
+_ACTORHANDLE.fields_by_name[
+    "actor_creation_task_function_descriptor"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._FUNCTIONDESCRIPTOR
+_ASSIGNTASKREQUEST.fields_by_name[
+    "task"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
+_PUSHTASKREQUEST.fields_by_name[
+    "task_spec"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
+_PUSHTASKREQUEST.fields_by_name[
+    "resource_mapping"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._RESOURCEMAPENTRY
+_PUSHTASKREPLY.fields_by_name["return_objects"].message_type = _RETURNOBJECT
+_PUSHTASKREPLY.fields_by_name["borrowed_refs"].message_type = _OBJECTREFERENCECOUNT
+_GETOBJECTSTATUSREPLY.fields_by_name[
+    "status"
+].enum_type = _GETOBJECTSTATUSREPLY_OBJECTSTATUS
 _GETOBJECTSTATUSREPLY_OBJECTSTATUS.containing_type = _GETOBJECTSTATUSREPLY
-_GETCOREWORKERSTATSREPLY.fields_by_name['core_worker_stats'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._COREWORKERSTATS
-_OBJECTREFERENCE.fields_by_name['owner_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_WAITFORREFREMOVEDREQUEST.fields_by_name['reference'].message_type = _OBJECTREFERENCE
-_OBJECTREFERENCECOUNT.fields_by_name['reference'].message_type = _OBJECTREFERENCE
-_OBJECTREFERENCECOUNT.fields_by_name['borrowers'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_OBJECTREFERENCECOUNT.fields_by_name['stored_in_objects'].message_type = _OBJECTREFERENCE
-_WAITFORREFREMOVEDREPLY.fields_by_name['borrowed_refs'].message_type = _OBJECTREFERENCECOUNT
-DESCRIPTOR.message_types_by_name['ActiveObjectIDs'] = _ACTIVEOBJECTIDS
-DESCRIPTOR.message_types_by_name['ActorHandle'] = _ACTORHANDLE
-DESCRIPTOR.message_types_by_name['AssignTaskRequest'] = _ASSIGNTASKREQUEST
-DESCRIPTOR.message_types_by_name['AssignTaskReply'] = _ASSIGNTASKREPLY
-DESCRIPTOR.message_types_by_name['ReturnObject'] = _RETURNOBJECT
-DESCRIPTOR.message_types_by_name['PushTaskRequest'] = _PUSHTASKREQUEST
-DESCRIPTOR.message_types_by_name['PushTaskReply'] = _PUSHTASKREPLY
-DESCRIPTOR.message_types_by_name['DirectActorCallArgWaitCompleteRequest'] = _DIRECTACTORCALLARGWAITCOMPLETEREQUEST
-DESCRIPTOR.message_types_by_name['DirectActorCallArgWaitCompleteReply'] = _DIRECTACTORCALLARGWAITCOMPLETEREPLY
-DESCRIPTOR.message_types_by_name['GetObjectStatusRequest'] = _GETOBJECTSTATUSREQUEST
-DESCRIPTOR.message_types_by_name['GetObjectStatusReply'] = _GETOBJECTSTATUSREPLY
-DESCRIPTOR.message_types_by_name['WaitForActorOutOfScopeRequest'] = _WAITFORACTOROUTOFSCOPEREQUEST
-DESCRIPTOR.message_types_by_name['WaitForActorOutOfScopeReply'] = _WAITFORACTOROUTOFSCOPEREPLY
-DESCRIPTOR.message_types_by_name['WaitForObjectEvictionRequest'] = _WAITFOROBJECTEVICTIONREQUEST
-DESCRIPTOR.message_types_by_name['WaitForObjectEvictionReply'] = _WAITFOROBJECTEVICTIONREPLY
-DESCRIPTOR.message_types_by_name['KillActorRequest'] = _KILLACTORREQUEST
-DESCRIPTOR.message_types_by_name['KillActorReply'] = _KILLACTORREPLY
-DESCRIPTOR.message_types_by_name['CancelTaskRequest'] = _CANCELTASKREQUEST
-DESCRIPTOR.message_types_by_name['CancelTaskReply'] = _CANCELTASKREPLY
-DESCRIPTOR.message_types_by_name['RemoteCancelTaskRequest'] = _REMOTECANCELTASKREQUEST
-DESCRIPTOR.message_types_by_name['RemoteCancelTaskReply'] = _REMOTECANCELTASKREPLY
-DESCRIPTOR.message_types_by_name['GetCoreWorkerStatsRequest'] = _GETCOREWORKERSTATSREQUEST
-DESCRIPTOR.message_types_by_name['GetCoreWorkerStatsReply'] = _GETCOREWORKERSTATSREPLY
-DESCRIPTOR.message_types_by_name['ObjectReference'] = _OBJECTREFERENCE
-DESCRIPTOR.message_types_by_name['WaitForRefRemovedRequest'] = _WAITFORREFREMOVEDREQUEST
-DESCRIPTOR.message_types_by_name['ObjectReferenceCount'] = _OBJECTREFERENCECOUNT
-DESCRIPTOR.message_types_by_name['WaitForRefRemovedReply'] = _WAITFORREFREMOVEDREPLY
-DESCRIPTOR.message_types_by_name['LocalGCRequest'] = _LOCALGCREQUEST
-DESCRIPTOR.message_types_by_name['LocalGCReply'] = _LOCALGCREPLY
-DESCRIPTOR.message_types_by_name['PlasmaObjectReadyRequest'] = _PLASMAOBJECTREADYREQUEST
-DESCRIPTOR.message_types_by_name['PlasmaObjectReadyReply'] = _PLASMAOBJECTREADYREPLY
+_GETCOREWORKERSTATSREPLY.fields_by_name[
+    "core_worker_stats"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._COREWORKERSTATS
+_OBJECTREFERENCE.fields_by_name[
+    "owner_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_WAITFORREFREMOVEDREQUEST.fields_by_name["reference"].message_type = _OBJECTREFERENCE
+_OBJECTREFERENCECOUNT.fields_by_name["reference"].message_type = _OBJECTREFERENCE
+_OBJECTREFERENCECOUNT.fields_by_name[
+    "borrowers"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_OBJECTREFERENCECOUNT.fields_by_name[
+    "stored_in_objects"
+].message_type = _OBJECTREFERENCE
+_WAITFORREFREMOVEDREPLY.fields_by_name[
+    "borrowed_refs"
+].message_type = _OBJECTREFERENCECOUNT
+DESCRIPTOR.message_types_by_name["ActiveObjectIDs"] = _ACTIVEOBJECTIDS
+DESCRIPTOR.message_types_by_name["ActorHandle"] = _ACTORHANDLE
+DESCRIPTOR.message_types_by_name["AssignTaskRequest"] = _ASSIGNTASKREQUEST
+DESCRIPTOR.message_types_by_name["AssignTaskReply"] = _ASSIGNTASKREPLY
+DESCRIPTOR.message_types_by_name["ReturnObject"] = _RETURNOBJECT
+DESCRIPTOR.message_types_by_name["PushTaskRequest"] = _PUSHTASKREQUEST
+DESCRIPTOR.message_types_by_name["PushTaskReply"] = _PUSHTASKREPLY
+DESCRIPTOR.message_types_by_name[
+    "DirectActorCallArgWaitCompleteRequest"
+] = _DIRECTACTORCALLARGWAITCOMPLETEREQUEST
+DESCRIPTOR.message_types_by_name[
+    "DirectActorCallArgWaitCompleteReply"
+] = _DIRECTACTORCALLARGWAITCOMPLETEREPLY
+DESCRIPTOR.message_types_by_name["GetObjectStatusRequest"] = _GETOBJECTSTATUSREQUEST
+DESCRIPTOR.message_types_by_name["GetObjectStatusReply"] = _GETOBJECTSTATUSREPLY
+DESCRIPTOR.message_types_by_name[
+    "WaitForActorOutOfScopeRequest"
+] = _WAITFORACTOROUTOFSCOPEREQUEST
+DESCRIPTOR.message_types_by_name[
+    "WaitForActorOutOfScopeReply"
+] = _WAITFORACTOROUTOFSCOPEREPLY
+DESCRIPTOR.message_types_by_name[
+    "WaitForObjectEvictionRequest"
+] = _WAITFOROBJECTEVICTIONREQUEST
+DESCRIPTOR.message_types_by_name[
+    "WaitForObjectEvictionReply"
+] = _WAITFOROBJECTEVICTIONREPLY
+DESCRIPTOR.message_types_by_name["KillActorRequest"] = _KILLACTORREQUEST
+DESCRIPTOR.message_types_by_name["KillActorReply"] = _KILLACTORREPLY
+DESCRIPTOR.message_types_by_name["CancelTaskRequest"] = _CANCELTASKREQUEST
+DESCRIPTOR.message_types_by_name["CancelTaskReply"] = _CANCELTASKREPLY
+DESCRIPTOR.message_types_by_name["RemoteCancelTaskRequest"] = _REMOTECANCELTASKREQUEST
+DESCRIPTOR.message_types_by_name["RemoteCancelTaskReply"] = _REMOTECANCELTASKREPLY
+DESCRIPTOR.message_types_by_name[
+    "GetCoreWorkerStatsRequest"
+] = _GETCOREWORKERSTATSREQUEST
+DESCRIPTOR.message_types_by_name["GetCoreWorkerStatsReply"] = _GETCOREWORKERSTATSREPLY
+DESCRIPTOR.message_types_by_name["ObjectReference"] = _OBJECTREFERENCE
+DESCRIPTOR.message_types_by_name["WaitForRefRemovedRequest"] = _WAITFORREFREMOVEDREQUEST
+DESCRIPTOR.message_types_by_name["ObjectReferenceCount"] = _OBJECTREFERENCECOUNT
+DESCRIPTOR.message_types_by_name["WaitForRefRemovedReply"] = _WAITFORREFREMOVEDREPLY
+DESCRIPTOR.message_types_by_name["LocalGCRequest"] = _LOCALGCREQUEST
+DESCRIPTOR.message_types_by_name["LocalGCReply"] = _LOCALGCREPLY
+DESCRIPTOR.message_types_by_name["PlasmaObjectReadyRequest"] = _PLASMAOBJECTREADYREQUEST
+DESCRIPTOR.message_types_by_name["PlasmaObjectReadyReply"] = _PLASMAOBJECTREADYREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-ActiveObjectIDs = _reflection.GeneratedProtocolMessageType('ActiveObjectIDs', (_message.Message,), {
-  'DESCRIPTOR' : _ACTIVEOBJECTIDS,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ActiveObjectIDs)
-  })
+ActiveObjectIDs = _reflection.GeneratedProtocolMessageType(
+    "ActiveObjectIDs",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACTIVEOBJECTIDS,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ActiveObjectIDs)
+    },
+)
 _sym_db.RegisterMessage(ActiveObjectIDs)
 
-ActorHandle = _reflection.GeneratedProtocolMessageType('ActorHandle', (_message.Message,), {
-  'DESCRIPTOR' : _ACTORHANDLE,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ActorHandle)
-  })
+ActorHandle = _reflection.GeneratedProtocolMessageType(
+    "ActorHandle",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACTORHANDLE,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ActorHandle)
+    },
+)
 _sym_db.RegisterMessage(ActorHandle)
 
-AssignTaskRequest = _reflection.GeneratedProtocolMessageType('AssignTaskRequest', (_message.Message,), {
-  'DESCRIPTOR' : _ASSIGNTASKREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.AssignTaskRequest)
-  })
+AssignTaskRequest = _reflection.GeneratedProtocolMessageType(
+    "AssignTaskRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ASSIGNTASKREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.AssignTaskRequest)
+    },
+)
 _sym_db.RegisterMessage(AssignTaskRequest)
 
-AssignTaskReply = _reflection.GeneratedProtocolMessageType('AssignTaskReply', (_message.Message,), {
-  'DESCRIPTOR' : _ASSIGNTASKREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.AssignTaskReply)
-  })
+AssignTaskReply = _reflection.GeneratedProtocolMessageType(
+    "AssignTaskReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ASSIGNTASKREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.AssignTaskReply)
+    },
+)
 _sym_db.RegisterMessage(AssignTaskReply)
 
-ReturnObject = _reflection.GeneratedProtocolMessageType('ReturnObject', (_message.Message,), {
-  'DESCRIPTOR' : _RETURNOBJECT,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ReturnObject)
-  })
+ReturnObject = _reflection.GeneratedProtocolMessageType(
+    "ReturnObject",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RETURNOBJECT,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ReturnObject)
+    },
+)
 _sym_db.RegisterMessage(ReturnObject)
 
-PushTaskRequest = _reflection.GeneratedProtocolMessageType('PushTaskRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PUSHTASKREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PushTaskRequest)
-  })
+PushTaskRequest = _reflection.GeneratedProtocolMessageType(
+    "PushTaskRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PUSHTASKREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PushTaskRequest)
+    },
+)
 _sym_db.RegisterMessage(PushTaskRequest)
 
-PushTaskReply = _reflection.GeneratedProtocolMessageType('PushTaskReply', (_message.Message,), {
-  'DESCRIPTOR' : _PUSHTASKREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PushTaskReply)
-  })
+PushTaskReply = _reflection.GeneratedProtocolMessageType(
+    "PushTaskReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PUSHTASKREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PushTaskReply)
+    },
+)
 _sym_db.RegisterMessage(PushTaskReply)
 
-DirectActorCallArgWaitCompleteRequest = _reflection.GeneratedProtocolMessageType('DirectActorCallArgWaitCompleteRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DIRECTACTORCALLARGWAITCOMPLETEREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.DirectActorCallArgWaitCompleteRequest)
-  })
+DirectActorCallArgWaitCompleteRequest = _reflection.GeneratedProtocolMessageType(
+    "DirectActorCallArgWaitCompleteRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DIRECTACTORCALLARGWAITCOMPLETEREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.DirectActorCallArgWaitCompleteRequest)
+    },
+)
 _sym_db.RegisterMessage(DirectActorCallArgWaitCompleteRequest)
 
-DirectActorCallArgWaitCompleteReply = _reflection.GeneratedProtocolMessageType('DirectActorCallArgWaitCompleteReply', (_message.Message,), {
-  'DESCRIPTOR' : _DIRECTACTORCALLARGWAITCOMPLETEREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.DirectActorCallArgWaitCompleteReply)
-  })
+DirectActorCallArgWaitCompleteReply = _reflection.GeneratedProtocolMessageType(
+    "DirectActorCallArgWaitCompleteReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DIRECTACTORCALLARGWAITCOMPLETEREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.DirectActorCallArgWaitCompleteReply)
+    },
+)
 _sym_db.RegisterMessage(DirectActorCallArgWaitCompleteReply)
 
-GetObjectStatusRequest = _reflection.GeneratedProtocolMessageType('GetObjectStatusRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETOBJECTSTATUSREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetObjectStatusRequest)
-  })
+GetObjectStatusRequest = _reflection.GeneratedProtocolMessageType(
+    "GetObjectStatusRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETOBJECTSTATUSREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetObjectStatusRequest)
+    },
+)
 _sym_db.RegisterMessage(GetObjectStatusRequest)
 
-GetObjectStatusReply = _reflection.GeneratedProtocolMessageType('GetObjectStatusReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETOBJECTSTATUSREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetObjectStatusReply)
-  })
+GetObjectStatusReply = _reflection.GeneratedProtocolMessageType(
+    "GetObjectStatusReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETOBJECTSTATUSREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetObjectStatusReply)
+    },
+)
 _sym_db.RegisterMessage(GetObjectStatusReply)
 
-WaitForActorOutOfScopeRequest = _reflection.GeneratedProtocolMessageType('WaitForActorOutOfScopeRequest', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFORACTOROUTOFSCOPEREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForActorOutOfScopeRequest)
-  })
+WaitForActorOutOfScopeRequest = _reflection.GeneratedProtocolMessageType(
+    "WaitForActorOutOfScopeRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFORACTOROUTOFSCOPEREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForActorOutOfScopeRequest)
+    },
+)
 _sym_db.RegisterMessage(WaitForActorOutOfScopeRequest)
 
-WaitForActorOutOfScopeReply = _reflection.GeneratedProtocolMessageType('WaitForActorOutOfScopeReply', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFORACTOROUTOFSCOPEREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForActorOutOfScopeReply)
-  })
+WaitForActorOutOfScopeReply = _reflection.GeneratedProtocolMessageType(
+    "WaitForActorOutOfScopeReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFORACTOROUTOFSCOPEREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForActorOutOfScopeReply)
+    },
+)
 _sym_db.RegisterMessage(WaitForActorOutOfScopeReply)
 
-WaitForObjectEvictionRequest = _reflection.GeneratedProtocolMessageType('WaitForObjectEvictionRequest', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFOROBJECTEVICTIONREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForObjectEvictionRequest)
-  })
+WaitForObjectEvictionRequest = _reflection.GeneratedProtocolMessageType(
+    "WaitForObjectEvictionRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFOROBJECTEVICTIONREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForObjectEvictionRequest)
+    },
+)
 _sym_db.RegisterMessage(WaitForObjectEvictionRequest)
 
-WaitForObjectEvictionReply = _reflection.GeneratedProtocolMessageType('WaitForObjectEvictionReply', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFOROBJECTEVICTIONREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForObjectEvictionReply)
-  })
+WaitForObjectEvictionReply = _reflection.GeneratedProtocolMessageType(
+    "WaitForObjectEvictionReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFOROBJECTEVICTIONREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForObjectEvictionReply)
+    },
+)
 _sym_db.RegisterMessage(WaitForObjectEvictionReply)
 
-KillActorRequest = _reflection.GeneratedProtocolMessageType('KillActorRequest', (_message.Message,), {
-  'DESCRIPTOR' : _KILLACTORREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.KillActorRequest)
-  })
+KillActorRequest = _reflection.GeneratedProtocolMessageType(
+    "KillActorRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _KILLACTORREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.KillActorRequest)
+    },
+)
 _sym_db.RegisterMessage(KillActorRequest)
 
-KillActorReply = _reflection.GeneratedProtocolMessageType('KillActorReply', (_message.Message,), {
-  'DESCRIPTOR' : _KILLACTORREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.KillActorReply)
-  })
+KillActorReply = _reflection.GeneratedProtocolMessageType(
+    "KillActorReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _KILLACTORREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.KillActorReply)
+    },
+)
 _sym_db.RegisterMessage(KillActorReply)
 
-CancelTaskRequest = _reflection.GeneratedProtocolMessageType('CancelTaskRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CANCELTASKREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.CancelTaskRequest)
-  })
+CancelTaskRequest = _reflection.GeneratedProtocolMessageType(
+    "CancelTaskRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CANCELTASKREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.CancelTaskRequest)
+    },
+)
 _sym_db.RegisterMessage(CancelTaskRequest)
 
-CancelTaskReply = _reflection.GeneratedProtocolMessageType('CancelTaskReply', (_message.Message,), {
-  'DESCRIPTOR' : _CANCELTASKREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.CancelTaskReply)
-  })
+CancelTaskReply = _reflection.GeneratedProtocolMessageType(
+    "CancelTaskReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CANCELTASKREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.CancelTaskReply)
+    },
+)
 _sym_db.RegisterMessage(CancelTaskReply)
 
-RemoteCancelTaskRequest = _reflection.GeneratedProtocolMessageType('RemoteCancelTaskRequest', (_message.Message,), {
-  'DESCRIPTOR' : _REMOTECANCELTASKREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.RemoteCancelTaskRequest)
-  })
+RemoteCancelTaskRequest = _reflection.GeneratedProtocolMessageType(
+    "RemoteCancelTaskRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REMOTECANCELTASKREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.RemoteCancelTaskRequest)
+    },
+)
 _sym_db.RegisterMessage(RemoteCancelTaskRequest)
 
-RemoteCancelTaskReply = _reflection.GeneratedProtocolMessageType('RemoteCancelTaskReply', (_message.Message,), {
-  'DESCRIPTOR' : _REMOTECANCELTASKREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.RemoteCancelTaskReply)
-  })
+RemoteCancelTaskReply = _reflection.GeneratedProtocolMessageType(
+    "RemoteCancelTaskReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REMOTECANCELTASKREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.RemoteCancelTaskReply)
+    },
+)
 _sym_db.RegisterMessage(RemoteCancelTaskReply)
 
-GetCoreWorkerStatsRequest = _reflection.GeneratedProtocolMessageType('GetCoreWorkerStatsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETCOREWORKERSTATSREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetCoreWorkerStatsRequest)
-  })
+GetCoreWorkerStatsRequest = _reflection.GeneratedProtocolMessageType(
+    "GetCoreWorkerStatsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETCOREWORKERSTATSREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetCoreWorkerStatsRequest)
+    },
+)
 _sym_db.RegisterMessage(GetCoreWorkerStatsRequest)
 
-GetCoreWorkerStatsReply = _reflection.GeneratedProtocolMessageType('GetCoreWorkerStatsReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETCOREWORKERSTATSREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetCoreWorkerStatsReply)
-  })
+GetCoreWorkerStatsReply = _reflection.GeneratedProtocolMessageType(
+    "GetCoreWorkerStatsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETCOREWORKERSTATSREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetCoreWorkerStatsReply)
+    },
+)
 _sym_db.RegisterMessage(GetCoreWorkerStatsReply)
 
-ObjectReference = _reflection.GeneratedProtocolMessageType('ObjectReference', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTREFERENCE,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectReference)
-  })
+ObjectReference = _reflection.GeneratedProtocolMessageType(
+    "ObjectReference",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTREFERENCE,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectReference)
+    },
+)
 _sym_db.RegisterMessage(ObjectReference)
 
-WaitForRefRemovedRequest = _reflection.GeneratedProtocolMessageType('WaitForRefRemovedRequest', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFORREFREMOVEDREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForRefRemovedRequest)
-  })
+WaitForRefRemovedRequest = _reflection.GeneratedProtocolMessageType(
+    "WaitForRefRemovedRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFORREFREMOVEDREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForRefRemovedRequest)
+    },
+)
 _sym_db.RegisterMessage(WaitForRefRemovedRequest)
 
-ObjectReferenceCount = _reflection.GeneratedProtocolMessageType('ObjectReferenceCount', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTREFERENCECOUNT,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ObjectReferenceCount)
-  })
+ObjectReferenceCount = _reflection.GeneratedProtocolMessageType(
+    "ObjectReferenceCount",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBJECTREFERENCECOUNT,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ObjectReferenceCount)
+    },
+)
 _sym_db.RegisterMessage(ObjectReferenceCount)
 
-WaitForRefRemovedReply = _reflection.GeneratedProtocolMessageType('WaitForRefRemovedReply', (_message.Message,), {
-  'DESCRIPTOR' : _WAITFORREFREMOVEDREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WaitForRefRemovedReply)
-  })
+WaitForRefRemovedReply = _reflection.GeneratedProtocolMessageType(
+    "WaitForRefRemovedReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WAITFORREFREMOVEDREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WaitForRefRemovedReply)
+    },
+)
 _sym_db.RegisterMessage(WaitForRefRemovedReply)
 
-LocalGCRequest = _reflection.GeneratedProtocolMessageType('LocalGCRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LOCALGCREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.LocalGCRequest)
-  })
+LocalGCRequest = _reflection.GeneratedProtocolMessageType(
+    "LocalGCRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LOCALGCREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.LocalGCRequest)
+    },
+)
 _sym_db.RegisterMessage(LocalGCRequest)
 
-LocalGCReply = _reflection.GeneratedProtocolMessageType('LocalGCReply', (_message.Message,), {
-  'DESCRIPTOR' : _LOCALGCREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.LocalGCReply)
-  })
+LocalGCReply = _reflection.GeneratedProtocolMessageType(
+    "LocalGCReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LOCALGCREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.LocalGCReply)
+    },
+)
 _sym_db.RegisterMessage(LocalGCReply)
 
-PlasmaObjectReadyRequest = _reflection.GeneratedProtocolMessageType('PlasmaObjectReadyRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PLASMAOBJECTREADYREQUEST,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PlasmaObjectReadyRequest)
-  })
+PlasmaObjectReadyRequest = _reflection.GeneratedProtocolMessageType(
+    "PlasmaObjectReadyRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PLASMAOBJECTREADYREQUEST,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PlasmaObjectReadyRequest)
+    },
+)
 _sym_db.RegisterMessage(PlasmaObjectReadyRequest)
 
-PlasmaObjectReadyReply = _reflection.GeneratedProtocolMessageType('PlasmaObjectReadyReply', (_message.Message,), {
-  'DESCRIPTOR' : _PLASMAOBJECTREADYREPLY,
-  '__module__' : 'src.ray.protobuf.core_worker_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PlasmaObjectReadyReply)
-  })
+PlasmaObjectReadyReply = _reflection.GeneratedProtocolMessageType(
+    "PlasmaObjectReadyReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PLASMAOBJECTREADYREPLY,
+        "__module__": "src.ray.protobuf.core_worker_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PlasmaObjectReadyReply)
+    },
+)
 _sym_db.RegisterMessage(PlasmaObjectReadyReply)
 
 
-
 _COREWORKERSERVICE = _descriptor.ServiceDescriptor(
-  name='CoreWorkerService',
-  full_name='ray.rpc.CoreWorkerService',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  serialized_start=3561,
-  serialized_end=4674,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='AssignTask',
-    full_name='ray.rpc.CoreWorkerService.AssignTask',
+    name="CoreWorkerService",
+    full_name="ray.rpc.CoreWorkerService",
+    file=DESCRIPTOR,
     index=0,
-    containing_service=None,
-    input_type=_ASSIGNTASKREQUEST,
-    output_type=_ASSIGNTASKREPLY,
     serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='PushTask',
-    full_name='ray.rpc.CoreWorkerService.PushTask',
-    index=1,
-    containing_service=None,
-    input_type=_PUSHTASKREQUEST,
-    output_type=_PUSHTASKREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='DirectActorCallArgWaitComplete',
-    full_name='ray.rpc.CoreWorkerService.DirectActorCallArgWaitComplete',
-    index=2,
-    containing_service=None,
-    input_type=_DIRECTACTORCALLARGWAITCOMPLETEREQUEST,
-    output_type=_DIRECTACTORCALLARGWAITCOMPLETEREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetObjectStatus',
-    full_name='ray.rpc.CoreWorkerService.GetObjectStatus',
-    index=3,
-    containing_service=None,
-    input_type=_GETOBJECTSTATUSREQUEST,
-    output_type=_GETOBJECTSTATUSREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='WaitForActorOutOfScope',
-    full_name='ray.rpc.CoreWorkerService.WaitForActorOutOfScope',
-    index=4,
-    containing_service=None,
-    input_type=_WAITFORACTOROUTOFSCOPEREQUEST,
-    output_type=_WAITFORACTOROUTOFSCOPEREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='WaitForObjectEviction',
-    full_name='ray.rpc.CoreWorkerService.WaitForObjectEviction',
-    index=5,
-    containing_service=None,
-    input_type=_WAITFOROBJECTEVICTIONREQUEST,
-    output_type=_WAITFOROBJECTEVICTIONREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='KillActor',
-    full_name='ray.rpc.CoreWorkerService.KillActor',
-    index=6,
-    containing_service=None,
-    input_type=_KILLACTORREQUEST,
-    output_type=_KILLACTORREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='CancelTask',
-    full_name='ray.rpc.CoreWorkerService.CancelTask',
-    index=7,
-    containing_service=None,
-    input_type=_CANCELTASKREQUEST,
-    output_type=_CANCELTASKREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='RemoteCancelTask',
-    full_name='ray.rpc.CoreWorkerService.RemoteCancelTask',
-    index=8,
-    containing_service=None,
-    input_type=_REMOTECANCELTASKREQUEST,
-    output_type=_REMOTECANCELTASKREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetCoreWorkerStats',
-    full_name='ray.rpc.CoreWorkerService.GetCoreWorkerStats',
-    index=9,
-    containing_service=None,
-    input_type=_GETCOREWORKERSTATSREQUEST,
-    output_type=_GETCOREWORKERSTATSREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='WaitForRefRemoved',
-    full_name='ray.rpc.CoreWorkerService.WaitForRefRemoved',
-    index=10,
-    containing_service=None,
-    input_type=_WAITFORREFREMOVEDREQUEST,
-    output_type=_WAITFORREFREMOVEDREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='LocalGC',
-    full_name='ray.rpc.CoreWorkerService.LocalGC',
-    index=11,
-    containing_service=None,
-    input_type=_LOCALGCREQUEST,
-    output_type=_LOCALGCREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='PlasmaObjectReady',
-    full_name='ray.rpc.CoreWorkerService.PlasmaObjectReady',
-    index=12,
-    containing_service=None,
-    input_type=_PLASMAOBJECTREADYREQUEST,
-    output_type=_PLASMAOBJECTREADYREPLY,
-    serialized_options=None,
-  ),
-])
+    serialized_start=3561,
+    serialized_end=4674,
+    methods=[
+        _descriptor.MethodDescriptor(
+            name="AssignTask",
+            full_name="ray.rpc.CoreWorkerService.AssignTask",
+            index=0,
+            containing_service=None,
+            input_type=_ASSIGNTASKREQUEST,
+            output_type=_ASSIGNTASKREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="PushTask",
+            full_name="ray.rpc.CoreWorkerService.PushTask",
+            index=1,
+            containing_service=None,
+            input_type=_PUSHTASKREQUEST,
+            output_type=_PUSHTASKREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="DirectActorCallArgWaitComplete",
+            full_name="ray.rpc.CoreWorkerService.DirectActorCallArgWaitComplete",
+            index=2,
+            containing_service=None,
+            input_type=_DIRECTACTORCALLARGWAITCOMPLETEREQUEST,
+            output_type=_DIRECTACTORCALLARGWAITCOMPLETEREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GetObjectStatus",
+            full_name="ray.rpc.CoreWorkerService.GetObjectStatus",
+            index=3,
+            containing_service=None,
+            input_type=_GETOBJECTSTATUSREQUEST,
+            output_type=_GETOBJECTSTATUSREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="WaitForActorOutOfScope",
+            full_name="ray.rpc.CoreWorkerService.WaitForActorOutOfScope",
+            index=4,
+            containing_service=None,
+            input_type=_WAITFORACTOROUTOFSCOPEREQUEST,
+            output_type=_WAITFORACTOROUTOFSCOPEREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="WaitForObjectEviction",
+            full_name="ray.rpc.CoreWorkerService.WaitForObjectEviction",
+            index=5,
+            containing_service=None,
+            input_type=_WAITFOROBJECTEVICTIONREQUEST,
+            output_type=_WAITFOROBJECTEVICTIONREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="KillActor",
+            full_name="ray.rpc.CoreWorkerService.KillActor",
+            index=6,
+            containing_service=None,
+            input_type=_KILLACTORREQUEST,
+            output_type=_KILLACTORREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="CancelTask",
+            full_name="ray.rpc.CoreWorkerService.CancelTask",
+            index=7,
+            containing_service=None,
+            input_type=_CANCELTASKREQUEST,
+            output_type=_CANCELTASKREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="RemoteCancelTask",
+            full_name="ray.rpc.CoreWorkerService.RemoteCancelTask",
+            index=8,
+            containing_service=None,
+            input_type=_REMOTECANCELTASKREQUEST,
+            output_type=_REMOTECANCELTASKREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GetCoreWorkerStats",
+            full_name="ray.rpc.CoreWorkerService.GetCoreWorkerStats",
+            index=9,
+            containing_service=None,
+            input_type=_GETCOREWORKERSTATSREQUEST,
+            output_type=_GETCOREWORKERSTATSREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="WaitForRefRemoved",
+            full_name="ray.rpc.CoreWorkerService.WaitForRefRemoved",
+            index=10,
+            containing_service=None,
+            input_type=_WAITFORREFREMOVEDREQUEST,
+            output_type=_WAITFORREFREMOVEDREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="LocalGC",
+            full_name="ray.rpc.CoreWorkerService.LocalGC",
+            index=11,
+            containing_service=None,
+            input_type=_LOCALGCREQUEST,
+            output_type=_LOCALGCREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="PlasmaObjectReady",
+            full_name="ray.rpc.CoreWorkerService.PlasmaObjectReady",
+            index=12,
+            containing_service=None,
+            input_type=_PLASMAOBJECTREADYREQUEST,
+            output_type=_PLASMAOBJECTREADYREPLY,
+            serialized_options=None,
+        ),
+    ],
+)
 _sym_db.RegisterServiceDescriptor(_COREWORKERSERVICE)
 
-DESCRIPTOR.services_by_name['CoreWorkerService'] = _COREWORKERSERVICE
+DESCRIPTOR.services_by_name["CoreWorkerService"] = _COREWORKERSERVICE
 
 # @@protoc_insertion_point(module_scope)

@@ -13,20 +13,25 @@ class AlwaysSameHeuristic(Policy):
 
     def get_initial_state(self):
         return [
-            random.choice([
-                RockPaperScissors.ROCK, RockPaperScissors.PAPER,
-                RockPaperScissors.SCISSORS
-            ])
+            random.choice(
+                [
+                    RockPaperScissors.ROCK,
+                    RockPaperScissors.PAPER,
+                    RockPaperScissors.SCISSORS,
+                ]
+            )
         ]
 
-    def compute_actions(self,
-                        obs_batch,
-                        state_batches=None,
-                        prev_action_batch=None,
-                        prev_reward_batch=None,
-                        info_batch=None,
-                        episodes=None,
-                        **kwargs):
+    def compute_actions(
+        self,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+        info_batch=None,
+        episodes=None,
+        **kwargs
+    ):
         return state_batches[0], state_batches, {}
 
 
@@ -37,14 +42,16 @@ class BeatLastHeuristic(Policy):
         super().__init__(*args, **kwargs)
         self.exploration = self._create_exploration()
 
-    def compute_actions(self,
-                        obs_batch,
-                        state_batches=None,
-                        prev_action_batch=None,
-                        prev_reward_batch=None,
-                        info_batch=None,
-                        episodes=None,
-                        **kwargs):
+    def compute_actions(
+        self,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+        info_batch=None,
+        episodes=None,
+        **kwargs
+    ):
         def successor(x):
             if x[RockPaperScissors.ROCK] == 1:
                 return RockPaperScissors.PAPER

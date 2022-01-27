@@ -34,14 +34,14 @@ Contains helper functions used to create protocol message classes from
 Descriptor objects at runtime backed by the protocol buffer C++ API.
 """
 
-__author__ = 'tibell@google.com (Johan Tibell)'
+__author__ = "tibell@google.com (Johan Tibell)"
 
 from google.protobuf.pyext import _message
 
 
 class GeneratedProtocolMessageType(_message.MessageMeta):
 
-  """Metaclass for protocol message classes created at runtime from Descriptors.
+    """Metaclass for protocol message classes created at runtime from Descriptors.
 
   The protocol compiler currently uses this metaclass to create protocol
   message classes at runtime.  Clients can also manually create their own
@@ -60,6 +60,6 @@ class GeneratedProtocolMessageType(_message.MessageMeta):
   order to create the appropriate class structure.
   """
 
-  # Must be consistent with the protocol-compiler code in
-  # proto2/compiler/internal/generator.*.
-  _DESCRIPTOR_KEY = 'DESCRIPTOR'
+    # Must be consistent with the protocol-compiler code in
+    # proto2/compiler/internal/generator.*.
+    _DESCRIPTOR_KEY = "DESCRIPTOR"

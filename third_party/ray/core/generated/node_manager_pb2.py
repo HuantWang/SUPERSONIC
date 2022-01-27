@@ -3,11 +3,13 @@
 # source: src/ray/protobuf/node_manager.proto
 
 import sys
-_b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+
+_b = sys.version_info[0] < 3 and (lambda x: x) or (lambda x: x.encode("latin1"))
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -17,834 +19,1171 @@ from . import common_pb2 as src_dot_ray_dot_protobuf_dot_common__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='src/ray/protobuf/node_manager.proto',
-  package='ray.rpc',
-  syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n#src/ray/protobuf/node_manager.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto\"S\n\x19RequestWorkerLeaseRequest\x12\x36\n\rresource_spec\x18\x01 \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x0cresourceSpec\"\xfd\x01\n\x17RequestWorkerLeaseReply\x12\x37\n\x0eworker_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\rworkerAddress\x12G\n\x17retry_at_raylet_address\x18\x02 \x01(\x0b\x32\x10.ray.rpc.AddressR\x14retryAtRayletAddress\x12\x44\n\x10resource_mapping\x18\x03 \x03(\x0b\x32\x19.ray.rpc.ResourceMapEntryR\x0fresourceMapping\x12\x1a\n\x08\x63\x61nceled\x18\x04 \x01(\x08R\x08\x63\x61nceled\"\x80\x01\n\x13ReturnWorkerRequest\x12\x1f\n\x0bworker_port\x18\x01 \x01(\x05R\nworkerPort\x12\x1b\n\tworker_id\x18\x02 \x01(\x0cR\x08workerId\x12+\n\x11\x64isconnect_worker\x18\x03 \x01(\x08R\x10\x64isconnectWorker\"\x13\n\x11ReturnWorkerReply\"3\n\x18\x43\x61ncelWorkerLeaseRequest\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\"2\n\x16\x43\x61ncelWorkerLeaseReply\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success\"i\n\x12\x46orwardTaskRequest\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12:\n\x11uncommitted_tasks\x18\x02 \x03(\x0b\x32\r.ray.rpc.TaskR\x10uncommittedTasks\"\x12\n\x10\x46orwardTaskReply\"k\n\x13PinObjectIDsRequest\x12\x35\n\rowner_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12\x1d\n\nobject_ids\x18\x02 \x03(\x0cR\tobjectIds\"\x13\n\x11PinObjectIDsReply\"E\n\x13GetNodeStatsRequest\x12.\n\x13include_memory_info\x18\x01 \x01(\x08R\x11includeMemoryInfo\"\xa3\x01\n\x0bWorkerStats\x12\x10\n\x03pid\x18\x01 \x01(\rR\x03pid\x12\x1b\n\tis_driver\x18\x02 \x01(\x08R\x08isDriver\x12\x44\n\x11\x63ore_worker_stats\x18\x03 \x01(\x0b\x32\x18.ray.rpc.CoreWorkerStatsR\x0f\x63oreWorkerStats\x12\x1f\n\x0b\x66\x65tch_error\x18\x04 \x01(\tR\nfetchError\"\x91\x02\n\x11GetNodeStatsReply\x12\x39\n\rworkers_stats\x18\x01 \x03(\x0b\x32\x14.ray.rpc.WorkerStatsR\x0cworkersStats\x12.\n\tview_data\x18\x02 \x03(\x0b\x32\x11.ray.rpc.ViewDataR\x08viewData\x12\x1f\n\x0bnum_workers\x18\x03 \x01(\rR\nnumWorkers\x12<\n\x10infeasible_tasks\x18\x04 \x03(\x0b\x32\x11.ray.rpc.TaskSpecR\x0finfeasibleTasks\x12\x32\n\x0bready_tasks\x18\x05 \x03(\x0b\x32\x11.ray.rpc.TaskSpecR\nreadyTasks\"\x11\n\x0fGlobalGCRequest\"\x0f\n\rGlobalGCReply\"\x1f\n\x1d\x46ormatGlobalMemoryInfoRequest\"D\n\x1b\x46ormatGlobalMemoryInfoReply\x12%\n\x0ememory_summary\x18\x01 \x01(\tR\rmemorySummary2\x94\x05\n\x12NodeManagerService\x12Z\n\x12RequestWorkerLease\x12\".ray.rpc.RequestWorkerLeaseRequest\x1a .ray.rpc.RequestWorkerLeaseReply\x12H\n\x0cReturnWorker\x12\x1c.ray.rpc.ReturnWorkerRequest\x1a\x1a.ray.rpc.ReturnWorkerReply\x12W\n\x11\x43\x61ncelWorkerLease\x12!.ray.rpc.CancelWorkerLeaseRequest\x1a\x1f.ray.rpc.CancelWorkerLeaseReply\x12\x45\n\x0b\x46orwardTask\x12\x1b.ray.rpc.ForwardTaskRequest\x1a\x19.ray.rpc.ForwardTaskReply\x12H\n\x0cPinObjectIDs\x12\x1c.ray.rpc.PinObjectIDsRequest\x1a\x1a.ray.rpc.PinObjectIDsReply\x12H\n\x0cGetNodeStats\x12\x1c.ray.rpc.GetNodeStatsRequest\x1a\x1a.ray.rpc.GetNodeStatsReply\x12<\n\x08GlobalGC\x12\x18.ray.rpc.GlobalGCRequest\x1a\x16.ray.rpc.GlobalGCReply\x12\x66\n\x16\x46ormatGlobalMemoryInfo\x12&.ray.rpc.FormatGlobalMemoryInfoRequest\x1a$.ray.rpc.FormatGlobalMemoryInfoReplyb\x06proto3')
-  ,
-  dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,])
-
-
+    name="src/ray/protobuf/node_manager.proto",
+    package="ray.rpc",
+    syntax="proto3",
+    serialized_options=None,
+    serialized_pb=_b(
+        '\n#src/ray/protobuf/node_manager.proto\x12\x07ray.rpc\x1a\x1dsrc/ray/protobuf/common.proto"S\n\x19RequestWorkerLeaseRequest\x12\x36\n\rresource_spec\x18\x01 \x01(\x0b\x32\x11.ray.rpc.TaskSpecR\x0cresourceSpec"\xfd\x01\n\x17RequestWorkerLeaseReply\x12\x37\n\x0eworker_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\rworkerAddress\x12G\n\x17retry_at_raylet_address\x18\x02 \x01(\x0b\x32\x10.ray.rpc.AddressR\x14retryAtRayletAddress\x12\x44\n\x10resource_mapping\x18\x03 \x03(\x0b\x32\x19.ray.rpc.ResourceMapEntryR\x0fresourceMapping\x12\x1a\n\x08\x63\x61nceled\x18\x04 \x01(\x08R\x08\x63\x61nceled"\x80\x01\n\x13ReturnWorkerRequest\x12\x1f\n\x0bworker_port\x18\x01 \x01(\x05R\nworkerPort\x12\x1b\n\tworker_id\x18\x02 \x01(\x0cR\x08workerId\x12+\n\x11\x64isconnect_worker\x18\x03 \x01(\x08R\x10\x64isconnectWorker"\x13\n\x11ReturnWorkerReply"3\n\x18\x43\x61ncelWorkerLeaseRequest\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId"2\n\x16\x43\x61ncelWorkerLeaseReply\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success"i\n\x12\x46orwardTaskRequest\x12\x17\n\x07task_id\x18\x01 \x01(\x0cR\x06taskId\x12:\n\x11uncommitted_tasks\x18\x02 \x03(\x0b\x32\r.ray.rpc.TaskR\x10uncommittedTasks"\x12\n\x10\x46orwardTaskReply"k\n\x13PinObjectIDsRequest\x12\x35\n\rowner_address\x18\x01 \x01(\x0b\x32\x10.ray.rpc.AddressR\x0cownerAddress\x12\x1d\n\nobject_ids\x18\x02 \x03(\x0cR\tobjectIds"\x13\n\x11PinObjectIDsReply"E\n\x13GetNodeStatsRequest\x12.\n\x13include_memory_info\x18\x01 \x01(\x08R\x11includeMemoryInfo"\xa3\x01\n\x0bWorkerStats\x12\x10\n\x03pid\x18\x01 \x01(\rR\x03pid\x12\x1b\n\tis_driver\x18\x02 \x01(\x08R\x08isDriver\x12\x44\n\x11\x63ore_worker_stats\x18\x03 \x01(\x0b\x32\x18.ray.rpc.CoreWorkerStatsR\x0f\x63oreWorkerStats\x12\x1f\n\x0b\x66\x65tch_error\x18\x04 \x01(\tR\nfetchError"\x91\x02\n\x11GetNodeStatsReply\x12\x39\n\rworkers_stats\x18\x01 \x03(\x0b\x32\x14.ray.rpc.WorkerStatsR\x0cworkersStats\x12.\n\tview_data\x18\x02 \x03(\x0b\x32\x11.ray.rpc.ViewDataR\x08viewData\x12\x1f\n\x0bnum_workers\x18\x03 \x01(\rR\nnumWorkers\x12<\n\x10infeasible_tasks\x18\x04 \x03(\x0b\x32\x11.ray.rpc.TaskSpecR\x0finfeasibleTasks\x12\x32\n\x0bready_tasks\x18\x05 \x03(\x0b\x32\x11.ray.rpc.TaskSpecR\nreadyTasks"\x11\n\x0fGlobalGCRequest"\x0f\n\rGlobalGCReply"\x1f\n\x1d\x46ormatGlobalMemoryInfoRequest"D\n\x1b\x46ormatGlobalMemoryInfoReply\x12%\n\x0ememory_summary\x18\x01 \x01(\tR\rmemorySummary2\x94\x05\n\x12NodeManagerService\x12Z\n\x12RequestWorkerLease\x12".ray.rpc.RequestWorkerLeaseRequest\x1a .ray.rpc.RequestWorkerLeaseReply\x12H\n\x0cReturnWorker\x12\x1c.ray.rpc.ReturnWorkerRequest\x1a\x1a.ray.rpc.ReturnWorkerReply\x12W\n\x11\x43\x61ncelWorkerLease\x12!.ray.rpc.CancelWorkerLeaseRequest\x1a\x1f.ray.rpc.CancelWorkerLeaseReply\x12\x45\n\x0b\x46orwardTask\x12\x1b.ray.rpc.ForwardTaskRequest\x1a\x19.ray.rpc.ForwardTaskReply\x12H\n\x0cPinObjectIDs\x12\x1c.ray.rpc.PinObjectIDsRequest\x1a\x1a.ray.rpc.PinObjectIDsReply\x12H\n\x0cGetNodeStats\x12\x1c.ray.rpc.GetNodeStatsRequest\x1a\x1a.ray.rpc.GetNodeStatsReply\x12<\n\x08GlobalGC\x12\x18.ray.rpc.GlobalGCRequest\x1a\x16.ray.rpc.GlobalGCReply\x12\x66\n\x16\x46ormatGlobalMemoryInfo\x12&.ray.rpc.FormatGlobalMemoryInfoRequest\x1a$.ray.rpc.FormatGlobalMemoryInfoReplyb\x06proto3'
+    ),
+    dependencies=[src_dot_ray_dot_protobuf_dot_common__pb2.DESCRIPTOR,],
+)
 
 
 _REQUESTWORKERLEASEREQUEST = _descriptor.Descriptor(
-  name='RequestWorkerLeaseRequest',
-  full_name='ray.rpc.RequestWorkerLeaseRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resource_spec', full_name='ray.rpc.RequestWorkerLeaseRequest.resource_spec', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceSpec', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=79,
-  serialized_end=162,
+    name="RequestWorkerLeaseRequest",
+    full_name="ray.rpc.RequestWorkerLeaseRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="resource_spec",
+            full_name="ray.rpc.RequestWorkerLeaseRequest.resource_spec",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceSpec",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=79,
+    serialized_end=162,
 )
 
 
 _REQUESTWORKERLEASEREPLY = _descriptor.Descriptor(
-  name='RequestWorkerLeaseReply',
-  full_name='ray.rpc.RequestWorkerLeaseReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='worker_address', full_name='ray.rpc.RequestWorkerLeaseReply.worker_address', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='retry_at_raylet_address', full_name='ray.rpc.RequestWorkerLeaseReply.retry_at_raylet_address', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='retryAtRayletAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='resource_mapping', full_name='ray.rpc.RequestWorkerLeaseReply.resource_mapping', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='resourceMapping', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='canceled', full_name='ray.rpc.RequestWorkerLeaseReply.canceled', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='canceled', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=165,
-  serialized_end=418,
+    name="RequestWorkerLeaseReply",
+    full_name="ray.rpc.RequestWorkerLeaseReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="worker_address",
+            full_name="ray.rpc.RequestWorkerLeaseReply.worker_address",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="retry_at_raylet_address",
+            full_name="ray.rpc.RequestWorkerLeaseReply.retry_at_raylet_address",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="retryAtRayletAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resource_mapping",
+            full_name="ray.rpc.RequestWorkerLeaseReply.resource_mapping",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="resourceMapping",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="canceled",
+            full_name="ray.rpc.RequestWorkerLeaseReply.canceled",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="canceled",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=165,
+    serialized_end=418,
 )
 
 
 _RETURNWORKERREQUEST = _descriptor.Descriptor(
-  name='ReturnWorkerRequest',
-  full_name='ray.rpc.ReturnWorkerRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='worker_port', full_name='ray.rpc.ReturnWorkerRequest.worker_port', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workerPort', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='worker_id', full_name='ray.rpc.ReturnWorkerRequest.worker_id', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workerId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='disconnect_worker', full_name='ray.rpc.ReturnWorkerRequest.disconnect_worker', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='disconnectWorker', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=421,
-  serialized_end=549,
+    name="ReturnWorkerRequest",
+    full_name="ray.rpc.ReturnWorkerRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="worker_port",
+            full_name="ray.rpc.ReturnWorkerRequest.worker_port",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workerPort",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="worker_id",
+            full_name="ray.rpc.ReturnWorkerRequest.worker_id",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workerId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="disconnect_worker",
+            full_name="ray.rpc.ReturnWorkerRequest.disconnect_worker",
+            index=2,
+            number=3,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="disconnectWorker",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=421,
+    serialized_end=549,
 )
 
 
 _RETURNWORKERREPLY = _descriptor.Descriptor(
-  name='ReturnWorkerReply',
-  full_name='ray.rpc.ReturnWorkerReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=551,
-  serialized_end=570,
+    name="ReturnWorkerReply",
+    full_name="ray.rpc.ReturnWorkerReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=551,
+    serialized_end=570,
 )
 
 
 _CANCELWORKERLEASEREQUEST = _descriptor.Descriptor(
-  name='CancelWorkerLeaseRequest',
-  full_name='ray.rpc.CancelWorkerLeaseRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_id', full_name='ray.rpc.CancelWorkerLeaseRequest.task_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskId', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=572,
-  serialized_end=623,
+    name="CancelWorkerLeaseRequest",
+    full_name="ray.rpc.CancelWorkerLeaseRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="task_id",
+            full_name="ray.rpc.CancelWorkerLeaseRequest.task_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskId",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=572,
+    serialized_end=623,
 )
 
 
 _CANCELWORKERLEASEREPLY = _descriptor.Descriptor(
-  name='CancelWorkerLeaseReply',
-  full_name='ray.rpc.CancelWorkerLeaseReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='ray.rpc.CancelWorkerLeaseReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='success', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=625,
-  serialized_end=675,
+    name="CancelWorkerLeaseReply",
+    full_name="ray.rpc.CancelWorkerLeaseReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="ray.rpc.CancelWorkerLeaseReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="success",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=625,
+    serialized_end=675,
 )
 
 
 _FORWARDTASKREQUEST = _descriptor.Descriptor(
-  name='ForwardTaskRequest',
-  full_name='ray.rpc.ForwardTaskRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_id', full_name='ray.rpc.ForwardTaskRequest.task_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='taskId', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='uncommitted_tasks', full_name='ray.rpc.ForwardTaskRequest.uncommitted_tasks', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='uncommittedTasks', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=677,
-  serialized_end=782,
+    name="ForwardTaskRequest",
+    full_name="ray.rpc.ForwardTaskRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="task_id",
+            full_name="ray.rpc.ForwardTaskRequest.task_id",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="taskId",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="uncommitted_tasks",
+            full_name="ray.rpc.ForwardTaskRequest.uncommitted_tasks",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="uncommittedTasks",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=677,
+    serialized_end=782,
 )
 
 
 _FORWARDTASKREPLY = _descriptor.Descriptor(
-  name='ForwardTaskReply',
-  full_name='ray.rpc.ForwardTaskReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=784,
-  serialized_end=802,
+    name="ForwardTaskReply",
+    full_name="ray.rpc.ForwardTaskReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=784,
+    serialized_end=802,
 )
 
 
 _PINOBJECTIDSREQUEST = _descriptor.Descriptor(
-  name='PinObjectIDsRequest',
-  full_name='ray.rpc.PinObjectIDsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='owner_address', full_name='ray.rpc.PinObjectIDsRequest.owner_address', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='ownerAddress', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_ids', full_name='ray.rpc.PinObjectIDsRequest.object_ids', index=1,
-      number=2, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='objectIds', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=804,
-  serialized_end=911,
+    name="PinObjectIDsRequest",
+    full_name="ray.rpc.PinObjectIDsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="owner_address",
+            full_name="ray.rpc.PinObjectIDsRequest.owner_address",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="ownerAddress",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="object_ids",
+            full_name="ray.rpc.PinObjectIDsRequest.object_ids",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="objectIds",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=804,
+    serialized_end=911,
 )
 
 
 _PINOBJECTIDSREPLY = _descriptor.Descriptor(
-  name='PinObjectIDsReply',
-  full_name='ray.rpc.PinObjectIDsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=913,
-  serialized_end=932,
+    name="PinObjectIDsReply",
+    full_name="ray.rpc.PinObjectIDsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=913,
+    serialized_end=932,
 )
 
 
 _GETNODESTATSREQUEST = _descriptor.Descriptor(
-  name='GetNodeStatsRequest',
-  full_name='ray.rpc.GetNodeStatsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='include_memory_info', full_name='ray.rpc.GetNodeStatsRequest.include_memory_info', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='includeMemoryInfo', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=934,
-  serialized_end=1003,
+    name="GetNodeStatsRequest",
+    full_name="ray.rpc.GetNodeStatsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="include_memory_info",
+            full_name="ray.rpc.GetNodeStatsRequest.include_memory_info",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="includeMemoryInfo",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=934,
+    serialized_end=1003,
 )
 
 
 _WORKERSTATS = _descriptor.Descriptor(
-  name='WorkerStats',
-  full_name='ray.rpc.WorkerStats',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='pid', full_name='ray.rpc.WorkerStats.pid', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='pid', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='is_driver', full_name='ray.rpc.WorkerStats.is_driver', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='isDriver', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='core_worker_stats', full_name='ray.rpc.WorkerStats.core_worker_stats', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='coreWorkerStats', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='fetch_error', full_name='ray.rpc.WorkerStats.fetch_error', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='fetchError', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1006,
-  serialized_end=1169,
+    name="WorkerStats",
+    full_name="ray.rpc.WorkerStats",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="pid",
+            full_name="ray.rpc.WorkerStats.pid",
+            index=0,
+            number=1,
+            type=13,
+            cpp_type=3,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="pid",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="is_driver",
+            full_name="ray.rpc.WorkerStats.is_driver",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="isDriver",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="core_worker_stats",
+            full_name="ray.rpc.WorkerStats.core_worker_stats",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="coreWorkerStats",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="fetch_error",
+            full_name="ray.rpc.WorkerStats.fetch_error",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="fetchError",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1006,
+    serialized_end=1169,
 )
 
 
 _GETNODESTATSREPLY = _descriptor.Descriptor(
-  name='GetNodeStatsReply',
-  full_name='ray.rpc.GetNodeStatsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='workers_stats', full_name='ray.rpc.GetNodeStatsReply.workers_stats', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='workersStats', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='view_data', full_name='ray.rpc.GetNodeStatsReply.view_data', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='viewData', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='num_workers', full_name='ray.rpc.GetNodeStatsReply.num_workers', index=2,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='numWorkers', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='infeasible_tasks', full_name='ray.rpc.GetNodeStatsReply.infeasible_tasks', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='infeasibleTasks', file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='ready_tasks', full_name='ray.rpc.GetNodeStatsReply.ready_tasks', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='readyTasks', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1172,
-  serialized_end=1445,
+    name="GetNodeStatsReply",
+    full_name="ray.rpc.GetNodeStatsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="workers_stats",
+            full_name="ray.rpc.GetNodeStatsReply.workers_stats",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="workersStats",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="view_data",
+            full_name="ray.rpc.GetNodeStatsReply.view_data",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="viewData",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="num_workers",
+            full_name="ray.rpc.GetNodeStatsReply.num_workers",
+            index=2,
+            number=3,
+            type=13,
+            cpp_type=3,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="numWorkers",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="infeasible_tasks",
+            full_name="ray.rpc.GetNodeStatsReply.infeasible_tasks",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="infeasibleTasks",
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="ready_tasks",
+            full_name="ray.rpc.GetNodeStatsReply.ready_tasks",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="readyTasks",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1172,
+    serialized_end=1445,
 )
 
 
 _GLOBALGCREQUEST = _descriptor.Descriptor(
-  name='GlobalGCRequest',
-  full_name='ray.rpc.GlobalGCRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1447,
-  serialized_end=1464,
+    name="GlobalGCRequest",
+    full_name="ray.rpc.GlobalGCRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1447,
+    serialized_end=1464,
 )
 
 
 _GLOBALGCREPLY = _descriptor.Descriptor(
-  name='GlobalGCReply',
-  full_name='ray.rpc.GlobalGCReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1466,
-  serialized_end=1481,
+    name="GlobalGCReply",
+    full_name="ray.rpc.GlobalGCReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1466,
+    serialized_end=1481,
 )
 
 
 _FORMATGLOBALMEMORYINFOREQUEST = _descriptor.Descriptor(
-  name='FormatGlobalMemoryInfoRequest',
-  full_name='ray.rpc.FormatGlobalMemoryInfoRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1483,
-  serialized_end=1514,
+    name="FormatGlobalMemoryInfoRequest",
+    full_name="ray.rpc.FormatGlobalMemoryInfoRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1483,
+    serialized_end=1514,
 )
 
 
 _FORMATGLOBALMEMORYINFOREPLY = _descriptor.Descriptor(
-  name='FormatGlobalMemoryInfoReply',
-  full_name='ray.rpc.FormatGlobalMemoryInfoReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='memory_summary', full_name='ray.rpc.FormatGlobalMemoryInfoReply.memory_summary', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='memorySummary', file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1516,
-  serialized_end=1584,
+    name="FormatGlobalMemoryInfoReply",
+    full_name="ray.rpc.FormatGlobalMemoryInfoReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="memory_summary",
+            full_name="ray.rpc.FormatGlobalMemoryInfoReply.memory_summary",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            json_name="memorySummary",
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1516,
+    serialized_end=1584,
 )
 
-_REQUESTWORKERLEASEREQUEST.fields_by_name['resource_spec'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
-_REQUESTWORKERLEASEREPLY.fields_by_name['worker_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_REQUESTWORKERLEASEREPLY.fields_by_name['retry_at_raylet_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_REQUESTWORKERLEASEREPLY.fields_by_name['resource_mapping'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._RESOURCEMAPENTRY
-_FORWARDTASKREQUEST.fields_by_name['uncommitted_tasks'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
-_PINOBJECTIDSREQUEST.fields_by_name['owner_address'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
-_WORKERSTATS.fields_by_name['core_worker_stats'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._COREWORKERSTATS
-_GETNODESTATSREPLY.fields_by_name['workers_stats'].message_type = _WORKERSTATS
-_GETNODESTATSREPLY.fields_by_name['view_data'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._VIEWDATA
-_GETNODESTATSREPLY.fields_by_name['infeasible_tasks'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
-_GETNODESTATSREPLY.fields_by_name['ready_tasks'].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
-DESCRIPTOR.message_types_by_name['RequestWorkerLeaseRequest'] = _REQUESTWORKERLEASEREQUEST
-DESCRIPTOR.message_types_by_name['RequestWorkerLeaseReply'] = _REQUESTWORKERLEASEREPLY
-DESCRIPTOR.message_types_by_name['ReturnWorkerRequest'] = _RETURNWORKERREQUEST
-DESCRIPTOR.message_types_by_name['ReturnWorkerReply'] = _RETURNWORKERREPLY
-DESCRIPTOR.message_types_by_name['CancelWorkerLeaseRequest'] = _CANCELWORKERLEASEREQUEST
-DESCRIPTOR.message_types_by_name['CancelWorkerLeaseReply'] = _CANCELWORKERLEASEREPLY
-DESCRIPTOR.message_types_by_name['ForwardTaskRequest'] = _FORWARDTASKREQUEST
-DESCRIPTOR.message_types_by_name['ForwardTaskReply'] = _FORWARDTASKREPLY
-DESCRIPTOR.message_types_by_name['PinObjectIDsRequest'] = _PINOBJECTIDSREQUEST
-DESCRIPTOR.message_types_by_name['PinObjectIDsReply'] = _PINOBJECTIDSREPLY
-DESCRIPTOR.message_types_by_name['GetNodeStatsRequest'] = _GETNODESTATSREQUEST
-DESCRIPTOR.message_types_by_name['WorkerStats'] = _WORKERSTATS
-DESCRIPTOR.message_types_by_name['GetNodeStatsReply'] = _GETNODESTATSREPLY
-DESCRIPTOR.message_types_by_name['GlobalGCRequest'] = _GLOBALGCREQUEST
-DESCRIPTOR.message_types_by_name['GlobalGCReply'] = _GLOBALGCREPLY
-DESCRIPTOR.message_types_by_name['FormatGlobalMemoryInfoRequest'] = _FORMATGLOBALMEMORYINFOREQUEST
-DESCRIPTOR.message_types_by_name['FormatGlobalMemoryInfoReply'] = _FORMATGLOBALMEMORYINFOREPLY
+_REQUESTWORKERLEASEREQUEST.fields_by_name[
+    "resource_spec"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
+_REQUESTWORKERLEASEREPLY.fields_by_name[
+    "worker_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_REQUESTWORKERLEASEREPLY.fields_by_name[
+    "retry_at_raylet_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_REQUESTWORKERLEASEREPLY.fields_by_name[
+    "resource_mapping"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._RESOURCEMAPENTRY
+_FORWARDTASKREQUEST.fields_by_name[
+    "uncommitted_tasks"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASK
+_PINOBJECTIDSREQUEST.fields_by_name[
+    "owner_address"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._ADDRESS
+_WORKERSTATS.fields_by_name[
+    "core_worker_stats"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._COREWORKERSTATS
+_GETNODESTATSREPLY.fields_by_name["workers_stats"].message_type = _WORKERSTATS
+_GETNODESTATSREPLY.fields_by_name[
+    "view_data"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._VIEWDATA
+_GETNODESTATSREPLY.fields_by_name[
+    "infeasible_tasks"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
+_GETNODESTATSREPLY.fields_by_name[
+    "ready_tasks"
+].message_type = src_dot_ray_dot_protobuf_dot_common__pb2._TASKSPEC
+DESCRIPTOR.message_types_by_name[
+    "RequestWorkerLeaseRequest"
+] = _REQUESTWORKERLEASEREQUEST
+DESCRIPTOR.message_types_by_name["RequestWorkerLeaseReply"] = _REQUESTWORKERLEASEREPLY
+DESCRIPTOR.message_types_by_name["ReturnWorkerRequest"] = _RETURNWORKERREQUEST
+DESCRIPTOR.message_types_by_name["ReturnWorkerReply"] = _RETURNWORKERREPLY
+DESCRIPTOR.message_types_by_name["CancelWorkerLeaseRequest"] = _CANCELWORKERLEASEREQUEST
+DESCRIPTOR.message_types_by_name["CancelWorkerLeaseReply"] = _CANCELWORKERLEASEREPLY
+DESCRIPTOR.message_types_by_name["ForwardTaskRequest"] = _FORWARDTASKREQUEST
+DESCRIPTOR.message_types_by_name["ForwardTaskReply"] = _FORWARDTASKREPLY
+DESCRIPTOR.message_types_by_name["PinObjectIDsRequest"] = _PINOBJECTIDSREQUEST
+DESCRIPTOR.message_types_by_name["PinObjectIDsReply"] = _PINOBJECTIDSREPLY
+DESCRIPTOR.message_types_by_name["GetNodeStatsRequest"] = _GETNODESTATSREQUEST
+DESCRIPTOR.message_types_by_name["WorkerStats"] = _WORKERSTATS
+DESCRIPTOR.message_types_by_name["GetNodeStatsReply"] = _GETNODESTATSREPLY
+DESCRIPTOR.message_types_by_name["GlobalGCRequest"] = _GLOBALGCREQUEST
+DESCRIPTOR.message_types_by_name["GlobalGCReply"] = _GLOBALGCREPLY
+DESCRIPTOR.message_types_by_name[
+    "FormatGlobalMemoryInfoRequest"
+] = _FORMATGLOBALMEMORYINFOREQUEST
+DESCRIPTOR.message_types_by_name[
+    "FormatGlobalMemoryInfoReply"
+] = _FORMATGLOBALMEMORYINFOREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-RequestWorkerLeaseRequest = _reflection.GeneratedProtocolMessageType('RequestWorkerLeaseRequest', (_message.Message,), {
-  'DESCRIPTOR' : _REQUESTWORKERLEASEREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.RequestWorkerLeaseRequest)
-  })
+RequestWorkerLeaseRequest = _reflection.GeneratedProtocolMessageType(
+    "RequestWorkerLeaseRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REQUESTWORKERLEASEREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.RequestWorkerLeaseRequest)
+    },
+)
 _sym_db.RegisterMessage(RequestWorkerLeaseRequest)
 
-RequestWorkerLeaseReply = _reflection.GeneratedProtocolMessageType('RequestWorkerLeaseReply', (_message.Message,), {
-  'DESCRIPTOR' : _REQUESTWORKERLEASEREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.RequestWorkerLeaseReply)
-  })
+RequestWorkerLeaseReply = _reflection.GeneratedProtocolMessageType(
+    "RequestWorkerLeaseReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REQUESTWORKERLEASEREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.RequestWorkerLeaseReply)
+    },
+)
 _sym_db.RegisterMessage(RequestWorkerLeaseReply)
 
-ReturnWorkerRequest = _reflection.GeneratedProtocolMessageType('ReturnWorkerRequest', (_message.Message,), {
-  'DESCRIPTOR' : _RETURNWORKERREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ReturnWorkerRequest)
-  })
+ReturnWorkerRequest = _reflection.GeneratedProtocolMessageType(
+    "ReturnWorkerRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RETURNWORKERREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ReturnWorkerRequest)
+    },
+)
 _sym_db.RegisterMessage(ReturnWorkerRequest)
 
-ReturnWorkerReply = _reflection.GeneratedProtocolMessageType('ReturnWorkerReply', (_message.Message,), {
-  'DESCRIPTOR' : _RETURNWORKERREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ReturnWorkerReply)
-  })
+ReturnWorkerReply = _reflection.GeneratedProtocolMessageType(
+    "ReturnWorkerReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RETURNWORKERREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ReturnWorkerReply)
+    },
+)
 _sym_db.RegisterMessage(ReturnWorkerReply)
 
-CancelWorkerLeaseRequest = _reflection.GeneratedProtocolMessageType('CancelWorkerLeaseRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CANCELWORKERLEASEREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.CancelWorkerLeaseRequest)
-  })
+CancelWorkerLeaseRequest = _reflection.GeneratedProtocolMessageType(
+    "CancelWorkerLeaseRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CANCELWORKERLEASEREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.CancelWorkerLeaseRequest)
+    },
+)
 _sym_db.RegisterMessage(CancelWorkerLeaseRequest)
 
-CancelWorkerLeaseReply = _reflection.GeneratedProtocolMessageType('CancelWorkerLeaseReply', (_message.Message,), {
-  'DESCRIPTOR' : _CANCELWORKERLEASEREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.CancelWorkerLeaseReply)
-  })
+CancelWorkerLeaseReply = _reflection.GeneratedProtocolMessageType(
+    "CancelWorkerLeaseReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CANCELWORKERLEASEREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.CancelWorkerLeaseReply)
+    },
+)
 _sym_db.RegisterMessage(CancelWorkerLeaseReply)
 
-ForwardTaskRequest = _reflection.GeneratedProtocolMessageType('ForwardTaskRequest', (_message.Message,), {
-  'DESCRIPTOR' : _FORWARDTASKREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ForwardTaskRequest)
-  })
+ForwardTaskRequest = _reflection.GeneratedProtocolMessageType(
+    "ForwardTaskRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FORWARDTASKREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ForwardTaskRequest)
+    },
+)
 _sym_db.RegisterMessage(ForwardTaskRequest)
 
-ForwardTaskReply = _reflection.GeneratedProtocolMessageType('ForwardTaskReply', (_message.Message,), {
-  'DESCRIPTOR' : _FORWARDTASKREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.ForwardTaskReply)
-  })
+ForwardTaskReply = _reflection.GeneratedProtocolMessageType(
+    "ForwardTaskReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FORWARDTASKREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.ForwardTaskReply)
+    },
+)
 _sym_db.RegisterMessage(ForwardTaskReply)
 
-PinObjectIDsRequest = _reflection.GeneratedProtocolMessageType('PinObjectIDsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PINOBJECTIDSREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PinObjectIDsRequest)
-  })
+PinObjectIDsRequest = _reflection.GeneratedProtocolMessageType(
+    "PinObjectIDsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PINOBJECTIDSREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PinObjectIDsRequest)
+    },
+)
 _sym_db.RegisterMessage(PinObjectIDsRequest)
 
-PinObjectIDsReply = _reflection.GeneratedProtocolMessageType('PinObjectIDsReply', (_message.Message,), {
-  'DESCRIPTOR' : _PINOBJECTIDSREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.PinObjectIDsReply)
-  })
+PinObjectIDsReply = _reflection.GeneratedProtocolMessageType(
+    "PinObjectIDsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PINOBJECTIDSREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.PinObjectIDsReply)
+    },
+)
 _sym_db.RegisterMessage(PinObjectIDsReply)
 
-GetNodeStatsRequest = _reflection.GeneratedProtocolMessageType('GetNodeStatsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETNODESTATSREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetNodeStatsRequest)
-  })
+GetNodeStatsRequest = _reflection.GeneratedProtocolMessageType(
+    "GetNodeStatsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETNODESTATSREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetNodeStatsRequest)
+    },
+)
 _sym_db.RegisterMessage(GetNodeStatsRequest)
 
-WorkerStats = _reflection.GeneratedProtocolMessageType('WorkerStats', (_message.Message,), {
-  'DESCRIPTOR' : _WORKERSTATS,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.WorkerStats)
-  })
+WorkerStats = _reflection.GeneratedProtocolMessageType(
+    "WorkerStats",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WORKERSTATS,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.WorkerStats)
+    },
+)
 _sym_db.RegisterMessage(WorkerStats)
 
-GetNodeStatsReply = _reflection.GeneratedProtocolMessageType('GetNodeStatsReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETNODESTATSREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GetNodeStatsReply)
-  })
+GetNodeStatsReply = _reflection.GeneratedProtocolMessageType(
+    "GetNodeStatsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETNODESTATSREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GetNodeStatsReply)
+    },
+)
 _sym_db.RegisterMessage(GetNodeStatsReply)
 
-GlobalGCRequest = _reflection.GeneratedProtocolMessageType('GlobalGCRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GLOBALGCREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GlobalGCRequest)
-  })
+GlobalGCRequest = _reflection.GeneratedProtocolMessageType(
+    "GlobalGCRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GLOBALGCREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GlobalGCRequest)
+    },
+)
 _sym_db.RegisterMessage(GlobalGCRequest)
 
-GlobalGCReply = _reflection.GeneratedProtocolMessageType('GlobalGCReply', (_message.Message,), {
-  'DESCRIPTOR' : _GLOBALGCREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.GlobalGCReply)
-  })
+GlobalGCReply = _reflection.GeneratedProtocolMessageType(
+    "GlobalGCReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GLOBALGCREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.GlobalGCReply)
+    },
+)
 _sym_db.RegisterMessage(GlobalGCReply)
 
-FormatGlobalMemoryInfoRequest = _reflection.GeneratedProtocolMessageType('FormatGlobalMemoryInfoRequest', (_message.Message,), {
-  'DESCRIPTOR' : _FORMATGLOBALMEMORYINFOREQUEST,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.FormatGlobalMemoryInfoRequest)
-  })
+FormatGlobalMemoryInfoRequest = _reflection.GeneratedProtocolMessageType(
+    "FormatGlobalMemoryInfoRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FORMATGLOBALMEMORYINFOREQUEST,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.FormatGlobalMemoryInfoRequest)
+    },
+)
 _sym_db.RegisterMessage(FormatGlobalMemoryInfoRequest)
 
-FormatGlobalMemoryInfoReply = _reflection.GeneratedProtocolMessageType('FormatGlobalMemoryInfoReply', (_message.Message,), {
-  'DESCRIPTOR' : _FORMATGLOBALMEMORYINFOREPLY,
-  '__module__' : 'src.ray.protobuf.node_manager_pb2'
-  # @@protoc_insertion_point(class_scope:ray.rpc.FormatGlobalMemoryInfoReply)
-  })
+FormatGlobalMemoryInfoReply = _reflection.GeneratedProtocolMessageType(
+    "FormatGlobalMemoryInfoReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FORMATGLOBALMEMORYINFOREPLY,
+        "__module__": "src.ray.protobuf.node_manager_pb2"
+        # @@protoc_insertion_point(class_scope:ray.rpc.FormatGlobalMemoryInfoReply)
+    },
+)
 _sym_db.RegisterMessage(FormatGlobalMemoryInfoReply)
 
 
-
 _NODEMANAGERSERVICE = _descriptor.ServiceDescriptor(
-  name='NodeManagerService',
-  full_name='ray.rpc.NodeManagerService',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  serialized_start=1587,
-  serialized_end=2247,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='RequestWorkerLease',
-    full_name='ray.rpc.NodeManagerService.RequestWorkerLease',
+    name="NodeManagerService",
+    full_name="ray.rpc.NodeManagerService",
+    file=DESCRIPTOR,
     index=0,
-    containing_service=None,
-    input_type=_REQUESTWORKERLEASEREQUEST,
-    output_type=_REQUESTWORKERLEASEREPLY,
     serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ReturnWorker',
-    full_name='ray.rpc.NodeManagerService.ReturnWorker',
-    index=1,
-    containing_service=None,
-    input_type=_RETURNWORKERREQUEST,
-    output_type=_RETURNWORKERREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='CancelWorkerLease',
-    full_name='ray.rpc.NodeManagerService.CancelWorkerLease',
-    index=2,
-    containing_service=None,
-    input_type=_CANCELWORKERLEASEREQUEST,
-    output_type=_CANCELWORKERLEASEREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ForwardTask',
-    full_name='ray.rpc.NodeManagerService.ForwardTask',
-    index=3,
-    containing_service=None,
-    input_type=_FORWARDTASKREQUEST,
-    output_type=_FORWARDTASKREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='PinObjectIDs',
-    full_name='ray.rpc.NodeManagerService.PinObjectIDs',
-    index=4,
-    containing_service=None,
-    input_type=_PINOBJECTIDSREQUEST,
-    output_type=_PINOBJECTIDSREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetNodeStats',
-    full_name='ray.rpc.NodeManagerService.GetNodeStats',
-    index=5,
-    containing_service=None,
-    input_type=_GETNODESTATSREQUEST,
-    output_type=_GETNODESTATSREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GlobalGC',
-    full_name='ray.rpc.NodeManagerService.GlobalGC',
-    index=6,
-    containing_service=None,
-    input_type=_GLOBALGCREQUEST,
-    output_type=_GLOBALGCREPLY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='FormatGlobalMemoryInfo',
-    full_name='ray.rpc.NodeManagerService.FormatGlobalMemoryInfo',
-    index=7,
-    containing_service=None,
-    input_type=_FORMATGLOBALMEMORYINFOREQUEST,
-    output_type=_FORMATGLOBALMEMORYINFOREPLY,
-    serialized_options=None,
-  ),
-])
+    serialized_start=1587,
+    serialized_end=2247,
+    methods=[
+        _descriptor.MethodDescriptor(
+            name="RequestWorkerLease",
+            full_name="ray.rpc.NodeManagerService.RequestWorkerLease",
+            index=0,
+            containing_service=None,
+            input_type=_REQUESTWORKERLEASEREQUEST,
+            output_type=_REQUESTWORKERLEASEREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="ReturnWorker",
+            full_name="ray.rpc.NodeManagerService.ReturnWorker",
+            index=1,
+            containing_service=None,
+            input_type=_RETURNWORKERREQUEST,
+            output_type=_RETURNWORKERREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="CancelWorkerLease",
+            full_name="ray.rpc.NodeManagerService.CancelWorkerLease",
+            index=2,
+            containing_service=None,
+            input_type=_CANCELWORKERLEASEREQUEST,
+            output_type=_CANCELWORKERLEASEREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="ForwardTask",
+            full_name="ray.rpc.NodeManagerService.ForwardTask",
+            index=3,
+            containing_service=None,
+            input_type=_FORWARDTASKREQUEST,
+            output_type=_FORWARDTASKREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="PinObjectIDs",
+            full_name="ray.rpc.NodeManagerService.PinObjectIDs",
+            index=4,
+            containing_service=None,
+            input_type=_PINOBJECTIDSREQUEST,
+            output_type=_PINOBJECTIDSREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GetNodeStats",
+            full_name="ray.rpc.NodeManagerService.GetNodeStats",
+            index=5,
+            containing_service=None,
+            input_type=_GETNODESTATSREQUEST,
+            output_type=_GETNODESTATSREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GlobalGC",
+            full_name="ray.rpc.NodeManagerService.GlobalGC",
+            index=6,
+            containing_service=None,
+            input_type=_GLOBALGCREQUEST,
+            output_type=_GLOBALGCREPLY,
+            serialized_options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="FormatGlobalMemoryInfo",
+            full_name="ray.rpc.NodeManagerService.FormatGlobalMemoryInfo",
+            index=7,
+            containing_service=None,
+            input_type=_FORMATGLOBALMEMORYINFOREQUEST,
+            output_type=_FORMATGLOBALMEMORYINFOREPLY,
+            serialized_options=None,
+        ),
+    ],
+)
 _sym_db.RegisterServiceDescriptor(_NODEMANAGERSERVICE)
 
-DESCRIPTOR.services_by_name['NodeManagerService'] = _NODEMANAGERSERVICE
+DESCRIPTOR.services_by_name["NodeManagerService"] = _NODEMANAGERSERVICE
 
 # @@protoc_insertion_point(module_scope)

@@ -28,8 +28,7 @@ def _get_actor(name):
         actor_name = _calculate_key(name)
         pickled_state = _internal_kv_get(actor_name)
         if pickled_state is None:
-            raise ValueError(
-                "The actor with name={} doesn't exist".format(name))
+            raise ValueError("The actor with name={} doesn't exist".format(name))
         handle = pickle.loads(pickled_state)
         # If the actor state is dead, that means that this name is reusable.
         # We don't delete the name entry from key value store when
@@ -53,8 +52,10 @@ def get_actor(name):
     Returns:
         The ActorHandle object corresponding to the name.
     """
-    logger.warning("ray.util.get_actor has been moved to ray.get_actor and "
-                   "will be removed in the future.")
+    logger.warning(
+        "ray.util.get_actor has been moved to ray.get_actor and "
+        "will be removed in the future."
+    )
     return _get_actor(name)
 
 
@@ -62,8 +63,7 @@ def _register_actor(name, actor_handle):
     if not isinstance(name, str):
         raise TypeError("The name argument must be a string.")
     if not isinstance(actor_handle, ray.actor.ActorHandle):
-        raise TypeError("The actor_handle argument must be an ActorHandle "
-                        "object.")
+        raise TypeError("The actor_handle argument must be an ActorHandle " "object.")
     actor_name = _calculate_key(name)
 
     # First check if the actor already exists.
@@ -87,6 +87,8 @@ def register_actor(name, actor_handle):
         name: The name of the named actor.
         actor_handle: The actor object to be associated with this name
     """
-    logger.warning("ray.util.register_actor is deprecated. To create a "
-                   "named, detached actor, use Actor.options(name=\"name\").")
+    logger.warning(
+        "ray.util.register_actor is deprecated. To create a "
+        'named, detached actor, use Actor.options(name="name").'
+    )
     return _register_actor(name, actor_handle)

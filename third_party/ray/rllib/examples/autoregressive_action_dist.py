@@ -15,10 +15,14 @@ import argparse
 import ray
 from ray import tune
 from ray.rllib.examples.env.correlated_actions_env import CorrelatedActionsEnv
-from ray.rllib.examples.models.autoregressive_action_model import \
-    AutoregressiveActionModel, TorchAutoregressiveActionModel
-from ray.rllib.examples.models.autoregressive_action_dist import \
-    BinaryAutoregressiveDistribution, TorchBinaryAutoregressiveDistribution
+from ray.rllib.examples.models.autoregressive_action_model import (
+    AutoregressiveActionModel,
+    TorchAutoregressiveActionModel,
+)
+from ray.rllib.examples.models.autoregressive_action_dist import (
+    BinaryAutoregressiveDistribution,
+    TorchBinaryAutoregressiveDistribution,
+)
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.test_utils import check_learning_achieved
 
@@ -35,11 +39,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
     ray.init(num_cpus=args.num_cpus or None)
     ModelCatalog.register_custom_model(
-        "autoregressive_model", TorchAutoregressiveActionModel
-        if args.torch else AutoregressiveActionModel)
+        "autoregressive_model",
+        TorchAutoregressiveActionModel if args.torch else AutoregressiveActionModel,
+    )
     ModelCatalog.register_custom_action_dist(
-        "binary_autoreg_dist", TorchBinaryAutoregressiveDistribution
-        if args.torch else BinaryAutoregressiveDistribution)
+        "binary_autoreg_dist",
+        TorchBinaryAutoregressiveDistribution
+        if args.torch
+        else BinaryAutoregressiveDistribution,
+    )
 
     config = {
         "env": CorrelatedActionsEnv,

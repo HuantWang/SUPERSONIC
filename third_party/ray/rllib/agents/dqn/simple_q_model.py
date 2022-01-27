@@ -14,13 +14,9 @@ class SimpleQModel(TFModelV2):
     Note that this class by itself is not a valid model unless you
     implement forward() in a subclass."""
 
-    def __init__(self,
-                 obs_space,
-                 action_space,
-                 num_outputs,
-                 model_config,
-                 name,
-                 q_hiddens=(256, )):
+    def __init__(
+        self, obs_space, action_space, num_outputs, model_config, name, q_hiddens=(256,)
+    ):
         """Initialize variables of this model.
 
         Extra model kwargs:
@@ -33,21 +29,22 @@ class SimpleQModel(TFModelV2):
         should be defined in subclasses of SimpleQModel.
         """
 
-        super(SimpleQModel, self).__init__(obs_space, action_space,
-                                           num_outputs, model_config, name)
+        super(SimpleQModel, self).__init__(
+            obs_space, action_space, num_outputs, model_config, name
+        )
 
         # setup the Q head output (i.e., model for get_q_values)
-        self.model_out = tf.keras.layers.Input(
-            shape=(num_outputs, ), name="model_out")
+        self.model_out = tf.keras.layers.Input(shape=(num_outputs,), name="model_out")
 
         if q_hiddens:
             last_layer = self.model_out
             for i, n in enumerate(q_hiddens):
                 last_layer = tf.keras.layers.Dense(
-                    n, name="q_hidden_{}".format(i),
-                    activation=tf.nn.relu)(last_layer)
+                    n, name="q_hidden_{}".format(i), activation=tf.nn.relu
+                )(last_layer)
             q_out = tf.keras.layers.Dense(
-                action_space.n, activation=None, name="q_out")(last_layer)
+                action_space.n, activation=None, name="q_out"
+            )(last_layer)
         else:
             q_out = self.model_out
 

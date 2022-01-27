@@ -27,20 +27,20 @@ def mako_plugin(dictionary):
 
   """
 
-    targets = dictionary.get('targets')
-    default_platforms = ['windows', 'posix', 'linux', 'mac']
+    targets = dictionary.get("targets")
+    default_platforms = ["windows", "posix", "linux", "mac"]
 
     for tgt in targets:
-        tgt['flaky'] = tgt.get('flaky', False)
-        tgt['platforms'] = sorted(tgt.get('platforms', default_platforms))
-        tgt['ci_platforms'] = sorted(tgt.get('ci_platforms', tgt['platforms']))
-        tgt['boringssl'] = tgt.get('boringssl', False)
-        tgt['zlib'] = tgt.get('zlib', False)
-        tgt['ares'] = tgt.get('ares', False)
-        tgt['gtest'] = tgt.get('gtest', False)
+        tgt["flaky"] = tgt.get("flaky", False)
+        tgt["platforms"] = sorted(tgt.get("platforms", default_platforms))
+        tgt["ci_platforms"] = sorted(tgt.get("ci_platforms", tgt["platforms"]))
+        tgt["boringssl"] = tgt.get("boringssl", False)
+        tgt["zlib"] = tgt.get("zlib", False)
+        tgt["ares"] = tgt.get("ares", False)
+        tgt["gtest"] = tgt.get("gtest", False)
 
-    libs = dictionary.get('libs')
+    libs = dictionary.get("libs")
     for lib in libs:
-        lib['boringssl'] = lib.get('boringssl', False)
-        lib['zlib'] = lib.get('zlib', False)
-        lib['ares'] = lib.get('ares', False)
+        lib["boringssl"] = lib.get("boringssl", False)
+        lib["zlib"] = lib.get("zlib", False)
+        lib["ares"] = lib.get("ares", False)

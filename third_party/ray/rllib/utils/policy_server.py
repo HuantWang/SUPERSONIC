@@ -17,8 +17,7 @@ class PolicyServer(ThreadingMixIn, HTTPServer):
 
     @PublicAPI
     def __init__(self, external_env, address, port):
-        deprecation_warning(
-            "rllib.utils.PolicyClient", new="rllib.env.PolicyClient")
+        deprecation_warning("rllib.utils.PolicyClient", new="rllib.env.PolicyClient")
         handler = _make_handler(external_env)
         HTTPServer.__init__(self, (address, port), handler)
 
@@ -42,19 +41,22 @@ def _make_handler(external_env):
             response = {}
             if command == PolicyClient.START_EPISODE:
                 response["episode_id"] = external_env.start_episode(
-                    args["episode_id"], args["training_enabled"])
+                    args["episode_id"], args["training_enabled"]
+                )
             elif command == PolicyClient.GET_ACTION:
                 response["action"] = external_env.get_action(
-                    args["episode_id"], args["observation"])
+                    args["episode_id"], args["observation"]
+                )
             elif command == PolicyClient.LOG_ACTION:
-                external_env.log_action(args["episode_id"],
-                                        args["observation"], args["action"])
+                external_env.log_action(
+                    args["episode_id"], args["observation"], args["action"]
+                )
             elif command == PolicyClient.LOG_RETURNS:
-                external_env.log_returns(args["episode_id"], args["reward"],
-                                         args["info"])
+                external_env.log_returns(
+                    args["episode_id"], args["reward"], args["info"]
+                )
             elif command == PolicyClient.END_EPISODE:
-                external_env.end_episode(args["episode_id"],
-                                         args["observation"])
+                external_env.end_episode(args["episode_id"], args["observation"])
             else:
                 raise Exception("Unknown command: {}".format(command))
             return response

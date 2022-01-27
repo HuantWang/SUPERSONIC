@@ -6,8 +6,11 @@ import sys
 
 import ray
 from ray.rllib.execution.segment_tree import SumSegmentTree, MinSegmentTree
-from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
-    MultiAgentBatch
+from ray.rllib.policy.sample_batch import (
+    SampleBatch,
+    DEFAULT_POLICY_ID,
+    MultiAgentBatch,
+)
 from ray.rllib.utils.annotations import DeveloperAPI
 from ray.rllib.utils.compression import unpack_if_needed
 from ray.util.iter import ParallelIteratorWorker
@@ -68,8 +71,13 @@ class ReplayBuffer:
             obses_tp1.append(np.array(unpack_if_needed(obs_tp1), copy=False))
             dones.append(done)
             self._hit_count[i] += 1
-        return (np.array(obses_t), np.array(actions), np.array(rewards),
-                np.array(obses_tp1), np.array(dones))
+        return (
+            np.array(obses_t),
+            np.array(actions),
+            np.array(rewards),
+            np.array(obses_tp1),
+            np.array(dones),
+        )
 
     @DeveloperAPI
     def sample_idxes(self, batch_size):
@@ -103,10 +111,7 @@ class ReplayBuffer:
           done_mask[i] = 1 if executing act_batch[i] resulted in
           the end of an episode and 0 otherwise.
         """
-        idxes = [
-            random.randint(0,
-                           len(self._storage) - 1) for _ in range(batch_size)
-        ]
+        idxes = [random.randint(0, len(self._storage) - 1) for _ in range(batch_size)]
         self._num_sampled += batch_size
         return self._encode_sample(idxes)
 
@@ -160,12 +165,13 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         """See ReplayBuffer.store_effect"""
 
         idx = self._next_idx
-        super(PrioritizedReplayBuffer, self).add(obs_t, action, reward,
-                                                 obs_tp1, done, weight)
+        super(PrioritizedReplayBuffer, self).add(
+            obs_t, action, reward, obs_tp1, done, weight
+        )
         if weight is None:
             weight = self._max_priority
-        self._it_sum[idx] = weight**self._alpha
-        self._it_min[idx] = weight**self._alpha
+        self._it_sum[idx] = weight ** self._alpha
+        self._it_min[idx] = weight ** self._alpha
 
     def _sample_proportional(self, batch_size):
         res = []
@@ -187,11 +193,11 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         weights = []
         p_min = self._it_min.min() / self._it_sum.sum()
-        max_weight = (p_min * len(self._storage))**(-beta)
+        max_weight = (p_min * len(self._storage)) ** (-beta)
 
         for idx in idxes:
             p_sample = self._it_sum[idx] / self._it_sum.sum()
-            weight = (p_sample * len(self._storage))**(-beta)
+            weight = (p_sample * len(self._storage)) ** (-beta)
             weights.append(weight / max_weight)
         weights = np.array(weights)
         encoded_sample = self._encode_sample(idxes)
@@ -241,11 +247,11 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         weights = []
         p_min = self._it_min.min() / self._it_sum.sum()
-        max_weight = (p_min * len(self._storage))**(-beta)
+        max_weight = (p_min * len(self._storage)) ** (-beta)
 
         for idx in idxes:
             p_sample = self._it_sum[idx] / self._it_sum.sum()
-            weight = (p_sample * len(self._storage))**(-beta)
+            weight = (p_sample * len(self._storage)) ** (-beta)
             weights.append(weight / max_weight)
         weights = np.array(weights)
         encoded_sample = self._encode_sample(idxes)
@@ -271,10 +277,10 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         for idx, priority in zip(idxes, priorities):
             assert priority > 0
             assert 0 <= idx < len(self._storage)
-            delta = priority**self._alpha - self._it_sum[idx]
+            delta = priority ** self._alpha - self._it_sum[idx]
             self._prio_change_stats.push(delta)
-            self._it_sum[idx] = priority**self._alpha
-            self._it_min[idx] = priority**self._alpha
+            self._it_sum[idx] = priority ** self._alpha
+            self._it_min[idx] = priority ** self._alpha
 
             self._max_priority = max(self._max_priority, priority)
 
@@ -297,15 +303,17 @@ class LocalReplayBuffer(ParallelIteratorWorker):
     Ray actors are single-threaded, so for scalability multiple replay actors
     may be created to increase parallelism."""
 
-    def __init__(self,
-                 num_shards,
-                 learning_starts,
-                 buffer_size,
-                 replay_batch_size,
-                 prioritized_replay_alpha=0.6,
-                 prioritized_replay_beta=0.4,
-                 prioritized_replay_eps=1e-6,
-                 multiagent_sync_replay=False):
+    def __init__(
+        self,
+        num_shards,
+        learning_starts,
+        buffer_size,
+        replay_batch_size,
+        prioritized_replay_alpha=0.6,
+        prioritized_replay_beta=0.4,
+        prioritized_replay_eps=1e-6,
+        multiagent_sync_replay=False,
+    ):
         self.replay_starts = learning_starts // num_shards
         self.buffer_size = buffer_size // num_shards
         self.replay_batch_size = replay_batch_size
@@ -321,7 +329,8 @@ class LocalReplayBuffer(ParallelIteratorWorker):
 
         def new_buffer():
             return PrioritizedReplayBuffer(
-                self.buffer_size, alpha=prioritized_replay_alpha)
+                self.buffer_size, alpha=prioritized_replay_alpha
+            )
 
         self.replay_buffers = collections.defaultdict(new_buffer)
 
@@ -355,17 +364,19 @@ class LocalReplayBuffer(ParallelIteratorWorker):
             for policy_id, s in batch.policy_batches.items():
                 for row in s.rows():
                     self.replay_buffers[policy_id].add(
-                        row["obs"], row["actions"], row["rewards"],
-                        row["new_obs"], row["dones"], row["weights"]
-                        if "weights" in row else None)
+                        row["obs"],
+                        row["actions"],
+                        row["rewards"],
+                        row["new_obs"],
+                        row["dones"],
+                        row["weights"] if "weights" in row else None,
+                    )
         self.num_added += batch.count
 
     def replay(self):
         if self._fake_batch:
             fake_batch = SampleBatch(self._fake_batch)
-            return MultiAgentBatch({
-                DEFAULT_POLICY_ID: fake_batch
-            }, fake_batch.count)
+            return MultiAgentBatch({DEFAULT_POLICY_ID: fake_batch}, fake_batch.count)
 
         if self.num_added < self.replay_starts:
             return None
@@ -376,43 +387,53 @@ class LocalReplayBuffer(ParallelIteratorWorker):
             for policy_id, replay_buffer in self.replay_buffers.items():
                 if self.multiagent_sync_replay:
                     if idxes is None:
-                        idxes = replay_buffer.sample_idxes(
-                            self.replay_batch_size)
+                        idxes = replay_buffer.sample_idxes(self.replay_batch_size)
                 else:
                     idxes = replay_buffer.sample_idxes(self.replay_batch_size)
-                (obses_t, actions, rewards, obses_tp1, dones, weights,
-                 batch_indexes) = replay_buffer.sample_with_idxes(
-                     idxes, beta=self.prioritized_replay_beta)
-                samples[policy_id] = SampleBatch({
-                    "obs": obses_t,
-                    "actions": actions,
-                    "rewards": rewards,
-                    "new_obs": obses_tp1,
-                    "dones": dones,
-                    "weights": weights,
-                    "batch_indexes": batch_indexes
-                })
+                (
+                    obses_t,
+                    actions,
+                    rewards,
+                    obses_tp1,
+                    dones,
+                    weights,
+                    batch_indexes,
+                ) = replay_buffer.sample_with_idxes(
+                    idxes, beta=self.prioritized_replay_beta
+                )
+                samples[policy_id] = SampleBatch(
+                    {
+                        "obs": obses_t,
+                        "actions": actions,
+                        "rewards": rewards,
+                        "new_obs": obses_tp1,
+                        "dones": dones,
+                        "weights": weights,
+                        "batch_indexes": batch_indexes,
+                    }
+                )
             return MultiAgentBatch(samples, self.replay_batch_size)
 
     def update_priorities(self, prio_dict):
         with self.update_priorities_timer:
             for policy_id, (batch_indexes, td_errors) in prio_dict.items():
-                new_priorities = (
-                    np.abs(td_errors) + self.prioritized_replay_eps)
+                new_priorities = np.abs(td_errors) + self.prioritized_replay_eps
                 self.replay_buffers[policy_id].update_priorities(
-                    batch_indexes, new_priorities)
+                    batch_indexes, new_priorities
+                )
 
     def stats(self, debug=False):
         stat = {
             "add_batch_time_ms": round(1000 * self.add_batch_timer.mean, 3),
             "replay_time_ms": round(1000 * self.replay_timer.mean, 3),
             "update_priorities_time_ms": round(
-                1000 * self.update_priorities_timer.mean, 3),
+                1000 * self.update_priorities_timer.mean, 3
+            ),
         }
         for policy_id, replay_buffer in self.replay_buffers.items():
-            stat.update({
-                "policy_{}".format(policy_id): replay_buffer.stats(debug=debug)
-            })
+            stat.update(
+                {"policy_{}".format(policy_id): replay_buffer.stats(debug=debug)}
+            )
         return stat
 
 

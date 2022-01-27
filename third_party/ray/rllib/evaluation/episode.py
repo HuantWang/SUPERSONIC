@@ -39,8 +39,9 @@ class MultiAgentEpisode:
         >>> episode.extra_batches.add(batch.build_and_reset())
     """
 
-    def __init__(self, policies, policy_mapping_fn, batch_builder_factory,
-                 extra_batch_callback):
+    def __init__(
+        self, policies, policy_mapping_fn, batch_builder_factory, extra_batch_callback
+    ):
         self.new_batch_builder = batch_builder_factory
         self.add_extra_batch = extra_batch_callback
         self.batch_builder = batch_builder_factory()
@@ -113,8 +114,7 @@ class MultiAgentEpisode:
         """Returns the last action for the specified agent, or zeros."""
 
         if agent_id in self._agent_to_last_action:
-            return flatten_to_single_ndarray(
-                self._agent_to_last_action[agent_id])
+            return flatten_to_single_ndarray(self._agent_to_last_action[agent_id])
         else:
             policy = self._policies[self.policy_for(agent_id)]
             flat = flatten_to_single_ndarray(policy.action_space.sample())
@@ -125,8 +125,7 @@ class MultiAgentEpisode:
         """Returns the previous action for the specified agent."""
 
         if agent_id in self._agent_to_prev_action:
-            return flatten_to_single_ndarray(
-                self._agent_to_prev_action[agent_id])
+            return flatten_to_single_ndarray(self._agent_to_prev_action[agent_id])
         else:
             # We're at t=0, so return all zeros.
             return np.zeros_like(self.last_action_for(agent_id))
@@ -160,8 +159,7 @@ class MultiAgentEpisode:
     def _add_agent_rewards(self, reward_dict):
         for agent_id, reward in reward_dict.items():
             if reward is not None:
-                self.agent_rewards[agent_id,
-                                   self.policy_for(agent_id)] += reward
+                self.agent_rewards[agent_id, self.policy_for(agent_id)] += reward
                 self.total_reward += reward
                 self._agent_reward_history[agent_id].append(reward)
 
@@ -179,8 +177,7 @@ class MultiAgentEpisode:
 
     def _set_last_action(self, agent_id, action):
         if agent_id in self._agent_to_last_action:
-            self._agent_to_prev_action[agent_id] = \
-                self._agent_to_last_action[agent_id]
+            self._agent_to_prev_action[agent_id] = self._agent_to_last_action[agent_id]
         self._agent_to_last_action[agent_id] = action
 
     def _set_last_pi_info(self, agent_id, pi_info):

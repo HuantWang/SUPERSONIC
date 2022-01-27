@@ -2,6 +2,7 @@ import copy
 import os
 import logging
 import pickle
+
 try:
     import sigopt as sgo
 except ImportError:
@@ -66,43 +67,43 @@ class SigOptSearch(Searcher):
             max_concurrent=1, metric="mean_loss", mode="min")
     """
 
-    def __init__(self,
-                 space,
-                 name="Default Tune Experiment",
-                 max_concurrent=1,
-                 reward_attr=None,
-                 metric="episode_reward_mean",
-                 mode="max",
-                 **kwargs):
+    def __init__(
+        self,
+        space,
+        name="Default Tune Experiment",
+        max_concurrent=1,
+        reward_attr=None,
+        metric="episode_reward_mean",
+        mode="max",
+        **kwargs
+    ):
         assert sgo is not None, "SigOpt must be installed!"
         assert type(max_concurrent) is int and max_concurrent > 0
-        assert "SIGOPT_KEY" in os.environ, \
-            "SigOpt API key must be stored as environ variable at SIGOPT_KEY"
+        assert (
+            "SIGOPT_KEY" in os.environ
+        ), "SigOpt API key must be stored as environ variable at SIGOPT_KEY"
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
 
         self._max_concurrent = max_concurrent
         self._metric = metric
         if mode == "max":
-            self._metric_op = 1.
+            self._metric_op = 1.0
         elif mode == "min":
-            self._metric_op = -1.
+            self._metric_op = -1.0
         self._live_trial_mapping = {}
 
         # Create a connection with SigOpt API, requires API key
         self.conn = sgo.Connection(client_token=os.environ["SIGOPT_KEY"])
 
         self.experiment = self.conn.experiments().create(
-            name=name,
-            parameters=space,
-            parallel_bandwidth=self._max_concurrent,
+            name=name, parameters=space, parallel_bandwidth=self._max_concurrent,
         )
 
         super(SigOptSearch, self).__init__(metric=metric, mode=mode, **kwargs)
 
     def suggest(self, trial_id):
         # Get new suggestion from SigOpt
-        suggestion = self.conn.experiments(
-            self.experiment.id).suggestions().create()
+        suggestion = self.conn.experiments(self.experiment.id).suggestions().create()
 
         self._live_trial_mapping[trial_id] = suggestion
 
@@ -127,7 +128,8 @@ class SigOptSearch(Searcher):
         elif error:
             # Reports a failed Observation
             self.conn.experiments(self.experiment.id).observations().create(
-                failed=True, suggestion=self._live_trial_mapping[trial_id].id)
+                failed=True, suggestion=self._live_trial_mapping[trial_id].id
+            )
         del self._live_trial_mapping[trial_id]
 
     def save(self, checkpoint_dir):

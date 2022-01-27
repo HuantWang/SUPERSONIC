@@ -2,24 +2,20 @@ from copy import deepcopy
 import gym
 import numpy as np
 from gym.spaces import Discrete, Dict, Box
-import compiler_gym
-from gensim.models.doc2vec import Doc2Vec
 
 # add for grpc
 import grpc
-from SuperSonic.bin.service import schedule_pb2
-from SuperSonic.bin.service import schedule_pb2_grpc
-import time
+from SuperSonic.service import schedule_pb2
+from SuperSonic.service import schedule_pb2_grpc
 from concurrent import futures
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24  # set timeout
-from multiprocessing import Lock
 import threading
 
-#add for new code
-from compiler_gym.mdp_search.action import action_functions
+# add for new code
 import sqlite3
 import time
+
 # add mutex
 lock = threading.Lock()
 lock_s = threading.Lock()
@@ -41,18 +37,19 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServiceServicer):
 
         if lock.locked():
             lock.release()
-            #print("lock release")
+            # print("lock release")
         return schedule_pb2.MsgStokeResponse(action=Action)
 
 
 class stoke_rl:
     def __init__(self, env_config):
-        
-        self.env = gym.make("Stoke-v0", 
+
+        self.env = gym.make(
+            "Stoke-v0",
             state_function=env_config.get("state_function"),
             action_function=env_config.get("action_function"),
             reward_function=env_config.get("reward_function"),
-            )
+        )
         # self.interleave_action_length,self.obsv_size = 9,100
         # self.obsv_low = 0
         # self.obsv_high = 1
@@ -67,11 +64,13 @@ class stoke_rl:
             }
         )
         self.running_reward = 0
-        #self.doc2vecmodel = Doc2Vec.load(env_config.get("embedding"))
+        # self.doc2vecmodel = Doc2Vec.load(env_config.get("embedding"))
         self.tstart = time.time()
         # grpc connect
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        schedule_pb2_grpc.add_ScheduleServiceServicer_to_server(ScheduleServicer(), self.server)
+        schedule_pb2_grpc.add_ScheduleServiceServicer_to_server(
+            ScheduleServicer(), self.server
+        )
         self.server.add_insecure_port(env_config.get("target"))
         self.server.start()
 
@@ -92,13 +91,17 @@ class stoke_rl:
         # print(action)
         if lock_s.locked():
             lock_s.release()
-           # print("lock_s release")
+        # print("lock_s release")
         try:
-            conn = sqlite3.connect('/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db')
+            conn = sqlite3.connect(
+                "/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db"
+            )
             c = conn.cursor()
             sql = "INSERT INTO STOKE (TIME, RESULT, REWARD) \
                             VALUES (?, ?, ?)"
-            c.execute(sql,(time.time() - self.tstart,state_code.replace("nop\n",""), rew))
+            c.execute(
+                sql, (time.time() - self.tstart, state_code.replace("nop\n", ""), rew)
+            )
 
             conn.commit()
             conn.close()

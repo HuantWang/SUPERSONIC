@@ -14,6 +14,7 @@ from ray.tune import TuneError
 from ray.tune.checkpoint_manager import Checkpoint, CheckpointManager
 from ray.tune.durable_trainable import DurableTrainable
 from ray.tune.logger import pretty_print, UnifiedLogger
+
 # NOTE(rkn): We import ray.tune.registry here instead of importing the names we
 # need because there are cyclic imports that may cause specific names to not
 # have been defined yet. See https://github.com/ray-project/ray/issues/1716.
@@ -55,6 +56,7 @@ class ExportFormat:
     This may correspond to different file formats based on the
     Trainable implementation.
     """
+
     CHECKPOINT = "checkpoint"
     MODEL = "model"
     H5 = "h5"
@@ -69,11 +71,11 @@ class ExportFormat:
         for i in range(len(formats)):
             formats[i] = formats[i].strip().lower()
             if formats[i] not in [
-                    ExportFormat.CHECKPOINT, ExportFormat.MODEL,
-                    ExportFormat.H5
+                ExportFormat.CHECKPOINT,
+                ExportFormat.MODEL,
+                ExportFormat.H5,
             ]:
-                raise TuneError("Unsupported import/export format: " +
-                                formats[i])
+                raise TuneError("Unsupported import/export format: " + formats[i])
 
 
 def checkpoint_deleter(trial_id, runner):
@@ -88,14 +90,12 @@ def checkpoint_deleter(trial_id, runner):
             checkpoint (Checkpoint): Checkpoint to delete.
         """
         if checkpoint.storage == Checkpoint.PERSISTENT and checkpoint.value:
-            logger.debug("Trial %s: Deleting checkpoint %s", trial_id,
-                         checkpoint.value)
+            logger.debug("Trial %s: Deleting checkpoint %s", trial_id, checkpoint.value)
             checkpoint_path = checkpoint.value
             # Delete local copy, if any exists.
             if os.path.exists(checkpoint_path):
                 try:
-                    checkpoint_dir = TrainableUtil.find_checkpoint_dir(
-                        checkpoint_path)
+                    checkpoint_dir = TrainableUtil.find_checkpoint_dir(checkpoint_path)
                     shutil.rmtree(checkpoint_dir)
                 except FileNotFoundError:
                     logger.warning("Checkpoint dir not found during deletion.")
@@ -156,27 +156,29 @@ class Trial:
     TERMINATED = "TERMINATED"
     ERROR = "ERROR"
 
-    def __init__(self,
-                 trainable_name,
-                 config=None,
-                 trial_id=None,
-                 local_dir=DEFAULT_RESULTS_DIR,
-                 evaluated_params=None,
-                 experiment_tag="",
-                 resources=None,
-                 stopping_criterion=None,
-                 remote_checkpoint_dir=None,
-                 checkpoint_freq=0,
-                 checkpoint_at_end=False,
-                 sync_on_checkpoint=True,
-                 keep_checkpoints_num=None,
-                 checkpoint_score_attr=TRAINING_ITERATION,
-                 export_formats=None,
-                 restore_path=None,
-                 trial_name_creator=None,
-                 loggers=None,
-                 sync_to_driver_fn=None,
-                 max_failures=0):
+    def __init__(
+        self,
+        trainable_name,
+        config=None,
+        trial_id=None,
+        local_dir=DEFAULT_RESULTS_DIR,
+        evaluated_params=None,
+        experiment_tag="",
+        resources=None,
+        stopping_criterion=None,
+        remote_checkpoint_dir=None,
+        checkpoint_freq=0,
+        checkpoint_at_end=False,
+        sync_on_checkpoint=True,
+        keep_checkpoints_num=None,
+        checkpoint_score_attr=TRAINING_ITERATION,
+        export_formats=None,
+        restore_path=None,
+        trial_name_creator=None,
+        loggers=None,
+        sync_to_driver_fn=None,
+        max_failures=0,
+    ):
         """Initialize a new trial.
 
         The args here take the same meaning as the command line flags defined
@@ -194,15 +196,16 @@ class Trial:
         self.experiment_tag = experiment_tag
         trainable_cls = self.get_trainable_cls()
         if trainable_cls:
-            default_resources = trainable_cls.default_resource_request(
-                self.config)
+            default_resources = trainable_cls.default_resource_request(self.config)
             if default_resources:
                 if resources:
                     raise ValueError(
                         "Resources for {} have been automatically set to {} "
                         "by its `default_resource_request()` method. Please "
                         "clear the `resources_per_trial` option.".format(
-                            trainable_cls, default_resources))
+                            trainable_cls, default_resources
+                        )
+                    )
                 resources = default_resources
         self.location = Location()
         self.resources = resources or Resources(cpu=1, gpu=0)
@@ -245,8 +248,10 @@ class Trial:
         self.checkpoint_at_end = checkpoint_at_end
         self.sync_on_checkpoint = sync_on_checkpoint
         self.checkpoint_manager = CheckpointManager(
-            keep_checkpoints_num, checkpoint_score_attr,
-            checkpoint_deleter(self._trainable_name(), self.runner))
+            keep_checkpoints_num,
+            checkpoint_score_attr,
+            checkpoint_deleter(self._trainable_name(), self.runner),
+        )
 
         # Restoration fields
         self.restore_path = restore_path
@@ -307,15 +312,16 @@ class Trial:
         os.makedirs(local_dir, exist_ok=True)
         return tempfile.mkdtemp(
             prefix="{}_{}".format(identifier[:MAX_LEN_IDENTIFIER], date_str()),
-            dir=local_dir)
+            dir=local_dir,
+        )
 
     def init_logger(self):
         """Init logger."""
         if not self.result_logger:
             if not self.logdir:
                 self.logdir = Trial.create_logdir(
-                    self._trainable_name() + "_" + self.experiment_tag,
-                    self.local_dir)
+                    self._trainable_name() + "_" + self.experiment_tag, self.local_dir
+                )
             else:
                 os.makedirs(self.logdir, exist_ok=True)
 
@@ -324,7 +330,8 @@ class Trial:
                 self.logdir,
                 trial=self,
                 loggers=self.loggers,
-                sync_function=self.sync_to_driver_fn)
+                sync_function=self.sync_to_driver_fn,
+            )
 
     def update_resources(self, cpu, gpu, **kwargs):
         """EXPERIMENTAL: Updates the resource requirements.
@@ -341,7 +348,8 @@ class Trial:
     def set_runner(self, runner):
         self.runner = runner
         self.checkpoint_manager.delete = checkpoint_deleter(
-            self._trainable_name(), runner)
+            self._trainable_name(), runner
+        )
 
     def set_location(self, location):
         """Sets the location of the trial."""
@@ -365,8 +373,11 @@ class Trial:
             self.num_failures += 1
             self.error_file = os.path.join(self.logdir, "error.txt")
             with open(self.error_file, "a+") as f:
-                f.write("Failure # {} (occurred at {})\n".format(
-                    self.num_failures, date_str()))
+                f.write(
+                    "Failure # {} (occurred at {})\n".format(
+                        self.num_failures, date_str()
+                    )
+                )
                 f.write(error_msg + "\n")
             self.error_msg = error_msg
 
@@ -379,11 +390,14 @@ class Trial:
             if criteria not in result:
                 raise TuneError(
                     "Stopping criteria {} not provided in result {}.".format(
-                        criteria, result))
+                        criteria, result
+                    )
+                )
             elif isinstance(criteria, dict):
                 raise ValueError(
                     "Stopping criteria is now flattened by default. "
-                    "Use forward slashes to nest values `key1/key2/key3`.")
+                    "Use forward slashes to nest values `key1/key2/key3`."
+                )
             elif result[criteria] >= stop_value:
                 return True
         return False
@@ -393,8 +407,10 @@ class Trial:
         result = self.last_result or {}
         if result.get(DONE) and self.checkpoint_at_end:
             return True
-        return (self.checkpoint_freq and
-                result.get(TRAINING_ITERATION, 0) % self.checkpoint_freq == 0)
+        return (
+            self.checkpoint_freq
+            and result.get(TRAINING_ITERATION, 0) % self.checkpoint_freq == 0
+        )
 
     def has_checkpoint(self):
         return self.checkpoint.value is not None
@@ -422,15 +438,19 @@ class Trial:
                 # checkpoint, so it should just be logged.
                 logger.error(
                     "Trial %s: An error occurred during the "
-                    "checkpoint pre-sync wait - %s", self, str(e))
+                    "checkpoint pre-sync wait - %s",
+                    self,
+                    str(e),
+                )
             # Force sync down and wait before tracking the new checkpoint.
             try:
                 if self.result_logger.sync_down():
                     self.result_logger.wait()
                 else:
                     logger.error(
-                        "Trial %s: Checkpoint sync skipped. "
-                        "This should not happen.", self)
+                        "Trial %s: Checkpoint sync skipped. " "This should not happen.",
+                        self,
+                    )
             except TuneError as e:
                 if issubclass(self.get_trainable_cls(), DurableTrainable):
                     # Even though rsync failed the trainable can restore
@@ -443,9 +463,12 @@ class Trial:
                     raise e
             if not issubclass(self.get_trainable_cls(), DurableTrainable):
                 if not os.path.exists(checkpoint.value):
-                    raise TuneError("Trial {}: Checkpoint path {} not "
-                                    "found after successful sync down.".format(
-                                        self, checkpoint.value))
+                    raise TuneError(
+                        "Trial {}: Checkpoint path {} not "
+                        "found after successful sync down.".format(
+                            self, checkpoint.value
+                        )
+                    )
         self.checkpoint_manager.on_checkpoint(checkpoint)
 
     def on_restore(self):
@@ -468,8 +491,9 @@ class Trial:
         result.update(trial_id=self.trial_id, done=terminate)
         if self.experiment_tag:
             result.update(experiment_tag=self.experiment_tag)
-        if self.verbose and (terminate or time.time() - self.last_debug >
-                             DEBUG_PRINT_INTERVAL):
+        if self.verbose and (
+            terminate or time.time() - self.last_debug > DEBUG_PRINT_INTERVAL
+        ):
             print("Result for {}:".format(self))
             print("  {}".format(pretty_print(result).replace("\n", "\n  ")))
             self.last_debug = time.time()
@@ -485,32 +509,35 @@ class Trial:
                         "max": value,
                         "min": value,
                         "avg": value,
-                        "last": value
+                        "last": value,
                     }
                     self.metric_n_steps[metric] = {}
                     for n in self.n_steps:
                         key = "last-{:d}-avg".format(n)
                         self.metric_analysis[metric][key] = value
                         # Store n as string for correct restore.
-                        self.metric_n_steps[metric][str(n)] = deque(
-                            [value], maxlen=n)
+                        self.metric_n_steps[metric][str(n)] = deque([value], maxlen=n)
                 else:
                     step = result["training_iteration"] or 1
                     self.metric_analysis[metric]["max"] = max(
-                        value, self.metric_analysis[metric]["max"])
+                        value, self.metric_analysis[metric]["max"]
+                    )
                     self.metric_analysis[metric]["min"] = min(
-                        value, self.metric_analysis[metric]["min"])
-                    self.metric_analysis[metric]["avg"] = 1 / step * (
-                        value +
-                        (step - 1) * self.metric_analysis[metric]["avg"])
+                        value, self.metric_analysis[metric]["min"]
+                    )
+                    self.metric_analysis[metric]["avg"] = (
+                        1
+                        / step
+                        * (value + (step - 1) * self.metric_analysis[metric]["avg"])
+                    )
                     self.metric_analysis[metric]["last"] = value
 
                     for n in self.n_steps:
                         key = "last-{:d}-avg".format(n)
                         self.metric_n_steps[metric][str(n)].append(value)
                         self.metric_analysis[metric][key] = sum(
-                            self.metric_n_steps[metric][str(n)]) / len(
-                                self.metric_n_steps[metric][str(n)])
+                            self.metric_n_steps[metric][str(n)]
+                        ) / len(self.metric_n_steps[metric][str(n)])
 
     def get_trainable_cls(self):
         return get_trainable_cls(self.trainable_name)
@@ -560,8 +587,9 @@ class Trial:
         Sets RUNNING trials to PENDING, and flushes the result logger.
         Note this can only occur if the trial holds a PERSISTENT checkpoint.
         """
-        assert self.checkpoint.storage == Checkpoint.PERSISTENT, (
-            "Checkpoint must not be in-memory.")
+        assert (
+            self.checkpoint.storage == Checkpoint.PERSISTENT
+        ), "Checkpoint must not be in-memory."
         state = self.__dict__.copy()
         state["resources"] = resources_to_json(self.resources)
 

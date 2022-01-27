@@ -25,8 +25,7 @@ def sync_to_async(func):
 # Class encapsulate the get result from direct actor.
 # Case 1: plasma_fallback_id=None, result=<Object>
 # Case 2: plasma_fallback_id=ObjectID, result=None
-AsyncGetResponse = namedtuple("AsyncGetResponse",
-                              ["plasma_fallback_id", "result"])
+AsyncGetResponse = namedtuple("AsyncGetResponse", ["plasma_fallback_id", "result"])
 
 
 def get_async(object_id):
@@ -82,8 +81,7 @@ def get_async(object_id):
 
                 if isinstance(result.result, ray.exceptions.RayTaskError):
                     ray.worker.last_task_error_raise_time = time.time()
-                    user_future.set_exception(
-                        result.result.as_instanceof_cause())
+                    user_future.set_exception(result.result.as_instanceof_cause())
                 else:
                     user_future.set_result(result.result)
             else:

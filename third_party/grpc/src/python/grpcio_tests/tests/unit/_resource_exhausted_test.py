@@ -23,17 +23,16 @@ from grpc.framework.foundation import logging_pool
 from tests.unit import test_common
 from tests.unit.framework.common import test_constants
 
-_REQUEST = b'\x00\x00\x00'
-_RESPONSE = b'\x00\x00\x00'
+_REQUEST = b"\x00\x00\x00"
+_RESPONSE = b"\x00\x00\x00"
 
-_UNARY_UNARY = '/test/UnaryUnary'
-_UNARY_STREAM = '/test/UnaryStream'
-_STREAM_UNARY = '/test/StreamUnary'
-_STREAM_STREAM = '/test/StreamStream'
+_UNARY_UNARY = "/test/UnaryUnary"
+_UNARY_STREAM = "/test/UnaryStream"
+_STREAM_UNARY = "/test/StreamUnary"
+_STREAM_STREAM = "/test/StreamStream"
 
 
 class _TestTrigger(object):
-
     def __init__(self, total_call_count):
         self._total_call_count = total_call_count
         self._pending_calls = 0
@@ -92,7 +91,6 @@ def handle_stream_stream(trigger, request_iterator, servicer_context):
 
 
 class _MethodHandler(grpc.RpcMethodHandler):
-
     def __init__(self, trigger, request_streaming, response_streaming):
         self.request_streaming = request_streaming
         self.response_streaming = response_streaming
@@ -103,8 +101,7 @@ class _MethodHandler(grpc.RpcMethodHandler):
         self.stream_unary = None
         self.stream_stream = None
         if self.request_streaming and self.response_streaming:
-            self.stream_stream = (
-                lambda x, y: handle_stream_stream(trigger, x, y))
+            self.stream_stream = lambda x, y: handle_stream_stream(trigger, x, y)
         elif self.request_streaming:
             self.stream_unary = lambda x, y: handle_stream_unary(trigger, x, y)
         elif self.response_streaming:
@@ -114,7 +111,6 @@ class _MethodHandler(grpc.RpcMethodHandler):
 
 
 class _GenericHandler(grpc.GenericRpcHandler):
-
     def __init__(self, trigger):
         self._trigger = trigger
 
@@ -132,18 +128,18 @@ class _GenericHandler(grpc.GenericRpcHandler):
 
 
 class ResourceExhaustedTest(unittest.TestCase):
-
     def setUp(self):
         self._server_pool = logging_pool.pool(test_constants.THREAD_CONCURRENCY)
         self._trigger = _TestTrigger(test_constants.THREAD_CONCURRENCY)
         self._server = grpc.server(
             self._server_pool,
             handlers=(_GenericHandler(self._trigger),),
-            options=(('grpc.so_reuseport', 0),),
-            maximum_concurrent_rpcs=test_constants.THREAD_CONCURRENCY)
-        port = self._server.add_insecure_port('[::]:0')
+            options=(("grpc.so_reuseport", 0),),
+            maximum_concurrent_rpcs=test_constants.THREAD_CONCURRENCY,
+        )
+        port = self._server.add_insecure_port("[::]:0")
         self._server.start()
-        self._channel = grpc.insecure_channel('localhost:%d' % port)
+        self._channel = grpc.insecure_channel("localhost:%d" % port)
 
     def tearDown(self):
         self._server.stop(0)
@@ -159,12 +155,14 @@ class ResourceExhaustedTest(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as exception_context:
             multi_callable(_REQUEST)
 
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         exception_context.exception.code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, exception_context.exception.code()
+        )
 
         future_exception = multi_callable.future(_REQUEST)
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         future_exception.exception().code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, future_exception.exception().code()
+        )
 
         self._trigger.trigger()
         for future in futures:
@@ -184,8 +182,9 @@ class ResourceExhaustedTest(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as exception_context:
             next(multi_callable(_REQUEST))
 
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         exception_context.exception.code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, exception_context.exception.code()
+        )
 
         self._trigger.trigger()
 
@@ -210,12 +209,14 @@ class ResourceExhaustedTest(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as exception_context:
             multi_callable(request)
 
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         exception_context.exception.code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, exception_context.exception.code()
+        )
 
         future_exception = multi_callable.future(request)
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         future_exception.exception().code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, future_exception.exception().code()
+        )
 
         self._trigger.trigger()
 
@@ -237,8 +238,9 @@ class ResourceExhaustedTest(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as exception_context:
             next(multi_callable(request))
 
-        self.assertEqual(grpc.StatusCode.RESOURCE_EXHAUSTED,
-                         exception_context.exception.code())
+        self.assertEqual(
+            grpc.StatusCode.RESOURCE_EXHAUSTED, exception_context.exception.code()
+        )
 
         self._trigger.trigger()
 
@@ -252,5 +254,5 @@ class ResourceExhaustedTest(unittest.TestCase):
             self.assertEqual(_RESPONSE, response)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -8,10 +8,16 @@ import numpy as np
 
 import ray.cloudpickle as cloudpickle
 from ray.util.debug import log_once
-from ray.tune.result import (NODE_IP, TRAINING_ITERATION, TIME_TOTAL_S,
-                             TIMESTEPS_TOTAL, EXPR_PARAM_FILE,
-                             EXPR_PARAM_PICKLE_FILE, EXPR_PROGRESS_FILE,
-                             EXPR_RESULT_FILE)
+from ray.tune.result import (
+    NODE_IP,
+    TRAINING_ITERATION,
+    TIME_TOTAL_S,
+    TIMESTEPS_TOTAL,
+    EXPR_PARAM_FILE,
+    EXPR_PARAM_PICKLE_FILE,
+    EXPR_PROGRESS_FILE,
+    EXPR_RESULT_FILE,
+)
 from ray.tune.syncer import get_node_syncer
 from ray.tune.utils import flatten_dict
 
@@ -79,6 +85,7 @@ class MLFLowLogger(Logger):
 
     def _init(self):
         from mlflow.tracking import MlflowClient
+
         client = MlflowClient()
         run = client.create_run(self.config.get("mlflow_experiment_id"))
         self._run_id = run.info.run_id
@@ -91,7 +98,8 @@ class MLFLowLogger(Logger):
             if not isinstance(value, float):
                 continue
             self.client.log_metric(
-                self._run_id, key, value, step=result.get(TRAINING_ITERATION))
+                self._run_id, key, value, step=result.get(TRAINING_ITERATION)
+            )
 
     def close(self):
         self.client.set_terminated(self._run_id)
@@ -129,11 +137,8 @@ class JsonLogger(Logger):
         config_out = os.path.join(self.logdir, EXPR_PARAM_FILE)
         with open(config_out, "w") as f:
             json.dump(
-                self.config,
-                f,
-                indent=2,
-                sort_keys=True,
-                cls=_SafeFallbackEncoder)
+                self.config, f, indent=2, sort_keys=True, cls=_SafeFallbackEncoder
+            )
         config_pkl = os.path.join(self.logdir, EXPR_PARAM_PICKLE_FILE)
         with open(config_pkl, "wb") as f:
             cloudpickle.dump(self.config, f)
@@ -166,8 +171,8 @@ class CSVLogger(Logger):
             if not self._continuing:
                 self._csv_out.writeheader()
         self._csv_out.writerow(
-            {k: v
-             for k, v in result.items() if k in self._csv_out.fieldnames})
+            {k: v for k, v in result.items() if k in self._csv_out.fieldnames}
+        )
         self._file.flush()
 
     def flush(self):
@@ -202,9 +207,7 @@ class TBXLogger(Logger):
         step = result.get(TIMESTEPS_TOTAL) or result[TRAINING_ITERATION]
 
         tmp = result.copy()
-        for k in [
-                "config", "pid", "timestamp", TIME_TOTAL_S, TRAINING_ITERATION
-        ]:
+        for k in ["config", "pid", "timestamp", TIME_TOTAL_S, TRAINING_ITERATION]:
             if k in tmp:
                 del tmp[k]  # not useful to log these
 
@@ -216,21 +219,21 @@ class TBXLogger(Logger):
             full_attr = "/".join(path + [attr])
             if type(value) in VALID_SUMMARY_TYPES and not np.isnan(value):
                 valid_result[full_attr] = value
-                self._file_writer.add_scalar(
-                    full_attr, value, global_step=step)
-            elif (type(value) == list and len(value) > 0) or (type(value) == np.ndarray and value.size > 0):
+                self._file_writer.add_scalar(full_attr, value, global_step=step)
+            elif (type(value) == list and len(value) > 0) or (
+                type(value) == np.ndarray and value.size > 0
+            ):
                 valid_result[full_attr] = value
                 try:
-                    self._file_writer.add_histogram(
-                        full_attr, value, global_step=step)
+                    self._file_writer.add_histogram(full_attr, value, global_step=step)
                 # In case TensorboardX still doesn't think it's a valid value
                 # (e.g. `[[]]`), warn and move on.
                 except (ValueError, TypeError):
                     if log_once("invalid_tbx_value"):
                         logger.warning(
                             "You are trying to log an invalid value ({}={}) "
-                            "via {}!".format(full_attr, value,
-                                             type(self).__name__))
+                            "via {}!".format(full_attr, value, type(self).__name__)
+                        )
 
         self.last_result = valid_result
         self._file_writer.flush()
@@ -255,9 +258,7 @@ class TBXLogger(Logger):
         # TBX currently errors if the hparams value is None.
         flat_params = flatten_dict(self.trial.evaluated_params)
         scrubbed_params = {
-            k: v
-            for k, v in flat_params.items()
-            if isinstance(v, self.VALID_HPARAMS)
+            k: v for k, v in flat_params.items() if isinstance(v, self.VALID_HPARAMS)
         }
 
         removed = {
@@ -268,19 +269,25 @@ class TBXLogger(Logger):
         if removed:
             logger.info(
                 "Removed the following hyperparameter values when "
-                "logging to tensorboard: %s", str(removed))
+                "logging to tensorboard: %s",
+                str(removed),
+            )
 
         from tensorboardX.summary import hparams
+
         try:
             experiment_tag, session_start_tag, session_end_tag = hparams(
-                hparam_dict=scrubbed_params, metric_dict=result)
+                hparam_dict=scrubbed_params, metric_dict=result
+            )
             self._file_writer.file_writer.add_summary(experiment_tag)
             self._file_writer.file_writer.add_summary(session_start_tag)
             self._file_writer.file_writer.add_summary(session_end_tag)
         except Exception:
-            logger.exception("TensorboardX failed to log hparams. "
-                             "This may be due to an unsupported type "
-                             "in the hyperparameter values.")
+            logger.exception(
+                "TensorboardX failed to log hparams. "
+                "This may be due to an unsupported type "
+                "in the hyperparameter values."
+            )
 
 
 DEFAULT_LOGGERS = (JsonLogger, CSVLogger, TBXLogger)
@@ -298,12 +305,7 @@ class UnifiedLogger(Logger):
             See ray/python/ray/tune/syncer.py
     """
 
-    def __init__(self,
-                 config,
-                 logdir,
-                 trial=None,
-                 loggers=None,
-                 sync_function=None):
+    def __init__(self, config, logdir, trial=None, loggers=None, sync_function=None):
         if loggers is None:
             self._logger_cls_list = DEFAULT_LOGGERS
         else:
@@ -312,7 +314,8 @@ class UnifiedLogger(Logger):
             if log_once("JsonLogger"):
                 logger.warning(
                     "JsonLogger not provided. The ExperimentAnalysis tool is "
-                    "disabled.")
+                    "disabled."
+                )
         self._sync_function = sync_function
         self._log_syncer = None
 
@@ -324,12 +327,10 @@ class UnifiedLogger(Logger):
             try:
                 self._loggers.append(cls(self.config, self.logdir, self.trial))
             except Exception as exc:
-                logger.warning("Could not instantiate %s: %s.", cls.__name__,
-                               str(exc))
+                logger.warning("Could not instantiate %s: %s.", cls.__name__, str(exc))
         self._log_syncer = get_node_syncer(
-            self.logdir,
-            remote_dir=self.logdir,
-            sync_function=self._sync_function)
+            self.logdir, remote_dir=self.logdir, sync_function=self._sync_function
+        )
 
     def on_result(self, result):
         for _logger in self._loggers:
@@ -350,8 +351,7 @@ class UnifiedLogger(Logger):
             _logger.flush()
         if sync_down:
             if not self._log_syncer.sync_down():
-                logger.warning("Trial %s: Post-flush sync skipped.",
-                               self.trial)
+                logger.warning("Trial %s: Post-flush sync skipped.", self.trial)
 
     def sync_up(self):
         return self._log_syncer.sync_up()
@@ -369,19 +369,24 @@ class UnifiedLogger(Logger):
         with the Ray autoscaler.
         """
         if worker_ip != self._log_syncer.worker_ip:
-            logger.info("Trial %s: Syncing (blocking) results to %s",
-                        self.trial, worker_ip)
+            logger.info(
+                "Trial %s: Syncing (blocking) results to %s", self.trial, worker_ip
+            )
             self._log_syncer.reset()
             self._log_syncer.set_worker_ip(worker_ip)
             if not self._log_syncer.sync_up():
                 logger.error(
                     "Trial %s: Sync up to new location skipped. "
-                    "This should not occur.", self.trial)
+                    "This should not occur.",
+                    self.trial,
+                )
             self._log_syncer.wait()
         else:
             logger.error(
-                "Trial %s: Sync attempted to same IP %s. This "
-                "should not occur.", self.trial, worker_ip)
+                "Trial %s: Sync attempted to same IP %s. This " "should not occur.",
+                self.trial,
+                worker_ip,
+            )
 
 
 class _SafeFallbackEncoder(json.JSONEncoder):
@@ -394,8 +399,7 @@ class _SafeFallbackEncoder(json.JSONEncoder):
             if np.isnan(value):
                 return self.nan_str
 
-            if (type(value).__module__ == np.__name__
-                    and isinstance(value, np.ndarray)):
+            if type(value).__module__ == np.__name__ and isinstance(value, np.ndarray):
                 return value.tolist()
 
             if issubclass(type(value), numbers.Integral):

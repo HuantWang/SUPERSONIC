@@ -42,85 +42,87 @@ import gc
 import sys
 
 try:
-  import copy_reg as copyreg  #PY26
+    import copy_reg as copyreg  # PY26
 except ImportError:
-  import copyreg
+    import copyreg
 
 try:
-  import unittest2 as unittest  #PY26
+    import unittest2 as unittest  # PY26
 except ImportError:
-  import unittest
+    import unittest
 
 
 class LocalTestResult(unittest.TestResult):
-  """A TestResult which forwards events to a parent object, except for Skips."""
+    """A TestResult which forwards events to a parent object, except for Skips."""
 
-  def __init__(self, parent_result):
-    unittest.TestResult.__init__(self)
-    self.parent_result = parent_result
+    def __init__(self, parent_result):
+        unittest.TestResult.__init__(self)
+        self.parent_result = parent_result
 
-  def addError(self, test, error):
-    self.parent_result.addError(test, error)
+    def addError(self, test, error):
+        self.parent_result.addError(test, error)
 
-  def addFailure(self, test, error):
-    self.parent_result.addFailure(test, error)
+    def addFailure(self, test, error):
+        self.parent_result.addFailure(test, error)
 
-  def addSkip(self, test, reason):
-    pass
+    def addSkip(self, test, reason):
+        pass
 
 
 class ReferenceLeakCheckerTestCase(unittest.TestCase):
-  """A TestCase which runs tests multiple times, collecting reference counts."""
+    """A TestCase which runs tests multiple times, collecting reference counts."""
 
-  NB_RUNS = 3
+    NB_RUNS = 3
 
-  def run(self, result=None):
-    # python_message.py registers all Message classes to some pickle global
-    # registry, which makes the classes immortal.
-    # We save a copy of this registry, and reset it before we could references.
-    self._saved_pickle_registry = copyreg.dispatch_table.copy()
+    def run(self, result=None):
+        # python_message.py registers all Message classes to some pickle global
+        # registry, which makes the classes immortal.
+        # We save a copy of this registry, and reset it before we could references.
+        self._saved_pickle_registry = copyreg.dispatch_table.copy()
 
-    # Run the test twice, to warm up the instance attributes.
-    super(ReferenceLeakCheckerTestCase, self).run(result=result)
-    super(ReferenceLeakCheckerTestCase, self).run(result=result)
+        # Run the test twice, to warm up the instance attributes.
+        super(ReferenceLeakCheckerTestCase, self).run(result=result)
+        super(ReferenceLeakCheckerTestCase, self).run(result=result)
 
-    oldrefcount = 0
-    local_result = LocalTestResult(result)
+        oldrefcount = 0
+        local_result = LocalTestResult(result)
 
-    refcount_deltas = []
-    for _ in range(self.NB_RUNS):
-      oldrefcount = self._getRefcounts()
-      super(ReferenceLeakCheckerTestCase, self).run(result=local_result)
-      newrefcount = self._getRefcounts()
-      refcount_deltas.append(newrefcount - oldrefcount)
-    print(refcount_deltas, self)
+        refcount_deltas = []
+        for _ in range(self.NB_RUNS):
+            oldrefcount = self._getRefcounts()
+            super(ReferenceLeakCheckerTestCase, self).run(result=local_result)
+            newrefcount = self._getRefcounts()
+            refcount_deltas.append(newrefcount - oldrefcount)
+        print(refcount_deltas, self)
 
-    try:
-      self.assertEqual(refcount_deltas, [0] * self.NB_RUNS)
-    except Exception:  # pylint: disable=broad-except
-      result.addError(self, sys.exc_info())
+        try:
+            self.assertEqual(refcount_deltas, [0] * self.NB_RUNS)
+        except Exception:  # pylint: disable=broad-except
+            result.addError(self, sys.exc_info())
 
-  def _getRefcounts(self):
-    copyreg.dispatch_table.clear()
-    copyreg.dispatch_table.update(self._saved_pickle_registry)
-    # It is sometimes necessary to gc.collect() multiple times, to ensure
-    # that all objects can be collected.
-    gc.collect()
-    gc.collect()
-    gc.collect()
-    return sys.gettotalrefcount()
+    def _getRefcounts(self):
+        copyreg.dispatch_table.clear()
+        copyreg.dispatch_table.update(self._saved_pickle_registry)
+        # It is sometimes necessary to gc.collect() multiple times, to ensure
+        # that all objects can be collected.
+        gc.collect()
+        gc.collect()
+        gc.collect()
+        return sys.gettotalrefcount()
 
 
-if hasattr(sys, 'gettotalrefcount'):
-  BaseTestCase = ReferenceLeakCheckerTestCase
-  SkipReferenceLeakChecker = unittest.skip
+if hasattr(sys, "gettotalrefcount"):
+    BaseTestCase = ReferenceLeakCheckerTestCase
+    SkipReferenceLeakChecker = unittest.skip
 
 else:
-  # When PyDEBUG is not enabled, run the tests normally.
-  BaseTestCase = unittest.TestCase
+    # When PyDEBUG is not enabled, run the tests normally.
+    BaseTestCase = unittest.TestCase
 
-  def SkipReferenceLeakChecker(reason):
-    del reason  # Don't skip, so don't need a reason.
-    def Same(func):
-      return func
-    return Same
+    def SkipReferenceLeakChecker(reason):
+        del reason  # Don't skip, so don't need a reason.
+
+        def Same(func):
+            return func
+
+        return Same

@@ -25,46 +25,65 @@ from ray.rllib.utils.spaces.repeated import Repeated
 tf = try_import_tf()
 _, nn = try_import_torch()
 
-DICT_SPACE = spaces.Dict({
-    "sensors": spaces.Dict({
-        "position": spaces.Box(low=-100, high=100, shape=(3, )),
-        "velocity": spaces.Box(low=-1, high=1, shape=(3, )),
-        "front_cam": spaces.Tuple(
-            (spaces.Box(low=0, high=1, shape=(10, 10, 3)),
-             spaces.Box(low=0, high=1, shape=(10, 10, 3)))),
-        "rear_cam": spaces.Box(low=0, high=1, shape=(10, 10, 3)),
-    }),
-    "inner_state": spaces.Dict({
-        "charge": spaces.Discrete(100),
-        "job_status": spaces.Dict({
-            "task": spaces.Discrete(5),
-            "progress": spaces.Box(low=0, high=100, shape=()),
-        })
-    })
-})
+DICT_SPACE = spaces.Dict(
+    {
+        "sensors": spaces.Dict(
+            {
+                "position": spaces.Box(low=-100, high=100, shape=(3,)),
+                "velocity": spaces.Box(low=-1, high=1, shape=(3,)),
+                "front_cam": spaces.Tuple(
+                    (
+                        spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+                        spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+                    )
+                ),
+                "rear_cam": spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+            }
+        ),
+        "inner_state": spaces.Dict(
+            {
+                "charge": spaces.Discrete(100),
+                "job_status": spaces.Dict(
+                    {
+                        "task": spaces.Discrete(5),
+                        "progress": spaces.Box(low=0, high=100, shape=()),
+                    }
+                ),
+            }
+        ),
+    }
+)
 
 DICT_SAMPLES = [DICT_SPACE.sample() for _ in range(10)]
 
-TUPLE_SPACE = spaces.Tuple([
-    spaces.Box(low=-100, high=100, shape=(3, )),
-    spaces.Tuple((spaces.Box(low=0, high=1, shape=(10, 10, 3)),
-                  spaces.Box(low=0, high=1, shape=(10, 10, 3)))),
-    spaces.Discrete(5),
-])
+TUPLE_SPACE = spaces.Tuple(
+    [
+        spaces.Box(low=-100, high=100, shape=(3,)),
+        spaces.Tuple(
+            (
+                spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+                spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+            )
+        ),
+        spaces.Discrete(5),
+    ]
+)
 TUPLE_SAMPLES = [TUPLE_SPACE.sample() for _ in range(10)]
 
 # Constraints on the Repeated space.
 MAX_PLAYERS = 4
 MAX_ITEMS = 7
 MAX_EFFECTS = 2
-ITEM_SPACE = spaces.Box(-5, 5, shape=(1, ))
-EFFECT_SPACE = spaces.Box(9000, 9999, shape=(4, ))
-PLAYER_SPACE = spaces.Dict({
-    "location": spaces.Box(-100, 100, shape=(2, )),
-    "items": Repeated(ITEM_SPACE, max_len=MAX_ITEMS),
-    "effects": Repeated(EFFECT_SPACE, max_len=MAX_EFFECTS),
-    "status": spaces.Box(-1, 1, shape=(10, )),
-})
+ITEM_SPACE = spaces.Box(-5, 5, shape=(1,))
+EFFECT_SPACE = spaces.Box(9000, 9999, shape=(4,))
+PLAYER_SPACE = spaces.Dict(
+    {
+        "location": spaces.Box(-100, 100, shape=(2,)),
+        "items": Repeated(ITEM_SPACE, max_len=MAX_ITEMS),
+        "effects": Repeated(EFFECT_SPACE, max_len=MAX_EFFECTS),
+        "status": spaces.Box(-1, 1, shape=(10,)),
+    }
+)
 REPEATED_SPACE = Repeated(PLAYER_SPACE, max_len=MAX_PLAYERS)
 REPEATED_SAMPLES = [REPEATED_SPACE.sample() for _ in range(10)]
 
@@ -164,14 +183,18 @@ class InvalidModel2(TFModelV2):
 class TorchSpyModel(TorchModelV2, nn.Module):
     capture_index = 0
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
-        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
-                              model_config, name)
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        TorchModelV2.__init__(
+            self, obs_space, action_space, num_outputs, model_config, name
+        )
         nn.Module.__init__(self)
         self.fc = FullyConnectedNetwork(
             obs_space.original_space.spaces["sensors"].spaces["position"],
-            action_space, num_outputs, model_config, name)
+            action_space,
+            num_outputs,
+            model_config,
+            name,
+        )
 
     def forward(self, input_dict, state, seq_lens):
         pos = input_dict["obs"]["sensors"]["position"].numpy()
@@ -180,11 +203,12 @@ class TorchSpyModel(TorchModelV2, nn.Module):
         ray.experimental.internal_kv._internal_kv_put(
             "torch_spy_in_{}".format(TorchSpyModel.capture_index),
             pickle.dumps((pos, front_cam, task)),
-            overwrite=True)
+            overwrite=True,
+        )
         TorchSpyModel.capture_index += 1
-        return self.fc({
-            "obs": input_dict["obs"]["sensors"]["position"]
-        }, state, seq_lens)
+        return self.fc(
+            {"obs": input_dict["obs"]["sensors"]["position"]}, state, seq_lens
+        )
 
     def value_function(self):
         return self.fc.value_function()
@@ -193,24 +217,29 @@ class TorchSpyModel(TorchModelV2, nn.Module):
 class TorchRepeatedSpyModel(TorchModelV2, nn.Module):
     capture_index = 0
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
-        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
-                              model_config, name)
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        TorchModelV2.__init__(
+            self, obs_space, action_space, num_outputs, model_config, name
+        )
         nn.Module.__init__(self)
         self.fc = FullyConnectedNetwork(
-            obs_space.original_space.child_space["location"], action_space,
-            num_outputs, model_config, name)
+            obs_space.original_space.child_space["location"],
+            action_space,
+            num_outputs,
+            model_config,
+            name,
+        )
 
     def forward(self, input_dict, state, seq_lens):
         ray.experimental.internal_kv._internal_kv_put(
             "torch_rspy_in_{}".format(TorchRepeatedSpyModel.capture_index),
             pickle.dumps(input_dict["obs"].unbatch_all()),
-            overwrite=True)
+            overwrite=True,
+        )
         TorchRepeatedSpyModel.capture_index += 1
-        return self.fc({
-            "obs": input_dict["obs"].values["location"][:, 0]
-        }, state, seq_lens)
+        return self.fc(
+            {"obs": input_dict["obs"].values["location"][:, 0]}, state, seq_lens
+        )
 
     def value_function(self):
         return self.fc.value_function()
@@ -239,22 +268,26 @@ class DictSpyModel(TFModelV2):
             ray.experimental.internal_kv._internal_kv_put(
                 "d_spy_in_{}".format(DictSpyModel.capture_index),
                 pickle.dumps((pos, front_cam, task)),
-                overwrite=True)
+                overwrite=True,
+            )
             DictSpyModel.capture_index += 1
             return 0
 
         spy_fn = tf.py_func(
-            spy, [
+            spy,
+            [
                 input_dict["obs"]["sensors"]["position"],
                 input_dict["obs"]["sensors"]["front_cam"][0],
-                input_dict["obs"]["inner_state"]["job_status"]["task"]
+                input_dict["obs"]["inner_state"]["job_status"]["task"],
             ],
             tf.int64,
-            stateful=True)
+            stateful=True,
+        )
 
         with tf.control_dependencies([spy_fn]):
-            output = tf.layers.dense(input_dict["obs"]["sensors"]["position"],
-                                     self.num_outputs)
+            output = tf.layers.dense(
+                input_dict["obs"]["sensors"]["position"], self.num_outputs
+            )
         return output, []
 
 
@@ -268,18 +301,17 @@ class TupleSpyModel(TFModelV2):
             ray.experimental.internal_kv._internal_kv_put(
                 "t_spy_in_{}".format(TupleSpyModel.capture_index),
                 pickle.dumps((pos, cam, task)),
-                overwrite=True)
+                overwrite=True,
+            )
             TupleSpyModel.capture_index += 1
             return 0
 
         spy_fn = tf.py_func(
-            spy, [
-                input_dict["obs"][0],
-                input_dict["obs"][1][0],
-                input_dict["obs"][2],
-            ],
+            spy,
+            [input_dict["obs"][0], input_dict["obs"][1][0], input_dict["obs"][2],],
             tf.int64,
-            stateful=True)
+            stateful=True,
+        )
 
         with tf.control_dependencies([spy_fn]):
             output = tf.layers.dense(input_dict["obs"][0], self.num_outputs)
@@ -302,24 +334,20 @@ class NestedSpacesTest(unittest.TestCase):
             "Subclasses of TorchModelV2 must also inherit from nn.Module",
             lambda: PGTrainer(
                 env="CartPole-v0",
-                config={
-                    "model": {
-                        "custom_model": "invalid",
-                    },
-                    "framework": "torch",
-                }))
+                config={"model": {"custom_model": "invalid",}, "framework": "torch",},
+            ),
+        )
 
     def test_invalid_model2(self):
         ModelCatalog.register_custom_model("invalid2", InvalidModel2)
         self.assertRaisesRegexp(
-            ValueError, "Expected output shape of",
+            ValueError,
+            "Expected output shape of",
             lambda: PGTrainer(
-                env="CartPole-v0", config={
-                    "model": {
-                        "custom_model": "invalid2",
-                    },
-                    "framework": "tf",
-                }))
+                env="CartPole-v0",
+                config={"model": {"custom_model": "invalid2",}, "framework": "tf",},
+            ),
+        )
 
     def do_test_nested_dict(self, make_env, test_lstm=False):
         ModelCatalog.register_custom_model("composite", DictSpyModel)
@@ -330,23 +358,20 @@ class NestedSpacesTest(unittest.TestCase):
                 "num_workers": 0,
                 "rollout_fragment_length": 5,
                 "train_batch_size": 5,
-                "model": {
-                    "custom_model": "composite",
-                    "use_lstm": test_lstm,
-                },
+                "model": {"custom_model": "composite", "use_lstm": test_lstm,},
                 "framework": "tf",
-            })
+            },
+        )
         pg.train()
 
         # Check that the model sees the correct reconstructed observations
         for i in range(4):
             seen = pickle.loads(
-                ray.experimental.internal_kv._internal_kv_get(
-                    "d_spy_in_{}".format(i)))
+                ray.experimental.internal_kv._internal_kv_get("d_spy_in_{}".format(i))
+            )
             pos_i = DICT_SAMPLES[i]["sensors"]["position"].tolist()
             cam_i = DICT_SAMPLES[i]["sensors"]["front_cam"][0].tolist()
-            task_i = one_hot(
-                DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
+            task_i = one_hot(DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
             self.assertEqual(seen[0][0].tolist(), pos_i)
             self.assertEqual(seen[1][0].tolist(), cam_i)
             self.assertEqual(seen[2][0].tolist(), task_i)
@@ -360,18 +385,17 @@ class NestedSpacesTest(unittest.TestCase):
                 "num_workers": 0,
                 "rollout_fragment_length": 5,
                 "train_batch_size": 5,
-                "model": {
-                    "custom_model": "composite2",
-                },
+                "model": {"custom_model": "composite2",},
                 "framework": "tf",
-            })
+            },
+        )
         pg.train()
 
         # Check that the model sees the correct reconstructed observations
         for i in range(4):
             seen = pickle.loads(
-                ray.experimental.internal_kv._internal_kv_get(
-                    "t_spy_in_{}".format(i)))
+                ray.experimental.internal_kv._internal_kv_get("t_spy_in_{}".format(i))
+            )
             pos_i = TUPLE_SAMPLES[i][0].tolist()
             cam_i = TUPLE_SAMPLES[i][1][0].tolist()
             task_i = one_hot(TUPLE_SAMPLES[i][2], 5)
@@ -386,29 +410,25 @@ class NestedSpacesTest(unittest.TestCase):
         self.do_test_nested_dict(lambda _: NestedDictEnv(), test_lstm=True)
 
     def test_nested_dict_vector(self):
-        self.do_test_nested_dict(
-            lambda _: VectorEnv.wrap(lambda i: NestedDictEnv()))
+        self.do_test_nested_dict(lambda _: VectorEnv.wrap(lambda i: NestedDictEnv()))
 
     def test_nested_dict_serving(self):
         self.do_test_nested_dict(lambda _: SimpleServing(NestedDictEnv()))
 
     def test_nested_dict_async(self):
-        self.do_test_nested_dict(
-            lambda _: BaseEnv.to_base_env(NestedDictEnv()))
+        self.do_test_nested_dict(lambda _: BaseEnv.to_base_env(NestedDictEnv()))
 
     def test_nested_tuple_gym(self):
         self.do_test_nested_tuple(lambda _: NestedTupleEnv())
 
     def test_nested_tuple_vector(self):
-        self.do_test_nested_tuple(
-            lambda _: VectorEnv.wrap(lambda i: NestedTupleEnv()))
+        self.do_test_nested_tuple(lambda _: VectorEnv.wrap(lambda i: NestedTupleEnv()))
 
     def test_nested_tuple_serving(self):
         self.do_test_nested_tuple(lambda _: SimpleServing(NestedTupleEnv()))
 
     def test_nested_tuple_async(self):
-        self.do_test_nested_tuple(
-            lambda _: BaseEnv.to_base_env(NestedTupleEnv()))
+        self.do_test_nested_tuple(lambda _: BaseEnv.to_base_env(NestedTupleEnv()))
 
     def test_multi_agent_complex_spaces(self):
         ModelCatalog.register_custom_model("dict_spy", DictSpyModel)
@@ -424,36 +444,43 @@ class NestedSpacesTest(unittest.TestCase):
                 "multiagent": {
                     "policies": {
                         "tuple_policy": (
-                            PGTFPolicy, TUPLE_SPACE, act_space,
-                            {"model": {"custom_model": "tuple_spy"}}),
+                            PGTFPolicy,
+                            TUPLE_SPACE,
+                            act_space,
+                            {"model": {"custom_model": "tuple_spy"}},
+                        ),
                         "dict_policy": (
-                            PGTFPolicy, DICT_SPACE, act_space,
-                            {"model": {"custom_model": "dict_spy"}}),
+                            PGTFPolicy,
+                            DICT_SPACE,
+                            act_space,
+                            {"model": {"custom_model": "dict_spy"}},
+                        ),
                     },
                     "policy_mapping_fn": lambda a: {
                         "tuple_agent": "tuple_policy",
-                        "dict_agent": "dict_policy"}[a],
+                        "dict_agent": "dict_policy",
+                    }[a],
                 },
                 "framework": "tf",
-            })
+            },
+        )
         pg.train()
 
         for i in range(4):
             seen = pickle.loads(
-                ray.experimental.internal_kv._internal_kv_get(
-                    "d_spy_in_{}".format(i)))
+                ray.experimental.internal_kv._internal_kv_get("d_spy_in_{}".format(i))
+            )
             pos_i = DICT_SAMPLES[i]["sensors"]["position"].tolist()
             cam_i = DICT_SAMPLES[i]["sensors"]["front_cam"][0].tolist()
-            task_i = one_hot(
-                DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
+            task_i = one_hot(DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
             self.assertEqual(seen[0][0].tolist(), pos_i)
             self.assertEqual(seen[1][0].tolist(), cam_i)
             self.assertEqual(seen[2][0].tolist(), task_i)
 
         for i in range(4):
             seen = pickle.loads(
-                ray.experimental.internal_kv._internal_kv_get(
-                    "t_spy_in_{}".format(i)))
+                ray.experimental.internal_kv._internal_kv_get("t_spy_in_{}".format(i))
+            )
             pos_i = TUPLE_SAMPLES[i][0].tolist()
             cam_i = TUPLE_SAMPLES[i][1][0].tolist()
             task_i = one_hot(TUPLE_SAMPLES[i][2], 5)
@@ -485,11 +512,10 @@ class NestedSpacesTest(unittest.TestCase):
                 "num_workers": 0,
                 "rollout_fragment_length": 5,
                 "train_batch_size": 5,
-                "model": {
-                    "custom_model": "composite",
-                },
+                "model": {"custom_model": "composite",},
                 "framework": "torch",
-            })
+            },
+        )
 
         a2c.train()
 
@@ -497,11 +523,12 @@ class NestedSpacesTest(unittest.TestCase):
         for i in range(4):
             seen = pickle.loads(
                 ray.experimental.internal_kv._internal_kv_get(
-                    "torch_spy_in_{}".format(i)))
+                    "torch_spy_in_{}".format(i)
+                )
+            )
             pos_i = DICT_SAMPLES[i]["sensors"]["position"].tolist()
             cam_i = DICT_SAMPLES[i]["sensors"]["front_cam"][0].tolist()
-            task_i = one_hot(
-                DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
+            task_i = one_hot(DICT_SAMPLES[i]["inner_state"]["job_status"]["task"], 5)
             self.assertEqual(seen[0][0].tolist(), pos_i)
             self.assertEqual(seen[1][0].tolist(), cam_i)
             self.assertEqual(seen[2][0].tolist(), task_i)
@@ -516,11 +543,10 @@ class NestedSpacesTest(unittest.TestCase):
                 "num_workers": 0,
                 "rollout_fragment_length": 5,
                 "train_batch_size": 5,
-                "model": {
-                    "custom_model": "r1",
-                },
+                "model": {"custom_model": "r1",},
                 "framework": "torch",
-            })
+            },
+        )
 
         a2c.train()
 
@@ -528,11 +554,14 @@ class NestedSpacesTest(unittest.TestCase):
         for i in range(4):
             seen = pickle.loads(
                 ray.experimental.internal_kv._internal_kv_get(
-                    "torch_rspy_in_{}".format(i)))
+                    "torch_rspy_in_{}".format(i)
+                )
+            )
             self.assertEqual(to_list(seen), [to_list(REPEATED_SAMPLES[i])])
 
 
 if __name__ == "__main__":
     import pytest
     import sys
+
     sys.exit(pytest.main(["-v", __file__]))

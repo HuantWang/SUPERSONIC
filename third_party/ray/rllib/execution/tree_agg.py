@@ -3,13 +3,15 @@ import platform
 from typing import List
 
 import ray
-from ray.rllib.execution.common import STEPS_SAMPLED_COUNTER, \
-    SampleBatchType, _get_shared_metrics
+from ray.rllib.execution.common import (
+    STEPS_SAMPLED_COUNTER,
+    SampleBatchType,
+    _get_shared_metrics,
+)
 from ray.rllib.execution.replay_ops import MixInReplay
 from ray.rllib.execution.rollout_ops import ParallelRollouts, ConcatBatches
 from ray.rllib.utils.actors import create_colocated
-from ray.util.iter import ParallelIterator, ParallelIteratorWorker, \
-    from_actors
+from ray.util.iter import ParallelIterator, ParallelIteratorWorker, from_actors
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +26,16 @@ class Aggregator(ParallelIteratorWorker):
     work to be offloaded to these actors instead of run in the learner.
     """
 
-    def __init__(self, config: dict,
-                 rollout_group: "ParallelIterator[SampleBatchType]"):
+    def __init__(
+        self, config: dict, rollout_group: "ParallelIterator[SampleBatchType]"
+    ):
         self.weights = None
         self.global_vars = None
 
         def generator():
             it = rollout_group.gather_async(
-                num_async=config["max_sample_requests_in_flight_per_worker"])
+                num_async=config["max_sample_requests_in_flight_per_worker"]
+            )
 
             # Update the rollout worker with our latest policy weights.
             def update_worker(item):
@@ -41,16 +45,19 @@ class Aggregator(ParallelIteratorWorker):
                 return batch
 
             # Augment with replay and concat to desired train batch size.
-            it = it.zip_with_source_actor() \
-                .for_each(update_worker) \
-                .for_each(lambda batch: batch.decompress_if_needed()) \
-                .for_each(MixInReplay(
-                    num_slots=config["replay_buffer_num_slots"],
-                    replay_proportion=config["replay_proportion"])) \
-                .flatten() \
-                .combine(
-                    ConcatBatches(
-                        min_batch_size=config["train_batch_size"]))
+            it = (
+                it.zip_with_source_actor()
+                .for_each(update_worker)
+                .for_each(lambda batch: batch.decompress_if_needed())
+                .for_each(
+                    MixInReplay(
+                        num_slots=config["replay_buffer_num_slots"],
+                        replay_proportion=config["replay_proportion"],
+                    )
+                )
+                .flatten()
+                .combine(ConcatBatches(min_batch_size=config["train_batch_size"]))
+            )
 
             for train_batch in it:
                 yield train_batch
@@ -87,9 +94,9 @@ def gather_experiences_tree_aggregation(workers, config):
     # This spawns |num_aggregation_workers| intermediate actors that aggregate
     # experiences in parallel. We force colocation on the same node to maximize
     # data bandwidth between them and the driver.
-    train_batches = from_actors([
-        create_colocated(Aggregator, [config, g], 1)[0] for g in rollout_groups
-    ])
+    train_batches = from_actors(
+        [create_colocated(Aggregator, [config, g], 1)[0] for g in rollout_groups]
+    )
 
     # TODO(ekl) properly account for replay.
     def record_steps_sampled(batch):

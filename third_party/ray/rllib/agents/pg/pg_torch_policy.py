@@ -16,8 +16,7 @@ def pg_torch_loss(policy, model, dist_class, train_batch):
     # Save the error in the policy object.
     # policy.pi_err = -train_batch[Postprocessing.ADVANTAGES].dot(
     # log_probs.reshape(-1)) / len(log_probs)
-    policy.pi_err = -torch.mean(
-        log_probs * train_batch[Postprocessing.ADVANTAGES])
+    policy.pi_err = -torch.mean(log_probs * train_batch[Postprocessing.ADVANTAGES])
     return policy.pi_err
 
 
@@ -31,4 +30,5 @@ PGTorchPolicy = build_torch_policy(
     get_default_config=lambda: ray.rllib.agents.pg.pg.DEFAULT_CONFIG,
     loss_fn=pg_torch_loss,
     stats_fn=pg_loss_stats,
-    postprocess_fn=post_process_advantages)
+    postprocess_fn=post_process_advantages,
+)

@@ -16,8 +16,11 @@ import random
 import ray
 from ray import tune
 from ray.rllib.examples.env.multi_agent import MultiAgentCartPole
-from ray.rllib.examples.models.shared_weights_model import \
-    SharedWeightsModel1, SharedWeightsModel2, TorchSharedWeightsModel
+from ray.rllib.examples.models.shared_weights_model import (
+    SharedWeightsModel1,
+    SharedWeightsModel2,
+    TorchSharedWeightsModel,
+)
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.framework import try_import_tf
 from ray.rllib.utils.test_utils import check_learning_achieved
@@ -55,25 +58,18 @@ if __name__ == "__main__":
     # Each policy can have a different configuration (including custom model).
     def gen_policy(i):
         config = {
-            "model": {
-                "custom_model": ["model1", "model2"][i % 2],
-            },
+            "model": {"custom_model": ["model1", "model2"][i % 2],},
             "gamma": random.choice([0.95, 0.99]),
         }
         return (None, obs_space, act_space, config)
 
     # Setup PPO with an ensemble of `num_policies` different policies.
-    policies = {
-        "policy_{}".format(i): gen_policy(i)
-        for i in range(args.num_policies)
-    }
+    policies = {"policy_{}".format(i): gen_policy(i) for i in range(args.num_policies)}
     policy_ids = list(policies.keys())
 
     config = {
         "env": MultiAgentCartPole,
-        "env_config": {
-            "num_agents": args.num_agents,
-        },
+        "env_config": {"num_agents": args.num_agents,},
         "simple_optimizer": args.simple,
         "num_sgd_iter": 10,
         "multiagent": {

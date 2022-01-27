@@ -1,6 +1,7 @@
 import copy
 import logging
 import pickle
+
 try:  # Python 3 only -- needed for lint test.
     import bayes_opt as byo
 except ImportError:
@@ -59,20 +60,23 @@ class BayesOptSearch(Searcher):
         algo = BayesOptSearch(space, metric="mean_loss", mode="min")
         tune.run(my_func, algo=algo)
     """
+
     # bayes_opt.BayesianOptimization: Optimization object
     optimizer = None
 
-    def __init__(self,
-                 space,
-                 metric,
-                 mode="max",
-                 utility_kwargs=None,
-                 random_state=42,
-                 random_search_steps=10,
-                 verbose=0,
-                 analysis=None,
-                 max_concurrent=None,
-                 use_early_stopped_trials=None):
+    def __init__(
+        self,
+        space,
+        metric,
+        mode="max",
+        utility_kwargs=None,
+        random_state=42,
+        random_search_steps=10,
+        verbose=0,
+        analysis=None,
+        max_concurrent=None,
+        use_early_stopped_trials=None,
+    ):
         """Instantiate new BayesOptSearch object.
 
         Args:
@@ -96,28 +100,26 @@ class BayesOptSearch(Searcher):
         """
         assert byo is not None, (
             "BayesOpt must be installed!. You can install BayesOpt with"
-            " the command: `pip install bayesian-optimization`.")
+            " the command: `pip install bayesian-optimization`."
+        )
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
         self.max_concurrent = max_concurrent
         super(BayesOptSearch, self).__init__(
             metric=metric,
             mode=mode,
             max_concurrent=max_concurrent,
-            use_early_stopped_trials=use_early_stopped_trials)
+            use_early_stopped_trials=use_early_stopped_trials,
+        )
 
         if utility_kwargs is None:
             # The defaults arguments are the same
             # as in the package BayesianOptimization
-            utility_kwargs = dict(
-                kind="ucb",
-                kappa=2.576,
-                xi=0.0,
-            )
+            utility_kwargs = dict(kind="ucb", kappa=2.576, xi=0.0,)
 
         if mode == "max":
-            self._metric_op = 1.
+            self._metric_op = 1.0
         elif mode == "min":
-            self._metric_op = -1.
+            self._metric_op = -1.0
 
         self._live_trial_mapping = {}
         self._cached_results = []
@@ -125,7 +127,8 @@ class BayesOptSearch(Searcher):
         self._total_random_search_trials = 0
 
         self.optimizer = byo.BayesianOptimization(
-            f=None, pbounds=space, verbose=verbose, random_state=random_state)
+            f=None, pbounds=space, verbose=verbose, random_state=random_state
+        )
 
         self.utility = byo.UtilityFunction(**utility_kwargs)
 
@@ -176,8 +179,9 @@ class BayesOptSearch(Searcher):
             analysis (ExperimentAnalysis): Optionally, the previous analysis
                 to integrate.
         """
-        for (_, report), params in zip(analysis.dataframe().iterrows(),
-                                       analysis.get_all_configs().values()):
+        for (_, report), params in zip(
+            analysis.dataframe().iterrows(), analysis.get_all_configs().values()
+        ):
             # We add the obtained results to the
             # gaussian process optimizer
             self._register_result(params, report)
@@ -226,11 +230,20 @@ class BayesOptSearch(Searcher):
     def save(self, checkpoint_dir):
         """Storing current optimizer state."""
         with open(checkpoint_dir, "wb") as f:
-            pickle.dump((self.optimizer, self._cached_results,
-                         self._total_random_search_trials), f)
+            pickle.dump(
+                (
+                    self.optimizer,
+                    self._cached_results,
+                    self._total_random_search_trials,
+                ),
+                f,
+            )
 
     def restore(self, checkpoint_dir):
         """Restoring current optimizer state."""
         with open(checkpoint_dir, "rb") as f:
-            (self.optimizer, self._cached_results,
-             self._total_random_search_trials) = pickle.load(f)
+            (
+                self.optimizer,
+                self._cached_results,
+                self._total_random_search_trials,
+            ) = pickle.load(f)

@@ -3,6 +3,7 @@ try:
 except ImportError:
     print("The dashboard requires aiohttp to run.")
     import sys
+
     sys.exit(1)
 
 import argparse
@@ -49,8 +50,9 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-async def json_response(is_dev, result=None, error=None,
-                        ts=None) -> aiohttp.web.Response:
+async def json_response(
+    is_dev, result=None, error=None, ts=None
+) -> aiohttp.web.Response:
     if ts is None:
         ts = datetime.datetime.utcnow()
 
@@ -59,19 +61,15 @@ async def json_response(is_dev, result=None, error=None,
         headers = {"Access-Control-Allow-Origin": "*"}
 
     return aiohttp.web.json_response(
-        {
-            "result": result,
-            "timestamp": to_unix_time(ts),
-            "error": error,
-        },
-        headers=headers)
+        {"result": result, "timestamp": to_unix_time(ts), "error": error,},
+        headers=headers,
+    )
 
 
 class DashboardController(BaseDashboardController):
     def __init__(self, redis_address, redis_password):
         self.node_stats = NodeStats(redis_address, redis_password)
-        self.raylet_stats = RayletStats(
-            redis_address, redis_password=redis_password)
+        self.raylet_stats = RayletStats(redis_address, redis_password=redis_password)
         if Analysis is not None:
             self.tune_stats = TuneCollector(2.0)
         self.memory_table = MemoryTable([])
@@ -79,59 +77,63 @@ class DashboardController(BaseDashboardController):
     def _construct_raylet_info(self):
         D = self.raylet_stats.get_raylet_stats()
         workers_info_by_node = {
-            data["nodeId"]: data.get("workersStats")
-            for data in D.values()
+            data["nodeId"]: data.get("workersStats") for data in D.values()
         }
 
         infeasible_tasks = sum(
-            (data.get("infeasibleTasks", []) for data in D.values()), [])
+            (data.get("infeasibleTasks", []) for data in D.values()), []
+        )
         # ready_tasks are used to render tasks that are not schedulable
         # due to resource limitations.
         # (e.g., Actor requires 2 GPUs but there is only 1 gpu available).
-        ready_tasks = sum((data.get("readyTasks", []) for data in D.values()),
-                          [])
+        ready_tasks = sum((data.get("readyTasks", []) for data in D.values()), [])
         actor_tree = self.node_stats.get_actor_tree(
-            workers_info_by_node, infeasible_tasks, ready_tasks)
+            workers_info_by_node, infeasible_tasks, ready_tasks
+        )
 
         for address, data in D.items():
             # process view data
             measures_dicts = {}
             for view_data in data["viewData"]:
                 view_name = view_data["viewName"]
-                if view_name in ("local_available_resource",
-                                 "local_total_resource",
-                                 "object_manager_stats"):
-                    measures_dicts[view_name] = measures_to_dict(
-                        view_data["measures"])
+                if view_name in (
+                    "local_available_resource",
+                    "local_total_resource",
+                    "object_manager_stats",
+                ):
+                    measures_dicts[view_name] = measures_to_dict(view_data["measures"])
             # process resources info
             extra_info_strings = []
             prefix = "ResourceName:"
             for resource_name, total_resource in measures_dicts[
-                    "local_total_resource"].items():
-                available_resource = measures_dicts[
-                    "local_available_resource"].get(resource_name, .0)
-                resource_name = resource_name[len(prefix):]
-                extra_info_strings.append("{}: {} / {}".format(
-                    resource_name,
-                    format_resource(resource_name,
-                                    total_resource - available_resource),
-                    format_resource(resource_name, total_resource)))
+                "local_total_resource"
+            ].items():
+                available_resource = measures_dicts["local_available_resource"].get(
+                    resource_name, 0.0
+                )
+                resource_name = resource_name[len(prefix) :]
+                extra_info_strings.append(
+                    "{}: {} / {}".format(
+                        resource_name,
+                        format_resource(
+                            resource_name, total_resource - available_resource
+                        ),
+                        format_resource(resource_name, total_resource),
+                    )
+                )
             data["extraInfo"] = ", ".join(extra_info_strings) + "\n"
             if os.environ.get("RAY_DASHBOARD_DEBUG"):
                 # process object store info
                 extra_info_strings = []
                 prefix = "ValueType:"
-                for stats_name in [
-                        "used_object_store_memory", "num_local_objects"
-                ]:
+                for stats_name in ["used_object_store_memory", "num_local_objects"]:
                     stats_value = measures_dicts["object_manager_stats"].get(
-                        prefix + stats_name, .0)
-                    extra_info_strings.append("{}: {}".format(
-                        stats_name, stats_value))
+                        prefix + stats_name, 0.0
+                    )
+                    extra_info_strings.append("{}: {}".format(stats_name, stats_value))
                 data["extraInfo"] += ", ".join(extra_info_strings)
                 # process actor info
-                actor_tree_str = json.dumps(
-                    actor_tree, indent=2, sort_keys=True)
+                actor_tree_str = json.dumps(actor_tree, indent=2, sort_keys=True)
                 lines = actor_tree_str.split("\n")
                 max_line_length = max(map(len, lines))
                 to_print = []
@@ -181,8 +183,7 @@ class DashboardController(BaseDashboardController):
         self.raylet_stats.include_memory_info = True
         D = self.raylet_stats.get_raylet_stats()
         workers_info_by_node = {
-            data["nodeId"]: data.get("workersStats")
-            for data in D.values()
+            data["nodeId"]: data.get("workersStats") for data in D.values()
         }
         self.memory_table = construct_memory_table(workers_info_by_node)
         return self.memory_table
@@ -215,7 +216,8 @@ class DashboardController(BaseDashboardController):
 
     def launch_profiling(self, node_id, pid, duration):
         profiling_id = self.raylet_stats.launch_profiling(
-            node_id=node_id, pid=pid, duration=duration)
+            node_id=node_id, pid=pid, duration=duration
+        )
         return profiling_id
 
     def check_profiling_status(self, profiling_id):
@@ -241,8 +243,7 @@ class DashboardController(BaseDashboardController):
 
 
 class DashboardRouteHandler(BaseDashboardRouteHandler):
-    def __init__(self, dashboard_controller: DashboardController,
-                 is_dev=False):
+    def __init__(self, dashboard_controller: DashboardController, is_dev=False):
         self.dashboard_controller = dashboard_controller
         self.is_dev = is_dev
 
@@ -255,14 +256,16 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
     async def get_index(self, req) -> aiohttp.web.Response:
         return aiohttp.web.FileResponse(
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "client/build/index.html"))
+                os.path.dirname(os.path.abspath(__file__)), "client/build/index.html"
+            )
+        )
 
     async def get_favicon(self, req) -> aiohttp.web.Response:
         return aiohttp.web.FileResponse(
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "client/build/favicon.ico"))
+                os.path.dirname(os.path.abspath(__file__)), "client/build/favicon.ico"
+            )
+        )
 
     async def ray_config(self, req) -> aiohttp.web.Response:
         error, result = self.dashboard_controller.get_ray_config()
@@ -283,8 +286,7 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
         memory_table = self.dashboard_controller.get_memory_table_info()
         return await json_response(self.is_dev, result=memory_table.__dict__())
 
-    async def stop_collecting_memory_table_info(self,
-                                                req) -> aiohttp.web.Response:
+    async def stop_collecting_memory_table_info(self, req) -> aiohttp.web.Response:
         self.dashboard_controller.stop_collecting_memory_table_info()
         return await json_response(self.is_dev, result={})
 
@@ -299,7 +301,8 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
     async def set_tune_experiment(self, req) -> aiohttp.web.Response:
         data = await req.json()
         error, result = self.dashboard_controller.set_tune_experiment(
-            data["experiment"])
+            data["experiment"]
+        )
         if error:
             return await json_response(self.is_dev, error=error)
         return await json_response(self.is_dev, result=result)
@@ -313,7 +316,8 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
         pid = int(req.query.get("pid"))
         duration = int(req.query.get("duration"))
         profiling_id = self.dashboard_controller.launch_profiling(
-            node_id, pid, duration)
+            node_id, pid, duration
+        )
         return await json_response(self.is_dev, result=str(profiling_id))
 
     async def check_profiling_status(self, req) -> aiohttp.web.Response:
@@ -323,8 +327,7 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
 
     async def get_profiling_info(self, req) -> aiohttp.web.Response:
         profiling_id = req.query.get("profiling_id")
-        profiling_info = self.dashboard_controller.get_profiling_info(
-            profiling_id)
+        profiling_info = self.dashboard_controller.get_profiling_info(profiling_id)
         return aiohttp.web.json_response(profiling_info)
 
     async def kill_actor(self, req) -> aiohttp.web.Response:
@@ -333,7 +336,8 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
         port = req.query.get("port")
         return await json_response(
             self.is_dev,
-            self.dashboard_controller.kill_actor(actor_id, ip_address, port))
+            self.dashboard_controller.kill_actor(actor_id, ip_address, port),
+        )
 
     async def logs(self, req) -> aiohttp.web.Response:
         hostname = req.query.get("hostname")
@@ -349,11 +353,13 @@ class DashboardRouteHandler(BaseDashboardRouteHandler):
 
 
 class MetricsExportHandler:
-    def __init__(self,
-                 dashboard_controller: DashboardController,
-                 metrics_export_client: MetricsExportClient,
-                 dashboard_id,
-                 is_dev=False):
+    def __init__(
+        self,
+        dashboard_controller: DashboardController,
+        metrics_export_client: MetricsExportClient,
+        dashboard_id,
+        is_dev=False,
+    ):
         assert metrics_export_client is not None
         self.metrics_export_client = metrics_export_client
         self.dashboard_controller = dashboard_controller
@@ -362,13 +368,15 @@ class MetricsExportHandler:
     async def enable_export_metrics(self, req) -> aiohttp.web.Response:
         if self.metrics_export_client.enabled:
             return await json_response(
-                self.is_dev, result={"url": None}, error="Already enabled")
+                self.is_dev, result={"url": None}, error="Already enabled"
+            )
 
         succeed, error = self.metrics_export_client.start_exporting_metrics()
         error_msg = "Failed to enable it. Error: {}".format(error)
         if not succeed:
             return await json_response(
-                self.is_dev, result={"url": None}, error=error_msg)
+                self.is_dev, result={"url": None}, error=error_msg
+            )
 
         url = self.metrics_export_client.dashboard_url
         return await json_response(self.is_dev, result={"url": url})
@@ -378,7 +386,8 @@ class MetricsExportHandler:
             return await json_response(
                 self.is_dev,
                 result={"url": None},
-                error="Metrics exporting is not enabled.")
+                error="Metrics exporting is not enabled.",
+            )
 
         url = self.metrics_export_client.dashboard_url
         return await json_response(self.is_dev, result={"url": url})
@@ -388,13 +397,15 @@ class MetricsExportHandler:
             return await json_response(
                 self.is_dev,
                 result={"url": None},
-                error="You should enable metrics export to use this endpoint.")
+                error="You should enable metrics export to use this endpoint.",
+            )
 
         raise aiohttp.web.HTTPFound(self.metrics_export_client.dashboard_url)
 
 
-def setup_metrics_export_routes(app: aiohttp.web.Application,
-                                handler: MetricsExportHandler):
+def setup_metrics_export_routes(
+    app: aiohttp.web.Application, handler: MetricsExportHandler
+):
     """Routes that require dynamically changing class attributes."""
     app.router.add_get("/api/metrics/enable", handler.enable_export_metrics)
     app.router.add_get("/api/metrics/url", handler.get_dashboard_address)
@@ -402,16 +413,18 @@ def setup_metrics_export_routes(app: aiohttp.web.Application,
 
 
 def setup_static_dir(app):
-    build_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "client/build")
+    build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "client/build")
     if not os.path.isdir(build_dir):
         raise OSError(
-            errno.ENOENT, "Dashboard build directory not found. If installing "
+            errno.ENOENT,
+            "Dashboard build directory not found. If installing "
             "from source, please follow the additional steps "
             "required to build the dashboard"
             "(cd python/ray/dashboard/client "
             "&& npm ci "
-            "&& npm run build)", build_dir)
+            "&& npm run build)",
+            build_dir,
+        )
 
     static_dir = os.path.join(build_dir, "static")
     app.router.add_static("/static", static_dir)
@@ -423,23 +436,25 @@ def setup_speedscope_dir(app, build_dir):
     app.router.add_static("/speedscope", speedscope_dir)
 
 
-def setup_dashboard_route(app: aiohttp.web.Application,
-                          handler: BaseDashboardRouteHandler,
-                          index=None,
-                          favicon=None,
-                          ray_config=None,
-                          node_info=None,
-                          raylet_info=None,
-                          tune_info=None,
-                          tune_availability=None,
-                          launch_profiling=None,
-                          check_profiling_status=None,
-                          get_profiling_info=None,
-                          kill_actor=None,
-                          logs=None,
-                          errors=None,
-                          memory_table=None,
-                          stop_memory_table=None):
+def setup_dashboard_route(
+    app: aiohttp.web.Application,
+    handler: BaseDashboardRouteHandler,
+    index=None,
+    favicon=None,
+    ray_config=None,
+    node_info=None,
+    raylet_info=None,
+    tune_info=None,
+    tune_availability=None,
+    launch_profiling=None,
+    check_profiling_status=None,
+    get_profiling_info=None,
+    kill_actor=None,
+    logs=None,
+    errors=None,
+    memory_table=None,
+    stop_memory_table=None,
+):
     def add_get_route(route, handler_func):
         if route is not None:
             app.router.add_get(route, handler_func)
@@ -478,21 +493,23 @@ class Dashboard:
         metrics_export_address(str): The address users host their dashboard.
     """
 
-    def __init__(self,
-                 host,
-                 port,
-                 redis_address,
-                 temp_dir,
-                 redis_password=None,
-                 metrics_export_address=None):
+    def __init__(
+        self,
+        host,
+        port,
+        redis_address,
+        temp_dir,
+        redis_password=None,
+        metrics_export_address=None,
+    ):
         self.host = host
         self.port = port
         self.redis_client = ray.services.create_redis_client(
-            redis_address, password=redis_password)
+            redis_address, password=redis_password
+        )
         self.temp_dir = temp_dir
         self.dashboard_id = str(uuid.uuid4())
-        self.dashboard_controller = DashboardController(
-            redis_address, redis_password)
+        self.dashboard_controller = DashboardController(redis_address, redis_password)
 
         # Setting the environment variable RAY_DASHBOARD_DEV=1 disables some
         # security checks in the dashboard server to ease development while
@@ -502,7 +519,8 @@ class Dashboard:
 
         self.app = aiohttp.web.Application()
         route_handler = DashboardRouteHandler(
-            self.dashboard_controller, is_dev=self.is_dev)
+            self.dashboard_controller, is_dev=self.is_dev
+        )
 
         # Setup Metrics exporting service if necessary.
         self.metrics_export_address = metrics_export_address
@@ -529,36 +547,47 @@ class Dashboard:
             logs="/api/logs",
             errors="/api/errors",
             memory_table="/api/memory_table",
-            stop_memory_table="/api/stop_memory_table")
+            stop_memory_table="/api/stop_memory_table",
+        )
         self.app.router.add_get("/{_}", route_handler.get_forbidden)
-        self.app.router.add_post("/api/set_tune_experiment",
-                                 route_handler.set_tune_experiment)
-        self.app.router.add_post("/api/enable_tune_tensorboard",
-                                 route_handler.enable_tune_tensorboard)
+        self.app.router.add_post(
+            "/api/set_tune_experiment", route_handler.set_tune_experiment
+        )
+        self.app.router.add_post(
+            "/api/enable_tune_tensorboard", route_handler.enable_tune_tensorboard
+        )
 
     def _setup_metrics_export(self):
-        exporter = Exporter(self.dashboard_id, self.metrics_export_address,
-                            self.dashboard_controller)
+        exporter = Exporter(
+            self.dashboard_id, self.metrics_export_address, self.dashboard_controller
+        )
         self.metrics_export_client = MetricsExportClient(
-            self.metrics_export_address, self.dashboard_controller,
-            self.dashboard_id, exporter)
+            self.metrics_export_address,
+            self.dashboard_controller,
+            self.dashboard_id,
+            exporter,
+        )
 
         # Setup endpoints
         metrics_export_handler = MetricsExportHandler(
             self.dashboard_controller,
             self.metrics_export_client,
             self.dashboard_id,
-            is_dev=self.is_dev)
+            is_dev=self.is_dev,
+        )
         setup_metrics_export_routes(self.app, metrics_export_handler)
 
     def _start_exporting_metrics(self):
         result, error = self.metrics_export_client.start_exporting_metrics()
         if not result and error:
             url = ray.services.get_webui_url_from_redis(self.redis_client)
-            error += (" Please reenable the metrics export by going to "
-                      "the url: {}/api/metrics/enable".format(url))
+            error += (
+                " Please reenable the metrics export by going to "
+                "the url: {}/api/metrics/enable".format(url)
+            )
             ray.utils.push_error_to_driver_through_redis(
-                self.redis_client, "metrics export failed", error)
+                self.redis_client, "metrics export failed", error
+            )
 
     def log_dashboard_url(self):
         url = ray.services.get_webui_url_from_redis(self.redis_client)
@@ -583,7 +612,8 @@ class RayletStats(threading.Thread):
         self.stubs = {}
         self.reporter_stubs = {}
         self.redis_client = ray.services.create_redis_client(
-            redis_address, password=redis_password)
+            redis_address, password=redis_password
+        )
 
         self._raylet_stats_lock = threading.Lock()
         self._raylet_stats = {}
@@ -612,26 +642,30 @@ class RayletStats(threading.Thread):
                 node_id = node["NodeID"]
                 if node_id not in self.stubs:
                     node_ip = node["NodeManagerAddress"]
-                    channel = grpc.insecure_channel("{}:{}".format(
-                        node_ip, node["NodeManagerPort"]))
-                    stub = node_manager_pb2_grpc.NodeManagerServiceStub(
-                        channel)
+                    channel = grpc.insecure_channel(
+                        "{}:{}".format(node_ip, node["NodeManagerPort"])
+                    )
+                    stub = node_manager_pb2_grpc.NodeManagerServiceStub(channel)
                     self.stubs[node_id] = stub
                     # Block wait until the reporter for the node starts.
                     while True:
                         reporter_port = self.redis_client.get(
-                            "REPORTER_PORT:{}".format(node_ip))
+                            "REPORTER_PORT:{}".format(node_ip)
+                        )
                         if reporter_port:
                             break
-                    reporter_channel = grpc.insecure_channel("{}:{}".format(
-                        node_ip, int(reporter_port)))
+                    reporter_channel = grpc.insecure_channel(
+                        "{}:{}".format(node_ip, int(reporter_port))
+                    )
                     reporter_stub = reporter_pb2_grpc.ReporterServiceStub(
-                        reporter_channel)
+                        reporter_channel
+                    )
                     self.reporter_stubs[node_id] = reporter_stub
 
-            assert len(self.stubs) == len(
-                self.reporter_stubs), (self.stubs.keys(),
-                                       self.reporter_stubs.keys())
+            assert len(self.stubs) == len(self.reporter_stubs), (
+                self.stubs.keys(),
+                self.reporter_stubs.keys(),
+            )
 
     def get_raylet_stats(self):
         with self._raylet_stats_lock:
@@ -647,7 +681,8 @@ class RayletStats(threading.Thread):
 
         reporter_stub = self.reporter_stubs[node_id]
         reply_future = reporter_stub.GetProfilingStats.future(
-            reporter_pb2.GetProfilingStatsRequest(pid=pid, duration=duration))
+            reporter_pb2.GetProfilingStatsRequest(pid=pid, duration=duration)
+        )
         reply_future.add_done_callback(_callback)
         return profiling_id
 
@@ -678,7 +713,9 @@ class RayletStats(threading.Thread):
 
         reply_future = stub.KillActor.future(
             core_worker_pb2.KillActorRequest(
-                intended_actor_id=ray.utils.hex_to_binary(actor_id)))
+                intended_actor_id=ray.utils.hex_to_binary(actor_id)
+            )
+        )
         reply_future.add_done_callback(_callback)
         return {}
 
@@ -693,8 +730,10 @@ class RayletStats(threading.Thread):
                     stub = self.stubs[node_id]
                     reply = stub.GetNodeStats(
                         node_manager_pb2.GetNodeStatsRequest(
-                            include_memory_info=self.include_memory_info),
-                        timeout=2)
+                            include_memory_info=self.include_memory_info
+                        ),
+                        timeout=2,
+                    )
                     reply_dict = MessageToDict(reply)
                     reply_dict["nodeId"] = node_id
                     replies[node["NodeManagerAddress"]] = reply_dict
@@ -736,12 +775,12 @@ class TuneCollector(threading.Thread):
         with self._data_lock:
             tensor_board_info = {
                 "tensorboard_current": self._logdir == self._tensor_board_dir,
-                "tensorboard_enabled": self._tensor_board_dir != ""
+                "tensorboard_enabled": self._tensor_board_dir != "",
             }
             return {
                 "trial_records": copy.deepcopy(self._trial_records),
                 "errors": copy.deepcopy(self._errors),
-                "tensorboard": tensor_board_info
+                "tensorboard": tensor_board_info,
             }
 
     def set_experiment(self, experiment):
@@ -762,10 +801,7 @@ class TuneCollector(threading.Thread):
 
     def get_availability(self):
         with self._data_lock:
-            return {
-                "available": True,
-                "trials_available": self._trials_available
-            }
+            return {"available": True, "trials_available": self._trials_available}
 
     def run(self):
         while True:
@@ -776,7 +812,8 @@ class TuneCollector(threading.Thread):
     def collect_errors(self, df):
         sub_dirs = os.listdir(self._logdir)
         trial_names = filter(
-            lambda d: os.path.isdir(os.path.join(self._logdir, d)), sub_dirs)
+            lambda d: os.path.isdir(os.path.join(self._logdir, d)), sub_dirs
+        )
         for trial in trial_names:
             error_path = os.path.join(self._logdir, trial, "error.txt")
             if os.path.isfile(error_path):
@@ -786,7 +823,7 @@ class TuneCollector(threading.Thread):
                     self._errors[str(trial)] = {
                         "text": text,
                         "job_id": os.path.basename(self._logdir),
-                        "trial_id": "No Trial ID"
+                        "trial_id": "No Trial ID",
                     }
                     other_data = df[df["logdir"].str.contains(trial)]
                     if len(other_data) > 0:
@@ -794,8 +831,7 @@ class TuneCollector(threading.Thread):
                         self._errors[str(trial)]["trial_id"] = str(trial_id)
                         if str(trial_id) in self._trial_records.keys():
                             self._trial_records[str(trial_id)]["error"] = text
-                            self._trial_records[str(trial_id)][
-                                "status"] = "ERROR"
+                            self._trial_records[str(trial_id)]["status"] = "ERROR"
 
     def collect(self):
         """
@@ -847,12 +883,25 @@ class TuneCollector(threading.Thread):
 
         # list of static attributes for trial
         default_names = [
-            "logdir", "time_this_iter_s", "done", "episodes_total",
-            "training_iteration", "timestamp", "timesteps_total",
-            "experiment_id", "date", "timestamp", "time_total_s", "pid",
-            "hostname", "node_ip", "time_since_restore",
-            "timesteps_since_restore", "iterations_since_restore",
-            "experiment_tag", "trial_id"
+            "logdir",
+            "time_this_iter_s",
+            "done",
+            "episodes_total",
+            "training_iteration",
+            "timestamp",
+            "timesteps_total",
+            "experiment_id",
+            "date",
+            "timestamp",
+            "time_total_s",
+            "pid",
+            "hostname",
+            "node_ip",
+            "time_since_restore",
+            "timesteps_since_restore",
+            "iterations_since_restore",
+            "experiment_tag",
+            "trial_id",
         ]
 
         # filter attributes into floats, metrics, and config variables
@@ -868,7 +917,8 @@ class TuneCollector(threading.Thread):
         for trial, details in trial_details.items():
             ts = os.path.getctime(details["logdir"])
             formatted_time = datetime.datetime.fromtimestamp(ts).strftime(
-                "%Y-%m-%d %H:%M:%S")
+                "%Y-%m-%d %H:%M:%S"
+            )
             details["start_time"] = formatted_time
             details["params"] = {}
             details["metrics"] = {}
@@ -902,48 +952,46 @@ class TuneCollector(threading.Thread):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=("Parse Redis server for the "
-                     "dashboard to connect to."))
+        description=("Parse Redis server for the " "dashboard to connect to.")
+    )
     parser.add_argument(
-        "--host",
-        required=True,
-        type=str,
-        help="The host to use for the HTTP server.")
+        "--host", required=True, type=str, help="The host to use for the HTTP server."
+    )
     parser.add_argument(
-        "--port",
-        required=True,
-        type=int,
-        help="The port to use for the HTTP server.")
+        "--port", required=True, type=int, help="The port to use for the HTTP server."
+    )
     parser.add_argument(
-        "--redis-address",
-        required=True,
-        type=str,
-        help="The address to use for Redis.")
+        "--redis-address", required=True, type=str, help="The address to use for Redis."
+    )
     parser.add_argument(
         "--redis-password",
         required=False,
         type=str,
         default=None,
-        help="the password to use for Redis")
+        help="the password to use for Redis",
+    )
     parser.add_argument(
         "--logging-level",
         required=False,
         type=str,
         default=ray_constants.LOGGER_LEVEL,
         choices=ray_constants.LOGGER_LEVEL_CHOICES,
-        help=ray_constants.LOGGER_LEVEL_HELP)
+        help=ray_constants.LOGGER_LEVEL_HELP,
+    )
     parser.add_argument(
         "--logging-format",
         required=False,
         type=str,
         default=ray_constants.LOGGER_FORMAT,
-        help=ray_constants.LOGGER_FORMAT_HELP)
+        help=ray_constants.LOGGER_FORMAT_HELP,
+    )
     parser.add_argument(
         "--temp-dir",
         required=False,
         type=str,
         default=None,
-        help="Specify the path of the temporary directory use by Ray process.")
+        help="Specify the path of the temporary directory use by Ray process.",
+    )
     args = parser.parse_args()
     ray.utils.setup_logger(args.logging_level, args.logging_format)
 
@@ -957,17 +1005,22 @@ if __name__ == "__main__":
             args.redis_address,
             args.temp_dir,
             redis_password=args.redis_password,
-            metrics_export_address=metrics_export_address)
+            metrics_export_address=metrics_export_address,
+        )
         dashboard.run()
     except Exception as e:
         # Something went wrong, so push an error to all drivers.
         redis_client = ray.services.create_redis_client(
-            args.redis_address, password=args.redis_password)
+            args.redis_address, password=args.redis_password
+        )
         traceback_str = ray.utils.format_error_message(traceback.format_exc())
-        message = ("The dashboard on node {} failed with the following "
-                   "error:\n{}".format(platform.node(), traceback_str))
+        message = (
+            "The dashboard on node {} failed with the following "
+            "error:\n{}".format(platform.node(), traceback_str)
+        )
         ray.utils.push_error_to_driver_through_redis(
-            redis_client, ray_constants.DASHBOARD_DIED_ERROR, message)
+            redis_client, ray_constants.DASHBOARD_DIED_ERROR, message
+        )
         if isinstance(e, OSError) and e.errno == errno.ENOENT:
             logger.warning(message)
         else:

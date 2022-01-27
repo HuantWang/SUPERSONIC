@@ -17,7 +17,7 @@
 import os
 import sys
 
-os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '../../..'))
+os.chdir(os.path.join(os.path.dirname(sys.argv[0]), "../../.."))
 
 
 def check_port_platform_inclusion(directory_root):
@@ -25,26 +25,25 @@ def check_port_platform_inclusion(directory_root):
     for root, dirs, files in os.walk(directory_root):
         for filename in files:
             path = os.path.join(root, filename)
-            if os.path.splitext(path)[1] not in ['.c', '.cc', '.h']: continue
+            if os.path.splitext(path)[1] not in [".c", ".cc", ".h"]:
+                continue
             if path in [
-                    os.path.join('include', 'grpc', 'support',
-                                 'port_platform.h'),
-                    os.path.join('include', 'grpc', 'impl', 'codegen',
-                                 'port_platform.h'),
+                os.path.join("include", "grpc", "support", "port_platform.h"),
+                os.path.join("include", "grpc", "impl", "codegen", "port_platform.h"),
             ]:
                 continue
-            if filename.endswith('.pb.h') or filename.endswith('.pb.c'):
+            if filename.endswith(".pb.h") or filename.endswith(".pb.c"):
                 continue
             with open(path) as f:
                 all_lines_in_file = f.readlines()
                 for index, l in enumerate(all_lines_in_file):
-                    if '#include' in l:
+                    if "#include" in l:
                         if l not in [
-                                '#include <grpc/support/port_platform.h>\n',
-                                '#include <grpc/impl/codegen/port_platform.h>\n'
+                            "#include <grpc/support/port_platform.h>\n",
+                            "#include <grpc/impl/codegen/port_platform.h>\n",
                         ]:
                             bad_files.append(path)
-                        elif all_lines_in_file[index + 1] != '\n':
+                        elif all_lines_in_file[index + 1] != "\n":
                             # Require a blank line after including port_platform.h in
                             # order to prevent the formatter from reording it's
                             # inclusion order upon future changes.
@@ -54,11 +53,16 @@ def check_port_platform_inclusion(directory_root):
 
 
 all_bad_files = []
-all_bad_files += check_port_platform_inclusion(os.path.join('src', 'core'))
-all_bad_files += check_port_platform_inclusion(os.path.join('include', 'grpc'))
+all_bad_files += check_port_platform_inclusion(os.path.join("src", "core"))
+all_bad_files += check_port_platform_inclusion(os.path.join("include", "grpc"))
 
 if len(all_bad_files) > 0:
     for f in all_bad_files:
-        print(('port_platform.h is not the first included header or there '
-               'is not a blank line following its inclusion in %s') % f)
+        print(
+            (
+                "port_platform.h is not the first included header or there "
+                "is not a blank line following its inclusion in %s"
+            )
+            % f
+        )
     sys.exit(1)

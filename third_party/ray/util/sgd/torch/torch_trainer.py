@@ -13,7 +13,10 @@ from ray.tune import Trainable
 from ray.tune.resources import Resources
 from ray.tune.utils.util import merge_dicts
 from ray.util.sgd.torch.distributed_torch_runner import (
-    DistributedTorchRunner, LocalDistributedRunner, DeactivatedRunner)
+    DistributedTorchRunner,
+    LocalDistributedRunner,
+    DeactivatedRunner,
+)
 from ray.util.sgd.utils import check_for_failure, NUM_SAMPLES, BATCH_SIZE
 from ray.util.sgd.torch.torch_runner import TorchRunner
 from ray.util.sgd.torch.constants import VALID_SCHEDULER_STEP
@@ -26,14 +29,18 @@ RESIZE_COOLDOWN_S = 10
 def _validate_scheduler_step_freq(scheduler_step_freq):
     """This validation check only happens if a scheduler is passed in."""
     if scheduler_step_freq not in VALID_SCHEDULER_STEP:
-        raise ValueError("Scheduler step freq must be in {}. Got {}".format(
-            VALID_SCHEDULER_STEP, scheduler_step_freq))
+        raise ValueError(
+            "Scheduler step freq must be in {}. Got {}".format(
+                VALID_SCHEDULER_STEP, scheduler_step_freq
+            )
+        )
 
 
 def _remind_gpu_usage(use_gpu):
     if not use_gpu and torch.cuda.is_available():
-        logger.info("GPUs detected but not using them. Set `use_gpu` to "
-                    "enable GPU usage. ")
+        logger.info(
+            "GPUs detected but not using them. Set `use_gpu` to " "enable GPU usage. "
+        )
 
 
 class TorchTrainer:
@@ -164,58 +171,65 @@ class TorchTrainer:
     # its remote workers to consume all available resources.
 
     def __init__(
-            self,
-            *,
-            model_creator,
-            data_creator,
-            optimizer_creator,
-            loss_creator=None,
-            scheduler_creator=None,
-            training_operator_cls=None,
-            initialization_hook=None,
-            config=None,
-            num_workers=1,
-            use_gpu="auto",
-            backend="auto",
-            wrap_ddp=True,
-            serialize_data_creation=True,
-            use_fp16=False,
-            use_tqdm=False,
-            apex_args=None,
-            add_dist_sampler=True,
-            scheduler_step_freq=None,
-            num_replicas=None,
-            batch_size=None,
-            data_loader_args=None,
+        self,
+        *,
+        model_creator,
+        data_creator,
+        optimizer_creator,
+        loss_creator=None,
+        scheduler_creator=None,
+        training_operator_cls=None,
+        initialization_hook=None,
+        config=None,
+        num_workers=1,
+        use_gpu="auto",
+        backend="auto",
+        wrap_ddp=True,
+        serialize_data_creation=True,
+        use_fp16=False,
+        use_tqdm=False,
+        apex_args=None,
+        add_dist_sampler=True,
+        scheduler_step_freq=None,
+        num_replicas=None,
+        batch_size=None,
+        data_loader_args=None,
     ):
         if num_workers > 1 and not dist.is_available():
             raise ValueError(
-                ("Distributed PyTorch is not supported on macOS. "
-                 "To run without distributed PyTorch, set 'num_workers=1'. "
-                 "For more information, see "
-                 "https://github.com/pytorch/examples/issues/467."))
+                (
+                    "Distributed PyTorch is not supported on macOS. "
+                    "To run without distributed PyTorch, set 'num_workers=1'. "
+                    "For more information, see "
+                    "https://github.com/pytorch/examples/issues/467."
+                )
+            )
 
         if not (callable(model_creator) and callable(optimizer_creator)):
             raise ValueError(
-                "Must provide a callable model_creator and optimizer_creator.")
+                "Must provide a callable model_creator and optimizer_creator."
+            )
 
         if num_replicas is not None:
             raise DeprecationWarning(
-                "num_replicas is deprecated. Use num_workers instead.")
+                "num_replicas is deprecated. Use num_workers instead."
+            )
 
         if batch_size is not None:
             raise DeprecationWarning(
                 "batch_size is deprecated. Use config={'batch_size': N} "
                 "specify a batch size for each worker or "
                 "config={ray.util.sgd.utils.BATCH_SIZE: N} to specify a "
-                "batch size to be used across all workers.")
+                "batch size to be used across all workers."
+            )
 
         if data_loader_args:
             raise ValueError(
                 "data_loader_args is deprecated. You can return a "
                 "torch.utils.data.DataLoader in data_creator. Ray will "
                 "automatically set a DistributedSampler if a DataLoader is "
-                "returned and num_workers > 1.")
+                "returned and num_workers > 1."
+            )
 
         self.model_creator = model_creator
         self.optimizer_creator = optimizer_creator
@@ -225,8 +239,10 @@ class TorchTrainer:
         self.training_operator_cls = training_operator_cls
 
         if not training_operator_cls and not loss_creator:
-            raise ValueError("If a loss_creator is not provided, you must "
-                             "provide a custom training operator.")
+            raise ValueError(
+                "If a loss_creator is not provided, you must "
+                "provide a custom training operator."
+            )
 
         self.initialization_hook = initialization_hook
         self.config = {} if config is None else config
@@ -266,9 +282,11 @@ class TorchTrainer:
         self.scheduler_step_freq = scheduler_step_freq
 
         if not ray.is_initialized() and self.max_replicas > 1:
-            logger.info("Automatically initializing single-node Ray. To use "
-                        "multi-node training, be sure to run `ray.init("
-                        "address='auto')` before instantiating the Trainer.")
+            logger.info(
+                "Automatically initializing single-node Ray. To use "
+                "multi-node training, be sure to run `ray.init("
+                "address='auto')` before instantiating the Trainer."
+            )
             ray.init()
         self._start_workers(self.max_replicas)
 
@@ -283,12 +301,16 @@ class TorchTrainer:
         if batch_size % num_workers > 0:
             new_batch_size = batch_size_per_worker * num_workers
             logger.warning(
-                ("Changing batch size from {old_batch_size} to "
-                 "{new_batch_size} to evenly distribute batches across "
-                 "{num_workers} workers.").format(
-                     old_batch_size=batch_size,
-                     new_batch_size=new_batch_size,
-                     num_workers=num_workers))
+                (
+                    "Changing batch size from {old_batch_size} to "
+                    "{new_batch_size} to evenly distribute batches across "
+                    "{num_workers} workers."
+                ).format(
+                    old_batch_size=batch_size,
+                    new_batch_size=new_batch_size,
+                    num_workers=num_workers,
+                )
+            )
             self.config[BATCH_SIZE] = new_batch_size
         return batch_size_per_worker
 
@@ -312,7 +334,8 @@ class TorchTrainer:
             use_gpu=self.use_gpu,
             use_tqdm=self.use_tqdm,
             apex_args=self.apex_args,
-            scheduler_step_freq=self.scheduler_step_freq)
+            scheduler_step_freq=self.scheduler_step_freq,
+        )
 
         if num_workers == 1:
             # Start local worker
@@ -324,15 +347,18 @@ class TorchTrainer:
             params.update(
                 backend=self.backend,
                 add_dist_sampler=self.add_dist_sampler,
-                wrap_ddp=self.wrap_ddp)
+                wrap_ddp=self.wrap_ddp,
+            )
 
             # Start local worker
             self.local_worker = LocalDistributedRunner(
-                num_cpus=1, num_gpus=int(self.use_gpu), **params)
+                num_cpus=1, num_gpus=int(self.use_gpu), **params
+            )
 
             # Generate actor class
-            RemoteRunner = ray.remote(
-                num_cpus=1, num_gpus=int(self.use_gpu))(DistributedTorchRunner)
+            RemoteRunner = ray.remote(num_cpus=1, num_gpus=int(self.use_gpu))(
+                DistributedTorchRunner
+            )
             # Start workers
             self.remote_workers = [
                 RemoteRunner.remote(**params) for i in range(num_workers - 1)
@@ -366,20 +392,21 @@ class TorchTrainer:
 
             # Runs code that requires all creator functions to have run.
             remote_operator_setups = [
-                worker.setup_ddp_and_operator.remote()
-                for worker in self.remote_workers
+                worker.setup_ddp_and_operator.remote() for worker in self.remote_workers
             ]
             self.local_worker.setup_ddp_and_operator()
             # Get setup tasks in order to throw errors on failure
             ray.get(remote_operator_setups)
 
-    def train(self,
-              num_steps=None,
-              profile=False,
-              reduce_results=True,
-              max_retries=3,
-              info=None,
-              dataset=None):
+    def train(
+        self,
+        num_steps=None,
+        profile=False,
+        reduce_results=True,
+        max_retries=3,
+        info=None,
+        dataset=None,
+    ):
         """Runs a training epoch.
 
         Calls `operator.train_epoch()` on N parallel workers simultaneously
@@ -416,14 +443,15 @@ class TorchTrainer:
                 length will be equal to ``num_workers``.
         """
         assert max_retries >= 0, "`max_retries` must be non-negative."
-        assert isinstance(dataset, Dataset) is not None \
-            or self.data_creator, \
-            "Must specify either a data creator or a dataset"
+        assert (
+            isinstance(dataset, Dataset) is not None or self.data_creator
+        ), "Must specify either a data creator or a dataset"
         if self._should_resize():
             logger.info("Resize opportunity detected. Attempting to scale up.")
             self._resize_workers()
         success, worker_stats = self._train_epoch(
-            num_steps=num_steps, profile=profile, info=info, dataset=dataset)
+            num_steps=num_steps, profile=profile, info=info, dataset=dataset
+        )
         # Fault handling
         for i in range(max_retries):
             if success:
@@ -431,13 +459,13 @@ class TorchTrainer:
             else:
                 self._num_failures += 1
             self._resize_workers()
-            logger.info("Retrying training step with %d workers." %
-                        (len(self.remote_workers) + 1))
+            logger.info(
+                "Retrying training step with %d workers."
+                % (len(self.remote_workers) + 1)
+            )
             success, worker_stats = self._train_epoch(
-                num_steps=num_steps,
-                profile=profile,
-                info=info,
-                dataset=dataset)
+                num_steps=num_steps, profile=profile, info=info, dataset=dataset
+            )
         if not success:
             raise RuntimeError("Training run failed.")
 
@@ -448,23 +476,19 @@ class TorchTrainer:
 
     def _process_stats(self, worker_stats):
         stats = {
-            NUM_SAMPLES: sum(
-                stats.pop(NUM_SAMPLES, np.nan) for stats in worker_stats)
+            NUM_SAMPLES: sum(stats.pop(NUM_SAMPLES, np.nan) for stats in worker_stats)
         }
 
         for stat_key in worker_stats[0]:
             if isinstance(worker_stats[0], numbers.Number):
                 stats[stat_key] = np.nanmean(
-                    [s.get(stat_key, np.nan) for s in worker_stats])
+                    [s.get(stat_key, np.nan) for s in worker_stats]
+                )
             else:
                 stats[stat_key] = worker_stats[0][stat_key]
         return stats
 
-    def _train_epoch(self,
-                     num_steps=None,
-                     profile=False,
-                     info=None,
-                     dataset=None):
+    def _train_epoch(self, num_steps=None, profile=False, info=None, dataset=None):
         params = dict(num_steps=num_steps, profile=profile, info=info)
         remote_worker_stats = []
         if dataset:
@@ -478,8 +502,7 @@ class TorchTrainer:
 
         try:
             if dataset:
-                params["iterator"] = dataset.get_shard(
-                    len(self.remote_workers))
+                params["iterator"] = dataset.get_shard(len(self.remote_workers))
             local_worker_stats = self.local_worker.train_epoch(**params)
         except RuntimeError as err:
             if "gloo" in err.args[0] and "Timed out" in err.args[0]:
@@ -522,17 +545,11 @@ class TorchTrainer:
             A list of objects returned by ``fn`` on each operator.
 
         """
-        remote_calls = [
-            w.apply_operator.remote(fn) for w in self.remote_workers
-        ]
+        remote_calls = [w.apply_operator.remote(fn) for w in self.remote_workers]
         local_call = self.local_worker.apply_operator(fn)
         return [local_call] + ray.get(remote_calls)
 
-    def validate(self,
-                 num_steps=None,
-                 profile=False,
-                 reduce_results=True,
-                 info=None):
+    def validate(self, num_steps=None, profile=False, reduce_results=True, info=None):
         """Evaluates the model on the validation data set.
 
         Args:
@@ -554,9 +571,7 @@ class TorchTrainer:
         """
         params = dict(num_steps=num_steps, profile=profile, info=info)
 
-        remote_worker_stats = [
-            w.validate.remote(**params) for w in self.remote_workers
-        ]
+        remote_worker_stats = [w.validate.remote(**params) for w in self.remote_workers]
         local_worker_stats = self.local_worker.validate(**params)
         worker_stats = [local_worker_stats] + ray.get(remote_worker_stats)
 
@@ -571,7 +586,8 @@ class TorchTrainer:
         This is useful for lr_schedulers such as ``ReduceLROnPlateau``.
         """
         self.apply_all_operators(
-            lambda op: [sched.step(metric) for sched in op.schedulers])
+            lambda op: [sched.step(metric) for sched in op.schedulers]
+        )
 
     def get_model(self):
         """Returns the learned model(s)."""
@@ -603,8 +619,7 @@ class TorchTrainer:
         state_id = ray.put(self.local_worker.state_stream())
 
         remote_calls = [
-            worker.load_state_stream.remote(state_id)
-            for worker in self.remote_workers
+            worker.load_state_stream.remote(state_id) for worker in self.remote_workers
         ]
         if blocking:
             ray.get(remote_calls)
@@ -633,19 +648,13 @@ class TorchTrainer:
     def shutdown(self, force=False):
         """Shuts down workers and releases resources."""
         if not force:
-            cleanup = [
-                worker.shutdown.remote() for worker in self.remote_workers
-            ]
+            cleanup = [worker.shutdown.remote() for worker in self.remote_workers]
             self.local_worker.shutdown()
             try:
                 ray.get(cleanup)
-                [
-                    worker.__ray_terminate__.remote()
-                    for worker in self.remote_workers
-                ]
+                [worker.__ray_terminate__.remote() for worker in self.remote_workers]
             except RayActorError:
-                logger.warning(
-                    "Failed to shutdown gracefully, forcing a shutdown.")
+                logger.warning("Failed to shutdown gracefully, forcing a shutdown.")
 
                 for worker in self.remote_workers:
                     logger.warning("Killing worker {}.".format(worker))
@@ -672,11 +681,9 @@ class TorchTrainer:
         # ASSUME 1 GPU + 1 CPU is already reserved for the local worker
         remote_resources = ray.available_resources()
         max_remote_workers = self.max_replicas - 1
-        new_remote_workers = min(
-            remote_resources.get("CPU", 0), max_remote_workers)
+        new_remote_workers = min(remote_resources.get("CPU", 0), max_remote_workers)
         if self.use_gpu:
-            new_remote_workers = min(
-                remote_resources.get("GPU", 0), new_remote_workers)
+            new_remote_workers = min(remote_resources.get("GPU", 0), new_remote_workers)
         return new_remote_workers
 
     def _resize_workers(self, max_retries=10):
@@ -691,9 +698,8 @@ class TorchTrainer:
                 self.load_state_dict(self.state_dict())
                 return
             else:
-                delay = 2**i
-                logger.warning(
-                    "No new workers found. Retrying in %d sec." % delay)
+                delay = 2 ** i
+                logger.warning("No new workers found. Retrying in %d sec." % delay)
                 time.sleep(delay)
         raise RuntimeError("Exceeded max_retries for relaunching workers.")
 
@@ -734,8 +740,7 @@ class TorchTrainer:
         class TorchTrainable(BaseTorchTrainable):
             @classmethod
             def default_resource_request(cls, config):
-                num_workers = config.get("num_workers",
-                                         kwargs.get("num_workers", 1))
+                num_workers = config.get("num_workers", kwargs.get("num_workers", 1))
                 use_gpu = config.get("use_gpu", kwargs.get("use_gpu"))
 
                 remote_worker_count = num_workers - 1
@@ -744,7 +749,8 @@ class TorchTrainer:
                     cpu=1,
                     gpu=int(use_gpu),
                     extra_cpu=int(remote_worker_count),
-                    extra_gpu=int(int(use_gpu) * remote_worker_count))
+                    extra_gpu=int(int(use_gpu) * remote_worker_count),
+                )
 
             def _create_trainer(self, tune_config):
                 """Overrides the provided config with Tune config."""

@@ -6,17 +6,16 @@ from PolSear_MTL.util.core.popart import PopArtLayer
 
 
 class ResNet(nn.Module):
-
     def __init__(
-            self,
-            observation_shape,  # not used in this architecture
-            num_actions,
-            num_tasks=1,
-            use_lstm=False,
-            use_popart=False,
-            reward_clipping="abs_one",
-            **kwargs
-         ):
+        self,
+        observation_shape,  # not used in this architecture
+        num_actions,
+        num_tasks=1,
+        use_lstm=False,
+        use_popart=False,
+        reward_clipping="abs_one",
+        **kwargs
+    ):
 
         super(ResNet, self).__init__()
         self.num_actions = num_actions
@@ -33,31 +32,39 @@ class ResNet(nn.Module):
 
         input_channels = 4
         for num_ch in [16, 32, 32]:
-            feats_convs = [nn.Conv2d(
-                in_channels=input_channels,
-                out_channels=num_ch,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-            ), nn.MaxPool2d(kernel_size=3, stride=2, padding=1)]
+            feats_convs = [
+                nn.Conv2d(
+                    in_channels=input_channels,
+                    out_channels=num_ch,
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                ),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            ]
             self.feat_convs.append(nn.Sequential(*feats_convs))
 
             input_channels = num_ch
 
             for i in range(2):
-                resnet_block = [nn.ReLU(), nn.Conv2d(
-                    in_channels=input_channels,
-                    out_channels=num_ch,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                ), nn.ReLU(), nn.Conv2d(
-                    in_channels=input_channels,
-                    out_channels=num_ch,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                )]
+                resnet_block = [
+                    nn.ReLU(),
+                    nn.Conv2d(
+                        in_channels=input_channels,
+                        out_channels=num_ch,
+                        kernel_size=3,
+                        stride=1,
+                        padding=1,
+                    ),
+                    nn.ReLU(),
+                    nn.Conv2d(
+                        in_channels=input_channels,
+                        out_channels=num_ch,
+                        kernel_size=3,
+                        stride=1,
+                        padding=1,
+                    ),
+                ]
                 if i == 0:
                     self.resnet1.append(nn.Sequential(*resnet_block))
                 else:
@@ -77,7 +84,9 @@ class ResNet(nn.Module):
             core_output_size = 256
 
         self.policy = nn.Linear(core_output_size, self.num_actions)
-        self.baseline = PopArtLayer(core_output_size, num_tasks if self.use_popart else 1)
+        self.baseline = PopArtLayer(
+            core_output_size, num_tasks if self.use_popart else 1
+        )
 
     def initial_state(self, batch_size=1):
         if not self.use_lstm:
@@ -163,7 +172,11 @@ class ResNet(nn.Module):
         action = action.view(T, B, 1)
 
         return (
-            dict(policy_logits=policy_logits, baseline=baseline, action=action,
-                 normalized_baseline=normalized_baseline),
+            dict(
+                policy_logits=policy_logits,
+                baseline=baseline,
+                action=action,
+                normalized_baseline=normalized_baseline,
+            ),
             core_state,
         )

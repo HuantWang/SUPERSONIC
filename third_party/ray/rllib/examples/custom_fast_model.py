@@ -24,14 +24,13 @@ if __name__ == "__main__":
     ray.init(num_cpus=args.num_cpus or None)
 
     ModelCatalog.register_custom_model(
-        "fast_model", TorchFastModel if args.torch else FastModel)
+        "fast_model", TorchFastModel if args.torch else FastModel
+    )
 
     config = {
         "env": FastImageEnv,
         "compress_observations": True,
-        "model": {
-            "custom_model": "fast_model"
-        },
+        "model": {"custom_model": "fast_model"},
         "num_gpus": 0,
         "num_workers": 2,
         "num_envs_per_worker": 10,
@@ -40,7 +39,8 @@ if __name__ == "__main__":
         "broadcast_interval": 50,
         "rollout_fragment_length": 100,
         "train_batch_size": sample_from(
-            lambda spec: 1000 * max(1, spec.config.num_gpus)),
+            lambda spec: 1000 * max(1, spec.config.num_gpus)
+        ),
         "fake_sampler": True,
         "framework": "torch" if args.torch else "tf",
     }

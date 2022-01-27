@@ -40,12 +40,14 @@ class Node:
             server list, which has multiple.
     """
 
-    def __init__(self,
-                 ray_params,
-                 head=False,
-                 shutdown_at_exit=True,
-                 spawn_reaper=True,
-                 connect_only=False):
+    def __init__(
+        self,
+        ray_params,
+        head=False,
+        shutdown_at_exit=True,
+        spawn_reaper=True,
+        connect_only=False,
+    ):
         """Start a node.
 
         Args:
@@ -63,21 +65,22 @@ class Node:
         """
         if shutdown_at_exit:
             if connect_only:
-                raise ValueError("'shutdown_at_exit' and 'connect_only' "
-                                 "cannot both be true.")
+                raise ValueError(
+                    "'shutdown_at_exit' and 'connect_only' " "cannot both be true."
+                )
             self._register_shutdown_hooks()
 
         self.head = head
         self.kernel_fate_share = bool(
-            spawn_reaper and ray.utils.detect_fate_sharing_support())
+            spawn_reaper and ray.utils.detect_fate_sharing_support()
+        )
         self.all_processes = {}
 
         # Try to get node IP address with the parameters.
         if ray_params.node_ip_address:
             node_ip_address = ray_params.node_ip_address
         elif ray_params.redis_address:
-            node_ip_address = ray.services.get_node_ip_address(
-                ray_params.redis_address)
+            node_ip_address = ray.services.get_node_ip_address(ray_params.redis_address)
         else:
             node_ip_address = ray.services.get_node_ip_address()
         self._node_ip_address = node_ip_address
@@ -91,7 +94,8 @@ class Node:
             raise ValueError(
                 "The raylet IP address should only be different than the node "
                 "IP address when connecting to an existing raylet; i.e., when "
-                "head=False and connect_only=True.")
+                "head=False and connect_only=True."
+            )
 
         self._raylet_ip_address = raylet_ip_address
 
@@ -100,8 +104,9 @@ class Node:
             resources={},
             temp_dir=ray.utils.get_ray_temp_dir(),
             worker_path=os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "workers/default_worker.py"))
+                os.path.dirname(os.path.abspath(__file__)), "workers/default_worker.py"
+            ),
+        )
 
         self._resource_spec = None
         self._localhost = socket.gethostbyname("localhost")
@@ -112,65 +117,67 @@ class Node:
         if head:
             redis_client = None
             # date including microsecond
-            date_str = datetime.datetime.today().strftime(
-                "%Y-%m-%d_%H-%M-%S_%f")
+            date_str = datetime.datetime.today().strftime("%Y-%m-%d_%H-%M-%S_%f")
             self.session_name = "session_{date_str}_{pid}".format(
-                pid=os.getpid(), date_str=date_str)
+                pid=os.getpid(), date_str=date_str
+            )
         else:
             redis_client = self.create_redis_client()
-            self.session_name = ray.utils.decode(
-                redis_client.get("session_name"))
+            self.session_name = ray.utils.decode(redis_client.get("session_name"))
 
         self._init_temp(redis_client)
 
         if connect_only:
             # Get socket names from the configuration.
-            self._plasma_store_socket_name = (
-                ray_params.plasma_store_socket_name)
+            self._plasma_store_socket_name = ray_params.plasma_store_socket_name
             self._raylet_socket_name = ray_params.raylet_socket_name
 
             # If user does not provide the socket name, get it from Redis.
-            if (self._plasma_store_socket_name is None
-                    or self._raylet_socket_name is None
-                    or self._ray_params.node_manager_port is None):
+            if (
+                self._plasma_store_socket_name is None
+                or self._raylet_socket_name is None
+                or self._ray_params.node_manager_port is None
+            ):
                 # Get the address info of the processes to connect to
                 # from Redis.
                 address_info = ray.services.get_address_info_from_redis(
                     self.redis_address,
                     self._raylet_ip_address,
-                    redis_password=self.redis_password)
-                self._plasma_store_socket_name = address_info[
-                    "object_store_address"]
+                    redis_password=self.redis_password,
+                )
+                self._plasma_store_socket_name = address_info["object_store_address"]
                 self._raylet_socket_name = address_info["raylet_socket_name"]
-                self._ray_params.node_manager_port = address_info[
-                    "node_manager_port"]
+                self._ray_params.node_manager_port = address_info["node_manager_port"]
         else:
             # If the user specified a socket name, use it.
             self._plasma_store_socket_name = self._prepare_socket_file(
-                self._ray_params.plasma_store_socket_name,
-                default_prefix="plasma_store")
+                self._ray_params.plasma_store_socket_name, default_prefix="plasma_store"
+            )
             self._raylet_socket_name = self._prepare_socket_file(
-                self._ray_params.raylet_socket_name, default_prefix="raylet")
+                self._ray_params.raylet_socket_name, default_prefix="raylet"
+            )
 
         if head:
             ray_params.update_if_absent(num_redis_shards=1)
             self._webui_url = None
         else:
-            self._webui_url = (
-                ray.services.get_webui_url_from_redis(redis_client))
-            ray_params.include_java = (
-                ray.services.include_java_from_redis(redis_client))
+            self._webui_url = ray.services.get_webui_url_from_redis(redis_client)
+            ray_params.include_java = ray.services.include_java_from_redis(redis_client)
 
         if head or not connect_only:
             # We need to start a local raylet.
-            if (self._ray_params.node_manager_port is None
-                    or self._ray_params.node_manager_port == 0):
+            if (
+                self._ray_params.node_manager_port is None
+                or self._ray_params.node_manager_port == 0
+            ):
                 # No port specified. Pick a random port for the raylet to use.
                 # NOTE: There is a possible but unlikely race condition where
                 # the port is bound by another process between now and when the
                 # raylet starts.
-                self._ray_params.node_manager_port, self._socket = \
-                    self._get_unused_port(close_on_exit=False)
+                (
+                    self._ray_params.node_manager_port,
+                    self._socket,
+                ) = self._get_unused_port(close_on_exit=False)
 
         if not connect_only and spawn_reaper and not self.kernel_fate_share:
             self.start_reaper_process()
@@ -217,8 +224,7 @@ class Node:
         if self.head:
             self._session_dir = os.path.join(self._temp_dir, self.session_name)
         else:
-            self._session_dir = ray.utils.decode(
-                redis_client.get("session_dir"))
+            self._session_dir = ray.utils.decode(redis_client.get("session_dir"))
         session_symlink = os.path.join(self._temp_dir, SESSION_LATEST)
 
         # Send a warning message if the session exists.
@@ -237,10 +243,13 @@ class Node:
         """Resolve and return the current resource spec for the node."""
         if not self._resource_spec:
             self._resource_spec = ResourceSpec(
-                self._ray_params.num_cpus, self._ray_params.num_gpus,
-                self._ray_params.memory, self._ray_params.object_store_memory,
+                self._ray_params.num_cpus,
+                self._ray_params.num_gpus,
+                self._ray_params.memory,
+                self._ray_params.object_store_memory,
                 self._ray_params.resources,
-                self._ray_params.redis_max_memory).resolve(is_head=self.head)
+                self._ray_params.redis_max_memory,
+            ).resolve(is_head=self.head)
         return self._resource_spec
 
     @property
@@ -285,8 +294,7 @@ class Node:
     @property
     def unique_id(self):
         """Get a unique identifier for this node."""
-        return "{}:{}".format(self.node_ip_address,
-                              self._plasma_store_socket_name)
+        return "{}:{}".format(self.node_ip_address, self._plasma_store_socket_name)
 
     @property
     def webui_url(self):
@@ -327,7 +335,8 @@ class Node:
     def create_redis_client(self):
         """Create a redis client."""
         return ray.services.create_redis_client(
-            self._redis_address, self._ray_params.redis_password)
+            self._redis_address, self._ray_params.redis_password
+        )
 
     def get_temp_dir_path(self):
         """Get the path of the temporary directory."""
@@ -368,16 +377,16 @@ class Node:
             if index == 0:
                 filename = os.path.join(directory_name, prefix + suffix)
             else:
-                filename = os.path.join(directory_name,
-                                        prefix + "." + str(index) + suffix)
+                filename = os.path.join(
+                    directory_name, prefix + "." + str(index) + suffix
+                )
             index += 1
             if not os.path.exists(filename):
                 # Save the index.
                 self._incremental_dict[suffix, prefix, directory_name] = index
                 return filename
 
-        raise FileExistsError(errno.EEXIST,
-                              "No usable temporary filename found")
+        raise FileExistsError(errno.EEXIST, "No usable temporary filename found")
 
     def new_log_files(self, name):
         """Generate partially randomized filenames for log files.
@@ -398,9 +407,11 @@ class Node:
             return None, None
 
         log_stdout = self._make_inc_temp(
-            suffix=".out", prefix=name, directory_name=self._logs_dir)
+            suffix=".out", prefix=name, directory_name=self._logs_dir
+        )
         log_stderr = self._make_inc_temp(
-            suffix=".err", prefix=name, directory_name=self._logs_dir)
+            suffix=".err", prefix=name, directory_name=self._logs_dir
+        )
         # Line-buffer the output (mode 1).
         log_stdout_file = open(log_stdout, "a", buffering=1)
         log_stderr_file = open(log_stderr, "a", buffering=1)
@@ -445,23 +456,26 @@ class Node:
         is_mac = sys.platform.startswith("darwin")
         if sys.platform == "win32":
             if socket_path is None:
-                result = "tcp://{}:{}".format(self._localhost,
-                                              self._get_unused_port()[0])
+                result = "tcp://{}:{}".format(
+                    self._localhost, self._get_unused_port()[0]
+                )
         else:
             if socket_path is None:
                 result = self._make_inc_temp(
-                    prefix=default_prefix, directory_name=self._sockets_dir)
+                    prefix=default_prefix, directory_name=self._sockets_dir
+                )
             else:
                 if os.path.exists(socket_path):
-                    raise RuntimeError(
-                        "Socket file {} exists!".format(socket_path))
+                    raise RuntimeError("Socket file {} exists!".format(socket_path))
                 try_to_create_directory(os.path.dirname(socket_path))
 
             # Check socket path length to make sure it's short enough
             maxlen = (104 if is_mac else 108) - 1  # sockaddr_un->sun_path
             if len(result.split("://", 1)[-1].encode("utf-8")) > maxlen:
-                raise OSError("AF_UNIX path length cannot exceed "
-                              "{} bytes: {!r}".format(maxlen, result))
+                raise OSError(
+                    "AF_UNIX path length cannot exceed "
+                    "{} bytes: {!r}".format(maxlen, result)
+                )
         return result
 
     def start_reaper_process(self):
@@ -471,8 +485,9 @@ class Node:
         This must be the first process spawned and should only be called when
         ray processes should be cleaned up if this process dies.
         """
-        assert not self.kernel_fate_share, (
-            "a reaper should not be used with kernel fate-sharing")
+        assert (
+            not self.kernel_fate_share
+        ), "a reaper should not be used with kernel fate-sharing"
         process_info = ray.services.start_reaper(fate_share=False)
         assert ray_constants.PROCESS_TYPE_REAPER not in self.all_processes
         if process_info is not None:
@@ -487,23 +502,21 @@ class Node:
         for i in range(self._ray_params.num_redis_shards):
             redis_log_files.append(self.new_log_files("redis-shard_" + str(i)))
 
-        (self._redis_address, redis_shards,
-         process_infos) = ray.services.start_redis(
-             self._node_ip_address,
-             redis_log_files,
-             self.get_resource_spec(),
-             port=self._ray_params.redis_port,
-             redis_shard_ports=self._ray_params.redis_shard_ports,
-             num_redis_shards=self._ray_params.num_redis_shards,
-             redis_max_clients=self._ray_params.redis_max_clients,
-             redirect_worker_output=True,
-             password=self._ray_params.redis_password,
-             include_java=self._ray_params.include_java,
-             fate_share=self.kernel_fate_share)
-        assert (
-            ray_constants.PROCESS_TYPE_REDIS_SERVER not in self.all_processes)
-        self.all_processes[ray_constants.PROCESS_TYPE_REDIS_SERVER] = (
-            process_infos)
+        (self._redis_address, redis_shards, process_infos) = ray.services.start_redis(
+            self._node_ip_address,
+            redis_log_files,
+            self.get_resource_spec(),
+            port=self._ray_params.redis_port,
+            redis_shard_ports=self._ray_params.redis_shard_ports,
+            num_redis_shards=self._ray_params.num_redis_shards,
+            redis_max_clients=self._ray_params.redis_max_clients,
+            redirect_worker_output=True,
+            password=self._ray_params.redis_password,
+            include_java=self._ray_params.include_java,
+            fate_share=self.kernel_fate_share,
+        )
+        assert ray_constants.PROCESS_TYPE_REDIS_SERVER not in self.all_processes
+        self.all_processes[ray_constants.PROCESS_TYPE_REDIS_SERVER] = process_infos
 
     def start_log_monitor(self):
         """Start the log monitor."""
@@ -514,7 +527,8 @@ class Node:
             stdout_file=stdout_file,
             stderr_file=stderr_file,
             redis_password=self._ray_params.redis_password,
-            fate_share=self.kernel_fate_share)
+            fate_share=self.kernel_fate_share,
+        )
         assert ray_constants.PROCESS_TYPE_LOG_MONITOR not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_LOG_MONITOR] = [
             process_info,
@@ -528,7 +542,8 @@ class Node:
             stdout_file=stdout_file,
             stderr_file=stderr_file,
             redis_password=self._ray_params.redis_password,
-            fate_share=self.kernel_fate_share)
+            fate_share=self.kernel_fate_share,
+        )
         assert ray_constants.PROCESS_TYPE_REPORTER not in self.all_processes
         if process_info is not None:
             self.all_processes[ray_constants.PROCESS_TYPE_REPORTER] = [
@@ -552,7 +567,8 @@ class Node:
             stdout_file=stdout_file,
             stderr_file=stderr_file,
             redis_password=self._ray_params.redis_password,
-            fate_share=self.kernel_fate_share)
+            fate_share=self.kernel_fate_share,
+        )
         assert ray_constants.PROCESS_TYPE_DASHBOARD not in self.all_processes
         if process_info is not None:
             self.all_processes[ray_constants.PROCESS_TYPE_DASHBOARD] = [
@@ -571,9 +587,9 @@ class Node:
             plasma_directory=self._ray_params.plasma_directory,
             huge_pages=self._ray_params.huge_pages,
             plasma_store_socket_name=self._plasma_store_socket_name,
-            fate_share=self.kernel_fate_share)
-        assert (
-            ray_constants.PROCESS_TYPE_PLASMA_STORE not in self.all_processes)
+            fate_share=self.kernel_fate_share,
+        )
+        assert ray_constants.PROCESS_TYPE_PLASMA_STORE not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_PLASMA_STORE] = [
             process_info,
         ]
@@ -588,9 +604,9 @@ class Node:
             stderr_file=stderr_file,
             redis_password=self._ray_params.redis_password,
             config=self._config,
-            fate_share=self.kernel_fate_share)
-        assert (
-            ray_constants.PROCESS_TYPE_GCS_SERVER not in self.all_processes)
+            fate_share=self.kernel_fate_share,
+        )
+        assert ray_constants.PROCESS_TYPE_GCS_SERVER not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_GCS_SERVER] = [
             process_info,
         ]
@@ -628,14 +644,16 @@ class Node:
             java_worker_options=self._ray_params.java_worker_options,
             load_code_from_local=self._ray_params.load_code_from_local,
             fate_share=self.kernel_fate_share,
-            socket_to_use=self.socket)
+            socket_to_use=self.socket,
+        )
         assert ray_constants.PROCESS_TYPE_RAYLET not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_RAYLET] = [process_info]
 
     def new_worker_redirected_log_file(self, worker_id):
         """Create new logging files for workers to redirect its output."""
-        worker_stdout_file, worker_stderr_file = (
-            self.new_log_files("worker-" + ray.utils.binary_to_hex(worker_id)))
+        worker_stdout_file, worker_stderr_file = self.new_log_files(
+            "worker-" + ray.utils.binary_to_hex(worker_id)
+        )
         return worker_stdout_file, worker_stderr_file
 
     def start_worker(self):
@@ -651,7 +669,8 @@ class Node:
             stderr_file=stderr_file,
             autoscaling_config=self._ray_params.autoscaling_config,
             redis_password=self._ray_params.redis_password,
-            fate_share=self.kernel_fate_share)
+            fate_share=self.kernel_fate_share,
+        )
         assert ray_constants.PROCESS_TYPE_MONITOR not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_MONITOR] = [process_info]
 
@@ -664,9 +683,9 @@ class Node:
             stderr_file=stderr_file,
             redis_password=self._ray_params.redis_password,
             config=self._config,
-            fate_share=self.kernel_fate_share)
-        assert (ray_constants.PROCESS_TYPE_RAYLET_MONITOR not in
-                self.all_processes)
+            fate_share=self.kernel_fate_share,
+        )
+        assert ray_constants.PROCESS_TYPE_RAYLET_MONITOR not in self.all_processes
         self.all_processes[ray_constants.PROCESS_TYPE_RAYLET_MONITOR] = [
             process_info,
         ]
@@ -675,7 +694,9 @@ class Node:
         """Start head processes on the node."""
         logger.debug(
             "Process STDOUT and STDERR is being redirected to {}.".format(
-                self._logs_dir))
+                self._logs_dir
+            )
+        )
         assert self._redis_address is None
         # If this is the head node, start the relevant head node processes.
         self.start_redis()
@@ -696,7 +717,9 @@ class Node:
         """Start all of the processes on the node."""
         logger.debug(
             "Process STDOUT and STDERR is being redirected to {}.".format(
-                self._logs_dir))
+                self._logs_dir
+            )
+        )
 
         self.start_plasma_store()
         self.start_raylet()
@@ -705,11 +728,9 @@ class Node:
         if self._ray_params.include_log_monitor:
             self.start_log_monitor()
 
-    def _kill_process_type(self,
-                           process_type,
-                           allow_graceful=False,
-                           check_alive=True,
-                           wait=False):
+    def _kill_process_type(
+        self, process_type, allow_graceful=False, check_alive=True, wait=False
+    ):
         """Kill a process of a given type.
 
         If the process type is PROCESS_TYPE_REDIS_SERVER, then we will kill all
@@ -744,8 +765,8 @@ class Node:
                 if check_alive:
                     raise RuntimeError(
                         "Attempting to kill a process of type "
-                        "'{}', but this process is already dead."
-                        .format(process_type))
+                        "'{}', but this process is already dead.".format(process_type)
+                    )
                 else:
                     continue
 
@@ -753,9 +774,12 @@ class Node:
                 process.terminate()
                 process.wait()
                 if process.returncode != 0:
-                    message = ("Valgrind detected some errors in process of "
-                               "type {}. Error code {}.".format(
-                                   process_type, process.returncode))
+                    message = (
+                        "Valgrind detected some errors in process of "
+                        "type {}. Error code {}.".format(
+                            process_type, process.returncode
+                        )
+                    )
                     if process_info.stdout_file is not None:
                         with open(process_info.stdout_file, "r") as f:
                             message += "\nPROCESS STDOUT:\n" + f.read()
@@ -798,7 +822,8 @@ class Node:
                 were already dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_REDIS_SERVER, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_REDIS_SERVER, check_alive=check_alive
+        )
 
     def kill_plasma_store(self, check_alive=True):
         """Kill the plasma store.
@@ -808,7 +833,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_PLASMA_STORE, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_PLASMA_STORE, check_alive=check_alive
+        )
 
     def kill_raylet(self, check_alive=True):
         """Kill the raylet.
@@ -818,7 +844,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_RAYLET, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_RAYLET, check_alive=check_alive
+        )
 
     def kill_log_monitor(self, check_alive=True):
         """Kill the log monitor.
@@ -828,7 +855,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_LOG_MONITOR, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_LOG_MONITOR, check_alive=check_alive
+        )
 
     def kill_reporter(self, check_alive=True):
         """Kill the reporter.
@@ -838,7 +866,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_REPORTER, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_REPORTER, check_alive=check_alive
+        )
 
     def kill_dashboard(self, check_alive=True):
         """Kill the dashboard.
@@ -848,7 +877,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_DASHBOARD, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_DASHBOARD, check_alive=check_alive
+        )
 
     def kill_monitor(self, check_alive=True):
         """Kill the monitor.
@@ -858,7 +888,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_MONITOR, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_MONITOR, check_alive=check_alive
+        )
 
     def kill_gcs_server(self, check_alive=True):
         """Kill the gcs server.
@@ -867,7 +898,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_GCS_SERVER, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_GCS_SERVER, check_alive=check_alive
+        )
 
     def kill_raylet_monitor(self, check_alive=True):
         """Kill the raylet monitor.
@@ -877,7 +909,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_RAYLET_MONITOR, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_RAYLET_MONITOR, check_alive=check_alive
+        )
 
     def kill_reaper(self, check_alive=True):
         """Kill the reaper process.
@@ -887,7 +920,8 @@ class Node:
                 dead.
         """
         self._kill_process_type(
-            ray_constants.PROCESS_TYPE_REAPER, check_alive=check_alive)
+            ray_constants.PROCESS_TYPE_REAPER, check_alive=check_alive
+        )
 
     def kill_all_processes(self, check_alive=True, allow_graceful=False):
         """Kill all of the processes.
@@ -908,13 +942,15 @@ class Node:
             self._kill_process_type(
                 ray_constants.PROCESS_TYPE_RAYLET,
                 check_alive=check_alive,
-                allow_graceful=allow_graceful)
+                allow_graceful=allow_graceful,
+            )
 
         if ray_constants.PROCESS_TYPE_GCS_SERVER in self.all_processes:
             self._kill_process_type(
                 ray_constants.PROCESS_TYPE_GCS_SERVER,
                 check_alive=check_alive,
-                allow_graceful=allow_graceful)
+                allow_graceful=allow_graceful,
+            )
 
         # We call "list" to copy the keys because we are modifying the
         # dictionary while iterating over it.
@@ -923,15 +959,15 @@ class Node:
             # while cleaning up.
             if process_type != ray_constants.PROCESS_TYPE_REAPER:
                 self._kill_process_type(
-                    process_type,
-                    check_alive=check_alive,
-                    allow_graceful=allow_graceful)
+                    process_type, check_alive=check_alive, allow_graceful=allow_graceful
+                )
 
         if ray_constants.PROCESS_TYPE_REAPER in self.all_processes:
             self._kill_process_type(
                 ray_constants.PROCESS_TYPE_REAPER,
                 check_alive=check_alive,
-                allow_graceful=allow_graceful)
+                allow_graceful=allow_graceful,
+            )
 
     def live_processes(self):
         """Return a list of the live processes.

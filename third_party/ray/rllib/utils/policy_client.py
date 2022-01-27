@@ -14,7 +14,8 @@ except ImportError:
     requests = None
     logger.warning(
         "Couldn't import `requests` library. Be sure to install it on"
-        " the client side.")
+        " the client side."
+    )
 
 
 @PublicAPI
@@ -30,7 +31,8 @@ class PolicyClient:
     @PublicAPI
     def __init__(self, address):
         deprecation_warning(
-            "rllib.utils.PolicyServer", new="rllib.env.PolicyServerInput")
+            "rllib.utils.PolicyServer", new="rllib.env.PolicyServerInput"
+        )
         self._address = address
 
     @PublicAPI
@@ -47,11 +49,13 @@ class PolicyClient:
             episode_id (str): Unique string id for the episode.
         """
 
-        return self._send({
-            "episode_id": episode_id,
-            "command": PolicyClient.START_EPISODE,
-            "training_enabled": training_enabled,
-        })["episode_id"]
+        return self._send(
+            {
+                "episode_id": episode_id,
+                "command": PolicyClient.START_EPISODE,
+                "training_enabled": training_enabled,
+            }
+        )["episode_id"]
 
     @PublicAPI
     def get_action(self, episode_id, observation):
@@ -64,11 +68,13 @@ class PolicyClient:
         Returns:
             action (obj): Action from the env action space.
         """
-        return self._send({
-            "command": PolicyClient.GET_ACTION,
-            "observation": observation,
-            "episode_id": episode_id,
-        })["action"]
+        return self._send(
+            {
+                "command": PolicyClient.GET_ACTION,
+                "observation": observation,
+                "episode_id": episode_id,
+            }
+        )["action"]
 
     @PublicAPI
     def log_action(self, episode_id, observation, action):
@@ -79,12 +85,14 @@ class PolicyClient:
             observation (obj): Current environment observation.
             action (obj): Action for the observation.
         """
-        self._send({
-            "command": PolicyClient.LOG_ACTION,
-            "observation": observation,
-            "action": action,
-            "episode_id": episode_id,
-        })
+        self._send(
+            {
+                "command": PolicyClient.LOG_ACTION,
+                "observation": observation,
+                "action": action,
+                "episode_id": episode_id,
+            }
+        )
 
     @PublicAPI
     def log_returns(self, episode_id, reward, info=None):
@@ -98,12 +106,14 @@ class PolicyClient:
             episode_id (str): Episode id returned from start_episode().
             reward (float): Reward from the environment.
         """
-        self._send({
-            "command": PolicyClient.LOG_RETURNS,
-            "reward": reward,
-            "info": info,
-            "episode_id": episode_id,
-        })
+        self._send(
+            {
+                "command": PolicyClient.LOG_RETURNS,
+                "reward": reward,
+                "info": info,
+                "episode_id": episode_id,
+            }
+        )
 
     @PublicAPI
     def end_episode(self, episode_id, observation):
@@ -113,11 +123,13 @@ class PolicyClient:
             episode_id (str): Episode id returned from start_episode().
             observation (obj): Current environment observation.
         """
-        self._send({
-            "command": PolicyClient.END_EPISODE,
-            "observation": observation,
-            "episode_id": episode_id,
-        })
+        self._send(
+            {
+                "command": PolicyClient.END_EPISODE,
+                "observation": observation,
+                "episode_id": episode_id,
+            }
+        )
 
     def _send(self, data):
         payload = pickle.dumps(data)

@@ -38,9 +38,7 @@ def get_signature(func):
     # The first condition for Cython functions, the latter for Cython instance
     # methods
     if is_cython(func):
-        attrs = [
-            "__code__", "__annotations__", "__defaults__", "__kwdefaults__"
-        ]
+        attrs = ["__code__", "__annotations__", "__defaults__", "__kwdefaults__"]
 
         if all(hasattr(func, attr) for attr in attrs):
             original_func = func
@@ -51,8 +49,7 @@ def get_signature(func):
             for attr in attrs:
                 setattr(func, attr, getattr(original_func, attr))
         else:
-            raise TypeError("{!r} is not a Python function we can process"
-                            .format(func))
+            raise TypeError("{!r} is not a Python function we can process".format(func))
 
     return inspect.signature(func)
 
@@ -72,9 +69,10 @@ def extract_signature(func, ignore_first=False):
 
     if ignore_first:
         if len(signature_parameters) == 0:
-            raise ValueError("Methods must take a 'self' argument, but the "
-                             "method '{}' does not have one.".format(
-                                 func.__name__))
+            raise ValueError(
+                "Methods must take a 'self' argument, but the "
+                "method '{}' does not have one.".format(func.__name__)
+            )
         signature_parameters = signature_parameters[1:]
 
     return signature_parameters
@@ -109,8 +107,7 @@ def flatten_args(signature_parameters, args, kwargs):
         [None, 1, None, 2, None, 3, "a", 4]
     """
 
-    reconstructed_signature = inspect.Signature(
-        parameters=signature_parameters)
+    reconstructed_signature = inspect.Signature(parameters=signature_parameters)
     try:
         reconstructed_signature.bind(*args, **kwargs)
     except TypeError as exc:
@@ -135,8 +132,9 @@ def recover_args(flattened_args):
         args: The non-keyword arguments passed into the function.
         kwargs: The keyword arguments passed into the function.
     """
-    assert len(flattened_args) % 2 == 0, (
-        "Flattened arguments need to be even-numbered. See `flatten_args`.")
+    assert (
+        len(flattened_args) % 2 == 0
+    ), "Flattened arguments need to be even-numbered. See `flatten_args`."
     args = []
     kwargs = {}
     for name_index in range(0, len(flattened_args), 2):

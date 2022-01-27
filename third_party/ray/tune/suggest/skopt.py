@@ -1,5 +1,6 @@
 import logging
 import pickle
+
 try:
     import skopt as sko
 except ImportError:
@@ -10,34 +11,40 @@ from ray.tune.suggest import Searcher
 logger = logging.getLogger(__name__)
 
 
-def _validate_warmstart(parameter_names, points_to_evaluate,
-                        evaluated_rewards):
+def _validate_warmstart(parameter_names, points_to_evaluate, evaluated_rewards):
     if points_to_evaluate:
         if not isinstance(points_to_evaluate, list):
             raise TypeError(
                 "points_to_evaluate expected to be a list, got {}.".format(
-                    type(points_to_evaluate)))
+                    type(points_to_evaluate)
+                )
+            )
         for point in points_to_evaluate:
             if not isinstance(point, list):
                 raise TypeError(
-                    "points_to_evaluate expected to include list, got {}.".
-                    format(point))
+                    "points_to_evaluate expected to include list, got {}.".format(point)
+                )
 
             if not len(point) == len(parameter_names):
-                raise ValueError("Dim of point {}".format(point) +
-                                 " and parameter_names {}".format(
-                                     parameter_names) + " do not match.")
+                raise ValueError(
+                    "Dim of point {}".format(point)
+                    + " and parameter_names {}".format(parameter_names)
+                    + " do not match."
+                )
 
     if points_to_evaluate and evaluated_rewards:
         if not isinstance(evaluated_rewards, list):
             raise TypeError(
                 "evaluated_rewards expected to be a list, got {}.".format(
-                    type(evaluated_rewards)))
+                    type(evaluated_rewards)
+                )
+            )
         if not len(evaluated_rewards) == len(points_to_evaluate):
             raise ValueError(
-                "Dim of evaluated_rewards {}".format(evaluated_rewards) +
-                " and points_to_evaluate {}".format(points_to_evaluate) +
-                " do not match.")
+                "Dim of evaluated_rewards {}".format(evaluated_rewards)
+                + " and points_to_evaluate {}".format(points_to_evaluate)
+                + " do not match."
+            )
 
 
 class SkOptSearch(Searcher):
@@ -92,27 +99,31 @@ class SkOptSearch(Searcher):
             points_to_evaluate=current_best_params)
     """
 
-    def __init__(self,
-                 optimizer,
-                 parameter_names,
-                 metric="episode_reward_mean",
-                 mode="max",
-                 points_to_evaluate=None,
-                 evaluated_rewards=None,
-                 max_concurrent=None,
-                 use_early_stopped_trials=None):
-        assert sko is not None, """skopt must be installed!
+    def __init__(
+        self,
+        optimizer,
+        parameter_names,
+        metric="episode_reward_mean",
+        mode="max",
+        points_to_evaluate=None,
+        evaluated_rewards=None,
+        max_concurrent=None,
+        use_early_stopped_trials=None,
+    ):
+        assert (
+            sko is not None
+        ), """skopt must be installed!
             You can install Skopt with the command:
             `pip install scikit-optimize`."""
-        _validate_warmstart(parameter_names, points_to_evaluate,
-                            evaluated_rewards)
+        _validate_warmstart(parameter_names, points_to_evaluate, evaluated_rewards)
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
         self.max_concurrent = max_concurrent
         super(SkOptSearch, self).__init__(
             metric=metric,
             mode=mode,
             max_concurrent=max_concurrent,
-            use_early_stopped_trials=use_early_stopped_trials)
+            use_early_stopped_trials=use_early_stopped_trials,
+        )
 
         self._initial_points = []
         if points_to_evaluate and evaluated_rewards:
@@ -122,9 +133,9 @@ class SkOptSearch(Searcher):
         self._parameters = parameter_names
         # Skopt internally minimizes, so "max" => -1
         if mode == "max":
-            self._metric_op = -1.
+            self._metric_op = -1.0
         elif mode == "min":
-            self._metric_op = 1.
+            self._metric_op = 1.0
         self._skopt_opt = optimizer
         self._live_trial_mapping = {}
 
@@ -154,8 +165,7 @@ class SkOptSearch(Searcher):
 
     def _process_result(self, trial_id, result):
         skopt_trial_info = self._live_trial_mapping[trial_id]
-        self._skopt_opt.tell(skopt_trial_info,
-                             self._metric_op * result[self._metric])
+        self._skopt_opt.tell(skopt_trial_info, self._metric_op * result[self._metric])
 
     def save(self, checkpoint_dir):
         trials_object = (self._initial_points, self._skopt_opt)

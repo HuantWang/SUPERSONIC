@@ -2,798 +2,1086 @@
 # source: schedule.proto
 
 import sys
-_b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+
+_b = sys.version_info[0] < 3 and (lambda x: x) or (lambda x: x.encode("latin1"))
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf import descriptor_pb2
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='schedule.proto',
-  package='',
-  syntax='proto3',
-  serialized_pb=_b('\n\x0eschedule.proto\"]\n\x13ScheduleInitRequest\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\x05\x12\x13\n\x0binput_image\x18\x02 \x01(\t\x12\x1b\n\x13max_stage_directive\x18\x03 \x01(\x05\"\x86\x01\n\x14ScheduleInitResponse\x12\x11\n\tmax_stage\x18\x01 \x01(\x05\x12\x15\n\rmax_directive\x18\x02 \x01(\x05\x12\x11\n\tmax_param\x18\x03 \x01(\x05\x12\x1a\n\x12schedule_map_range\x18\x04 \x01(\x05\x12\x15\n\rinit_time_sec\x18\x05 \x01(\x01\"4\n\x13ScheduleStepRequest\x12\x1d\n\x02op\x18\x01 \x01(\x0b\x32\x11.OperationRequest\"w\n\x14ScheduleStepResponse\x12\x12\n\nexec_error\x18\x01 \x01(\x08\x12\x14\n\x0c\x65xec_timeout\x18\x02 \x01(\x08\x12\x1e\n\x02op\x18\x03 \x01(\x0b\x32\x12.OperationResponse\x12\x15\n\rexec_time_sec\x18\x04 \x01(\x01\"5\n\x14ScheduleResetRequest\x12\x1d\n\x02op\x18\x01 \x03(\x0b\x32\x11.OperationRequest\"7\n\x15ScheduleResetResponse\x12\x1e\n\x02op\x18\x01 \x03(\x0b\x32\x12.OperationResponse\"\x17\n\x15ScheduleRenderRequest\".\n\x16ScheduleRenderResponse\x12\x14\n\x0cschedule_str\x18\x01 \x03(\t\"\x16\n\x14ScheduleCloseRequest\"\x17\n\x15ScheduleCloseResponse\"$\n\x10OperationRequest\x12\x10\n\x08map_code\x18\x01 \x01(\x05\"$\n\x11OperationResponse\x12\x0f\n\x07\x65lem_id\x18\x01 \x03(\x05\"\x1c\n\nTvmRequest\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\x05\"<\n\x0bTvmResponse\x12\r\n\x05state\x18\x01 \x01(\t\x12\x0e\n\x06reward\x18\x02 \x01(\x01\x12\x0e\n\x06maxLen\x18\x03 \x01(\x05\"-\n\x0fMsgStokeRequest\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0c\n\x04\x63ost\x18\x02 \x01(\x01\"\"\n\x10MsgStokeResponse\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\x05\x32\x8d\x03\n\x0fScheduleService\x12\x35\n\x04init\x12\x14.ScheduleInitRequest\x1a\x15.ScheduleInitResponse\"\x00\x12\x35\n\x04step\x12\x14.ScheduleStepRequest\x1a\x15.ScheduleStepResponse\"\x00\x12\x38\n\x05reset\x12\x15.ScheduleResetRequest\x1a\x16.ScheduleResetResponse\"\x00\x12;\n\x06render\x12\x16.ScheduleRenderRequest\x1a\x17.ScheduleRenderResponse\"\x00\x12\x38\n\x05\x63lose\x12\x15.ScheduleCloseRequest\x1a\x16.ScheduleCloseResponse\"\x00\x12%\n\x06GetTvm\x12\x0b.TvmRequest\x1a\x0c.TvmResponse\"\x00\x12\x34\n\x0bGetStokeMsg\x12\x10.MsgStokeRequest\x1a\x11.MsgStokeResponse\"\x00\x62\x06proto3')
+    name="schedule.proto",
+    package="",
+    syntax="proto3",
+    serialized_pb=_b(
+        '\n\x0eschedule.proto"]\n\x13ScheduleInitRequest\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\x05\x12\x13\n\x0binput_image\x18\x02 \x01(\t\x12\x1b\n\x13max_stage_directive\x18\x03 \x01(\x05"\x86\x01\n\x14ScheduleInitResponse\x12\x11\n\tmax_stage\x18\x01 \x01(\x05\x12\x15\n\rmax_directive\x18\x02 \x01(\x05\x12\x11\n\tmax_param\x18\x03 \x01(\x05\x12\x1a\n\x12schedule_map_range\x18\x04 \x01(\x05\x12\x15\n\rinit_time_sec\x18\x05 \x01(\x01"4\n\x13ScheduleStepRequest\x12\x1d\n\x02op\x18\x01 \x01(\x0b\x32\x11.OperationRequest"w\n\x14ScheduleStepResponse\x12\x12\n\nexec_error\x18\x01 \x01(\x08\x12\x14\n\x0c\x65xec_timeout\x18\x02 \x01(\x08\x12\x1e\n\x02op\x18\x03 \x01(\x0b\x32\x12.OperationResponse\x12\x15\n\rexec_time_sec\x18\x04 \x01(\x01"5\n\x14ScheduleResetRequest\x12\x1d\n\x02op\x18\x01 \x03(\x0b\x32\x11.OperationRequest"7\n\x15ScheduleResetResponse\x12\x1e\n\x02op\x18\x01 \x03(\x0b\x32\x12.OperationResponse"\x17\n\x15ScheduleRenderRequest".\n\x16ScheduleRenderResponse\x12\x14\n\x0cschedule_str\x18\x01 \x03(\t"\x16\n\x14ScheduleCloseRequest"\x17\n\x15ScheduleCloseResponse"$\n\x10OperationRequest\x12\x10\n\x08map_code\x18\x01 \x01(\x05"$\n\x11OperationResponse\x12\x0f\n\x07\x65lem_id\x18\x01 \x03(\x05"\x1c\n\nTvmRequest\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\x05"<\n\x0bTvmResponse\x12\r\n\x05state\x18\x01 \x01(\t\x12\x0e\n\x06reward\x18\x02 \x01(\x01\x12\x0e\n\x06maxLen\x18\x03 \x01(\x05"-\n\x0fMsgStokeRequest\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0c\n\x04\x63ost\x18\x02 \x01(\x01""\n\x10MsgStokeResponse\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\x05\x32\x8d\x03\n\x0fScheduleService\x12\x35\n\x04init\x12\x14.ScheduleInitRequest\x1a\x15.ScheduleInitResponse"\x00\x12\x35\n\x04step\x12\x14.ScheduleStepRequest\x1a\x15.ScheduleStepResponse"\x00\x12\x38\n\x05reset\x12\x15.ScheduleResetRequest\x1a\x16.ScheduleResetResponse"\x00\x12;\n\x06render\x12\x16.ScheduleRenderRequest\x1a\x17.ScheduleRenderResponse"\x00\x12\x38\n\x05\x63lose\x12\x15.ScheduleCloseRequest\x1a\x16.ScheduleCloseResponse"\x00\x12%\n\x06GetTvm\x12\x0b.TvmRequest\x1a\x0c.TvmResponse"\x00\x12\x34\n\x0bGetStokeMsg\x12\x10.MsgStokeRequest\x1a\x11.MsgStokeResponse"\x00\x62\x06proto3'
+    ),
 )
 
 
-
-
 _SCHEDULEINITREQUEST = _descriptor.Descriptor(
-  name='ScheduleInitRequest',
-  full_name='ScheduleInitRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='algorithm_id', full_name='ScheduleInitRequest.algorithm_id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='input_image', full_name='ScheduleInitRequest.input_image', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='max_stage_directive', full_name='ScheduleInitRequest.max_stage_directive', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=18,
-  serialized_end=111,
+    name="ScheduleInitRequest",
+    full_name="ScheduleInitRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="algorithm_id",
+            full_name="ScheduleInitRequest.algorithm_id",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="input_image",
+            full_name="ScheduleInitRequest.input_image",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="max_stage_directive",
+            full_name="ScheduleInitRequest.max_stage_directive",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=18,
+    serialized_end=111,
 )
 
 
 _SCHEDULEINITRESPONSE = _descriptor.Descriptor(
-  name='ScheduleInitResponse',
-  full_name='ScheduleInitResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='max_stage', full_name='ScheduleInitResponse.max_stage', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='max_directive', full_name='ScheduleInitResponse.max_directive', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='max_param', full_name='ScheduleInitResponse.max_param', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='schedule_map_range', full_name='ScheduleInitResponse.schedule_map_range', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='init_time_sec', full_name='ScheduleInitResponse.init_time_sec', index=4,
-      number=5, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=114,
-  serialized_end=248,
+    name="ScheduleInitResponse",
+    full_name="ScheduleInitResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="max_stage",
+            full_name="ScheduleInitResponse.max_stage",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="max_directive",
+            full_name="ScheduleInitResponse.max_directive",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="max_param",
+            full_name="ScheduleInitResponse.max_param",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="schedule_map_range",
+            full_name="ScheduleInitResponse.schedule_map_range",
+            index=3,
+            number=4,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="init_time_sec",
+            full_name="ScheduleInitResponse.init_time_sec",
+            index=4,
+            number=5,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=114,
+    serialized_end=248,
 )
 
 
 _SCHEDULESTEPREQUEST = _descriptor.Descriptor(
-  name='ScheduleStepRequest',
-  full_name='ScheduleStepRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='op', full_name='ScheduleStepRequest.op', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=250,
-  serialized_end=302,
+    name="ScheduleStepRequest",
+    full_name="ScheduleStepRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="op",
+            full_name="ScheduleStepRequest.op",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=250,
+    serialized_end=302,
 )
 
 
 _SCHEDULESTEPRESPONSE = _descriptor.Descriptor(
-  name='ScheduleStepResponse',
-  full_name='ScheduleStepResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exec_error', full_name='ScheduleStepResponse.exec_error', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='exec_timeout', full_name='ScheduleStepResponse.exec_timeout', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='op', full_name='ScheduleStepResponse.op', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='exec_time_sec', full_name='ScheduleStepResponse.exec_time_sec', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=304,
-  serialized_end=423,
+    name="ScheduleStepResponse",
+    full_name="ScheduleStepResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="exec_error",
+            full_name="ScheduleStepResponse.exec_error",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="exec_timeout",
+            full_name="ScheduleStepResponse.exec_timeout",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="op",
+            full_name="ScheduleStepResponse.op",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="exec_time_sec",
+            full_name="ScheduleStepResponse.exec_time_sec",
+            index=3,
+            number=4,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=304,
+    serialized_end=423,
 )
 
 
 _SCHEDULERESETREQUEST = _descriptor.Descriptor(
-  name='ScheduleResetRequest',
-  full_name='ScheduleResetRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='op', full_name='ScheduleResetRequest.op', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=425,
-  serialized_end=478,
+    name="ScheduleResetRequest",
+    full_name="ScheduleResetRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="op",
+            full_name="ScheduleResetRequest.op",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=425,
+    serialized_end=478,
 )
 
 
 _SCHEDULERESETRESPONSE = _descriptor.Descriptor(
-  name='ScheduleResetResponse',
-  full_name='ScheduleResetResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='op', full_name='ScheduleResetResponse.op', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=480,
-  serialized_end=535,
+    name="ScheduleResetResponse",
+    full_name="ScheduleResetResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="op",
+            full_name="ScheduleResetResponse.op",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=480,
+    serialized_end=535,
 )
 
 
 _SCHEDULERENDERREQUEST = _descriptor.Descriptor(
-  name='ScheduleRenderRequest',
-  full_name='ScheduleRenderRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=537,
-  serialized_end=560,
+    name="ScheduleRenderRequest",
+    full_name="ScheduleRenderRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=537,
+    serialized_end=560,
 )
 
 
 _SCHEDULERENDERRESPONSE = _descriptor.Descriptor(
-  name='ScheduleRenderResponse',
-  full_name='ScheduleRenderResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='schedule_str', full_name='ScheduleRenderResponse.schedule_str', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=562,
-  serialized_end=608,
+    name="ScheduleRenderResponse",
+    full_name="ScheduleRenderResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="schedule_str",
+            full_name="ScheduleRenderResponse.schedule_str",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=562,
+    serialized_end=608,
 )
 
 
 _SCHEDULECLOSEREQUEST = _descriptor.Descriptor(
-  name='ScheduleCloseRequest',
-  full_name='ScheduleCloseRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=610,
-  serialized_end=632,
+    name="ScheduleCloseRequest",
+    full_name="ScheduleCloseRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=610,
+    serialized_end=632,
 )
 
 
 _SCHEDULECLOSERESPONSE = _descriptor.Descriptor(
-  name='ScheduleCloseResponse',
-  full_name='ScheduleCloseResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=634,
-  serialized_end=657,
+    name="ScheduleCloseResponse",
+    full_name="ScheduleCloseResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=634,
+    serialized_end=657,
 )
 
 
 _OPERATIONREQUEST = _descriptor.Descriptor(
-  name='OperationRequest',
-  full_name='OperationRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='map_code', full_name='OperationRequest.map_code', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=659,
-  serialized_end=695,
+    name="OperationRequest",
+    full_name="OperationRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="map_code",
+            full_name="OperationRequest.map_code",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=659,
+    serialized_end=695,
 )
 
 
 _OPERATIONRESPONSE = _descriptor.Descriptor(
-  name='OperationResponse',
-  full_name='OperationResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='elem_id', full_name='OperationResponse.elem_id', index=0,
-      number=1, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=697,
-  serialized_end=733,
+    name="OperationResponse",
+    full_name="OperationResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="elem_id",
+            full_name="OperationResponse.elem_id",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=697,
+    serialized_end=733,
 )
 
 
 _TVMREQUEST = _descriptor.Descriptor(
-  name='TvmRequest',
-  full_name='TvmRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='action', full_name='TvmRequest.action', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=735,
-  serialized_end=763,
+    name="TvmRequest",
+    full_name="TvmRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="action",
+            full_name="TvmRequest.action",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=735,
+    serialized_end=763,
 )
 
 
 _TVMRESPONSE = _descriptor.Descriptor(
-  name='TvmResponse',
-  full_name='TvmResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='state', full_name='TvmResponse.state', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='reward', full_name='TvmResponse.reward', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='maxLen', full_name='TvmResponse.maxLen', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=765,
-  serialized_end=825,
+    name="TvmResponse",
+    full_name="TvmResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="state",
+            full_name="TvmResponse.state",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="reward",
+            full_name="TvmResponse.reward",
+            index=1,
+            number=2,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="maxLen",
+            full_name="TvmResponse.maxLen",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=765,
+    serialized_end=825,
 )
 
 
 _MSGSTOKEREQUEST = _descriptor.Descriptor(
-  name='MsgStokeRequest',
-  full_name='MsgStokeRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='code', full_name='MsgStokeRequest.code', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='cost', full_name='MsgStokeRequest.cost', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=827,
-  serialized_end=872,
+    name="MsgStokeRequest",
+    full_name="MsgStokeRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="code",
+            full_name="MsgStokeRequest.code",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cost",
+            full_name="MsgStokeRequest.cost",
+            index=1,
+            number=2,
+            type=1,
+            cpp_type=5,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=827,
+    serialized_end=872,
 )
 
 
 _MSGSTOKERESPONSE = _descriptor.Descriptor(
-  name='MsgStokeResponse',
-  full_name='MsgStokeResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='action', full_name='MsgStokeResponse.action', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=874,
-  serialized_end=908,
+    name="MsgStokeResponse",
+    full_name="MsgStokeResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="action",
+            full_name="MsgStokeResponse.action",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=874,
+    serialized_end=908,
 )
 
-_SCHEDULESTEPREQUEST.fields_by_name['op'].message_type = _OPERATIONREQUEST
-_SCHEDULESTEPRESPONSE.fields_by_name['op'].message_type = _OPERATIONRESPONSE
-_SCHEDULERESETREQUEST.fields_by_name['op'].message_type = _OPERATIONREQUEST
-_SCHEDULERESETRESPONSE.fields_by_name['op'].message_type = _OPERATIONRESPONSE
-DESCRIPTOR.message_types_by_name['ScheduleInitRequest'] = _SCHEDULEINITREQUEST
-DESCRIPTOR.message_types_by_name['ScheduleInitResponse'] = _SCHEDULEINITRESPONSE
-DESCRIPTOR.message_types_by_name['ScheduleStepRequest'] = _SCHEDULESTEPREQUEST
-DESCRIPTOR.message_types_by_name['ScheduleStepResponse'] = _SCHEDULESTEPRESPONSE
-DESCRIPTOR.message_types_by_name['ScheduleResetRequest'] = _SCHEDULERESETREQUEST
-DESCRIPTOR.message_types_by_name['ScheduleResetResponse'] = _SCHEDULERESETRESPONSE
-DESCRIPTOR.message_types_by_name['ScheduleRenderRequest'] = _SCHEDULERENDERREQUEST
-DESCRIPTOR.message_types_by_name['ScheduleRenderResponse'] = _SCHEDULERENDERRESPONSE
-DESCRIPTOR.message_types_by_name['ScheduleCloseRequest'] = _SCHEDULECLOSEREQUEST
-DESCRIPTOR.message_types_by_name['ScheduleCloseResponse'] = _SCHEDULECLOSERESPONSE
-DESCRIPTOR.message_types_by_name['OperationRequest'] = _OPERATIONREQUEST
-DESCRIPTOR.message_types_by_name['OperationResponse'] = _OPERATIONRESPONSE
-DESCRIPTOR.message_types_by_name['TvmRequest'] = _TVMREQUEST
-DESCRIPTOR.message_types_by_name['TvmResponse'] = _TVMRESPONSE
-DESCRIPTOR.message_types_by_name['MsgStokeRequest'] = _MSGSTOKEREQUEST
-DESCRIPTOR.message_types_by_name['MsgStokeResponse'] = _MSGSTOKERESPONSE
+_SCHEDULESTEPREQUEST.fields_by_name["op"].message_type = _OPERATIONREQUEST
+_SCHEDULESTEPRESPONSE.fields_by_name["op"].message_type = _OPERATIONRESPONSE
+_SCHEDULERESETREQUEST.fields_by_name["op"].message_type = _OPERATIONREQUEST
+_SCHEDULERESETRESPONSE.fields_by_name["op"].message_type = _OPERATIONRESPONSE
+DESCRIPTOR.message_types_by_name["ScheduleInitRequest"] = _SCHEDULEINITREQUEST
+DESCRIPTOR.message_types_by_name["ScheduleInitResponse"] = _SCHEDULEINITRESPONSE
+DESCRIPTOR.message_types_by_name["ScheduleStepRequest"] = _SCHEDULESTEPREQUEST
+DESCRIPTOR.message_types_by_name["ScheduleStepResponse"] = _SCHEDULESTEPRESPONSE
+DESCRIPTOR.message_types_by_name["ScheduleResetRequest"] = _SCHEDULERESETREQUEST
+DESCRIPTOR.message_types_by_name["ScheduleResetResponse"] = _SCHEDULERESETRESPONSE
+DESCRIPTOR.message_types_by_name["ScheduleRenderRequest"] = _SCHEDULERENDERREQUEST
+DESCRIPTOR.message_types_by_name["ScheduleRenderResponse"] = _SCHEDULERENDERRESPONSE
+DESCRIPTOR.message_types_by_name["ScheduleCloseRequest"] = _SCHEDULECLOSEREQUEST
+DESCRIPTOR.message_types_by_name["ScheduleCloseResponse"] = _SCHEDULECLOSERESPONSE
+DESCRIPTOR.message_types_by_name["OperationRequest"] = _OPERATIONREQUEST
+DESCRIPTOR.message_types_by_name["OperationResponse"] = _OPERATIONRESPONSE
+DESCRIPTOR.message_types_by_name["TvmRequest"] = _TVMREQUEST
+DESCRIPTOR.message_types_by_name["TvmResponse"] = _TVMRESPONSE
+DESCRIPTOR.message_types_by_name["MsgStokeRequest"] = _MSGSTOKEREQUEST
+DESCRIPTOR.message_types_by_name["MsgStokeResponse"] = _MSGSTOKERESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-ScheduleInitRequest = _reflection.GeneratedProtocolMessageType('ScheduleInitRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULEINITREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleInitRequest)
-  ))
+ScheduleInitRequest = _reflection.GeneratedProtocolMessageType(
+    "ScheduleInitRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULEINITREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleInitRequest)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleInitRequest)
 
-ScheduleInitResponse = _reflection.GeneratedProtocolMessageType('ScheduleInitResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULEINITRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleInitResponse)
-  ))
+ScheduleInitResponse = _reflection.GeneratedProtocolMessageType(
+    "ScheduleInitResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULEINITRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleInitResponse)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleInitResponse)
 
-ScheduleStepRequest = _reflection.GeneratedProtocolMessageType('ScheduleStepRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULESTEPREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleStepRequest)
-  ))
+ScheduleStepRequest = _reflection.GeneratedProtocolMessageType(
+    "ScheduleStepRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULESTEPREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleStepRequest)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleStepRequest)
 
-ScheduleStepResponse = _reflection.GeneratedProtocolMessageType('ScheduleStepResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULESTEPRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleStepResponse)
-  ))
+ScheduleStepResponse = _reflection.GeneratedProtocolMessageType(
+    "ScheduleStepResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULESTEPRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleStepResponse)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleStepResponse)
 
-ScheduleResetRequest = _reflection.GeneratedProtocolMessageType('ScheduleResetRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULERESETREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleResetRequest)
-  ))
+ScheduleResetRequest = _reflection.GeneratedProtocolMessageType(
+    "ScheduleResetRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULERESETREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleResetRequest)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleResetRequest)
 
-ScheduleResetResponse = _reflection.GeneratedProtocolMessageType('ScheduleResetResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULERESETRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleResetResponse)
-  ))
+ScheduleResetResponse = _reflection.GeneratedProtocolMessageType(
+    "ScheduleResetResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULERESETRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleResetResponse)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleResetResponse)
 
-ScheduleRenderRequest = _reflection.GeneratedProtocolMessageType('ScheduleRenderRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULERENDERREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleRenderRequest)
-  ))
+ScheduleRenderRequest = _reflection.GeneratedProtocolMessageType(
+    "ScheduleRenderRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULERENDERREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleRenderRequest)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleRenderRequest)
 
-ScheduleRenderResponse = _reflection.GeneratedProtocolMessageType('ScheduleRenderResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULERENDERRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleRenderResponse)
-  ))
+ScheduleRenderResponse = _reflection.GeneratedProtocolMessageType(
+    "ScheduleRenderResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULERENDERRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleRenderResponse)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleRenderResponse)
 
-ScheduleCloseRequest = _reflection.GeneratedProtocolMessageType('ScheduleCloseRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULECLOSEREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleCloseRequest)
-  ))
+ScheduleCloseRequest = _reflection.GeneratedProtocolMessageType(
+    "ScheduleCloseRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULECLOSEREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleCloseRequest)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleCloseRequest)
 
-ScheduleCloseResponse = _reflection.GeneratedProtocolMessageType('ScheduleCloseResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SCHEDULECLOSERESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:ScheduleCloseResponse)
-  ))
+ScheduleCloseResponse = _reflection.GeneratedProtocolMessageType(
+    "ScheduleCloseResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_SCHEDULECLOSERESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:ScheduleCloseResponse)
+    ),
+)
 _sym_db.RegisterMessage(ScheduleCloseResponse)
 
-OperationRequest = _reflection.GeneratedProtocolMessageType('OperationRequest', (_message.Message,), dict(
-  DESCRIPTOR = _OPERATIONREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:OperationRequest)
-  ))
+OperationRequest = _reflection.GeneratedProtocolMessageType(
+    "OperationRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_OPERATIONREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:OperationRequest)
+    ),
+)
 _sym_db.RegisterMessage(OperationRequest)
 
-OperationResponse = _reflection.GeneratedProtocolMessageType('OperationResponse', (_message.Message,), dict(
-  DESCRIPTOR = _OPERATIONRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:OperationResponse)
-  ))
+OperationResponse = _reflection.GeneratedProtocolMessageType(
+    "OperationResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_OPERATIONRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:OperationResponse)
+    ),
+)
 _sym_db.RegisterMessage(OperationResponse)
 
-TvmRequest = _reflection.GeneratedProtocolMessageType('TvmRequest', (_message.Message,), dict(
-  DESCRIPTOR = _TVMREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:TvmRequest)
-  ))
+TvmRequest = _reflection.GeneratedProtocolMessageType(
+    "TvmRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_TVMREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:TvmRequest)
+    ),
+)
 _sym_db.RegisterMessage(TvmRequest)
 
-TvmResponse = _reflection.GeneratedProtocolMessageType('TvmResponse', (_message.Message,), dict(
-  DESCRIPTOR = _TVMRESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:TvmResponse)
-  ))
+TvmResponse = _reflection.GeneratedProtocolMessageType(
+    "TvmResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_TVMRESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:TvmResponse)
+    ),
+)
 _sym_db.RegisterMessage(TvmResponse)
 
-MsgStokeRequest = _reflection.GeneratedProtocolMessageType('MsgStokeRequest', (_message.Message,), dict(
-  DESCRIPTOR = _MSGSTOKEREQUEST,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:MsgStokeRequest)
-  ))
+MsgStokeRequest = _reflection.GeneratedProtocolMessageType(
+    "MsgStokeRequest",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_MSGSTOKEREQUEST,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:MsgStokeRequest)
+    ),
+)
 _sym_db.RegisterMessage(MsgStokeRequest)
 
-MsgStokeResponse = _reflection.GeneratedProtocolMessageType('MsgStokeResponse', (_message.Message,), dict(
-  DESCRIPTOR = _MSGSTOKERESPONSE,
-  __module__ = 'schedule_pb2'
-  # @@protoc_insertion_point(class_scope:MsgStokeResponse)
-  ))
+MsgStokeResponse = _reflection.GeneratedProtocolMessageType(
+    "MsgStokeResponse",
+    (_message.Message,),
+    dict(
+        DESCRIPTOR=_MSGSTOKERESPONSE,
+        __module__="schedule_pb2"
+        # @@protoc_insertion_point(class_scope:MsgStokeResponse)
+    ),
+)
 _sym_db.RegisterMessage(MsgStokeResponse)
 
 
-
 _SCHEDULESERVICE = _descriptor.ServiceDescriptor(
-  name='ScheduleService',
-  full_name='ScheduleService',
-  file=DESCRIPTOR,
-  index=0,
-  options=None,
-  serialized_start=911,
-  serialized_end=1308,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='init',
-    full_name='ScheduleService.init',
+    name="ScheduleService",
+    full_name="ScheduleService",
+    file=DESCRIPTOR,
     index=0,
-    containing_service=None,
-    input_type=_SCHEDULEINITREQUEST,
-    output_type=_SCHEDULEINITRESPONSE,
     options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='step',
-    full_name='ScheduleService.step',
-    index=1,
-    containing_service=None,
-    input_type=_SCHEDULESTEPREQUEST,
-    output_type=_SCHEDULESTEPRESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='reset',
-    full_name='ScheduleService.reset',
-    index=2,
-    containing_service=None,
-    input_type=_SCHEDULERESETREQUEST,
-    output_type=_SCHEDULERESETRESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='render',
-    full_name='ScheduleService.render',
-    index=3,
-    containing_service=None,
-    input_type=_SCHEDULERENDERREQUEST,
-    output_type=_SCHEDULERENDERRESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='close',
-    full_name='ScheduleService.close',
-    index=4,
-    containing_service=None,
-    input_type=_SCHEDULECLOSEREQUEST,
-    output_type=_SCHEDULECLOSERESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetTvm',
-    full_name='ScheduleService.GetTvm',
-    index=5,
-    containing_service=None,
-    input_type=_TVMREQUEST,
-    output_type=_TVMRESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetStokeMsg',
-    full_name='ScheduleService.GetStokeMsg',
-    index=6,
-    containing_service=None,
-    input_type=_MSGSTOKEREQUEST,
-    output_type=_MSGSTOKERESPONSE,
-    options=None,
-  ),
-])
+    serialized_start=911,
+    serialized_end=1308,
+    methods=[
+        _descriptor.MethodDescriptor(
+            name="init",
+            full_name="ScheduleService.init",
+            index=0,
+            containing_service=None,
+            input_type=_SCHEDULEINITREQUEST,
+            output_type=_SCHEDULEINITRESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="step",
+            full_name="ScheduleService.step",
+            index=1,
+            containing_service=None,
+            input_type=_SCHEDULESTEPREQUEST,
+            output_type=_SCHEDULESTEPRESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="reset",
+            full_name="ScheduleService.reset",
+            index=2,
+            containing_service=None,
+            input_type=_SCHEDULERESETREQUEST,
+            output_type=_SCHEDULERESETRESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="render",
+            full_name="ScheduleService.render",
+            index=3,
+            containing_service=None,
+            input_type=_SCHEDULERENDERREQUEST,
+            output_type=_SCHEDULERENDERRESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="close",
+            full_name="ScheduleService.close",
+            index=4,
+            containing_service=None,
+            input_type=_SCHEDULECLOSEREQUEST,
+            output_type=_SCHEDULECLOSERESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GetTvm",
+            full_name="ScheduleService.GetTvm",
+            index=5,
+            containing_service=None,
+            input_type=_TVMREQUEST,
+            output_type=_TVMRESPONSE,
+            options=None,
+        ),
+        _descriptor.MethodDescriptor(
+            name="GetStokeMsg",
+            full_name="ScheduleService.GetStokeMsg",
+            index=6,
+            containing_service=None,
+            input_type=_MSGSTOKEREQUEST,
+            output_type=_MSGSTOKERESPONSE,
+            options=None,
+        ),
+    ],
+)
 _sym_db.RegisterServiceDescriptor(_SCHEDULESERVICE)
 
-DESCRIPTOR.services_by_name['ScheduleService'] = _SCHEDULESERVICE
+DESCRIPTOR.services_by_name["ScheduleService"] = _SCHEDULESERVICE
 
 # @@protoc_insertion_point(module_scope)

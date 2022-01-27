@@ -16,12 +16,11 @@ from psutil.tests import unittest
 
 @unittest.skipIf(not SUNOS, "SUNOS only")
 class SunOSSpecificTestCase(unittest.TestCase):
-
     def test_swap_memory(self):
-        out = sh('env PATH=/usr/sbin:/sbin:%s swap -l' % os.environ['PATH'])
-        lines = out.strip().split('\n')[1:]
+        out = sh("env PATH=/usr/sbin:/sbin:%s swap -l" % os.environ["PATH"])
+        lines = out.strip().split("\n")[1:]
         if not lines:
-            raise ValueError('no swap device(s) configured')
+            raise ValueError("no swap device(s) configured")
         total = free = 0
         for line in lines:
             line = line.split()
@@ -37,9 +36,10 @@ class SunOSSpecificTestCase(unittest.TestCase):
 
     def test_cpu_count(self):
         out = sh("/usr/sbin/psrinfo")
-        self.assertEqual(psutil.cpu_count(), len(out.split('\n')))
+        self.assertEqual(psutil.cpu_count(), len(out.split("\n")))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from psutil.tests.runner import run
+
     run(__file__)

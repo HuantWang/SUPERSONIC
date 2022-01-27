@@ -108,8 +108,9 @@ class SourceOperator(StreamOperator):
     def open(self, collectors, runtime_context):
         super().open(collectors, runtime_context)
         self.source_context = SourceOperator.SourceContextImpl(collectors)
-        self.func.init(runtime_context.get_parallelism(),
-                       runtime_context.get_task_index())
+        self.func.init(
+            runtime_context.get_parallelism(), runtime_context.get_task_index()
+        )
 
     def run(self):
         self.func.run(self.source_context)
@@ -143,8 +144,7 @@ class FlatMapOperator(StreamOperator, OneInputOperator):
 
     def open(self, collectors, runtime_context):
         super().open(collectors, runtime_context)
-        self.collection_collector = streaming.collector.CollectionCollector(
-            collectors)
+        self.collection_collector = streaming.collector.CollectionCollector(collectors)
 
     def process_element(self, record):
         self.func.flat_map(record.value, self.collection_collector)
@@ -252,11 +252,11 @@ def load_operator(descriptor_operator_bytes: bytes):
         a streaming operator
     """
     assert len(descriptor_operator_bytes) > 0
-    function_desc_bytes, module_name, class_name \
-        = gateway_client.deserialize(descriptor_operator_bytes)
+    function_desc_bytes, module_name, class_name = gateway_client.deserialize(
+        descriptor_operator_bytes
+    )
     if function_desc_bytes:
-        return create_operator_with_func(
-            function.load_function(function_desc_bytes))
+        return create_operator_with_func(function.load_function(function_desc_bytes))
     else:
         assert module_name
         assert class_name

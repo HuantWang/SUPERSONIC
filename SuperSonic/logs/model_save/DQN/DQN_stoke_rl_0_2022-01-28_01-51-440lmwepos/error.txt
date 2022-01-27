@@ -1,0 +1,63 @@
+Failure # 1 (occurred at 2022-01-28_01-51-47)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ValueError): [36mray::DQN.train()[39m (pid=43846, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 500, in train
+    raise e
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 486, in train
+    result = Trainable.train(self)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 261, in train
+    result = self._train()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 132, in _train
+    return self._train_exec_impl()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 170, in _train_exec_impl
+    res = next(self.train_exec_impl)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 731, in __next__
+    return next(self.built_iterator)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 1047, in build_union
+    item = next(it)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 731, in __next__
+    return next(self.built_iterator)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/execution/rollout_ops.py", line 70, in sampler
+    yield workers.local_worker().sample()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/rollout_worker.py", line 528, in sample
+    batches = [self.input_reader.next()]
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 59, in next
+    batches = [self.get_data()]
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 164, in get_data
+    item = next(self.rollout_provider)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 471, in _env_runner
+    active_envs, to_eval, outputs = _process_observations(
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 640, in _process_observations
+    prep_obs = _get_or_raise(preprocessors,
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 234, in transform
+    self.write(observation, array, 0)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 244, in write
+    p.write(o, array, offset)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 169, in write
+    array[offset:offset + self._size] = np.array(
+ValueError: could not convert string to float: ''
+

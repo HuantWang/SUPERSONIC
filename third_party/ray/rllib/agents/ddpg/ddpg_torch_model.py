@@ -19,18 +19,20 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
     Note that this class by itself is not a valid model unless you
     implement forward() in a subclass."""
 
-    def __init__(self,
-                 obs_space,
-                 action_space,
-                 num_outputs,
-                 model_config,
-                 name,
-                 actor_hidden_activation="relu",
-                 actor_hiddens=(256, 256),
-                 critic_hidden_activation="relu",
-                 critic_hiddens=(256, 256),
-                 twin_q=False,
-                 add_layer_norm=False):
+    def __init__(
+        self,
+        obs_space,
+        action_space,
+        num_outputs,
+        model_config,
+        name,
+        actor_hidden_activation="relu",
+        actor_hiddens=(256, 256),
+        critic_hidden_activation="relu",
+        critic_hiddens=(256, 256),
+        twin_q=False,
+        add_layer_norm=False,
+    ):
         """Initialize variables of this model.
 
         Extra model kwargs:
@@ -46,13 +48,16 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
         forward() should be defined in subclasses of DDPGTorchModel.
         """
         nn.Module.__init__(self)
-        super(DDPGTorchModel, self).__init__(obs_space, action_space,
-                                             num_outputs, model_config, name)
+        super(DDPGTorchModel, self).__init__(
+            obs_space, action_space, num_outputs, model_config, name
+        )
 
-        self.bounded = np.logical_and(action_space.bounded_above,
-                                      action_space.bounded_below).any()
+        self.bounded = np.logical_and(
+            action_space.bounded_above, action_space.bounded_below
+        ).any()
         self.action_range = torch.from_numpy(
-            (action_space.high - action_space.low)[None])
+            (action_space.high - action_space.low)[None]
+        )
         self.low_action = torch.from_numpy(action_space.low[None])
         self.action_dim = np.product(action_space.shape)
 
@@ -60,8 +65,7 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
         self.policy_model = nn.Sequential()
         ins = num_outputs
         self.obs_ins = ins
-        activation = get_activation_fn(
-            actor_hidden_activation, framework="torch")
+        activation = get_activation_fn(actor_hidden_activation, framework="torch")
         for i, n in enumerate(actor_hiddens):
             self.policy_model.add_module(
                 "action_{}".format(i),
@@ -69,11 +73,14 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
                     ins,
                     n,
                     initializer=torch.nn.init.xavier_uniform_,
-                    activation_fn=activation))
+                    activation_fn=activation,
+                ),
+            )
             # Add LayerNorm after each Dense.
             if add_layer_norm:
-                self.policy_model.add_module("LayerNorm_A_{}".format(i),
-                                             nn.LayerNorm(n))
+                self.policy_model.add_module(
+                    "LayerNorm_A_{}".format(i), nn.LayerNorm(n)
+                )
             ins = n
 
         self.policy_model.add_module(
@@ -82,7 +89,9 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
                 ins,
                 self.action_dim,
                 initializer=torch.nn.init.xavier_uniform_,
-                activation_fn=None))
+                activation_fn=None,
+            ),
+        )
 
         # Use sigmoid to scale to [0,1], but also double magnitude of input to
         # emulate behaviour of tanh activation used in DDPG and TD3 papers.
@@ -99,8 +108,7 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
 
         # Build the Q-net(s), including target Q-net(s).
         def build_q_net(name_):
-            activation = get_activation_fn(
-                critic_hidden_activation, framework="torch")
+            activation = get_activation_fn(critic_hidden_activation, framework="torch")
             # For continuous actions: Feed obs and actions (concatenated)
             # through the NN. For discrete actions, only obs.
             q_net = nn.Sequential()
@@ -112,7 +120,9 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
                         ins,
                         n,
                         initializer=torch.nn.init.xavier_uniform_,
-                        activation_fn=activation))
+                        activation_fn=activation,
+                    ),
+                )
                 ins = n
 
             q_net.add_module(
@@ -121,7 +131,9 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
                     ins,
                     1,
                     initializer=torch.nn.init.xavier_uniform_,
-                    activation_fn=None))
+                    activation_fn=None,
+                ),
+            )
             return q_net
 
         self.q_model = build_q_net("q")
@@ -188,7 +200,8 @@ class DDPGTorchModel(TorchModelV2, nn.Module):
         if as_dict:
             return {
                 **self.q_model.state_dict(),
-                **(self.twin_q_model.state_dict() if self.twin_q_model else {})
+                **(self.twin_q_model.state_dict() if self.twin_q_model else {}),
             }
-        return list(self.q_model.parameters()) + \
-            (list(self.twin_q_model.parameters()) if self.twin_q_model else [])
+        return list(self.q_model.parameters()) + (
+            list(self.twin_q_model.parameters()) if self.twin_q_model else []
+        )

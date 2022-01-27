@@ -5,11 +5,13 @@ from ray.util.iter import LocalIterator, _NextValueNotReady
 from ray.util.iter_metrics import SharedMetrics
 
 
-def Concurrently(ops: List[LocalIterator],
-                 *,
-                 mode="round_robin",
-                 output_indexes=None,
-                 round_robin_weights=None):
+def Concurrently(
+    ops: List[LocalIterator],
+    *,
+    mode="round_robin",
+    output_indexes=None,
+    round_robin_weights=None
+):
     """Operator that runs the given parent iterators concurrently.
 
     Arguments:
@@ -40,8 +42,7 @@ def Concurrently(ops: List[LocalIterator],
     elif mode == "async":
         deterministic = False
         if round_robin_weights:
-            raise ValueError(
-                "round_robin_weights cannot be specified in async mode")
+            raise ValueError("round_robin_weights cannot be specified in async mode")
     else:
         raise ValueError("Unknown mode {}".format(mode))
     if round_robin_weights and all(r == "*" for r in round_robin_weights):
@@ -57,13 +58,13 @@ def Concurrently(ops: List[LocalIterator],
         ops = [tag(op, i) for i, op in enumerate(ops)]
 
     output = ops[0].union(
-        *ops[1:],
-        deterministic=deterministic,
-        round_robin_weights=round_robin_weights)
+        *ops[1:], deterministic=deterministic, round_robin_weights=round_robin_weights
+    )
 
     if output_indexes:
-        output = (output.filter(lambda tup: tup[0] in output_indexes)
-                  .for_each(lambda tup: tup[1]))
+        output = output.filter(lambda tup: tup[0] in output_indexes).for_each(
+            lambda tup: tup[1]
+        )
 
     return output
 
@@ -87,8 +88,7 @@ class Enqueue:
 
     def __init__(self, output_queue: queue.Queue):
         if not isinstance(output_queue, queue.Queue):
-            raise ValueError("Expected queue.Queue, got {}".format(
-                type(output_queue)))
+            raise ValueError("Expected queue.Queue, got {}".format(type(output_queue)))
         self.queue = output_queue
 
     def __call__(self, x):
@@ -119,8 +119,7 @@ def Dequeue(input_queue: queue.Queue, check=lambda: True):
         SampleBatch(...)
     """
     if not isinstance(input_queue, queue.Queue):
-        raise ValueError("Expected queue.Queue, got {}".format(
-            type(input_queue)))
+        raise ValueError("Expected queue.Queue, got {}".format(type(input_queue)))
 
     def base_iterator(timeout=None):
         while check():

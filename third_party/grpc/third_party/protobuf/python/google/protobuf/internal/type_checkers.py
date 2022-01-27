@@ -43,13 +43,13 @@ TYPE_TO_DESERIALIZE_METHOD: A dictionary with field types and deserialization
   function.
 """
 
-__author__ = 'robinson@google.com (Will Robinson)'
+__author__ = "robinson@google.com (Will Robinson)"
 
 import numbers
 import six
 
 if six.PY3:
-  long = int
+    long = int
 
 from google.protobuf.internal import api_implementation
 from google.protobuf.internal import decoder
@@ -59,11 +59,13 @@ from google.protobuf import descriptor
 
 _FieldDescriptor = descriptor.FieldDescriptor
 
+
 def SupportsOpenEnums(field_descriptor):
-  return field_descriptor.containing_type.syntax == "proto3"
+    return field_descriptor.containing_type.syntax == "proto3"
+
 
 def GetTypeChecker(field):
-  """Returns a type checker for a message field of the specified types.
+    """Returns a type checker for a message field of the specified types.
 
   Args:
     field: FieldDescriptor object for this field.
@@ -72,16 +74,18 @@ def GetTypeChecker(field):
     An instance of TypeChecker which can be used to verify the types
     of values assigned to a field of the specified type.
   """
-  if (field.cpp_type == _FieldDescriptor.CPPTYPE_STRING and
-      field.type == _FieldDescriptor.TYPE_STRING):
-    return UnicodeValueChecker()
-  if field.cpp_type == _FieldDescriptor.CPPTYPE_ENUM:
-    if SupportsOpenEnums(field):
-      # When open enums are supported, any int32 can be assigned.
-      return _VALUE_CHECKERS[_FieldDescriptor.CPPTYPE_INT32]
-    else:
-      return EnumValueChecker(field.enum_type)
-  return _VALUE_CHECKERS[field.cpp_type]
+    if (
+        field.cpp_type == _FieldDescriptor.CPPTYPE_STRING
+        and field.type == _FieldDescriptor.TYPE_STRING
+    ):
+        return UnicodeValueChecker()
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_ENUM:
+        if SupportsOpenEnums(field):
+            # When open enums are supported, any int32 can be assigned.
+            return _VALUE_CHECKERS[_FieldDescriptor.CPPTYPE_INT32]
+        else:
+            return EnumValueChecker(field.enum_type)
+    return _VALUE_CHECKERS[field.cpp_type]
 
 
 # None of the typecheckers below make any attempt to guard against people
@@ -89,132 +93,145 @@ def GetTypeChecker(field):
 # protect against malicious clients here, just people accidentally shooting
 # themselves in the foot in obvious ways.
 
+
 class TypeChecker(object):
 
-  """Type checker used to catch type errors as early as possible
+    """Type checker used to catch type errors as early as possible
   when the client is setting scalar fields in protocol messages.
   """
 
-  def __init__(self, *acceptable_types):
-    self._acceptable_types = acceptable_types
+    def __init__(self, *acceptable_types):
+        self._acceptable_types = acceptable_types
 
-  def CheckValue(self, proposed_value):
-    """Type check the provided value and return it.
+    def CheckValue(self, proposed_value):
+        """Type check the provided value and return it.
 
     The returned value might have been normalized to another type.
     """
-    if not isinstance(proposed_value, self._acceptable_types):
-      message = ('%.1024r has type %s, but expected one of: %s' %
-                 (proposed_value, type(proposed_value), self._acceptable_types))
-      raise TypeError(message)
-    return proposed_value
+        if not isinstance(proposed_value, self._acceptable_types):
+            message = "%.1024r has type %s, but expected one of: %s" % (
+                proposed_value,
+                type(proposed_value),
+                self._acceptable_types,
+            )
+            raise TypeError(message)
+        return proposed_value
 
 
 class TypeCheckerWithDefault(TypeChecker):
+    def __init__(self, default_value, *acceptable_types):
+        TypeChecker.__init__(self, acceptable_types)
+        self._default_value = default_value
 
-  def __init__(self, default_value, *acceptable_types):
-    TypeChecker.__init__(self, acceptable_types)
-    self._default_value = default_value
-
-  def DefaultValue(self):
-    return self._default_value
+    def DefaultValue(self):
+        return self._default_value
 
 
 # IntValueChecker and its subclasses perform integer type-checks
 # and bounds-checks.
 class IntValueChecker(object):
 
-  """Checker used for integer fields.  Performs type-check and range check."""
+    """Checker used for integer fields.  Performs type-check and range check."""
 
-  def CheckValue(self, proposed_value):
-    if not isinstance(proposed_value, numbers.Integral):
-      message = ('%.1024r has type %s, but expected one of: %s' %
-                 (proposed_value, type(proposed_value), six.integer_types))
-      raise TypeError(message)
-    if not self._MIN <= int(proposed_value) <= self._MAX:
-      raise ValueError('Value out of range: %d' % proposed_value)
-    # We force 32-bit values to int and 64-bit values to long to make
-    # alternate implementations where the distinction is more significant
-    # (e.g. the C++ implementation) simpler.
-    proposed_value = self._TYPE(proposed_value)
-    return proposed_value
+    def CheckValue(self, proposed_value):
+        if not isinstance(proposed_value, numbers.Integral):
+            message = "%.1024r has type %s, but expected one of: %s" % (
+                proposed_value,
+                type(proposed_value),
+                six.integer_types,
+            )
+            raise TypeError(message)
+        if not self._MIN <= int(proposed_value) <= self._MAX:
+            raise ValueError("Value out of range: %d" % proposed_value)
+        # We force 32-bit values to int and 64-bit values to long to make
+        # alternate implementations where the distinction is more significant
+        # (e.g. the C++ implementation) simpler.
+        proposed_value = self._TYPE(proposed_value)
+        return proposed_value
 
-  def DefaultValue(self):
-    return 0
+    def DefaultValue(self):
+        return 0
 
 
 class EnumValueChecker(object):
 
-  """Checker used for enum fields.  Performs type-check and range check."""
+    """Checker used for enum fields.  Performs type-check and range check."""
 
-  def __init__(self, enum_type):
-    self._enum_type = enum_type
+    def __init__(self, enum_type):
+        self._enum_type = enum_type
 
-  def CheckValue(self, proposed_value):
-    if not isinstance(proposed_value, numbers.Integral):
-      message = ('%.1024r has type %s, but expected one of: %s' %
-                 (proposed_value, type(proposed_value), six.integer_types))
-      raise TypeError(message)
-    if int(proposed_value) not in self._enum_type.values_by_number:
-      raise ValueError('Unknown enum value: %d' % proposed_value)
-    return proposed_value
+    def CheckValue(self, proposed_value):
+        if not isinstance(proposed_value, numbers.Integral):
+            message = "%.1024r has type %s, but expected one of: %s" % (
+                proposed_value,
+                type(proposed_value),
+                six.integer_types,
+            )
+            raise TypeError(message)
+        if int(proposed_value) not in self._enum_type.values_by_number:
+            raise ValueError("Unknown enum value: %d" % proposed_value)
+        return proposed_value
 
-  def DefaultValue(self):
-    return self._enum_type.values[0].number
+    def DefaultValue(self):
+        return self._enum_type.values[0].number
 
 
 class UnicodeValueChecker(object):
 
-  """Checker used for string fields.
+    """Checker used for string fields.
 
   Always returns a unicode value, even if the input is of type str.
   """
 
-  def CheckValue(self, proposed_value):
-    if not isinstance(proposed_value, (bytes, six.text_type)):
-      message = ('%.1024r has type %s, but expected one of: %s' %
-                 (proposed_value, type(proposed_value), (bytes, six.text_type)))
-      raise TypeError(message)
+    def CheckValue(self, proposed_value):
+        if not isinstance(proposed_value, (bytes, six.text_type)):
+            message = "%.1024r has type %s, but expected one of: %s" % (
+                proposed_value,
+                type(proposed_value),
+                (bytes, six.text_type),
+            )
+            raise TypeError(message)
 
-    # If the value is of type 'bytes' make sure that it is valid UTF-8 data.
-    if isinstance(proposed_value, bytes):
-      try:
-        proposed_value = proposed_value.decode('utf-8')
-      except UnicodeDecodeError:
-        raise ValueError('%.1024r has type bytes, but isn\'t valid UTF-8 '
-                         'encoding. Non-UTF-8 strings must be converted to '
-                         'unicode objects before being added.' %
-                         (proposed_value))
-    return proposed_value
+        # If the value is of type 'bytes' make sure that it is valid UTF-8 data.
+        if isinstance(proposed_value, bytes):
+            try:
+                proposed_value = proposed_value.decode("utf-8")
+            except UnicodeDecodeError:
+                raise ValueError(
+                    "%.1024r has type bytes, but isn't valid UTF-8 "
+                    "encoding. Non-UTF-8 strings must be converted to "
+                    "unicode objects before being added." % (proposed_value)
+                )
+        return proposed_value
 
-  def DefaultValue(self):
-    return u""
+    def DefaultValue(self):
+        return u""
 
 
 class Int32ValueChecker(IntValueChecker):
-  # We're sure to use ints instead of longs here since comparison may be more
-  # efficient.
-  _MIN = -2147483648
-  _MAX = 2147483647
-  _TYPE = int
+    # We're sure to use ints instead of longs here since comparison may be more
+    # efficient.
+    _MIN = -2147483648
+    _MAX = 2147483647
+    _TYPE = int
 
 
 class Uint32ValueChecker(IntValueChecker):
-  _MIN = 0
-  _MAX = (1 << 32) - 1
-  _TYPE = int
+    _MIN = 0
+    _MAX = (1 << 32) - 1
+    _TYPE = int
 
 
 class Int64ValueChecker(IntValueChecker):
-  _MIN = -(1 << 63)
-  _MAX = (1 << 63) - 1
-  _TYPE = long
+    _MIN = -(1 << 63)
+    _MAX = (1 << 63) - 1
+    _TYPE = long
 
 
 class Uint64ValueChecker(IntValueChecker):
-  _MIN = 0
-  _MAX = (1 << 64) - 1
-  _TYPE = long
+    _MIN = 0
+    _MAX = (1 << 64) - 1
+    _TYPE = long
 
 
 # Type-checkers for all scalar CPPTYPEs.
@@ -223,14 +240,13 @@ _VALUE_CHECKERS = {
     _FieldDescriptor.CPPTYPE_INT64: Int64ValueChecker(),
     _FieldDescriptor.CPPTYPE_UINT32: Uint32ValueChecker(),
     _FieldDescriptor.CPPTYPE_UINT64: Uint64ValueChecker(),
-    _FieldDescriptor.CPPTYPE_DOUBLE: TypeCheckerWithDefault(
-        0.0, numbers.Real),
-    _FieldDescriptor.CPPTYPE_FLOAT: TypeCheckerWithDefault(
-        0.0, numbers.Real),
+    _FieldDescriptor.CPPTYPE_DOUBLE: TypeCheckerWithDefault(0.0, numbers.Real),
+    _FieldDescriptor.CPPTYPE_FLOAT: TypeCheckerWithDefault(0.0, numbers.Real),
     _FieldDescriptor.CPPTYPE_BOOL: TypeCheckerWithDefault(
-        False, bool, numbers.Integral),
-    _FieldDescriptor.CPPTYPE_STRING: TypeCheckerWithDefault(b'', bytes),
-    }
+        False, bool, numbers.Integral
+    ),
+    _FieldDescriptor.CPPTYPE_STRING: TypeCheckerWithDefault(b"", bytes),
+}
 
 
 # Map from field type to a function F, such that F(field_num, value)
@@ -255,8 +271,8 @@ TYPE_TO_BYTE_SIZE_FN = {
     _FieldDescriptor.TYPE_SFIXED32: wire_format.SFixed32ByteSize,
     _FieldDescriptor.TYPE_SFIXED64: wire_format.SFixed64ByteSize,
     _FieldDescriptor.TYPE_SINT32: wire_format.SInt32ByteSize,
-    _FieldDescriptor.TYPE_SINT64: wire_format.SInt64ByteSize
-    }
+    _FieldDescriptor.TYPE_SINT64: wire_format.SInt64ByteSize,
+}
 
 
 # Maps from field types to encoder constructors.
@@ -279,7 +295,7 @@ TYPE_TO_ENCODER = {
     _FieldDescriptor.TYPE_SFIXED64: encoder.SFixed64Encoder,
     _FieldDescriptor.TYPE_SINT32: encoder.SInt32Encoder,
     _FieldDescriptor.TYPE_SINT64: encoder.SInt64Encoder,
-    }
+}
 
 
 # Maps from field types to sizer constructors.
@@ -302,7 +318,7 @@ TYPE_TO_SIZER = {
     _FieldDescriptor.TYPE_SFIXED64: encoder.SFixed64Sizer,
     _FieldDescriptor.TYPE_SINT32: encoder.SInt32Sizer,
     _FieldDescriptor.TYPE_SINT64: encoder.SInt64Sizer,
-    }
+}
 
 
 # Maps from field type to a decoder constructor.
@@ -325,7 +341,7 @@ TYPE_TO_DECODER = {
     _FieldDescriptor.TYPE_SFIXED64: decoder.SFixed64Decoder,
     _FieldDescriptor.TYPE_SINT32: decoder.SInt32Decoder,
     _FieldDescriptor.TYPE_SINT64: decoder.SInt64Decoder,
-    }
+}
 
 # Maps from field type to expected wiretype.
 FIELD_TYPE_TO_WIRE_TYPE = {
@@ -337,17 +353,14 @@ FIELD_TYPE_TO_WIRE_TYPE = {
     _FieldDescriptor.TYPE_FIXED64: wire_format.WIRETYPE_FIXED64,
     _FieldDescriptor.TYPE_FIXED32: wire_format.WIRETYPE_FIXED32,
     _FieldDescriptor.TYPE_BOOL: wire_format.WIRETYPE_VARINT,
-    _FieldDescriptor.TYPE_STRING:
-      wire_format.WIRETYPE_LENGTH_DELIMITED,
+    _FieldDescriptor.TYPE_STRING: wire_format.WIRETYPE_LENGTH_DELIMITED,
     _FieldDescriptor.TYPE_GROUP: wire_format.WIRETYPE_START_GROUP,
-    _FieldDescriptor.TYPE_MESSAGE:
-      wire_format.WIRETYPE_LENGTH_DELIMITED,
-    _FieldDescriptor.TYPE_BYTES:
-      wire_format.WIRETYPE_LENGTH_DELIMITED,
+    _FieldDescriptor.TYPE_MESSAGE: wire_format.WIRETYPE_LENGTH_DELIMITED,
+    _FieldDescriptor.TYPE_BYTES: wire_format.WIRETYPE_LENGTH_DELIMITED,
     _FieldDescriptor.TYPE_UINT32: wire_format.WIRETYPE_VARINT,
     _FieldDescriptor.TYPE_ENUM: wire_format.WIRETYPE_VARINT,
     _FieldDescriptor.TYPE_SFIXED32: wire_format.WIRETYPE_FIXED32,
     _FieldDescriptor.TYPE_SFIXED64: wire_format.WIRETYPE_FIXED64,
     _FieldDescriptor.TYPE_SINT32: wire_format.WIRETYPE_VARINT,
     _FieldDescriptor.TYPE_SINT64: wire_format.WIRETYPE_VARINT,
-    }
+}

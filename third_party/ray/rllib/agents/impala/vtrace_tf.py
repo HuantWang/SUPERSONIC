@@ -35,24 +35,29 @@ from ray.rllib.utils import try_import_tf
 
 tf = try_import_tf()
 
-VTraceFromLogitsReturns = collections.namedtuple("VTraceFromLogitsReturns", [
-    "vs", "pg_advantages", "log_rhos", "behaviour_action_log_probs",
-    "target_action_log_probs"
-])
+VTraceFromLogitsReturns = collections.namedtuple(
+    "VTraceFromLogitsReturns",
+    [
+        "vs",
+        "pg_advantages",
+        "log_rhos",
+        "behaviour_action_log_probs",
+        "target_action_log_probs",
+    ],
+)
 
 VTraceReturns = collections.namedtuple("VTraceReturns", "vs pg_advantages")
 
 
-def log_probs_from_logits_and_actions(policy_logits,
-                                      actions,
-                                      dist_class=Categorical,
-                                      model=None):
-    return multi_log_probs_from_logits_and_actions([policy_logits], [actions],
-                                                   dist_class, model)[0]
+def log_probs_from_logits_and_actions(
+    policy_logits, actions, dist_class=Categorical, model=None
+):
+    return multi_log_probs_from_logits_and_actions(
+        [policy_logits], [actions], dist_class, model
+    )[0]
 
 
-def multi_log_probs_from_logits_and_actions(policy_logits, actions, dist_class,
-                                            model):
+def multi_log_probs_from_logits_and_actions(policy_logits, actions, dist_class, model):
     """Computes action log-probs from policy logits and actions.
 
     In the notation used throughout documentation and comments, T refers to the
@@ -79,34 +84,39 @@ def multi_log_probs_from_logits_and_actions(policy_logits, actions, dist_class,
     for i in range(len(policy_logits)):
         p_shape = tf.shape(policy_logits[i])
         a_shape = tf.shape(actions[i])
-        policy_logits_flat = tf.reshape(policy_logits[i],
-                                        tf.concat([[-1], p_shape[2:]], axis=0))
-        actions_flat = tf.reshape(actions[i],
-                                  tf.concat([[-1], a_shape[2:]], axis=0))
+        policy_logits_flat = tf.reshape(
+            policy_logits[i], tf.concat([[-1], p_shape[2:]], axis=0)
+        )
+        actions_flat = tf.reshape(actions[i], tf.concat([[-1], a_shape[2:]], axis=0))
         log_probs.append(
             tf.reshape(
-                dist_class(policy_logits_flat, model).logp(actions_flat),
-                a_shape[:2]))
+                dist_class(policy_logits_flat, model).logp(actions_flat), a_shape[:2]
+            )
+        )
 
     return log_probs
 
 
-def from_logits(behaviour_policy_logits,
-                target_policy_logits,
-                actions,
-                discounts,
-                rewards,
-                values,
-                bootstrap_value,
-                dist_class=Categorical,
-                model=None,
-                clip_rho_threshold=1.0,
-                clip_pg_rho_threshold=1.0,
-                name="vtrace_from_logits"):
+def from_logits(
+    behaviour_policy_logits,
+    target_policy_logits,
+    actions,
+    discounts,
+    rewards,
+    values,
+    bootstrap_value,
+    dist_class=Categorical,
+    model=None,
+    clip_rho_threshold=1.0,
+    clip_pg_rho_threshold=1.0,
+    name="vtrace_from_logits",
+):
     """multi_from_logits wrapper used only for tests"""
 
     res = multi_from_logits(
-        [behaviour_policy_logits], [target_policy_logits], [actions],
+        [behaviour_policy_logits],
+        [target_policy_logits],
+        [actions],
         discounts,
         rewards,
         values,
@@ -115,32 +125,33 @@ def from_logits(behaviour_policy_logits,
         model,
         clip_rho_threshold=clip_rho_threshold,
         clip_pg_rho_threshold=clip_pg_rho_threshold,
-        name=name)
+        name=name,
+    )
 
     return VTraceFromLogitsReturns(
         vs=res.vs,
         pg_advantages=res.pg_advantages,
         log_rhos=res.log_rhos,
-        behaviour_action_log_probs=tf.squeeze(
-            res.behaviour_action_log_probs, axis=0),
-        target_action_log_probs=tf.squeeze(
-            res.target_action_log_probs, axis=0),
+        behaviour_action_log_probs=tf.squeeze(res.behaviour_action_log_probs, axis=0),
+        target_action_log_probs=tf.squeeze(res.target_action_log_probs, axis=0),
     )
 
 
-def multi_from_logits(behaviour_policy_logits,
-                      target_policy_logits,
-                      actions,
-                      discounts,
-                      rewards,
-                      values,
-                      bootstrap_value,
-                      dist_class,
-                      model,
-                      behaviour_action_log_probs=None,
-                      clip_rho_threshold=1.0,
-                      clip_pg_rho_threshold=1.0,
-                      name="vtrace_from_logits"):
+def multi_from_logits(
+    behaviour_policy_logits,
+    target_policy_logits,
+    actions,
+    discounts,
+    rewards,
+    values,
+    bootstrap_value,
+    dist_class,
+    model,
+    behaviour_action_log_probs=None,
+    clip_rho_threshold=1.0,
+    clip_pg_rho_threshold=1.0,
+    name="vtrace_from_logits",
+):
     r"""V-trace for softmax policies.
 
   Calculates V-trace actor critic targets for softmax polices as described in
@@ -213,9 +224,11 @@ def multi_from_logits(behaviour_policy_logits,
 
     for i in range(len(behaviour_policy_logits)):
         behaviour_policy_logits[i] = tf.convert_to_tensor(
-            behaviour_policy_logits[i], dtype=tf.float32)
+            behaviour_policy_logits[i], dtype=tf.float32
+        )
         target_policy_logits[i] = tf.convert_to_tensor(
-            target_policy_logits[i], dtype=tf.float32)
+            target_policy_logits[i], dtype=tf.float32
+        )
 
         # Make sure tensor ranks are as expected.
         # The rest will be checked by from_action_log_probs.
@@ -223,25 +236,30 @@ def multi_from_logits(behaviour_policy_logits,
         target_policy_logits[i].shape.assert_has_rank(3)
 
     with tf.name_scope(
-            name,
-            values=[
-                behaviour_policy_logits, target_policy_logits, actions,
-                discounts, rewards, values, bootstrap_value
-            ]):
+        name,
+        values=[
+            behaviour_policy_logits,
+            target_policy_logits,
+            actions,
+            discounts,
+            rewards,
+            values,
+            bootstrap_value,
+        ],
+    ):
         target_action_log_probs = multi_log_probs_from_logits_and_actions(
-            target_policy_logits, actions, dist_class, model)
+            target_policy_logits, actions, dist_class, model
+        )
 
-        if (len(behaviour_policy_logits) > 1
-                or behaviour_action_log_probs is None):
+        if len(behaviour_policy_logits) > 1 or behaviour_action_log_probs is None:
             # can't use precalculated values, recompute them. Note that
             # recomputing won't work well for autoregressive action dists
             # which may have variables not captured by 'logits'
-            behaviour_action_log_probs = (
-                multi_log_probs_from_logits_and_actions(
-                    behaviour_policy_logits, actions, dist_class, model))
+            behaviour_action_log_probs = multi_log_probs_from_logits_and_actions(
+                behaviour_policy_logits, actions, dist_class, model
+            )
 
-        log_rhos = get_log_rhos(target_action_log_probs,
-                                behaviour_action_log_probs)
+        log_rhos = get_log_rhos(target_action_log_probs, behaviour_action_log_probs)
 
         vtrace_returns = from_importance_weights(
             log_rhos=log_rhos,
@@ -250,23 +268,27 @@ def multi_from_logits(behaviour_policy_logits,
             values=values,
             bootstrap_value=bootstrap_value,
             clip_rho_threshold=clip_rho_threshold,
-            clip_pg_rho_threshold=clip_pg_rho_threshold)
+            clip_pg_rho_threshold=clip_pg_rho_threshold,
+        )
 
         return VTraceFromLogitsReturns(
             log_rhos=log_rhos,
             behaviour_action_log_probs=behaviour_action_log_probs,
             target_action_log_probs=target_action_log_probs,
-            **vtrace_returns._asdict())
+            **vtrace_returns._asdict()
+        )
 
 
-def from_importance_weights(log_rhos,
-                            discounts,
-                            rewards,
-                            values,
-                            bootstrap_value,
-                            clip_rho_threshold=1.0,
-                            clip_pg_rho_threshold=1.0,
-                            name="vtrace_from_importance_weights"):
+def from_importance_weights(
+    log_rhos,
+    discounts,
+    rewards,
+    values,
+    bootstrap_value,
+    clip_rho_threshold=1.0,
+    clip_pg_rho_threshold=1.0,
+    name="vtrace_from_importance_weights",
+):
     r"""V-trace from log importance weights.
 
   Calculates V-trace actor critic targets as described in
@@ -315,11 +337,11 @@ def from_importance_weights(log_rhos,
     values = tf.convert_to_tensor(values, dtype=tf.float32)
     bootstrap_value = tf.convert_to_tensor(bootstrap_value, dtype=tf.float32)
     if clip_rho_threshold is not None:
-        clip_rho_threshold = tf.convert_to_tensor(
-            clip_rho_threshold, dtype=tf.float32)
+        clip_rho_threshold = tf.convert_to_tensor(clip_rho_threshold, dtype=tf.float32)
     if clip_pg_rho_threshold is not None:
         clip_pg_rho_threshold = tf.convert_to_tensor(
-            clip_pg_rho_threshold, dtype=tf.float32)
+            clip_pg_rho_threshold, dtype=tf.float32
+        )
 
     # Make sure tensor ranks are consistent.
     rho_rank = log_rhos.shape.ndims  # Usually 2.
@@ -333,19 +355,19 @@ def from_importance_weights(log_rhos,
         clip_pg_rho_threshold.shape.assert_has_rank(0)
 
     with tf.name_scope(
-            name,
-            values=[log_rhos, discounts, rewards, values, bootstrap_value]):
+        name, values=[log_rhos, discounts, rewards, values, bootstrap_value]
+    ):
         rhos = tf.exp(log_rhos)
         if clip_rho_threshold is not None:
-            clipped_rhos = tf.minimum(
-                clip_rho_threshold, rhos, name="clipped_rhos")
+            clipped_rhos = tf.minimum(clip_rho_threshold, rhos, name="clipped_rhos")
 
             tf.summary.histogram("clipped_rhos_1000", tf.minimum(1000.0, rhos))
             tf.summary.scalar(
                 "num_of_clipped_rhos",
                 tf.reduce_sum(
-                    tf.cast(
-                        tf.equal(clipped_rhos, clip_rho_threshold), tf.int32)))
+                    tf.cast(tf.equal(clipped_rhos, clip_rho_threshold), tf.int32)
+                ),
+            )
             tf.summary.scalar("size_of_clipped_rhos", tf.size(clipped_rhos))
         else:
             clipped_rhos = rhos
@@ -353,9 +375,9 @@ def from_importance_weights(log_rhos,
         cs = tf.minimum(1.0, rhos, name="cs")
         # Append bootstrapped value to get [v1, ..., v_t+1]
         values_t_plus_1 = tf.concat(
-            [values[1:], tf.expand_dims(bootstrap_value, 0)], axis=0)
-        deltas = clipped_rhos * (
-            rewards + discounts * values_t_plus_1 - values)
+            [values[1:], tf.expand_dims(bootstrap_value, 0)], axis=0
+        )
+        deltas = clipped_rhos * (rewards + discounts * values_t_plus_1 - values)
 
         # All sequences are reversed, computation starts from the back.
         sequences = (
@@ -377,7 +399,8 @@ def from_importance_weights(log_rhos,
             initializer=initial_values,
             parallel_iterations=1,
             back_prop=False,
-            name="scan")
+            name="scan",
+        )
         # Reverse the results back to original order.
         vs_minus_v_xs = tf.reverse(vs_minus_v_xs, [0], name="vs_minus_v_xs")
 
@@ -385,20 +408,19 @@ def from_importance_weights(log_rhos,
         vs = tf.add(vs_minus_v_xs, values, name="vs")
 
         # Advantage for policy gradient.
-        vs_t_plus_1 = tf.concat(
-            [vs[1:], tf.expand_dims(bootstrap_value, 0)], axis=0)
+        vs_t_plus_1 = tf.concat([vs[1:], tf.expand_dims(bootstrap_value, 0)], axis=0)
         if clip_pg_rho_threshold is not None:
             clipped_pg_rhos = tf.minimum(
-                clip_pg_rho_threshold, rhos, name="clipped_pg_rhos")
+                clip_pg_rho_threshold, rhos, name="clipped_pg_rhos"
+            )
         else:
             clipped_pg_rhos = rhos
-        pg_advantages = (
-            clipped_pg_rhos * (rewards + discounts * vs_t_plus_1 - values))
+        pg_advantages = clipped_pg_rhos * (rewards + discounts * vs_t_plus_1 - values)
 
         # Make sure no gradients backpropagated through the returned values.
         return VTraceReturns(
-            vs=tf.stop_gradient(vs),
-            pg_advantages=tf.stop_gradient(pg_advantages))
+            vs=tf.stop_gradient(vs), pg_advantages=tf.stop_gradient(pg_advantages)
+        )
 
 
 def get_log_rhos(target_action_log_probs, behaviour_action_log_probs):

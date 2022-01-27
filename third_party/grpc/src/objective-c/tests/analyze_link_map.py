@@ -33,46 +33,46 @@ symbol_total_size = 0
 file_import = sys.argv[1]
 lines = list(open(file_import))
 for line in lines:
-  line_stripped = line[:-1]
-  if "# Object files:" == line_stripped:
-    state = "object"
-    continue
-  elif "# Sections:" == line_stripped:
-    state = "section"
-    continue
-  elif "# Symbols:" == line_stripped:
-    state = "symbol"
-    continue
-  elif "# Dead Stripped Symbols:" == line_stripped:
-    state = "dead"
-    continue
+    line_stripped = line[:-1]
+    if "# Object files:" == line_stripped:
+        state = "object"
+        continue
+    elif "# Sections:" == line_stripped:
+        state = "section"
+        continue
+    elif "# Symbols:" == line_stripped:
+        state = "symbol"
+        continue
+    elif "# Dead Stripped Symbols:" == line_stripped:
+        state = "dead"
+        continue
 
-  if state == "object":
-    segs = re.search('(\[ *[0-9]*\]) (.*)', line_stripped)
-    table_tag[segs.group(1)] = segs.group(2)
+    if state == "object":
+        segs = re.search("(\[ *[0-9]*\]) (.*)", line_stripped)
+        table_tag[segs.group(1)] = segs.group(2)
 
-  if state == "section":
-    if len(line_stripped) == 0 or line_stripped[0] == '#':
-      continue
-    segs = re.search('^(.+?)\s+(.+?)\s+.*', line_stripped)
-    section_total_size += int(segs.group(2), 16)
+    if state == "section":
+        if len(line_stripped) == 0 or line_stripped[0] == "#":
+            continue
+        segs = re.search("^(.+?)\s+(.+?)\s+.*", line_stripped)
+        section_total_size += int(segs.group(2), 16)
 
-  if state == "symbol":
-    if len(line_stripped) == 0 or line_stripped[0] == '#':
-      continue
-    segs = re.search('^.+?\s+(.+?)\s+(\[.+?\]).*', line_stripped)
-    target = table_tag[segs.group(2)]
-    target_stripped = re.search('^(.*?)(\(.+?\))?$', target).group(1)
-    size = int(segs.group(1), 16)
-    if not target_stripped in table_stats_symbol:
-      table_stats_symbol[target_stripped] = 0
-    table_stats_symbol[target_stripped] += size
+    if state == "symbol":
+        if len(line_stripped) == 0 or line_stripped[0] == "#":
+            continue
+        segs = re.search("^.+?\s+(.+?)\s+(\[.+?\]).*", line_stripped)
+        target = table_tag[segs.group(2)]
+        target_stripped = re.search("^(.*?)(\(.+?\))?$", target).group(1)
+        size = int(segs.group(1), 16)
+        if not target_stripped in table_stats_symbol:
+            table_stats_symbol[target_stripped] = 0
+        table_stats_symbol[target_stripped] += size
 
 print("Sections total size: %d" % section_total_size)
 
 for target in table_stats_symbol:
-  print(target)
-  print(table_stats_symbol[target])
-  symbol_total_size += table_stats_symbol[target]
+    print(target)
+    print(table_stats_symbol[target])
+    symbol_total_size += table_stats_symbol[target]
 
 print("Symbols total size: %d" % symbol_total_size)

@@ -8,8 +8,12 @@ except ImportError:
     pd = None
 
 from ray.tune.error import TuneError
-from ray.tune.result import EXPR_PROGRESS_FILE, EXPR_PARAM_FILE,\
-    CONFIG_PREFIX, TRAINING_ITERATION
+from ray.tune.result import (
+    EXPR_PROGRESS_FILE,
+    EXPR_PARAM_FILE,
+    CONFIG_PREFIX,
+    TRAINING_ITERATION,
+)
 from ray.tune.trial import Trial
 from ray.tune.trainable import TrainableUtil
 
@@ -25,8 +29,7 @@ class Analysis:
     def __init__(self, experiment_dir):
         experiment_dir = os.path.expanduser(experiment_dir)
         if not os.path.isdir(experiment_dir):
-            raise ValueError(
-                "{} is not a valid directory.".format(experiment_dir))
+            raise ValueError("{} is not a valid directory.".format(experiment_dir))
         self._experiment_dir = experiment_dir
         self._configs = {}
         self._trial_dataframes = {}
@@ -34,7 +37,8 @@ class Analysis:
         if not pd:
             logger.warning(
                 "pandas not installed. Run `pip install pandas` for "
-                "Analysis utilities.")
+                "Analysis utilities."
+            )
         else:
             self.fetch_trial_dataframes()
 
@@ -88,13 +92,13 @@ class Analysis:
         for path in self._get_trial_paths():
             try:
                 self.trial_dataframes[path] = pd.read_csv(
-                    os.path.join(path, EXPR_PROGRESS_FILE))
+                    os.path.join(path, EXPR_PROGRESS_FILE)
+                )
             except Exception:
                 fail_count += 1
 
         if fail_count:
-            logger.debug(
-                "Couldn't read results from {} paths".format(fail_count))
+            logger.debug("Couldn't read results from {} paths".format(fail_count))
         return self.trial_dataframes
 
     def get_all_configs(self, prefix=False):
@@ -120,8 +124,7 @@ class Analysis:
                 fail_count += 1
 
         if fail_count:
-            logger.warning(
-                "Couldn't read config from {} paths".format(fail_count))
+            logger.warning("Couldn't read config from {} paths".format(fail_count))
         return self._configs
 
     def get_trial_checkpoints_paths(self, trial, metric=TRAINING_ITERATION):
@@ -143,7 +146,8 @@ class Analysis:
             # Join with trial dataframe to get metrics.
             trial_df = self.trial_dataframes[trial_dir]
             path_metric_df = chkpt_df.merge(
-                trial_df, on="training_iteration", how="inner")
+                trial_df, on="training_iteration", how="inner"
+            )
             return path_metric_df[["chkpt_path", metric]].values.tolist()
         elif isinstance(trial, Trial):
             checkpoints = trial.checkpoint_manager.best_checkpoints()
@@ -172,8 +176,7 @@ class Analysis:
                 _trial_paths += [trial_path]
 
         if not _trial_paths:
-            raise TuneError("No trials found in {}.".format(
-                self._experiment_dir))
+            raise TuneError("No trials found in {}.".format(self._experiment_dir))
         return _trial_paths
 
     @property
@@ -210,7 +213,8 @@ class ExperimentAnalysis(Analysis):
         self._checkpoints = _experiment_state["checkpoints"]
         self.trials = trials
         super(ExperimentAnalysis, self).__init__(
-            os.path.dirname(experiment_checkpoint_path))
+            os.path.dirname(experiment_checkpoint_path)
+        )
 
     def get_best_trial(self, metric, mode="max", scope="all"):
         """Retrieve the best trial object.
@@ -234,13 +238,14 @@ class ExperimentAnalysis(Analysis):
         if mode not in ["max", "min"]:
             raise ValueError(
                 "ExperimentAnalysis: attempting to get best trial for "
-                "metric {} for mode {} not in [\"max\", \"min\"]".format(
-                    metric, mode))
+                'metric {} for mode {} not in ["max", "min"]'.format(metric, mode)
+            )
         if scope not in ["all", "last", "avg", "last-5-avg", "last-10-avg"]:
             raise ValueError(
                 "ExperimentAnalysis: attempting to get best trial for "
-                "metric {} for scope {} not in [\"all\", \"last\", \"avg\", "
-                "\"last-5-avg\", \"last-10-avg\"]".format(metric, scope))
+                'metric {} for scope {} not in ["all", "last", "avg", '
+                '"last-5-avg", "last-10-avg"]'.format(metric, scope)
+            )
         best_trial = None
         best_metric_score = None
         for trial in self.trials:
@@ -323,12 +328,12 @@ class ExperimentAnalysis(Analysis):
         if self.trials:
             _trial_paths = [t.logdir for t in self.trials]
         else:
-            logger.warning("No `self.trials`. Drawing logdirs from checkpoint "
-                           "file. This may result in some information that is "
-                           "out of sync, as checkpointing is periodic.")
-            _trial_paths = [
-                checkpoint["logdir"] for checkpoint in self._checkpoints
-            ]
+            logger.warning(
+                "No `self.trials`. Drawing logdirs from checkpoint "
+                "file. This may result in some information that is "
+                "out of sync, as checkpointing is periodic."
+            )
+            _trial_paths = [checkpoint["logdir"] for checkpoint in self._checkpoints]
         if not _trial_paths:
             raise TuneError("No trials found.")
         return _trial_paths

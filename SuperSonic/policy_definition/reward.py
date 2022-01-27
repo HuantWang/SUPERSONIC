@@ -3,14 +3,14 @@ import numpy as np
 
 # TODO: Supplement GRPC module
 # def get_reward(method, action, hamming, hamming_last):
-class reward_function():
+class reward_function:
     def __init__(self):
         self.rew_fun = "tanh"
 
-
-
     def get_reward(self, input, baseline, weight=1, method="relative_measure"):
-        self.baseline = baseline  # eg: using grpc to obtain hamming distance as baseline
+        self.baseline = (
+            baseline  # eg: using grpc to obtain hamming distance as baseline
+        )
         self.current = input
         if method == "relative_measure":
             # hamming = random.randint(-5, 5)  # eg: using grpc to obtain hamming distance
@@ -25,16 +25,15 @@ class reward_function():
             else:
                 reward = 1
             return reward, self.baseline
-        
+
         if method == "weight":
             if self.current < self.baseline:
                 exec_diff = self.baseline - self.current
                 self.current = self.current
                 reward = exec_diff * weight
-            else :
+            else:
                 reward = 0.0
-            return reward,self.baseline
-            
+            return reward, self.baseline
 
         return reward
 
@@ -58,4 +57,3 @@ class reward_function():
         #         reward = np.tan(hamming * 2)
         #     else:
         #         reward = np.tan(hamming * 0.5)
-

@@ -20,13 +20,18 @@ logger = logging.getLogger(__name__)
 
 
 class LogFileInfo:
-    def __init__(self,
-                 filename=None,
-                 size_when_last_opened=None,
-                 file_position=None,
-                 file_handle=None):
-        assert (filename is not None and size_when_last_opened is not None
-                and file_position is not None)
+    def __init__(
+        self,
+        filename=None,
+        size_when_last_opened=None,
+        file_position=None,
+        file_handle=None,
+    ):
+        assert (
+            filename is not None
+            and size_when_last_opened is not None
+            and file_position is not None
+        )
         self.filename = filename
         self.size_when_last_opened = size_when_last_opened
         self.file_position = file_position
@@ -71,7 +76,8 @@ class LogMonitor:
         self.ip = services.get_node_ip_address()
         self.logs_dir = logs_dir
         self.redis_client = ray.services.create_redis_client(
-            redis_address, password=redis_password)
+            redis_address, password=redis_password
+        )
         self.log_filenames = set()
         self.open_file_infos = []
         self.closed_file_infos = []
@@ -92,14 +98,17 @@ class LogMonitor:
                 # The process is not alive any more, so move the log file
                 # out of the log directory so glob.glob will not be slowed
                 # by it.
-                target = os.path.join(self.logs_dir, "old",
-                                      os.path.basename(file_info.filename))
+                target = os.path.join(
+                    self.logs_dir, "old", os.path.basename(file_info.filename)
+                )
                 try:
                     shutil.move(file_info.filename, target)
                 except (IOError, OSError) as e:
                     if e.errno == errno.ENOENT:
-                        logger.warning("Warning: The file {} was not "
-                                       "found.".format(file_info.filename))
+                        logger.warning(
+                            "Warning: The file {} was not "
+                            "found.".format(file_info.filename)
+                        )
                     else:
                         raise e
             else:
@@ -109,20 +118,20 @@ class LogMonitor:
     def update_log_filenames(self):
         """Update the list of log files to monitor."""
         # output of user code is written here
-        log_file_paths = glob.glob("{}/worker*[.out|.err]".format(
-            self.logs_dir))
+        log_file_paths = glob.glob("{}/worker*[.out|.err]".format(self.logs_dir))
         # segfaults and other serious errors are logged here
         raylet_err_paths = glob.glob("{}/raylet*.err".format(self.logs_dir))
         for file_path in log_file_paths + raylet_err_paths:
-            if os.path.isfile(
-                    file_path) and file_path not in self.log_filenames:
+            if os.path.isfile(file_path) and file_path not in self.log_filenames:
                 self.log_filenames.add(file_path)
                 self.closed_file_infos.append(
                     LogFileInfo(
                         filename=file_path,
                         size_when_last_opened=0,
                         file_position=0,
-                        file_handle=None))
+                        file_handle=None,
+                    )
+                )
                 log_filename = os.path.basename(file_path)
                 logger.info("Beginning to track file {}".format(log_filename))
 
@@ -138,8 +147,7 @@ class LogMonitor:
 
         files_with_no_updates = []
         while len(self.closed_file_infos) > 0:
-            if (len(self.open_file_infos) >=
-                    ray_constants.LOG_MONITOR_MAX_OPEN_FILES):
+            if len(self.open_file_infos) >= ray_constants.LOG_MONITOR_MAX_OPEN_FILES:
                 self.can_open_more_files = False
                 break
 
@@ -152,8 +160,10 @@ class LogMonitor:
             except (IOError, OSError) as e:
                 # Catch "file not found" errors.
                 if e.errno == errno.ENOENT:
-                    logger.warning("Warning: The file {} was not "
-                                   "found.".format(file_info.filename))
+                    logger.warning(
+                        "Warning: The file {} was not "
+                        "found.".format(file_info.filename)
+                    )
                     self.log_filenames.remove(file_info.filename)
                     continue
                 raise e
@@ -165,8 +175,10 @@ class LogMonitor:
                     f = open(file_info.filename, "rb")
                 except (IOError, OSError) as e:
                     if e.errno == errno.ENOENT:
-                        logger.warning("Warning: The file {} was not "
-                                       "found.".format(file_info.filename))
+                        logger.warning(
+                            "Warning: The file {} was not "
+                            "found.".format(file_info.filename)
+                        )
                         self.log_filenames.remove(file_info.filename)
                         continue
                     else:
@@ -207,17 +219,19 @@ class LogMonitor:
                         next_line = next_line[:-1]
                     lines_to_publish.append(next_line)
                 except Exception:
-                    logger.error("Error: Reading file: {}, position: {} "
-                                 "failed.".format(
-                                     file_info.full_path,
-                                     file_info.file_info.file_handle.tell()))
+                    logger.error(
+                        "Error: Reading file: {}, position: {} "
+                        "failed.".format(
+                            file_info.full_path, file_info.file_info.file_handle.tell()
+                        )
+                    )
                     raise
 
             if file_info.file_position == 0:
-                if (len(lines_to_publish) > 0 and
-                        lines_to_publish[0].startswith("Ray worker pid: ")):
-                    file_info.worker_pid = int(
-                        lines_to_publish[0].split(" ")[-1])
+                if len(lines_to_publish) > 0 and lines_to_publish[0].startswith(
+                    "Ray worker pid: "
+                ):
+                    file_info.worker_pid = int(lines_to_publish[0].split(" ")[-1])
                     lines_to_publish = lines_to_publish[1:]
                 elif "/raylet" in file_info.filename:
                     file_info.worker_pid = "raylet"
@@ -228,11 +242,14 @@ class LogMonitor:
             if len(lines_to_publish) > 0:
                 self.redis_client.publish(
                     ray.gcs_utils.LOG_FILE_CHANNEL,
-                    json.dumps({
-                        "ip": self.ip,
-                        "pid": file_info.worker_pid,
-                        "lines": lines_to_publish
-                    }))
+                    json.dumps(
+                        {
+                            "ip": self.ip,
+                            "pid": file_info.worker_pid,
+                            "lines": lines_to_publish,
+                        }
+                    ),
+                )
                 anything_published = True
 
         return anything_published
@@ -255,54 +272,59 @@ class LogMonitor:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=("Parse Redis server for the "
-                     "log monitor to connect "
-                     "to."))
+        description=("Parse Redis server for the " "log monitor to connect " "to.")
+    )
     parser.add_argument(
-        "--redis-address",
-        required=True,
-        type=str,
-        help="The address to use for Redis.")
+        "--redis-address", required=True, type=str, help="The address to use for Redis."
+    )
     parser.add_argument(
         "--redis-password",
         required=False,
         type=str,
         default=None,
-        help="the password to use for Redis")
+        help="the password to use for Redis",
+    )
     parser.add_argument(
         "--logging-level",
         required=False,
         type=str,
         default=ray_constants.LOGGER_LEVEL,
         choices=ray_constants.LOGGER_LEVEL_CHOICES,
-        help=ray_constants.LOGGER_LEVEL_HELP)
+        help=ray_constants.LOGGER_LEVEL_HELP,
+    )
     parser.add_argument(
         "--logging-format",
         required=False,
         type=str,
         default=ray_constants.LOGGER_FORMAT,
-        help=ray_constants.LOGGER_FORMAT_HELP)
+        help=ray_constants.LOGGER_FORMAT_HELP,
+    )
     parser.add_argument(
         "--logs-dir",
         required=True,
         type=str,
-        help="Specify the path of the temporary directory used by Ray "
-        "processes.")
+        help="Specify the path of the temporary directory used by Ray " "processes.",
+    )
     args = parser.parse_args()
     ray.utils.setup_logger(args.logging_level, args.logging_format)
 
     log_monitor = LogMonitor(
-        args.logs_dir, args.redis_address, redis_password=args.redis_password)
+        args.logs_dir, args.redis_address, redis_password=args.redis_password
+    )
 
     try:
         log_monitor.run()
     except Exception as e:
         # Something went wrong, so push an error to all drivers.
         redis_client = ray.services.create_redis_client(
-            args.redis_address, password=args.redis_password)
+            args.redis_address, password=args.redis_password
+        )
         traceback_str = ray.utils.format_error_message(traceback.format_exc())
-        message = ("The log monitor on node {} failed with the following "
-                   "error:\n{}".format(platform.node(), traceback_str))
+        message = (
+            "The log monitor on node {} failed with the following "
+            "error:\n{}".format(platform.node(), traceback_str)
+        )
         ray.utils.push_error_to_driver_through_redis(
-            redis_client, ray_constants.LOG_MONITOR_DIED_ERROR, message)
+            redis_client, ray_constants.LOG_MONITOR_DIED_ERROR, message
+        )
         raise e

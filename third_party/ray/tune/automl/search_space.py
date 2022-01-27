@@ -85,8 +85,7 @@ class ContinuousSpace(ParameterSpace):
         if distribution == ContinuousSpace.LINEAR:
             self.choices = np.linspace(start, end, num)
         else:
-            raise NotImplementedError(
-                "Distribution %s not supported" % distribution)
+            raise NotImplementedError("Distribution %s not supported" % distribution)
 
         self.distribution = distribution
 
@@ -108,8 +107,7 @@ class ContinuousSpace(ParameterSpace):
         return len(self.choices)
 
     def __str__(self):
-        return "ContinuousSpace %s: [%s, %s]" % (self.name, self.start,
-                                                 self.end)
+        return "ContinuousSpace %s: [%s, %s]" % (self.name, self.start, self.end)
 
 
 class SearchSpace:

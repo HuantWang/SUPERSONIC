@@ -73,26 +73,30 @@ class ZOOptSearch(Searcher):
 
     optimizer = None
 
-    def __init__(self,
-                 algo="asracos",
-                 budget=None,
-                 dim_dict=None,
-                 metric="episode_reward_mean",
-                 mode="min",
-                 **kwargs):
+    def __init__(
+        self,
+        algo="asracos",
+        budget=None,
+        dim_dict=None,
+        metric="episode_reward_mean",
+        mode="min",
+        **kwargs
+    ):
         assert zoopt is not None, "Zoopt not found - please install zoopt."
         assert budget is not None, "`budget` should not be None!"
         assert dim_dict is not None, "`dim_list` should not be None!"
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
         _algo = algo.lower()
-        assert _algo in ["asracos", "sracos"
-                         ], "`algo` must be in ['asracos', 'sracos'] currently"
+        assert _algo in [
+            "asracos",
+            "sracos",
+        ], "`algo` must be in ['asracos', 'sracos'] currently"
 
         self._metric = metric
         if mode == "max":
-            self._metric_op = -1.
+            self._metric_op = -1.0
         elif mode == "min":
-            self._metric_op = 1.
+            self._metric_op = 1.0
         self._live_trial_mapping = {}
 
         self._dim_keys = []
@@ -105,13 +109,13 @@ class ZOOptSearch(Searcher):
         par = zoopt.Parameter(budget=budget)
         if _algo == "sracos" or _algo == "asracos":
             from zoopt.algos.opt_algorithms.racos.sracos import SRacosTune
+
             self.optimizer = SRacosTune(dimension=dim, parameter=par)
 
         self.solution_dict = {}
         self.best_solution_list = []
 
-        super(ZOOptSearch, self).__init__(
-            metric=self._metric, mode=mode, **kwargs)
+        super(ZOOptSearch, self).__init__(metric=self._metric, mode=mode, **kwargs)
 
     def suggest(self, trial_id):
         _solution = self.optimizer.suggest()
@@ -127,7 +131,8 @@ class ZOOptSearch(Searcher):
         if result:
             _solution = self.solution_dict[str(trial_id)]
             _best_solution_so_far = self.optimizer.complete(
-                _solution, self._metric_op * result[self._metric])
+                _solution, self._metric_op * result[self._metric]
+            )
             if _best_solution_so_far:
                 self.best_solution_list.append(_best_solution_so_far)
 

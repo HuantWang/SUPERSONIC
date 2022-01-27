@@ -8,11 +8,13 @@ import setproctitle
 
 class RayError(Exception):
     """Super class of all ray exception types."""
+
     pass
 
 
 class RayConnectionError(RayError):
     """Raised when ray is not yet connected but needs to be."""
+
     pass
 
 
@@ -48,13 +50,9 @@ class RayTaskError(RayError):
         traceback_str (str): The traceback from the exception.
     """
 
-    def __init__(self,
-                 function_name,
-                 traceback_str,
-                 cause_cls,
-                 proctitle=None,
-                 pid=None,
-                 ip=None):
+    def __init__(
+        self, function_name, traceback_str, cause_cls, proctitle=None, pid=None, ip=None
+    ):
         """Initialize a RayTaskError."""
         if proctitle:
             self.proctitle = proctitle
@@ -81,17 +79,25 @@ class RayTaskError(RayError):
             return self  # don't try to wrap ray internal errors
 
         class cls(RayTaskError, self.cause_cls):
-            def __init__(self, function_name, traceback_str, cause_cls,
-                         proctitle, pid, ip):
-                RayTaskError.__init__(self, function_name, traceback_str,
-                                      cause_cls, proctitle, pid, ip)
+            def __init__(
+                self, function_name, traceback_str, cause_cls, proctitle, pid, ip
+            ):
+                RayTaskError.__init__(
+                    self, function_name, traceback_str, cause_cls, proctitle, pid, ip
+                )
 
         name = "RayTaskError({})".format(self.cause_cls.__name__)
         cls.__name__ = name
         cls.__qualname__ = name
 
-        return cls(self.function_name, self.traceback_str, self.cause_cls,
-                   self.proctitle, self.pid, self.ip)
+        return cls(
+            self.function_name,
+            self.traceback_str,
+            self.cause_cls,
+            self.proctitle,
+            self.pid,
+            self.ip,
+        )
 
     def __str__(self):
         """Format a RayTaskError as a string."""
@@ -100,9 +106,15 @@ class RayTaskError(RayError):
         in_worker = False
         for line in lines:
             if line.startswith("Traceback "):
-                out.append("{}{}{} (pid={}, ip={})".format(
-                    colorama.Fore.CYAN, self.proctitle, colorama.Fore.RESET,
-                    self.pid, self.ip))
+                out.append(
+                    "{}{}{} (pid={}, ip={})".format(
+                        colorama.Fore.CYAN,
+                        self.proctitle,
+                        colorama.Fore.RESET,
+                        self.pid,
+                        self.ip,
+                    )
+                )
             elif in_worker:
                 in_worker = False
             elif "ray/worker.py" in line or "ray/function_manager.py" in line:
@@ -159,7 +171,8 @@ class ObjectStoreFullError(RayError):
             "You can also try setting an option to fallback to LRU eviction "
             "when the object store is full by calling "
             "ray.init(lru_evict=True). See also: "
-            "https://docs.ray.io/en/latest/memory-management.html.")
+            "https://docs.ray.io/en/latest/memory-management.html."
+        )
 
 
 class UnreconstructableError(RayError):
@@ -184,16 +197,20 @@ class UnreconstructableError(RayError):
             "or setting object store limits with "
             "ray.remote(object_store_memory=<bytes>). See also: {}".format(
                 self.object_id.hex(),
-                "https://docs.ray.io/en/latest/memory-management.html"))
+                "https://docs.ray.io/en/latest/memory-management.html",
+            )
+        )
 
 
 class RayTimeoutError(RayError):
     """Indicates that a call to the worker timed out."""
+
     pass
 
 
 class PlasmaObjectNotAvailable(RayError):
     """Called when an object was not available within the given timeout."""
+
     pass
 
 

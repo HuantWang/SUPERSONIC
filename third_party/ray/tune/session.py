@@ -33,7 +33,8 @@ def get_session():
     if _session is None:
         raise ValueError(
             "Session not detected. You should not be calling this function "
-            "outside `tune.run` or while using the class API. ")
+            "outside `tune.run` or while using the class API. "
+        )
     return _session
 
 
@@ -49,7 +50,8 @@ def init(reporter, ignore_reinit_error=True):
             "A Tune session already exists in the current process. "
             "If you are using ray.init(local_mode=True), "
             "you must set ray.init(..., num_cpus=1, num_gpus=1) to limit "
-            "available concurrency.")
+            "available concurrency."
+        )
         if ignore_reinit_error:
             logger.warning(reinit_msg)
             return

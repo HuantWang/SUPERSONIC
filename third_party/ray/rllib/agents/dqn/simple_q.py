@@ -80,8 +80,8 @@ DEFAULT_CONFIG = with_common_config({
 
 def get_policy_class(config):
     if config["framework"] == "torch":
-        from ray.rllib.agents.dqn.simple_q_torch_policy import \
-            SimpleQTorchPolicy
+        from ray.rllib.agents.dqn.simple_q_torch_policy import SimpleQTorchPolicy
+
         return SimpleQTorchPolicy
     else:
         return SimpleQTFPolicy
@@ -92,23 +92,25 @@ def execution_plan(workers, config):
         num_shards=1,
         learning_starts=config["learning_starts"],
         buffer_size=config["buffer_size"],
-        replay_batch_size=config["train_batch_size"])
+        replay_batch_size=config["train_batch_size"],
+    )
 
     rollouts = ParallelRollouts(workers, mode="bulk_sync")
 
     # (1) Generate rollouts and store them in our local replay buffer.
-    store_op = rollouts.for_each(
-        StoreToReplayBuffer(local_buffer=local_replay_buffer))
+    store_op = rollouts.for_each(StoreToReplayBuffer(local_buffer=local_replay_buffer))
 
     # (2) Read and train on experiences from the replay buffer.
-    replay_op = Replay(local_buffer=local_replay_buffer) \
-        .for_each(TrainOneStep(workers)) \
-        .for_each(UpdateTargetNetwork(
-            workers, config["target_network_update_freq"]))
+    replay_op = (
+        Replay(local_buffer=local_replay_buffer)
+        .for_each(TrainOneStep(workers))
+        .for_each(UpdateTargetNetwork(workers, config["target_network_update_freq"]))
+    )
 
     # Alternate deterministically between (1) and (2).
     train_op = Concurrently(
-        [store_op, replay_op], mode="round_robin", output_indexes=[1])
+        [store_op, replay_op], mode="round_robin", output_indexes=[1]
+    )
 
     return StandardMetricsReporting(train_op, workers, config)
 
@@ -117,4 +119,5 @@ SimpleQTrainer = DQNTrainer.with_updates(
     default_policy=SimpleQTFPolicy,
     get_policy_class=get_policy_class,
     execution_plan=execution_plan,
-    default_config=DEFAULT_CONFIG)
+    default_config=DEFAULT_CONFIG,
+)

@@ -20,7 +20,6 @@ from grpc_testing import _common
 
 
 class Rpc(object):
-
     def __init__(self, handler, invocation_metadata):
         self._condition = threading.Condition()
         self._handler = handler
@@ -47,7 +46,7 @@ class Rpc(object):
                 try:
                     callback()
                 except Exception:  # pylint: disable=broad-except
-                    logging.exception('Exception calling server-side callback!')
+                    logging.exception("Exception calling server-side callback!")
 
         callback_calling_thread = threading.Thread(target=call_back)
         callback_calling_thread.start()
@@ -68,7 +67,7 @@ class Rpc(object):
             code = grpc.StatusCode.OK
         else:
             code = self._pending_code
-        details = '' if self._pending_details is None else self._pending_details
+        details = "" if self._pending_details is None else self._pending_details
         self._terminate(trailing_metadata, code, details)
 
     def _abort(self, code, details):
@@ -80,16 +79,18 @@ class Rpc(object):
 
     def application_cancel(self):
         with self._condition:
-            self._abort(grpc.StatusCode.CANCELLED,
-                        'Cancelled by server-side application!')
+            self._abort(
+                grpc.StatusCode.CANCELLED, "Cancelled by server-side application!"
+            )
 
     def application_exception_abort(self, exception):
         with self._condition:
             if exception not in self._rpc_errors:
-                logging.exception('Exception calling application!')
+                logging.exception("Exception calling application!")
                 self._abort(
                     grpc.StatusCode.UNKNOWN,
-                    'Exception calling application: {}'.format(exception))
+                    "Exception calling application: {}".format(exception),
+                )
 
     def extrinsic_abort(self):
         with self._condition:

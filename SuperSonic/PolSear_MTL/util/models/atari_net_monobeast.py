@@ -6,8 +6,15 @@ from PolSear_MTL.util.core.popart import PopArtLayer
 
 
 class AtariNet(nn.Module):
-
-    def __init__(self, observation_shape, num_actions, num_tasks=1, use_lstm=False, use_popart=False, **kwargs):
+    def __init__(
+        self,
+        observation_shape,
+        num_actions,
+        num_tasks=1,
+        use_lstm=False,
+        use_popart=False,
+        **kwargs
+    ):
         super(AtariNet, self).__init__()
         self.observation_shape = observation_shape
         self.num_actions = num_actions
@@ -35,7 +42,9 @@ class AtariNet(nn.Module):
             self.core = nn.LSTM(core_output_size, core_output_size, 2)
 
         self.policy = nn.Linear(core_output_size, self.num_actions)
-        self.baseline = PopArtLayer(core_output_size, num_tasks if self.use_popart else 1)
+        self.baseline = PopArtLayer(
+            core_output_size, num_tasks if self.use_popart else 1
+        )
 
     def initial_state(self, batch_size):
         if not self.use_lstm:
@@ -98,7 +107,11 @@ class AtariNet(nn.Module):
         action = action.view(T, B, 1)
 
         return (
-            dict(policy_logits=policy_logits, baseline=baseline, action=action,
-                 normalized_baseline=normalized_baseline),
+            dict(
+                policy_logits=policy_logits,
+                baseline=baseline,
+                action=action,
+                normalized_baseline=normalized_baseline,
+            ),
             core_state,
         )

@@ -35,9 +35,7 @@ CallCredentials = grpc.CallCredentials
 
 
 def metadata_call_credentials(metadata_plugin, name=None):
-
     def plugin(context, callback):
-
         def wrapped_callback(beta_metadata, error):
             callback(_metadata.unbeta(beta_metadata), error)
 
@@ -110,8 +108,7 @@ def insecure_channel(host, port):
   Returns:
     A Channel to the remote host through which RPCs may be conducted.
   """
-    channel = grpc.insecure_channel(host if port is None else '%s:%d' % (host,
-                                                                         port))
+    channel = grpc.insecure_channel(host if port is None else "%s:%d" % (host, port))
     return Channel(channel)
 
 
@@ -127,8 +124,9 @@ def secure_channel(host, port, channel_credentials):
   Returns:
     A secure Channel to the remote host through which RPCs may be conducted.
   """
-    channel = grpc.secure_channel(host if port is None else
-                                  '%s:%d' % (host, port), channel_credentials)
+    channel = grpc.secure_channel(
+        host if port is None else "%s:%d" % (host, port), channel_credentials
+    )
     return Channel(channel)
 
 
@@ -140,8 +138,15 @@ class StubOptions(object):
   functions.
   """
 
-    def __init__(self, host, request_serializers, response_deserializers,
-                 metadata_transformer, thread_pool, thread_pool_size):
+    def __init__(
+        self,
+        host,
+        request_serializers,
+        response_deserializers,
+        metadata_transformer,
+        thread_pool,
+        thread_pool_size,
+    ):
         self.host = host
         self.request_serializers = request_serializers
         self.response_deserializers = response_deserializers
@@ -153,12 +158,14 @@ class StubOptions(object):
 _EMPTY_STUB_OPTIONS = StubOptions(None, None, None, None, None, None)
 
 
-def stub_options(host=None,
-                 request_serializers=None,
-                 response_deserializers=None,
-                 metadata_transformer=None,
-                 thread_pool=None,
-                 thread_pool_size=None):
+def stub_options(
+    host=None,
+    request_serializers=None,
+    response_deserializers=None,
+    metadata_transformer=None,
+    thread_pool=None,
+    thread_pool_size=None,
+):
     """Creates a StubOptions value to be passed at stub creation.
 
   All parameters are optional and should always be passed by keyword.
@@ -179,8 +186,14 @@ def stub_options(host=None,
   Returns:
     A StubOptions value created from the passed parameters.
   """
-    return StubOptions(host, request_serializers, response_deserializers,
-                       metadata_transformer, thread_pool, thread_pool_size)
+    return StubOptions(
+        host,
+        request_serializers,
+        response_deserializers,
+        metadata_transformer,
+        thread_pool,
+        thread_pool_size,
+    )
 
 
 def generic_stub(channel, options=None):
@@ -199,7 +212,8 @@ def generic_stub(channel, options=None):
         effective_options.host,
         effective_options.metadata_transformer,
         effective_options.request_serializers,
-        effective_options.response_deserializers)
+        effective_options.response_deserializers,
+    )
 
 
 def dynamic_stub(channel, service, cardinalities, options=None):
@@ -224,7 +238,8 @@ def dynamic_stub(channel, service, cardinalities, options=None):
         effective_options.host,
         effective_options.metadata_transformer,
         effective_options.request_serializers,
-        effective_options.response_deserializers)
+        effective_options.response_deserializers,
+    )
 
 
 ServerCredentials = grpc.ServerCredentials
@@ -239,9 +254,16 @@ class ServerOptions(object):
   functions.
   """
 
-    def __init__(self, multi_method_implementation, request_deserializers,
-                 response_serializers, thread_pool, thread_pool_size,
-                 default_timeout, maximum_timeout):
+    def __init__(
+        self,
+        multi_method_implementation,
+        request_deserializers,
+        response_serializers,
+        thread_pool,
+        thread_pool_size,
+        default_timeout,
+        maximum_timeout,
+    ):
         self.multi_method_implementation = multi_method_implementation
         self.request_deserializers = request_deserializers
         self.response_serializers = response_serializers
@@ -254,13 +276,15 @@ class ServerOptions(object):
 _EMPTY_SERVER_OPTIONS = ServerOptions(None, None, None, None, None, None, None)
 
 
-def server_options(multi_method_implementation=None,
-                   request_deserializers=None,
-                   response_serializers=None,
-                   thread_pool=None,
-                   thread_pool_size=None,
-                   default_timeout=None,
-                   maximum_timeout=None):
+def server_options(
+    multi_method_implementation=None,
+    request_deserializers=None,
+    response_serializers=None,
+    thread_pool=None,
+    thread_pool_size=None,
+    default_timeout=None,
+    maximum_timeout=None,
+):
     """Creates a ServerOptions value to be passed at server creation.
 
   All parameters are optional and should always be passed by keyword.
@@ -285,9 +309,15 @@ def server_options(multi_method_implementation=None,
   Returns:
     A StubOptions value created from the passed parameters.
   """
-    return ServerOptions(multi_method_implementation, request_deserializers,
-                         response_serializers, thread_pool, thread_pool_size,
-                         default_timeout, maximum_timeout)
+    return ServerOptions(
+        multi_method_implementation,
+        request_deserializers,
+        response_serializers,
+        thread_pool,
+        thread_pool_size,
+        default_timeout,
+        maximum_timeout,
+    )
 
 
 def server(service_implementations, options=None):
@@ -304,7 +334,10 @@ def server(service_implementations, options=None):
   """
     effective_options = _EMPTY_SERVER_OPTIONS if options is None else options
     return _server_adaptations.server(
-        service_implementations, effective_options.multi_method_implementation,
+        service_implementations,
+        effective_options.multi_method_implementation,
         effective_options.request_deserializers,
-        effective_options.response_serializers, effective_options.thread_pool,
-        effective_options.thread_pool_size)
+        effective_options.response_serializers,
+        effective_options.thread_pool,
+        effective_options.thread_pool_size,
+    )

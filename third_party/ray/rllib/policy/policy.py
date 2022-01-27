@@ -8,8 +8,7 @@ from ray.rllib.utils.annotations import DeveloperAPI
 from ray.rllib.utils.exploration.exploration import Exploration
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.from_config import from_config
-from ray.rllib.utils.spaces.space_utils import get_base_struct_from_space, \
-    unbatch
+from ray.rllib.utils.spaces.space_utils import get_base_struct_from_space, unbatch
 
 torch, _ = try_import_torch()
 tree = try_import_tree()
@@ -72,16 +71,18 @@ class Policy(metaclass=ABCMeta):
 
     @abstractmethod
     @DeveloperAPI
-    def compute_actions(self,
-                        obs_batch,
-                        state_batches=None,
-                        prev_action_batch=None,
-                        prev_reward_batch=None,
-                        info_batch=None,
-                        episodes=None,
-                        explore=None,
-                        timestep=None,
-                        **kwargs):
+    def compute_actions(
+        self,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+        info_batch=None,
+        episodes=None,
+        explore=None,
+        timestep=None,
+        **kwargs
+    ):
         """Computes actions for the current policy.
 
         Args:
@@ -112,17 +113,19 @@ class Policy(metaclass=ABCMeta):
         raise NotImplementedError
 
     @DeveloperAPI
-    def compute_single_action(self,
-                              obs,
-                              state=None,
-                              prev_action=None,
-                              prev_reward=None,
-                              info=None,
-                              episode=None,
-                              clip_actions=False,
-                              explore=None,
-                              timestep=None,
-                              **kwargs):
+    def compute_single_action(
+        self,
+        obs,
+        state=None,
+        prev_action=None,
+        prev_reward=None,
+        info=None,
+        episode=None,
+        clip_actions=False,
+        explore=None,
+        timestep=None,
+        **kwargs
+    ):
         """Unbatched version of compute_actions.
 
         Arguments:
@@ -160,8 +163,7 @@ class Policy(metaclass=ABCMeta):
             episodes = [episode]
         if state is not None:
             state_batch = [
-                s.unsqueeze(0)
-                if torch and isinstance(s, torch.Tensor) else [s]
+                s.unsqueeze(0) if torch and isinstance(s, torch.Tensor) else [s]
                 for s in state
             ]
 
@@ -173,27 +175,32 @@ class Policy(metaclass=ABCMeta):
             info_batch=info_batch,
             episodes=episodes,
             explore=explore,
-            timestep=timestep)
+            timestep=timestep,
+        )
 
         single_action = unbatch(batched_action)
         assert len(single_action) == 1
         single_action = single_action[0]
 
         if clip_actions:
-            single_action = clip_action(single_action,
-                                        self.action_space_struct)
+            single_action = clip_action(single_action, self.action_space_struct)
 
         # Return action, internal state(s), infos.
-        return single_action, [s[0] for s in state_out], \
-            {k: v[0] for k, v in info.items()}
+        return (
+            single_action,
+            [s[0] for s in state_out],
+            {k: v[0] for k, v in info.items()},
+        )
 
     @DeveloperAPI
-    def compute_log_likelihoods(self,
-                                actions,
-                                obs_batch,
-                                state_batches=None,
-                                prev_action_batch=None,
-                                prev_reward_batch=None):
+    def compute_log_likelihoods(
+        self,
+        actions,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+    ):
         """Computes the log-prob/likelihood for a given action and observation.
 
         Args:
@@ -215,10 +222,9 @@ class Policy(metaclass=ABCMeta):
         raise NotImplementedError
 
     @DeveloperAPI
-    def postprocess_trajectory(self,
-                               sample_batch,
-                               other_agent_batches=None,
-                               episode=None):
+    def postprocess_trajectory(
+        self, sample_batch, other_agent_batches=None, episode=None
+    ):
         """Implements algorithm-specific trajectory postprocessing.
 
         This will be called on each trajectory fragment computed during policy
@@ -398,14 +404,14 @@ class Policy(metaclass=ABCMeta):
 
         exploration = from_config(
             Exploration,
-            self.config.get("exploration_config",
-                            {"type": "StochasticSampling"}),
+            self.config.get("exploration_config", {"type": "StochasticSampling"}),
             action_space=self.action_space,
             policy_config=self.config,
             model=getattr(self, "model", None),
             num_workers=self.config.get("num_workers", 0),
             worker_index=self.config.get("worker_index", 0),
-            framework=getattr(self, "framework", "tf"))
+            framework=getattr(self, "framework", "tf"),
+        )
         return exploration
 
 

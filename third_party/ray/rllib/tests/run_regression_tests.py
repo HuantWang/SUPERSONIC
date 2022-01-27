@@ -28,13 +28,11 @@ from ray.rllib import _register_all
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--torch",
-    action="store_true",
-    help="Runs all tests with PyTorch enabled.")
+    "--torch", action="store_true", help="Runs all tests with PyTorch enabled."
+)
 parser.add_argument(
-    "--yaml-dir",
-    type=str,
-    help="The directory in which to find all yamls to test.")
+    "--yaml-dir", type=str, help="The directory in which to find all yamls to test."
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -49,7 +47,8 @@ if __name__ == "__main__":
 
     yaml_files = rllib_dir.rglob(args.yaml_dir + "/*.yaml")
     yaml_files = sorted(
-        map(lambda path: str(path.absolute()), yaml_files), reverse=True)
+        map(lambda path: str(path.absolute()), yaml_files), reverse=True
+    )
 
     print("Will run the following regression tests:")
     for yaml_file in yaml_files:
@@ -58,8 +57,9 @@ if __name__ == "__main__":
     # Loop through all collected files.
     for yaml_file in yaml_files:
         experiments = yaml.load(open(yaml_file).read())
-        assert len(experiments) == 1,\
-            "Error, can only run a single experiment per yaml file!"
+        assert (
+            len(experiments) == 1
+        ), "Error, can only run a single experiment per yaml file!"
 
         print("== Test config ==")
         print(yaml.dump(experiments))
@@ -81,8 +81,10 @@ if __name__ == "__main__":
                 _register_all()
 
             for t in trials:
-                if (t.last_result["episode_reward_mean"] >=
-                        t.stopping_criterion["episode_reward_mean"]):
+                if (
+                    t.last_result["episode_reward_mean"]
+                    >= t.stopping_criterion["episode_reward_mean"]
+                ):
                     passed = True
                     break
 

@@ -27,11 +27,11 @@ def parse_request_item(request_item):
         asgi_scope, body_bytes = request_item.request_args
 
         flask_request = build_flask_request(asgi_scope, io.BytesIO(body_bytes))
-        args = (flask_request, )
+        args = (flask_request,)
         kwargs = {}
     else:
         is_web_context = False
-        args = (FakeFlaskRequest(), )
+        args = (FakeFlaskRequest(),)
         kwargs = request_item.request_kwargs
 
     return args, kwargs, is_web_context
@@ -78,15 +78,14 @@ def pformat_color_json(d):
     """Use pygments to pretty format and colroize dictionary"""
     formatted_json = json.dumps(d, sort_keys=True, indent=4)
 
-    colorful_json = highlight(formatted_json, lexers.JsonLexer(),
-                              formatters.TerminalFormatter())
+    colorful_json = highlight(
+        formatted_json, lexers.JsonLexer(), formatters.TerminalFormatter()
+    )
 
     return colorful_json
 
 
-def block_until_http_ready(http_endpoint,
-                           backoff_time_s=1,
-                           timeout=HTTP_PROXY_TIMEOUT):
+def block_until_http_ready(http_endpoint, backoff_time_s=1, timeout=HTTP_PROXY_TIMEOUT):
     http_is_ready = False
     start_time = time.time()
 
@@ -99,8 +98,7 @@ def block_until_http_ready(http_endpoint,
             pass
 
         if 0 < timeout < time.time() - start_time:
-            raise TimeoutError(
-                "HTTP proxy not ready after {} seconds.".format(timeout))
+            raise TimeoutError("HTTP proxy not ready after {} seconds.".format(timeout))
 
         time.sleep(backoff_time_s)
 

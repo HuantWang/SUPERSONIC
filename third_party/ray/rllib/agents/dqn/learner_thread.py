@@ -46,14 +46,15 @@ class LearnerThread(threading.Thread):
                     grad_out = self.local_worker.learn_on_batch(replay)
                     for pid, info in grad_out.items():
                         td_error = info.get(
-                            "td_error",
-                            info[LEARNER_STATS_KEY].get("td_error"))
-                        prio_dict[pid] = (replay.policy_batches[pid].data.get(
-                            "batch_indexes"), td_error)
+                            "td_error", info[LEARNER_STATS_KEY].get("td_error")
+                        )
+                        prio_dict[pid] = (
+                            replay.policy_batches[pid].data.get("batch_indexes"),
+                            td_error,
+                        )
                         self.stats[pid] = get_learner_stats(info)
                     self.grad_timer.push_units_processed(replay.count)
                 self.outqueue.put((ra, prio_dict, replay.count))
             self.learner_queue_size.push(self.inqueue.qsize())
             self.weights_updated = True
-            self.overall_timer.push_units_processed(replay and replay.count
-                                                    or 0)
+            self.overall_timer.push_units_processed(replay and replay.count or 0)

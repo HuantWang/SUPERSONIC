@@ -18,8 +18,8 @@ MAX_LOG_NN_OUTPUT = 2
 def huber_loss(x, delta=1.0):
     """Reference: https://en.wikipedia.org/wiki/Huber_loss"""
     return np.where(
-        np.abs(x) < delta,
-        np.power(x, 2.0) * 0.5, delta * (np.abs(x) - 0.5 * delta))
+        np.abs(x) < delta, np.power(x, 2.0) * 0.5, delta * (np.abs(x) - 0.5 * delta)
+    )
 
 
 def l2_loss(x):
@@ -113,9 +113,11 @@ def one_hot(x, depth=0, on_value=1, off_value=0):
 
     if depth == 0:
         depth = np.max(x) + 1
-    assert np.max(x) < depth, \
-        "ERROR: The max. index of `x` ({}) is larger than depth ({})!".\
-        format(np.max(x), depth)
+    assert (
+        np.max(x) < depth
+    ), "ERROR: The max. index of `x` ({}) is larger than depth ({})!".format(
+        np.max(x), depth
+    )
     shape = x.shape
 
     # Python 2.7 compatibility, (*shape, depth) is not allowed.
@@ -166,20 +168,23 @@ def fc(x, weights, biases=None, framework=None):
 
     x = map_(x)
     # Torch stores matrices in transpose (faster for backprop).
-    transpose = (framework == "torch" and (x.shape[1] != weights.shape[0]
-                                           and x.shape[1] == weights.shape[1]))
+    transpose = framework == "torch" and (
+        x.shape[1] != weights.shape[0] and x.shape[1] == weights.shape[1]
+    )
     weights = map_(weights, transpose=transpose)
     biases = map_(biases)
 
     return np.matmul(x, weights) + (0.0 if biases is None else biases)
 
 
-def lstm(x,
-         weights,
-         biases=None,
-         initial_internal_states=None,
-         time_major=False,
-         forget_bias=1.0):
+def lstm(
+    x,
+    weights,
+    biases=None,
+    initial_internal_states=None,
+    time_major=False,
+    forget_bias=1.0,
+):
     """
     Calculates the outputs of an LSTM layer given weights/biases,
     internal_states, and input.
@@ -229,15 +234,14 @@ def lstm(x,
         input_matrix = np.concatenate((input_matrix, h_states), axis=1)
         input_matmul_matrix = np.matmul(input_matrix, weights) + biases
         # Forget gate (3rd slot in tf output matrix). Add static forget bias.
-        sigmoid_1 = sigmoid(input_matmul_matrix[:, units * 2:units * 3] +
-                            forget_bias)
+        sigmoid_1 = sigmoid(input_matmul_matrix[:, units * 2 : units * 3] + forget_bias)
         c_states = np.multiply(c_states, sigmoid_1)
         # Add gate (1st and 2nd slots in tf output matrix).
         sigmoid_2 = sigmoid(input_matmul_matrix[:, 0:units])
-        tanh_3 = np.tanh(input_matmul_matrix[:, units:units * 2])
+        tanh_3 = np.tanh(input_matmul_matrix[:, units : units * 2])
         c_states = np.add(c_states, np.multiply(sigmoid_2, tanh_3))
         # Output gate (last slot in tf output matrix).
-        sigmoid_4 = sigmoid(input_matmul_matrix[:, units * 3:units * 4])
+        sigmoid_4 = sigmoid(input_matmul_matrix[:, units * 3 : units * 4])
         h_states = np.multiply(sigmoid_4, np.tanh(c_states))
 
         # Store this output time-slice.

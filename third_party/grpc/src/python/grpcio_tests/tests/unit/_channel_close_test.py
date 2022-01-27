@@ -43,7 +43,6 @@ _METHOD_HANDLER = _MethodHandler()
 
 
 class _GenericHandler(grpc.GenericRpcHandler):
-
     def service(self, handler_call_details):
         return _METHOD_HANDLER
 
@@ -52,7 +51,6 @@ _GENERIC_HANDLER = _GenericHandler()
 
 
 class _Pipe(object):
-
     def __init__(self, values):
         self._condition = threading.Condition()
         self._values = list(values)
@@ -94,20 +92,20 @@ class _Pipe(object):
 
 
 class ChannelCloseTest(unittest.TestCase):
-
     def setUp(self):
         self._server = test_common.test_server(
-            max_workers=test_constants.THREAD_CONCURRENCY)
+            max_workers=test_constants.THREAD_CONCURRENCY
+        )
         self._server.add_generic_rpc_handlers((_GENERIC_HANDLER,))
-        self._port = self._server.add_insecure_port('[::]:0')
+        self._port = self._server.add_insecure_port("[::]:0")
         self._server.start()
 
     def tearDown(self):
         self._server.stop(None)
 
     def test_close_immediately_after_call_invocation(self):
-        channel = grpc.insecure_channel('localhost:{}'.format(self._port))
-        multi_callable = channel.stream_stream('Meffod')
+        channel = grpc.insecure_channel("localhost:{}".format(self._port))
+        multi_callable = channel.stream_stream("Meffod")
         request_iterator = _Pipe(())
         response_iterator = multi_callable(request_iterator)
         channel.close()
@@ -116,9 +114,9 @@ class ChannelCloseTest(unittest.TestCase):
         self.assertIs(response_iterator.code(), grpc.StatusCode.CANCELLED)
 
     def test_close_while_call_active(self):
-        channel = grpc.insecure_channel('localhost:{}'.format(self._port))
-        multi_callable = channel.stream_stream('Meffod')
-        request_iterator = _Pipe((b'abc',))
+        channel = grpc.insecure_channel("localhost:{}".format(self._port))
+        multi_callable = channel.stream_stream("Meffod")
+        request_iterator = _Pipe((b"abc",))
         response_iterator = multi_callable(request_iterator)
         next(response_iterator)
         channel.close()
@@ -127,10 +125,11 @@ class ChannelCloseTest(unittest.TestCase):
         self.assertIs(response_iterator.code(), grpc.StatusCode.CANCELLED)
 
     def test_context_manager_close_while_call_active(self):
-        with grpc.insecure_channel('localhost:{}'.format(
-                self._port)) as channel:  # pylint: disable=bad-continuation
-            multi_callable = channel.stream_stream('Meffod')
-            request_iterator = _Pipe((b'abc',))
+        with grpc.insecure_channel(
+            "localhost:{}".format(self._port)
+        ) as channel:  # pylint: disable=bad-continuation
+            multi_callable = channel.stream_stream("Meffod")
+            request_iterator = _Pipe((b"abc",))
             response_iterator = multi_callable(request_iterator)
             next(response_iterator)
         request_iterator.close()
@@ -138,12 +137,13 @@ class ChannelCloseTest(unittest.TestCase):
         self.assertIs(response_iterator.code(), grpc.StatusCode.CANCELLED)
 
     def test_context_manager_close_while_many_calls_active(self):
-        with grpc.insecure_channel('localhost:{}'.format(
-                self._port)) as channel:  # pylint: disable=bad-continuation
-            multi_callable = channel.stream_stream('Meffod')
+        with grpc.insecure_channel(
+            "localhost:{}".format(self._port)
+        ) as channel:  # pylint: disable=bad-continuation
+            multi_callable = channel.stream_stream("Meffod")
             request_iterators = tuple(
-                _Pipe((b'abc',))
-                for _ in range(test_constants.THREAD_CONCURRENCY))
+                _Pipe((b"abc",)) for _ in range(test_constants.THREAD_CONCURRENCY)
+            )
             response_iterators = []
             for request_iterator in request_iterators:
                 response_iterator = multi_callable(request_iterator)
@@ -156,9 +156,9 @@ class ChannelCloseTest(unittest.TestCase):
             self.assertIs(response_iterator.code(), grpc.StatusCode.CANCELLED)
 
     def test_many_concurrent_closes(self):
-        channel = grpc.insecure_channel('localhost:{}'.format(self._port))
-        multi_callable = channel.stream_stream('Meffod')
-        request_iterator = _Pipe((b'abc',))
+        channel = grpc.insecure_channel("localhost:{}".format(self._port))
+        multi_callable = channel.stream_stream("Meffod")
+        request_iterator = _Pipe((b"abc",))
         response_iterator = multi_callable(request_iterator)
         next(response_iterator)
         start = time.time()
@@ -172,7 +172,7 @@ class ChannelCloseTest(unittest.TestCase):
             close_thread = threading.Thread(target=sleep_some_time_then_close)
             close_thread.start()
         while True:
-            request_iterator.add(b'def')
+            request_iterator.add(b"def")
             time.sleep(_BEAT)
             if end < time.time():
                 break
@@ -181,5 +181,5 @@ class ChannelCloseTest(unittest.TestCase):
         self.assertIs(response_iterator.code(), grpc.StatusCode.CANCELLED)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

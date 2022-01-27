@@ -200,38 +200,41 @@ class ChannelConnectivity(enum.Enum):
         to recover.
       SHUTDOWN: The channel has seen a failure from which it cannot recover.
     """
-    IDLE = (_cygrpc.ConnectivityState.idle, 'idle')
-    CONNECTING = (_cygrpc.ConnectivityState.connecting, 'connecting')
-    READY = (_cygrpc.ConnectivityState.ready, 'ready')
-    TRANSIENT_FAILURE = (_cygrpc.ConnectivityState.transient_failure,
-                         'transient failure')
-    SHUTDOWN = (_cygrpc.ConnectivityState.shutdown, 'shutdown')
+
+    IDLE = (_cygrpc.ConnectivityState.idle, "idle")
+    CONNECTING = (_cygrpc.ConnectivityState.connecting, "connecting")
+    READY = (_cygrpc.ConnectivityState.ready, "ready")
+    TRANSIENT_FAILURE = (
+        _cygrpc.ConnectivityState.transient_failure,
+        "transient failure",
+    )
+    SHUTDOWN = (_cygrpc.ConnectivityState.shutdown, "shutdown")
 
 
 @enum.unique
 class StatusCode(enum.Enum):
     """Mirrors grpc_status_code in the gRPC Core."""
-    OK = (_cygrpc.StatusCode.ok, 'ok')
-    CANCELLED = (_cygrpc.StatusCode.cancelled, 'cancelled')
-    UNKNOWN = (_cygrpc.StatusCode.unknown, 'unknown')
-    INVALID_ARGUMENT = (_cygrpc.StatusCode.invalid_argument, 'invalid argument')
-    DEADLINE_EXCEEDED = (_cygrpc.StatusCode.deadline_exceeded,
-                         'deadline exceeded')
-    NOT_FOUND = (_cygrpc.StatusCode.not_found, 'not found')
-    ALREADY_EXISTS = (_cygrpc.StatusCode.already_exists, 'already exists')
-    PERMISSION_DENIED = (_cygrpc.StatusCode.permission_denied,
-                         'permission denied')
-    RESOURCE_EXHAUSTED = (_cygrpc.StatusCode.resource_exhausted,
-                          'resource exhausted')
-    FAILED_PRECONDITION = (_cygrpc.StatusCode.failed_precondition,
-                           'failed precondition')
-    ABORTED = (_cygrpc.StatusCode.aborted, 'aborted')
-    OUT_OF_RANGE = (_cygrpc.StatusCode.out_of_range, 'out of range')
-    UNIMPLEMENTED = (_cygrpc.StatusCode.unimplemented, 'unimplemented')
-    INTERNAL = (_cygrpc.StatusCode.internal, 'internal')
-    UNAVAILABLE = (_cygrpc.StatusCode.unavailable, 'unavailable')
-    DATA_LOSS = (_cygrpc.StatusCode.data_loss, 'data loss')
-    UNAUTHENTICATED = (_cygrpc.StatusCode.unauthenticated, 'unauthenticated')
+
+    OK = (_cygrpc.StatusCode.ok, "ok")
+    CANCELLED = (_cygrpc.StatusCode.cancelled, "cancelled")
+    UNKNOWN = (_cygrpc.StatusCode.unknown, "unknown")
+    INVALID_ARGUMENT = (_cygrpc.StatusCode.invalid_argument, "invalid argument")
+    DEADLINE_EXCEEDED = (_cygrpc.StatusCode.deadline_exceeded, "deadline exceeded")
+    NOT_FOUND = (_cygrpc.StatusCode.not_found, "not found")
+    ALREADY_EXISTS = (_cygrpc.StatusCode.already_exists, "already exists")
+    PERMISSION_DENIED = (_cygrpc.StatusCode.permission_denied, "permission denied")
+    RESOURCE_EXHAUSTED = (_cygrpc.StatusCode.resource_exhausted, "resource exhausted")
+    FAILED_PRECONDITION = (
+        _cygrpc.StatusCode.failed_precondition,
+        "failed precondition",
+    )
+    ABORTED = (_cygrpc.StatusCode.aborted, "aborted")
+    OUT_OF_RANGE = (_cygrpc.StatusCode.out_of_range, "out of range")
+    UNIMPLEMENTED = (_cygrpc.StatusCode.unimplemented, "unimplemented")
+    INTERNAL = (_cygrpc.StatusCode.internal, "internal")
+    UNAVAILABLE = (_cygrpc.StatusCode.unavailable, "unavailable")
+    DATA_LOSS = (_cygrpc.StatusCode.data_loss, "data loss")
+    UNAUTHENTICATED = (_cygrpc.StatusCode.unauthenticated, "unauthenticated")
 
 
 #############################  gRPC Exceptions  ################################
@@ -404,8 +407,7 @@ class UnaryStreamClientInterceptor(six.with_metaclass(abc.ABCMeta)):
     """
 
     @abc.abstractmethod
-    def intercept_unary_stream(self, continuation, client_call_details,
-                               request):
+    def intercept_unary_stream(self, continuation, client_call_details, request):
         """Intercepts a unary-stream invocation.
 
         Args:
@@ -440,8 +442,9 @@ class StreamUnaryClientInterceptor(six.with_metaclass(abc.ABCMeta)):
     """
 
     @abc.abstractmethod
-    def intercept_stream_unary(self, continuation, client_call_details,
-                               request_iterator):
+    def intercept_stream_unary(
+        self, continuation, client_call_details, request_iterator
+    ):
         """Intercepts a stream-unary invocation asynchronously.
 
         Args:
@@ -478,8 +481,9 @@ class StreamStreamClientInterceptor(six.with_metaclass(abc.ABCMeta)):
     """
 
     @abc.abstractmethod
-    def intercept_stream_stream(self, continuation, client_call_details,
-                                request_iterator):
+    def intercept_stream_stream(
+        self, continuation, client_call_details, request_iterator
+    ):
         """Intercepts a stream-stream invocation.
 
           continuation: A function that proceeds with the invocation by
@@ -702,11 +706,7 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
     """Affords invoking a stream-unary RPC from client-side."""
 
     @abc.abstractmethod
-    def __call__(self,
-                 request_iterator,
-                 timeout=None,
-                 metadata=None,
-                 credentials=None):
+    def __call__(self, request_iterator, timeout=None, metadata=None, credentials=None):
         """Synchronously invokes the underlying RPC.
 
         Args:
@@ -729,11 +729,9 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def with_call(self,
-                  request_iterator,
-                  timeout=None,
-                  metadata=None,
-                  credentials=None):
+    def with_call(
+        self, request_iterator, timeout=None, metadata=None, credentials=None
+    ):
         """Synchronously invokes the underlying RPC on the client.
 
         Args:
@@ -756,11 +754,7 @@ class StreamUnaryMultiCallable(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def future(self,
-               request_iterator,
-               timeout=None,
-               metadata=None,
-               credentials=None):
+    def future(self, request_iterator, timeout=None, metadata=None, credentials=None):
         """Asynchronously invokes the underlying RPC on the client.
 
         Args:
@@ -785,11 +779,7 @@ class StreamStreamMultiCallable(six.with_metaclass(abc.ABCMeta)):
     """Affords invoking a stream-stream RPC on client-side."""
 
     @abc.abstractmethod
-    def __call__(self,
-                 request_iterator,
-                 timeout=None,
-                 metadata=None,
-                 credentials=None):
+    def __call__(self, request_iterator, timeout=None, metadata=None, credentials=None):
         """Invokes the underlying RPC on the client.
 
         Args:
@@ -851,10 +841,7 @@ class Channel(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def unary_unary(self,
-                    method,
-                    request_serializer=None,
-                    response_deserializer=None):
+    def unary_unary(self, method, request_serializer=None, response_deserializer=None):
         """Creates a UnaryUnaryMultiCallable for a unary-unary method.
 
         Args:
@@ -871,10 +858,7 @@ class Channel(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def unary_stream(self,
-                     method,
-                     request_serializer=None,
-                     response_deserializer=None):
+    def unary_stream(self, method, request_serializer=None, response_deserializer=None):
         """Creates a UnaryStreamMultiCallable for a unary-stream method.
 
         Args:
@@ -891,10 +875,7 @@ class Channel(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def stream_unary(self,
-                     method,
-                     request_serializer=None,
-                     response_deserializer=None):
+    def stream_unary(self, method, request_serializer=None, response_deserializer=None):
         """Creates a StreamUnaryMultiCallable for a stream-unary method.
 
         Args:
@@ -911,10 +892,9 @@ class Channel(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def stream_stream(self,
-                      method,
-                      request_serializer=None,
-                      response_deserializer=None):
+    def stream_stream(
+        self, method, request_serializer=None, response_deserializer=None
+    ):
         """Creates a StreamStreamMultiCallable for a stream-stream method.
 
         Args:
@@ -1278,9 +1258,9 @@ class Server(six.with_metaclass(abc.ABCMeta)):
 #################################  Functions    ################################
 
 
-def unary_unary_rpc_method_handler(behavior,
-                                   request_deserializer=None,
-                                   response_serializer=None):
+def unary_unary_rpc_method_handler(
+    behavior, request_deserializer=None, response_serializer=None
+):
     """Creates an RpcMethodHandler for a unary-unary RPC method.
 
     Args:
@@ -1293,14 +1273,22 @@ def unary_unary_rpc_method_handler(behavior,
       An RpcMethodHandler object that is typically used by grpc.Server.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
-    return _utilities.RpcMethodHandler(False, False, request_deserializer,
-                                       response_serializer, behavior, None,
-                                       None, None)
+
+    return _utilities.RpcMethodHandler(
+        False,
+        False,
+        request_deserializer,
+        response_serializer,
+        behavior,
+        None,
+        None,
+        None,
+    )
 
 
-def unary_stream_rpc_method_handler(behavior,
-                                    request_deserializer=None,
-                                    response_serializer=None):
+def unary_stream_rpc_method_handler(
+    behavior, request_deserializer=None, response_serializer=None
+):
     """Creates an RpcMethodHandler for a unary-stream RPC method.
 
     Args:
@@ -1313,14 +1301,22 @@ def unary_stream_rpc_method_handler(behavior,
       An RpcMethodHandler object that is typically used by grpc.Server.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
-    return _utilities.RpcMethodHandler(False, True, request_deserializer,
-                                       response_serializer, None, behavior,
-                                       None, None)
+
+    return _utilities.RpcMethodHandler(
+        False,
+        True,
+        request_deserializer,
+        response_serializer,
+        None,
+        behavior,
+        None,
+        None,
+    )
 
 
-def stream_unary_rpc_method_handler(behavior,
-                                    request_deserializer=None,
-                                    response_serializer=None):
+def stream_unary_rpc_method_handler(
+    behavior, request_deserializer=None, response_serializer=None
+):
     """Creates an RpcMethodHandler for a stream-unary RPC method.
 
     Args:
@@ -1333,14 +1329,22 @@ def stream_unary_rpc_method_handler(behavior,
       An RpcMethodHandler object that is typically used by grpc.Server.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
-    return _utilities.RpcMethodHandler(True, False, request_deserializer,
-                                       response_serializer, None, None,
-                                       behavior, None)
+
+    return _utilities.RpcMethodHandler(
+        True,
+        False,
+        request_deserializer,
+        response_serializer,
+        None,
+        None,
+        behavior,
+        None,
+    )
 
 
-def stream_stream_rpc_method_handler(behavior,
-                                     request_deserializer=None,
-                                     response_serializer=None):
+def stream_stream_rpc_method_handler(
+    behavior, request_deserializer=None, response_serializer=None
+):
     """Creates an RpcMethodHandler for a stream-stream RPC method.
 
     Args:
@@ -1353,9 +1357,17 @@ def stream_stream_rpc_method_handler(behavior,
       An RpcMethodHandler object that is typically used by grpc.Server.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
-    return _utilities.RpcMethodHandler(True, True, request_deserializer,
-                                       response_serializer, None, None, None,
-                                       behavior)
+
+    return _utilities.RpcMethodHandler(
+        True,
+        True,
+        request_deserializer,
+        response_serializer,
+        None,
+        None,
+        None,
+        behavior,
+    )
 
 
 def method_handlers_generic_handler(service, method_handlers):
@@ -1372,12 +1384,13 @@ def method_handlers_generic_handler(service, method_handlers):
       with add_generic_rpc_handlers() before starting the server.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
+
     return _utilities.DictionaryGenericHandler(service, method_handlers)
 
 
-def ssl_channel_credentials(root_certificates=None,
-                            private_key=None,
-                            certificate_chain=None):
+def ssl_channel_credentials(
+    root_certificates=None, private_key=None, certificate_chain=None
+):
     """Creates a ChannelCredentials for use with an SSL-enabled Channel.
 
     Args:
@@ -1393,8 +1406,8 @@ def ssl_channel_credentials(root_certificates=None,
       A ChannelCredentials for use with an SSL-enabled Channel.
     """
     return ChannelCredentials(
-        _cygrpc.SSLChannelCredentials(root_certificates, private_key,
-                                      certificate_chain))
+        _cygrpc.SSLChannelCredentials(root_certificates, private_key, certificate_chain)
+    )
 
 
 def metadata_call_credentials(metadata_plugin, name=None):
@@ -1408,8 +1421,8 @@ def metadata_call_credentials(metadata_plugin, name=None):
       A CallCredentials.
     """
     from grpc import _plugin_wrapping  # pylint: disable=cyclic-import
-    return _plugin_wrapping.metadata_plugin_call_credentials(
-        metadata_plugin, name)
+
+    return _plugin_wrapping.metadata_plugin_call_credentials(metadata_plugin, name)
 
 
 def access_token_call_credentials(access_token):
@@ -1425,8 +1438,10 @@ def access_token_call_credentials(access_token):
     """
     from grpc import _auth  # pylint: disable=cyclic-import
     from grpc import _plugin_wrapping  # pylint: disable=cyclic-import
+
     return _plugin_wrapping.metadata_plugin_call_credentials(
-        _auth.AccessTokenAuthMetadataPlugin(access_token), None)
+        _auth.AccessTokenAuthMetadataPlugin(access_token), None
+    )
 
 
 def composite_call_credentials(*call_credentials):
@@ -1440,8 +1455,12 @@ def composite_call_credentials(*call_credentials):
     """
     return CallCredentials(
         _cygrpc.CompositeCallCredentials(
-            tuple(single_call_credentials._credentials
-                  for single_call_credentials in call_credentials)))
+            tuple(
+                single_call_credentials._credentials
+                for single_call_credentials in call_credentials
+            )
+        )
+    )
 
 
 def composite_channel_credentials(channel_credentials, *call_credentials):
@@ -1457,14 +1476,20 @@ def composite_channel_credentials(channel_credentials, *call_credentials):
     """
     return ChannelCredentials(
         _cygrpc.CompositeChannelCredentials(
-            tuple(single_call_credentials._credentials
-                  for single_call_credentials in call_credentials),
-            channel_credentials._credentials))
+            tuple(
+                single_call_credentials._credentials
+                for single_call_credentials in call_credentials
+            ),
+            channel_credentials._credentials,
+        )
+    )
 
 
-def ssl_server_credentials(private_key_certificate_chain_pairs,
-                           root_certificates=None,
-                           require_client_auth=False):
+def ssl_server_credentials(
+    private_key_certificate_chain_pairs,
+    root_certificates=None,
+    require_client_auth=False,
+):
     """Creates a ServerCredentials for use with an SSL-enabled Server.
 
     Args:
@@ -1482,22 +1507,27 @@ def ssl_server_credentials(private_key_certificate_chain_pairs,
       object is an argument to add_secure_port() method during server setup.
     """
     if len(private_key_certificate_chain_pairs) == 0:
-        raise ValueError(
-            'At least one private key-certificate chain pair is required!')
+        raise ValueError("At least one private key-certificate chain pair is required!")
     elif require_client_auth and root_certificates is None:
         raise ValueError(
-            'Illegal to require client auth without providing root certificates!'
+            "Illegal to require client auth without providing root certificates!"
         )
     else:
         return ServerCredentials(
-            _cygrpc.server_credentials_ssl(root_certificates, [
-                _cygrpc.SslPemKeyCertPair(key, pem)
-                for key, pem in private_key_certificate_chain_pairs
-            ], require_client_auth))
+            _cygrpc.server_credentials_ssl(
+                root_certificates,
+                [
+                    _cygrpc.SslPemKeyCertPair(key, pem)
+                    for key, pem in private_key_certificate_chain_pairs
+                ],
+                require_client_auth,
+            )
+        )
 
 
-def ssl_server_certificate_configuration(private_key_certificate_chain_pairs,
-                                         root_certificates=None):
+def ssl_server_certificate_configuration(
+    private_key_certificate_chain_pairs, root_certificates=None
+):
     """Creates a ServerCertificateConfiguration for use with a Server.
 
     Args:
@@ -1512,19 +1542,24 @@ def ssl_server_certificate_configuration(private_key_certificate_chain_pairs,
         configuration fetching callback.
     """
     if len(private_key_certificate_chain_pairs) == 0:
-        raise ValueError(
-            'At least one private key-certificate chain pair is required!')
+        raise ValueError("At least one private key-certificate chain pair is required!")
     else:
         return ServerCertificateConfiguration(
-            _cygrpc.server_certificate_config_ssl(root_certificates, [
-                _cygrpc.SslPemKeyCertPair(key, pem)
-                for key, pem in private_key_certificate_chain_pairs
-            ]))
+            _cygrpc.server_certificate_config_ssl(
+                root_certificates,
+                [
+                    _cygrpc.SslPemKeyCertPair(key, pem)
+                    for key, pem in private_key_certificate_chain_pairs
+                ],
+            )
+        )
 
 
-def dynamic_ssl_server_credentials(initial_certificate_configuration,
-                                   certificate_configuration_fetcher,
-                                   require_client_authentication=False):
+def dynamic_ssl_server_credentials(
+    initial_certificate_configuration,
+    certificate_configuration_fetcher,
+    require_client_authentication=False,
+):
     """Creates a ServerCredentials for use with an SSL-enabled Server.
 
     Args:
@@ -1548,7 +1583,10 @@ def dynamic_ssl_server_credentials(initial_certificate_configuration,
     return ServerCredentials(
         _cygrpc.server_credentials_ssl_dynamic_cert_config(
             initial_certificate_configuration,
-            certificate_configuration_fetcher, require_client_authentication))
+            certificate_configuration_fetcher,
+            require_client_authentication,
+        )
+    )
 
 
 def channel_ready_future(channel):
@@ -1565,6 +1603,7 @@ def channel_ready_future(channel):
       ChannelConnectivity.READY.
     """
     from grpc import _utilities  # pylint: disable=cyclic-import
+
     return _utilities.channel_ready_future(channel)
 
 
@@ -1580,6 +1619,7 @@ def insecure_channel(target, options=None):
       A Channel object.
     """
     from grpc import _channel  # pylint: disable=cyclic-import
+
     return _channel.Channel(target, () if options is None else options, None)
 
 
@@ -1596,8 +1636,10 @@ def secure_channel(target, credentials, options=None):
       A Channel object.
     """
     from grpc import _channel  # pylint: disable=cyclic-import
-    return _channel.Channel(target, () if options is None else options,
-                            credentials._credentials)
+
+    return _channel.Channel(
+        target, () if options is None else options, credentials._credentials
+    )
 
 
 def intercept_channel(channel, *interceptors):
@@ -1625,14 +1667,17 @@ def intercept_channel(channel, *interceptors):
         StreamStreamClientInterceptor.
     """
     from grpc import _interceptor  # pylint: disable=cyclic-import
+
     return _interceptor.intercept_channel(channel, *interceptors)
 
 
-def server(thread_pool,
-           handlers=None,
-           interceptors=None,
-           options=None,
-           maximum_concurrent_rpcs=None):
+def server(
+    thread_pool,
+    handlers=None,
+    interceptors=None,
+    options=None,
+    maximum_concurrent_rpcs=None,
+):
     """Creates a Server with which RPCs can be serviced.
 
     Args:
@@ -1655,64 +1700,69 @@ def server(thread_pool,
       A Server object.
     """
     from grpc import _server  # pylint: disable=cyclic-import
-    return _server.Server(thread_pool, () if handlers is None else handlers, ()
-                          if interceptors is None else interceptors, () if
-                          options is None else options, maximum_concurrent_rpcs)
+
+    return _server.Server(
+        thread_pool,
+        () if handlers is None else handlers,
+        () if interceptors is None else interceptors,
+        () if options is None else options,
+        maximum_concurrent_rpcs,
+    )
 
 
 ###################################  __all__  #################################
 
 __all__ = (
-    'FutureTimeoutError',
-    'FutureCancelledError',
-    'Future',
-    'ChannelConnectivity',
-    'StatusCode',
-    'RpcError',
-    'RpcContext',
-    'Call',
-    'ChannelCredentials',
-    'CallCredentials',
-    'AuthMetadataContext',
-    'AuthMetadataPluginCallback',
-    'AuthMetadataPlugin',
-    'ClientCallDetails',
-    'ServerCertificateConfiguration',
-    'ServerCredentials',
-    'UnaryUnaryMultiCallable',
-    'UnaryStreamMultiCallable',
-    'StreamUnaryMultiCallable',
-    'StreamStreamMultiCallable',
-    'UnaryUnaryClientInterceptor',
-    'UnaryStreamClientInterceptor',
-    'StreamUnaryClientInterceptor',
-    'StreamStreamClientInterceptor',
-    'Channel',
-    'ServicerContext',
-    'RpcMethodHandler',
-    'HandlerCallDetails',
-    'GenericRpcHandler',
-    'ServiceRpcHandler',
-    'Server',
-    'ServerInterceptor',
-    'unary_unary_rpc_method_handler',
-    'unary_stream_rpc_method_handler',
-    'stream_unary_rpc_method_handler',
-    'stream_stream_rpc_method_handler',
-    'method_handlers_generic_handler',
-    'ssl_channel_credentials',
-    'metadata_call_credentials',
-    'access_token_call_credentials',
-    'composite_call_credentials',
-    'composite_channel_credentials',
-    'ssl_server_credentials',
-    'ssl_server_certificate_configuration',
-    'dynamic_ssl_server_credentials',
-    'channel_ready_future',
-    'insecure_channel',
-    'secure_channel',
-    'intercept_channel',
-    'server',
+    "FutureTimeoutError",
+    "FutureCancelledError",
+    "Future",
+    "ChannelConnectivity",
+    "StatusCode",
+    "RpcError",
+    "RpcContext",
+    "Call",
+    "ChannelCredentials",
+    "CallCredentials",
+    "AuthMetadataContext",
+    "AuthMetadataPluginCallback",
+    "AuthMetadataPlugin",
+    "ClientCallDetails",
+    "ServerCertificateConfiguration",
+    "ServerCredentials",
+    "UnaryUnaryMultiCallable",
+    "UnaryStreamMultiCallable",
+    "StreamUnaryMultiCallable",
+    "StreamStreamMultiCallable",
+    "UnaryUnaryClientInterceptor",
+    "UnaryStreamClientInterceptor",
+    "StreamUnaryClientInterceptor",
+    "StreamStreamClientInterceptor",
+    "Channel",
+    "ServicerContext",
+    "RpcMethodHandler",
+    "HandlerCallDetails",
+    "GenericRpcHandler",
+    "ServiceRpcHandler",
+    "Server",
+    "ServerInterceptor",
+    "unary_unary_rpc_method_handler",
+    "unary_stream_rpc_method_handler",
+    "stream_unary_rpc_method_handler",
+    "stream_stream_rpc_method_handler",
+    "method_handlers_generic_handler",
+    "ssl_channel_credentials",
+    "metadata_call_credentials",
+    "access_token_call_credentials",
+    "composite_call_credentials",
+    "composite_channel_credentials",
+    "ssl_server_credentials",
+    "ssl_server_certificate_configuration",
+    "dynamic_ssl_server_credentials",
+    "channel_ready_future",
+    "insecure_channel",
+    "secure_channel",
+    "intercept_channel",
+    "server",
 )
 
 ############################### Extension Shims ################################
@@ -1720,16 +1770,19 @@ __all__ = (
 # Here to maintain backwards compatibility; avoid using these in new code!
 try:
     import grpc_tools
-    sys.modules.update({'grpc.tools': grpc_tools})
+
+    sys.modules.update({"grpc.tools": grpc_tools})
 except ImportError:
     pass
 try:
     import grpc_health
-    sys.modules.update({'grpc.health': grpc_health})
+
+    sys.modules.update({"grpc.health": grpc_health})
 except ImportError:
     pass
 try:
     import grpc_reflection
-    sys.modules.update({'grpc.reflection': grpc_reflection})
+
+    sys.modules.update({"grpc.reflection": grpc_reflection})
 except ImportError:
     pass

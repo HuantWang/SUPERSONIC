@@ -44,8 +44,8 @@ DEFAULT_CONFIG = with_common_config({
 
 def get_policy_class(config):
     if config["framework"] == "torch":
-        from ray.rllib.agents.a3c.a3c_torch_policy import \
-            A3CTorchPolicy
+        from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
+
         return A3CTorchPolicy
     else:
         return A3CTFPolicy
@@ -56,8 +56,10 @@ def validate_config(config):
         raise DeprecationWarning("entropy_coeff must be >= 0")
     if config["sample_async"] and config["framework"] == "torch":
         config["sample_async"] = False
-        logger.warning("`sample_async=True` is not supported for PyTorch! "
-                       "Multithreading can lead to crashes.")
+        logger.warning(
+            "`sample_async=True` is not supported for PyTorch! "
+            "Multithreading can lead to crashes."
+        )
 
 
 def execution_plan(workers, config):
@@ -77,4 +79,5 @@ A3CTrainer = build_trainer(
     default_policy=A3CTFPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
-    execution_plan=execution_plan)
+    execution_plan=execution_plan,
+)

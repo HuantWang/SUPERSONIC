@@ -55,9 +55,10 @@ class RecurrentNetwork(TFModelV2):
         assert seq_lens is not None
 
         output, new_state = self.forward_rnn(
-            add_time_dimension(
-                input_dict["obs_flat"], seq_lens, framework="tf"), state,
-            seq_lens)
+            add_time_dimension(input_dict["obs_flat"], seq_lens, framework="tf"),
+            state,
+            seq_lens,
+        )
         return tf.reshape(output, [-1, self.num_outputs]), new_state
 
     def forward_rnn(self, inputs, state, seq_lens):
@@ -102,46 +103,45 @@ class LSTMWrapper(RecurrentNetwork):
     """An LSTM wrapper serving as an interface for ModelV2s that set use_lstm.
     """
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
 
-        super(LSTMWrapper, self).__init__(obs_space, action_space, None,
-                                          model_config, name)
+        super(LSTMWrapper, self).__init__(
+            obs_space, action_space, None, model_config, name
+        )
 
         self.cell_size = model_config["lstm_cell_size"]
 
         # Define input layers.
         input_layer = tf.keras.layers.Input(
-            shape=(None, self.num_outputs), name="inputs")
+            shape=(None, self.num_outputs), name="inputs"
+        )
 
         self.num_outputs = num_outputs
 
-        state_in_h = tf.keras.layers.Input(shape=(self.cell_size, ), name="h")
-        state_in_c = tf.keras.layers.Input(shape=(self.cell_size, ), name="c")
+        state_in_h = tf.keras.layers.Input(shape=(self.cell_size,), name="h")
+        state_in_c = tf.keras.layers.Input(shape=(self.cell_size,), name="c")
         seq_in = tf.keras.layers.Input(shape=(), name="seq_in", dtype=tf.int32)
 
         # Preprocess observation with a hidden layer and send to LSTM cell
         lstm_out, state_h, state_c = tf.keras.layers.LSTM(
-            self.cell_size,
-            return_sequences=True,
-            return_state=True,
-            name="lstm")(
-                inputs=input_layer,
-                mask=tf.sequence_mask(seq_in),
-                initial_state=[state_in_h, state_in_c])
+            self.cell_size, return_sequences=True, return_state=True, name="lstm"
+        )(
+            inputs=input_layer,
+            mask=tf.sequence_mask(seq_in),
+            initial_state=[state_in_h, state_in_c],
+        )
 
         # Postprocess LSTM output with another hidden layer and compute values
         logits = tf.keras.layers.Dense(
-            self.num_outputs,
-            activation=tf.keras.activations.linear,
-            name="logits")(lstm_out)
-        values = tf.keras.layers.Dense(
-            1, activation=None, name="values")(lstm_out)
+            self.num_outputs, activation=tf.keras.activations.linear, name="logits"
+        )(lstm_out)
+        values = tf.keras.layers.Dense(1, activation=None, name="values")(lstm_out)
 
         # Create the RNN model
         self._rnn_model = tf.keras.Model(
             inputs=[input_layer, seq_in, state_in_h, state_in_c],
-            outputs=[logits, values, state_h, state_c])
+            outputs=[logits, values, state_h, state_c],
+        )
         self.register_variables(self._rnn_model.variables)
         self._rnn_model.summary()
 
@@ -157,8 +157,7 @@ class LSTMWrapper(RecurrentNetwork):
 
     @override(RecurrentNetwork)
     def forward_rnn(self, inputs, state, seq_lens):
-        model_out, self._value_out, h, c = self._rnn_model([inputs, seq_lens] +
-                                                           state)
+        model_out, self._value_out, h, c = self._rnn_model([inputs, seq_lens] + state)
         return model_out, [h, c]
 
     @override(ModelV2)

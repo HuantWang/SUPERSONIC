@@ -84,7 +84,8 @@ class PBTBenchmarkExample(Trainable):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing")
+        "--smoke-test", action="store_true", help="Finish quickly for testing"
+    )
     args, _ = parser.parse_known_args()
     if args.smoke_test:
         ray.init(num_cpus=2)  # force pausing to happen for test
@@ -101,7 +102,8 @@ if __name__ == "__main__":
             "lr": lambda: random.uniform(0.0001, 0.02),
             # allow perturbations within this set of categorical values
             "some_other_factor": [1, 2],
-        })
+        },
+    )
 
     run(
         PBTBenchmarkExample,
@@ -110,13 +112,12 @@ if __name__ == "__main__":
         reuse_actors=True,
         checkpoint_freq=20,
         verbose=False,
-        stop={
-            "training_iteration": 200,
-        },
+        stop={"training_iteration": 200,},
         num_samples=8,
         config={
             "lr": 0.0001,
             # note: this parameter is perturbed but has no effect on
             # the model training in this example
             "some_other_factor": 1,
-        })
+        },
+    )

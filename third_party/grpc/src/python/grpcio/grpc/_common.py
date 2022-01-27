@@ -23,16 +23,11 @@ import grpc
 from grpc._cython import cygrpc
 
 CYGRPC_CONNECTIVITY_STATE_TO_CHANNEL_CONNECTIVITY = {
-    cygrpc.ConnectivityState.idle:
-    grpc.ChannelConnectivity.IDLE,
-    cygrpc.ConnectivityState.connecting:
-    grpc.ChannelConnectivity.CONNECTING,
-    cygrpc.ConnectivityState.ready:
-    grpc.ChannelConnectivity.READY,
-    cygrpc.ConnectivityState.transient_failure:
-    grpc.ChannelConnectivity.TRANSIENT_FAILURE,
-    cygrpc.ConnectivityState.shutdown:
-    grpc.ChannelConnectivity.SHUTDOWN,
+    cygrpc.ConnectivityState.idle: grpc.ChannelConnectivity.IDLE,
+    cygrpc.ConnectivityState.connecting: grpc.ChannelConnectivity.CONNECTING,
+    cygrpc.ConnectivityState.ready: grpc.ChannelConnectivity.READY,
+    cygrpc.ConnectivityState.transient_failure: grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+    cygrpc.ConnectivityState.shutdown: grpc.ChannelConnectivity.SHUTDOWN,
 }
 
 CYGRPC_STATUS_CODE_TO_STATUS_CODE = {
@@ -56,8 +51,7 @@ CYGRPC_STATUS_CODE_TO_STATUS_CODE = {
 }
 STATUS_CODE_TO_CYGRPC_STATUS_CODE = {
     grpc_code: cygrpc_code
-    for cygrpc_code, grpc_code in six.iteritems(
-        CYGRPC_STATUS_CODE_TO_STATUS_CODE)
+    for cygrpc_code, grpc_code in six.iteritems(CYGRPC_STATUS_CODE_TO_STATUS_CODE)
 }
 
 
@@ -65,7 +59,7 @@ def encode(s):
     if isinstance(s, bytes):
         return s
     else:
-        return s.encode('ascii')
+        return s.encode("ascii")
 
 
 def decode(b):
@@ -73,10 +67,10 @@ def decode(b):
         return b
     else:
         try:
-            return b.decode('utf8')
+            return b.decode("utf8")
         except UnicodeDecodeError:
-            logging.exception('Invalid encoding on %s', b)
-            return b.decode('latin1')
+            logging.exception("Invalid encoding on %s", b)
+            return b.decode("latin1")
 
 
 def _transform(message, transformer, exception_message):
@@ -91,16 +85,17 @@ def _transform(message, transformer, exception_message):
 
 
 def serialize(message, serializer):
-    return _transform(message, serializer, 'Exception serializing message!')
+    return _transform(message, serializer, "Exception serializing message!")
 
 
 def deserialize(serialized_message, deserializer):
-    return _transform(serialized_message, deserializer,
-                      'Exception deserializing message!')
+    return _transform(
+        serialized_message, deserializer, "Exception deserializing message!"
+    )
 
 
 def fully_qualified_method(group, method):
-    return '/{}/{}'.format(group, method)
+    return "/{}/{}".format(group, method)
 
 
 class CleanupThread(threading.Thread):

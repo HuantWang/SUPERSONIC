@@ -21,7 +21,7 @@ import unittest
 
 import coverage
 
-TEST_MODULE_REGEX = r'^.*_test$'
+TEST_MODULE_REGEX = r"^.*_test$"
 
 
 class Loader(object):
@@ -68,8 +68,7 @@ class Loader(object):
       package_paths (list): A list of paths over which to walk through modules
         along.
     """
-        for importer, module_name, is_package in (
-                pkgutil.walk_packages(package_paths)):
+        for importer, module_name, is_package in pkgutil.walk_packages(package_paths):
             module = importer.find_module(module_name).load_module(module_name)
             self.visit_module(module)
 
@@ -101,5 +100,4 @@ def iterate_suite_cases(suite):
         elif isinstance(item, unittest.TestCase):
             yield item
         else:
-            raise ValueError('unexpected suite item of type {}'.format(
-                type(item)))
+            raise ValueError("unexpected suite item of type {}".format(type(item)))

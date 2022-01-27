@@ -45,7 +45,8 @@ class MyTrainableClass(Trainable):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing")
+        "--smoke-test", action="store_true", help="Finish quickly for testing"
+    )
     args, _ = parser.parse_known_args()
     ray.init(num_cpus=4 if args.smoke_test else None)
 
@@ -56,15 +57,18 @@ if __name__ == "__main__":
         time_attr="training_iteration",
         metric="episode_reward_mean",
         mode="max",
-        max_t=200)
+        max_t=200,
+    )
 
-    run(MyTrainableClass,
+    run(
+        MyTrainableClass,
         name="hyperband_test",
         num_samples=20,
         stop={"training_iteration": 1 if args.smoke_test else 99999},
         config={
             "width": sample_from(lambda spec: 10 + int(90 * random.random())),
-            "height": sample_from(lambda spec: int(100 * random.random()))
+            "height": sample_from(lambda spec: int(100 * random.random())),
         },
         scheduler=hyperband,
-        fail_fast=True)
+        fail_fast=True,
+    )

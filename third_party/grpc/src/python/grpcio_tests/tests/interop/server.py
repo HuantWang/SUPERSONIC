@@ -31,36 +31,36 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 def serve():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--port', type=int, required=True, help='the port on which to serve')
+        "--port", type=int, required=True, help="the port on which to serve"
+    )
     parser.add_argument(
-        '--use_tls',
+        "--use_tls",
         default=False,
         type=resources.parse_bool,
-        help='require a secure connection')
+        help="require a secure connection",
+    )
     args = parser.parse_args()
 
     server = test_common.test_server()
-    test_pb2_grpc.add_TestServiceServicer_to_server(methods.TestService(),
-                                                    server)
+    test_pb2_grpc.add_TestServiceServicer_to_server(methods.TestService(), server)
     if args.use_tls:
         private_key = resources.private_key()
         certificate_chain = resources.certificate_chain()
-        credentials = grpc.ssl_server_credentials(((private_key,
-                                                    certificate_chain),))
-        server.add_secure_port('[::]:{}'.format(args.port), credentials)
+        credentials = grpc.ssl_server_credentials(((private_key, certificate_chain),))
+        server.add_secure_port("[::]:{}".format(args.port), credentials)
     else:
-        server.add_insecure_port('[::]:{}'.format(args.port))
+        server.add_insecure_port("[::]:{}".format(args.port))
 
     server.start()
-    logging.info('Server serving.')
+    logging.info("Server serving.")
     try:
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)
     except BaseException as e:
         logging.info('Caught exception "%s"; stopping server...', e)
         server.stop(None)
-        logging.info('Server stopped; exiting.')
+        logging.info("Server stopped; exiting.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     serve()

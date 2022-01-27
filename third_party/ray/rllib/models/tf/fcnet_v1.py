@@ -23,7 +23,8 @@ class FullyConnectedNetwork(Model):
         deprecation_warning(
             "Model->FullyConnectedNetwork",
             "ModelV2->FullyConnectedNetwork",
-            error=False)
+            error=False,
+        )
 
         hiddens = options.get("fcnet_hiddens")
         activation = get_activation_fn(options.get("fcnet_activation"))
@@ -42,7 +43,8 @@ class FullyConnectedNetwork(Model):
                         num_outputs,
                         kernel_initializer=normc_initializer(1.0),
                         activation=activation,
-                        name="fc_out")
+                        name="fc_out",
+                    )
                     return output, output
 
                 label = "fc{}".format(i)
@@ -51,7 +53,8 @@ class FullyConnectedNetwork(Model):
                     size,
                     kernel_initializer=normc_initializer(1.0),
                     activation=activation,
-                    name=label)
+                    name=label,
+                )
                 i += 1
 
             output = tf.layers.dense(
@@ -59,5 +62,6 @@ class FullyConnectedNetwork(Model):
                 num_outputs,
                 kernel_initializer=normc_initializer(0.01),
                 activation=None,
-                name="fc_out")
+                name="fc_out",
+            )
             return output, last_layer

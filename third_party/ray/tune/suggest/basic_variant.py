@@ -6,8 +6,11 @@ import uuid
 from ray.tune.error import TuneError
 from ray.tune.experiment import convert_to_experiment_list
 from ray.tune.config_parser import make_parser, create_trial_from_spec
-from ray.tune.suggest.variant_generator import (generate_variants, format_vars,
-                                                flatten_resolved_vars)
+from ray.tune.suggest.variant_generator import (
+    generate_variants,
+    format_vars,
+    flatten_resolved_vars,
+)
 from ray.tune.suggest.search import SearchAlgorithm
 
 
@@ -71,8 +74,11 @@ class BasicVariantGenerator(SearchAlgorithm):
             self._trial_generator = itertools.chain(
                 self._trial_generator,
                 self._generate_trials(
-                    experiment.spec.get("num_samples", 1), experiment.spec,
-                    experiment.name))
+                    experiment.spec.get("num_samples", 1),
+                    experiment.spec,
+                    experiment.name,
+                ),
+            )
 
     def next_trials(self):
         """Provides Trial objects to be queued into the TrialRunner.
@@ -113,4 +119,5 @@ class BasicVariantGenerator(SearchAlgorithm):
                     self._parser,
                     evaluated_params=flatten_resolved_vars(resolved_vars),
                     trial_id=trial_id,
-                    experiment_tag=experiment_tag)
+                    experiment_tag=experiment_tag,
+                )

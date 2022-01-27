@@ -32,7 +32,8 @@ class TestAttentionNetLearning(unittest.TestCase):
     def test_ppo_attention_net_learning(self):
         ModelCatalog.register_custom_model("attention_net", GTrXLNet)
         config = dict(
-            self.config, **{
+            self.config,
+            **{
                 "num_workers": 0,
                 "entropy_coeff": 0.001,
                 "vf_loss_coeff": 1e-5,
@@ -49,13 +50,15 @@ class TestAttentionNetLearning(unittest.TestCase):
                         "ff_hidden_dim": 32,
                     },
                 },
-            })
+            }
+        )
         tune.run("PPO", config=config, stop=self.stop, verbose=1)
 
     def test_impala_attention_net_learning(self):
         ModelCatalog.register_custom_model("attention_net", GTrXLNet)
         config = dict(
-            self.config, **{
+            self.config,
+            **{
                 "num_workers": 4,
                 "num_gpus": 0,
                 "entropy_coeff": 0.01,
@@ -73,11 +76,13 @@ class TestAttentionNetLearning(unittest.TestCase):
                         "ff_hidden_dim": 32,
                     },
                 },
-            })
+            }
+        )
         tune.run("IMPALA", config=config, stop=self.stop, verbose=1)
 
 
 if __name__ == "__main__":
     import pytest
     import sys
+
     sys.exit(pytest.main(["-v", __file__]))

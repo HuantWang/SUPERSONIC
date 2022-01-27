@@ -21,21 +21,37 @@ import weakref
 import typing
 
 from .cloudpickle import (
-    _is_dynamic, _extract_code_globals, _BUILTIN_TYPE_NAMES, DEFAULT_PROTOCOL,
-    _find_imported_submodules, _get_cell_contents, _is_importable_by_name, _builtin_type,
-    Enum, _get_or_create_tracker_id,  _make_skeleton_class, _make_skeleton_enum,
-    _extract_class_dict, dynamic_subimport, subimport, _typevar_reduce, _get_bases,
-    cell_set, _make_empty_cell,
+    _is_dynamic,
+    _extract_code_globals,
+    _BUILTIN_TYPE_NAMES,
+    DEFAULT_PROTOCOL,
+    _find_imported_submodules,
+    _get_cell_contents,
+    _is_importable_by_name,
+    _builtin_type,
+    Enum,
+    _get_or_create_tracker_id,
+    _make_skeleton_class,
+    _make_skeleton_enum,
+    _extract_class_dict,
+    dynamic_subimport,
+    subimport,
+    _typevar_reduce,
+    _get_bases,
+    cell_set,
+    _make_empty_cell,
 )
 
 if sys.version_info[:2] < (3, 8):
     import pickle5 as pickle
     from pickle5 import Pickler
+
     load, loads = pickle.load, pickle.loads
 else:
     import _pickle
     import pickle
     from _pickle import Pickler
+
     load, loads = _pickle.load, _pickle.loads
 
 import numpy
@@ -74,23 +90,37 @@ def dumps(obj, protocol=None, buffer_callback=None):
 # COLLECTION OF OBJECTS __getnewargs__-LIKE METHODS
 # -------------------------------------------------
 
+
 def _class_getnewargs(obj):
     type_kwargs = {}
     if "__slots__" in obj.__dict__:
         type_kwargs["__slots__"] = obj.__slots__
 
-    __dict__ = obj.__dict__.get('__dict__', None)
+    __dict__ = obj.__dict__.get("__dict__", None)
     if isinstance(__dict__, property):
-        type_kwargs['__dict__'] = __dict__
+        type_kwargs["__dict__"] = __dict__
 
-    return (type(obj), obj.__name__, _get_bases(obj), type_kwargs,
-            _get_or_create_tracker_id(obj), None)
+    return (
+        type(obj),
+        obj.__name__,
+        _get_bases(obj),
+        type_kwargs,
+        _get_or_create_tracker_id(obj),
+        None,
+    )
 
 
 def _enum_getnewargs(obj):
     members = dict((e.name, e.value) for e in obj)
-    return (obj.__bases__, obj.__name__, obj.__qualname__, members,
-            obj.__module__, _get_or_create_tracker_id(obj), None)
+    return (
+        obj.__bases__,
+        obj.__name__,
+        obj.__qualname__,
+        members,
+        obj.__module__,
+        _get_or_create_tracker_id(obj),
+        None,
+    )
 
 
 # COLLECTION OF OBJECTS RECONSTRUCTORS
@@ -120,12 +150,12 @@ def _function_getstate(func):
     }
 
     f_globals_ref = _extract_code_globals(func.__code__)
-    f_globals = {k: func.__globals__[k] for k in f_globals_ref if k in
-                 func.__globals__}
+    f_globals = {k: func.__globals__[k] for k in f_globals_ref if k in func.__globals__}
 
     closure_values = (
         list(map(_get_cell_contents, func.__closure__))
-        if func.__closure__ is not None else ()
+        if func.__closure__ is not None
+        else ()
     )
 
     # Extract currently-imported submodules used by func. Storing these modules
@@ -133,7 +163,8 @@ def _function_getstate(func):
     # trigger the side effect of importing these modules at unpickling time
     # (which is necessary for func to work correctly once depickled)
     slotstate["_cloudpickle_submodules"] = _find_imported_submodules(
-        func.__code__, itertools.chain(f_globals.values(), closure_values))
+        func.__code__, itertools.chain(f_globals.values(), closure_values)
+    )
     slotstate["__globals__"] = f_globals
 
     state = func.__dict__
@@ -142,24 +173,25 @@ def _function_getstate(func):
 
 def _class_getstate(obj):
     clsdict = _extract_class_dict(obj)
-    clsdict.pop('__weakref__', None)
+    clsdict.pop("__weakref__", None)
 
     if issubclass(type(obj), abc.ABCMeta):
         # If obj is an instance of an ABCMeta subclass, dont pickle the
         # cache/negative caches populated during isinstance/issubclass
         # checks, but pickle the list of registered subclasses of obj.
-        clsdict.pop('_abc_cache', None)
-        clsdict.pop('_abc_negative_cache', None)
-        clsdict.pop('_abc_negative_cache_version', None)
-        clsdict.pop('_abc_impl', None)
-        registry = clsdict.pop('_abc_registry', None)
+        clsdict.pop("_abc_cache", None)
+        clsdict.pop("_abc_negative_cache", None)
+        clsdict.pop("_abc_negative_cache_version", None)
+        clsdict.pop("_abc_impl", None)
+        registry = clsdict.pop("_abc_registry", None)
         if registry is None:
             # in Python3.7+, the abc caches and registered subclasses of a
             # class are bundled into the single _abc_impl attribute
-            if hasattr(abc, '_get_dump'):
+            if hasattr(abc, "_get_dump"):
                 (registry, _, _, _) = abc._get_dump(obj)
-                clsdict["_abc_impl"] = [subclass_weakref()
-                                        for subclass_weakref in registry]
+                clsdict["_abc_impl"] = [
+                    subclass_weakref() for subclass_weakref in registry
+                ]
             else:
                 # FIXME(suquark): The upstream cloudpickle cannot work in Ray
                 # because sometimes both '_abc_registry' and '_get_dump' does
@@ -181,7 +213,7 @@ def _class_getstate(obj):
             for k in obj.__slots__:
                 clsdict.pop(k, None)
 
-    clsdict.pop('__dict__', None)  # unpicklable property object
+    clsdict.pop("__dict__", None)  # unpicklable property object
 
     return (clsdict, {})
 
@@ -192,9 +224,13 @@ def _enum_getstate(obj):
     members = dict((e.name, e.value) for e in obj)
     # Cleanup the clsdict that will be passed to _rehydrate_skeleton_class:
     # Those attributes are already handled by the metaclass.
-    for attrname in ["_generate_next_value_", "_member_names_",
-                     "_member_map_", "_member_type_",
-                     "_value2member_map_"]:
+    for attrname in [
+        "_generate_next_value_",
+        "_member_names_",
+        "_member_map_",
+        "_member_type_",
+        "_value2member_map_",
+    ]:
         clsdict.pop(attrname, None)
     for member in members:
         clsdict.pop(member)
@@ -213,24 +249,45 @@ def _enum_getstate(obj):
 # obj.__reduce__), some do not. The following methods were created to "fill
 # these holes".
 
+
 def _code_reduce(obj):
     """codeobject reducer"""
     if hasattr(obj, "co_posonlyargcount"):  # pragma: no branch
         args = (
-                obj.co_argcount, obj.co_posonlyargcount,
-                obj.co_kwonlyargcount, obj.co_nlocals, obj.co_stacksize,
-                obj.co_flags, obj.co_code, obj.co_consts, obj.co_names,
-                obj.co_varnames, obj.co_filename, obj.co_name,
-                obj.co_firstlineno, obj.co_lnotab, obj.co_freevars,
-                obj.co_cellvars
-            )
+            obj.co_argcount,
+            obj.co_posonlyargcount,
+            obj.co_kwonlyargcount,
+            obj.co_nlocals,
+            obj.co_stacksize,
+            obj.co_flags,
+            obj.co_code,
+            obj.co_consts,
+            obj.co_names,
+            obj.co_varnames,
+            obj.co_filename,
+            obj.co_name,
+            obj.co_firstlineno,
+            obj.co_lnotab,
+            obj.co_freevars,
+            obj.co_cellvars,
+        )
     else:
         args = (
-            obj.co_argcount, obj.co_kwonlyargcount, obj.co_nlocals,
-            obj.co_stacksize, obj.co_flags, obj.co_code, obj.co_consts,
-            obj.co_names, obj.co_varnames, obj.co_filename,
-            obj.co_name, obj.co_firstlineno, obj.co_lnotab,
-            obj.co_freevars, obj.co_cellvars
+            obj.co_argcount,
+            obj.co_kwonlyargcount,
+            obj.co_nlocals,
+            obj.co_stacksize,
+            obj.co_flags,
+            obj.co_code,
+            obj.co_consts,
+            obj.co_names,
+            obj.co_varnames,
+            obj.co_filename,
+            obj.co_name,
+            obj.co_firstlineno,
+            obj.co_lnotab,
+            obj.co_freevars,
+            obj.co_cellvars,
         )
     return types.CodeType, args
 
@@ -279,13 +336,10 @@ def _file_reduce(obj):
     if obj.closed:
         raise pickle.PicklingError("Cannot pickle closed files")
     if hasattr(obj, "isatty") and obj.isatty():
-        raise pickle.PicklingError(
-            "Cannot pickle files that map to tty objects"
-        )
+        raise pickle.PicklingError("Cannot pickle files that map to tty objects")
     if "r" not in obj.mode and "+" not in obj.mode:
         raise pickle.PicklingError(
-            "Cannot pickle files that are not opened for reading: %s"
-            % obj.mode
+            "Cannot pickle files that are not opened for reading: %s" % obj.mode
         )
 
     name = obj.name
@@ -299,9 +353,7 @@ def _file_reduce(obj):
         contents = obj.read()
         obj.seek(curloc)
     except IOError:
-        raise pickle.PicklingError(
-            "Cannot pickle file %s as it cannot be read" % name
-        )
+        raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
     retval.write(contents)
     retval.seek(curloc)
 
@@ -323,7 +375,7 @@ def _memoryview_reduce(obj):
 
 def _module_reduce(obj):
     if _is_dynamic(obj):
-        obj.__dict__.pop('__builtins__', None)
+        obj.__dict__.pop("__builtins__", None)
         return dynamic_subimport, (obj.__name__, vars(obj))
     else:
         return subimport, (obj.__name__,)
@@ -359,13 +411,21 @@ def _dynamic_class_reduce(obj):
     """
     if Enum is not None and issubclass(obj, Enum):
         return (
-            _make_skeleton_enum, _enum_getnewargs(obj), _enum_getstate(obj),
-            None, None, _class_setstate
+            _make_skeleton_enum,
+            _enum_getnewargs(obj),
+            _enum_getstate(obj),
+            None,
+            None,
+            _class_setstate,
         )
     else:
         return (
-            _make_skeleton_class, _class_getnewargs(obj), _class_getstate(obj),
-            None, None, _class_setstate
+            _make_skeleton_class,
+            _class_getnewargs(obj),
+            _class_getstate(obj),
+            None,
+            None,
+            _class_setstate,
         )
 
 
@@ -442,6 +502,7 @@ def _class_setstate(obj, state):
 def _numpy_frombuffer(buffer, dtype, shape, order):
     # Get the _frombuffer() function for reconstruction
     from numpy.core.numeric import _frombuffer
+
     array = _frombuffer(buffer, dtype, shape, order)
     # Unfortunately, numpy does not follow the standard, so we still
     # have to set the readonly flag for it here.
@@ -454,14 +515,18 @@ def _numpy_ndarray_reduce(array):
     # in numpy C backend. This is a workaround for python3.5 pickling support.
     if sys.version_info >= (3, 8):
         import pickle
+
         picklebuf_class = pickle.PickleBuffer
     elif sys.version_info >= (3, 5):
         try:
             import pickle5
+
             picklebuf_class = pickle5.PickleBuffer
         except Exception:
-            raise ImportError("Using pickle protocol 5 requires the pickle5 "
-                              "module for Python >=3.5 and <3.8")
+            raise ImportError(
+                "Using pickle protocol 5 requires the pickle5 "
+                "module for Python >=3.5 and <3.8"
+            )
     else:
         raise ValueError("pickle protocol 5 is not available for Python < 3.5")
     # if the array if Fortran-contiguous and not C-contiguous,
@@ -567,10 +632,16 @@ class CloudPickler(Pickler):
 
         # This is a patch for python3.5
         if isinstance(obj, numpy.ndarray):
-            if (self.proto < 5 or
-                    (not obj.flags.c_contiguous and not obj.flags.f_contiguous) or
-                    (issubclass(type(obj), numpy.ndarray) and type(obj) is not numpy.ndarray) or
-                    obj.dtype == "O" or obj.itemsize == 0):
+            if (
+                self.proto < 5
+                or (not obj.flags.c_contiguous and not obj.flags.f_contiguous)
+                or (
+                    issubclass(type(obj), numpy.ndarray)
+                    and type(obj) is not numpy.ndarray
+                )
+                or obj.dtype == "O"
+                or obj.itemsize == 0
+            ):
                 return NotImplemented
             return _numpy_ndarray_reduce(obj)
 
@@ -594,8 +665,7 @@ class CloudPickler(Pickler):
         """Reduce a function that is not pickleable via attribute lookup."""
         newargs = self._function_getnewargs(func)
         state = _function_getstate(func)
-        return (types.FunctionType, newargs, state, None, None,
-                _function_setstate)
+        return (types.FunctionType, newargs, state, None, None, _function_setstate)
 
     def _function_reduce(self, obj):
         """Reducer for function objects.
@@ -643,11 +713,11 @@ class CloudPickler(Pickler):
             closure = None
         else:
             if sys.version_info[:2] >= (3, 8):
-                closure = tuple(
-                    types.CellType() for _ in range(len(code.co_freevars)))
+                closure = tuple(types.CellType() for _ in range(len(code.co_freevars)))
             else:
                 closure = tuple(
-                    _make_empty_cell() for _ in range(len(code.co_freevars)))
+                    _make_empty_cell() for _ in range(len(code.co_freevars))
+                )
 
         return code, base_globals, None, None, closure
 
@@ -657,8 +727,7 @@ class CloudPickler(Pickler):
         except RuntimeError as e:
             if "recursion" in e.args[0]:
                 msg = (
-                    "Could not pickle object as excessively deep recursion "
-                    "required."
+                    "Could not pickle object as excessively deep recursion " "required."
                 )
                 raise pickle.PicklingError(msg)
             else:

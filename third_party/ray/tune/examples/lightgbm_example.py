@@ -15,8 +15,7 @@ def LightGBMCallback(env):
 
 def train_breast_cancer(config):
     data, target = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    train_x, test_x, train_y, test_y = train_test_split(
-        data, target, test_size=0.25)
+    train_x, test_x, train_y, test_y = train_test_split(data, target, test_size=0.25)
     train_set = lgb.Dataset(train_x, label=train_y)
     test_set = lgb.Dataset(test_x, label=test_y)
     gbm = lgb.train(
@@ -24,12 +23,13 @@ def train_breast_cancer(config):
         train_set,
         valid_sets=[test_set],
         verbose_eval=False,
-        callbacks=[LightGBMCallback])
+        callbacks=[LightGBMCallback],
+    )
     preds = gbm.predict(test_x)
     pred_labels = np.rint(preds)
     tune.report(
-        mean_accuracy=sklearn.metrics.accuracy_score(test_y, pred_labels),
-        done=True)
+        mean_accuracy=sklearn.metrics.accuracy_score(test_y, pred_labels), done=True
+    )
 
 
 if __name__ == "__main__":
@@ -39,11 +39,13 @@ if __name__ == "__main__":
         "verbose": -1,
         "boosting_type": tune.grid_search(["gbdt", "dart"]),
         "num_leaves": tune.randint(10, 1000),
-        "learning_rate": tune.loguniform(1e-8, 1e-1)
+        "learning_rate": tune.loguniform(1e-8, 1e-1),
     }
     from ray.tune.schedulers import ASHAScheduler
+
     tune.run(
         train_breast_cancer,
         config=config,
         num_samples=2,
-        scheduler=ASHAScheduler(metric="binary_error", mode="min"))
+        scheduler=ASHAScheduler(metric="binary_error", mode="min"),
+    )

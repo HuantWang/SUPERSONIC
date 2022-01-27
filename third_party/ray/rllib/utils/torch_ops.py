@@ -17,9 +17,7 @@ def global_norm(tensors):
             global norm over.
     """
     # List of single tensors' L2 norms: SQRT(SUM(xi^2)) over all xi in tensor.
-    single_l2s = [
-        torch.pow(torch.sum(torch.pow(t, 2.0)), 0.5) for t in tensors
-    ]
+    single_l2s = [torch.pow(torch.sum(torch.pow(t, 2.0)), 0.5) for t in tensors]
     # Compute global norm from all single tensors' L2 norms.
     return torch.pow(sum(torch.pow(l2, 2.0) for l2 in single_l2s), 0.5)
 
@@ -28,7 +26,9 @@ def huber_loss(x, delta=1.0):
     """Reference: https://en.wikipedia.org/wiki/Huber_loss"""
     return torch.where(
         torch.abs(x) < delta,
-        torch.pow(x, 2.0) * 0.5, delta * (torch.abs(x) - 0.5 * delta))
+        torch.pow(x, 2.0) * 0.5,
+        delta * (torch.abs(x) - 0.5 * delta),
+    )
 
 
 def l2_loss(x):
@@ -68,8 +68,10 @@ def sequence_mask(lengths, maxlen=None, dtype=None):
     if maxlen is None:
         maxlen = lengths.max()
 
-    mask = ~(torch.ones((len(lengths), maxlen)).to(
-        lengths.device).cumsum(dim=1).t() > lengths).t()
+    mask = ~(
+        torch.ones((len(lengths), maxlen)).to(lengths.device).cumsum(dim=1).t()
+        > lengths
+    ).t()
     mask.type(dtype or torch.bool)
 
     return mask
@@ -91,8 +93,11 @@ def convert_to_non_torch_type(stats):
     # The mapping function used to numpyize torch Tensors.
     def mapping(item):
         if isinstance(item, torch.Tensor):
-            return item.cpu().item() if len(item.size()) == 0 else \
-                item.cpu().detach().numpy()
+            return (
+                item.cpu().item()
+                if len(item.size()) == 0
+                else item.cpu().detach().numpy()
+            )
         else:
             return item
 

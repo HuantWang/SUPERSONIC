@@ -31,8 +31,10 @@ SampleBatchType = Union[SampleBatch, MultiAgentBatch]
 # Asserts that an object is a type of SampleBatch.
 def _check_sample_batch_type(batch):
     if not isinstance(batch, SampleBatchType.__args__):
-        raise ValueError("Expected either SampleBatch or MultiAgentBatch, "
-                         "got {}: {}".format(type(batch), batch))
+        raise ValueError(
+            "Expected either SampleBatch or MultiAgentBatch, "
+            "got {}: {}".format(type(batch), batch)
+        )
 
 
 # Returns pipeline global vars that should be periodically sent to each worker.

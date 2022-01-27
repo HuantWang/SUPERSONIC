@@ -11,7 +11,6 @@ from PolSear_MTL.util.core.popart import PopArtLayer
 
 
 class ConvLSTMCell(nn.Module):
-
     def __init__(self, input_channels, hidden_channels, kernel_size):
         """From the original implementation:
         Paper
@@ -33,14 +32,70 @@ class ConvLSTMCell(nn.Module):
 
         self.padding = int((kernel_size - 1) / 2)
 
-        self.Wxi = nn.Conv2d(self.input_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=True)
-        self.Whi = nn.Conv2d(self.hidden_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=False)
-        self.Wxf = nn.Conv2d(self.input_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=True)
-        self.Whf = nn.Conv2d(self.hidden_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=False)
-        self.Wxc = nn.Conv2d(self.input_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=True)
-        self.Whc = nn.Conv2d(self.hidden_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=False)
-        self.Wxo = nn.Conv2d(self.input_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=True)
-        self.Who = nn.Conv2d(self.hidden_channels, self.hidden_channels, self.kernel_size, 1, self.padding, bias=False)
+        self.Wxi = nn.Conv2d(
+            self.input_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=True,
+        )
+        self.Whi = nn.Conv2d(
+            self.hidden_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=False,
+        )
+        self.Wxf = nn.Conv2d(
+            self.input_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=True,
+        )
+        self.Whf = nn.Conv2d(
+            self.hidden_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=False,
+        )
+        self.Wxc = nn.Conv2d(
+            self.input_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=True,
+        )
+        self.Whc = nn.Conv2d(
+            self.hidden_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=False,
+        )
+        self.Wxo = nn.Conv2d(
+            self.input_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=True,
+        )
+        self.Who = nn.Conv2d(
+            self.hidden_channels,
+            self.hidden_channels,
+            self.kernel_size,
+            1,
+            self.padding,
+            bias=False,
+        )
 
         self.Wci = None
         self.Wcf = None
@@ -56,16 +111,22 @@ class ConvLSTMCell(nn.Module):
             self.Wco = torch.zeros(1, hidden, height, width, requires_grad=True)
         return (
             torch.zeros(batch_size, hidden, height, width),
-            torch.zeros(batch_size, hidden, height, width)
+            torch.zeros(batch_size, hidden, height, width),
         )
 
     def forward(self, x, prev_hidden=()):
         if self.Wci is None:
             _, _, height, width = x.shape
             hidden = self.hidden_channels
-            self.Wci = torch.zeros(1, hidden, height, width, requires_grad=True).to(x.device)
-            self.Wcf = torch.zeros(1, hidden, height, width, requires_grad=True).to(x.device)
-            self.Wco = torch.zeros(1, hidden, height, width, requires_grad=True).to(x.device)
+            self.Wci = torch.zeros(1, hidden, height, width, requires_grad=True).to(
+                x.device
+            )
+            self.Wcf = torch.zeros(1, hidden, height, width, requires_grad=True).to(
+                x.device
+            )
+            self.Wco = torch.zeros(1, hidden, height, width, requires_grad=True).to(
+                x.device
+            )
 
         h, c = prev_hidden
 
@@ -79,7 +140,6 @@ class ConvLSTMCell(nn.Module):
 
 
 class VisionNetwork(nn.Module):
-
     def __init__(self, frame_height, frame_width, in_channels=3, hidden_channels=128):
         super(VisionNetwork, self).__init__()
         self._frame_height = frame_height
@@ -89,26 +149,42 @@ class VisionNetwork(nn.Module):
 
         # padding s.t. the output shapes match the paper.
         self.vision_cnn = nn.Sequential(
-            nn.Conv2d(in_channels=self._in_channels, out_channels=32, kernel_size=(8, 8), stride=4, padding=1),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(4, 4), stride=2, padding=2)
+            nn.Conv2d(
+                in_channels=self._in_channels,
+                out_channels=32,
+                kernel_size=(8, 8),
+                stride=4,
+                padding=1,
+            ),
+            nn.Conv2d(
+                in_channels=32, out_channels=64, kernel_size=(4, 4), stride=2, padding=2
+            ),
         )
-        self.vision_lstm = ConvLSTMCell(input_channels=64, hidden_channels=self._hidden_channels, kernel_size=3)
+        self.vision_lstm = ConvLSTMCell(
+            input_channels=64, hidden_channels=self._hidden_channels, kernel_size=3
+        )
 
     def initial_state(self, batch_size, dummy_frame):
         cnn_output = self.vision_cnn(dummy_frame)
         height, width = tuple(cnn_output.shape[2:])
-        return self.vision_lstm.initial_state(batch_size, self._hidden_channels, height, width)
+        return self.vision_lstm.initial_state(
+            batch_size, self._hidden_channels, height, width
+        )
 
     def forward(self, x, prev_vision_core_state):
         x = x.permute(0, 3, 1, 2)
-        vision_core_output, vision_core_state = self.vision_lstm(self.vision_cnn(x), prev_vision_core_state)
-        return vision_core_output.permute(0, 2, 3, 1), (vision_core_output, vision_core_state)
+        vision_core_output, vision_core_state = self.vision_lstm(
+            self.vision_cnn(x), prev_vision_core_state
+        )
+        return (
+            vision_core_output.permute(0, 2, 3, 1),
+            (vision_core_output, vision_core_state),
+        )
 
 
 class QueryNetwork(nn.Module):
-
     def __init__(self, num_queries, c_k, c_s):
-        super(QueryNetwork, self, ).__init__()
+        super(QueryNetwork, self,).__init__()
         self._num_queries = num_queries
         self._c_o = c_k + c_s
         self.model = nn.Sequential(
@@ -116,7 +192,7 @@ class QueryNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(128, self._num_queries * self._c_o),
             nn.ReLU(),
-            nn.Linear(self._num_queries * self._c_o, self._num_queries * self._c_o)
+            nn.Linear(self._num_queries * self._c_o, self._num_queries * self._c_o),
         )
 
     def forward(self, query):
@@ -125,7 +201,6 @@ class QueryNetwork(nn.Module):
 
 
 class SpatialBasis:
-
     def __init__(self, height=27, width=20, channels=64):
         self._height = height
         self._width = width
@@ -153,8 +228,12 @@ class SpatialBasis:
     def init(self):
         h, w, d = self._height, self._width, self._channels
 
-        p_h = torch.mul(torch.arange(1, h + 1).unsqueeze(1).float(), torch.ones(1, w).float()) * (np.pi / h)
-        p_w = torch.mul(torch.ones(h, 1).float(), torch.arange(1, w + 1).unsqueeze(0).float()) * (np.pi / w)
+        p_h = torch.mul(
+            torch.arange(1, h + 1).unsqueeze(1).float(), torch.ones(1, w).float()
+        ) * (np.pi / h)
+        p_w = torch.mul(
+            torch.ones(h, 1).float(), torch.arange(1, w + 1).unsqueeze(0).float()
+        ) * (np.pi / w)
 
         # NOTE: I didn't quite see how U,V = 4 made sense given that the authors form the spatial
         # basis by taking the outer product of the values. Still, I think what I have is aligned with what
@@ -163,7 +242,7 @@ class SpatialBasis:
         u_basis = v_basis = torch.arange(1, U + 1).unsqueeze(0).float()
         a = torch.mul(p_h.unsqueeze(2), u_basis)
         b = torch.mul(p_w.unsqueeze(2), v_basis)
-        out = torch.einsum('hwu,hwv->hwuv', torch.cos(a), torch.cos(b)).reshape(h, w, d)
+        out = torch.einsum("hwu,hwv->hwuv", torch.cos(a), torch.cos(b)).reshape(h, w, d)
         self._s = out
 
 
@@ -189,20 +268,19 @@ def apply_alpha(A, V):
 
 
 class AttentionAugmentedAgent(nn.Module):
-
     def __init__(
-            self,
-            observation_shape,
-            num_actions,
-            hidden_size: int = 256,
-            c_v: int = 120,
-            c_k: int = 8,
-            c_s: int = 64,
-            num_queries: int = 4,
-            rgb_last: bool = False,
-            num_tasks: int = 1,
-            use_popart: bool = False,
-            **kwargs
+        self,
+        observation_shape,
+        num_actions,
+        hidden_size: int = 256,
+        c_v: int = 120,
+        c_k: int = 8,
+        c_s: int = 64,
+        num_queries: int = 4,
+        rgb_last: bool = False,
+        num_tasks: int = 1,
+        use_popart: bool = False,
+        **kwargs
     ):
         super(AttentionAugmentedAgent, self).__init__()
         self.hidden_size = hidden_size
@@ -223,18 +301,23 @@ class AttentionAugmentedAgent(nn.Module):
             "c_k": c_k,
             "c_s": c_s,
             "num_queries": num_queries,
-            "rgb_last": rgb_last
+            "rgb_last": rgb_last,
         }
         self.config.update(kwargs)
 
-        self.vision = VisionNetwork(self.observation_shape[1], self.observation_shape[2],
-                                    in_channels=self.observation_shape[0])
+        self.vision = VisionNetwork(
+            self.observation_shape[1],
+            self.observation_shape[2],
+            in_channels=self.observation_shape[0],
+        )
         self.query = QueryNetwork(num_queries, c_k, c_s)
         self.spatial = SpatialBasis()
 
         self.answer_processor = nn.Sequential(
             # 1031 x 512
-            nn.Linear((c_v + c_s) * num_queries + (c_k + c_s) * num_queries + 1 + 1, 512),
+            nn.Linear(
+                (c_v + c_s) * num_queries + (c_k + c_s) * num_queries + 1 + 1, 512
+            ),
             nn.ReLU(),
             nn.Linear(512, hidden_size),
         )
@@ -242,19 +325,24 @@ class AttentionAugmentedAgent(nn.Module):
         self.policy_core = nn.LSTM(hidden_size, hidden_size)
 
         self.policy_head = nn.Linear(hidden_size, num_actions)
-        self.baseline_head = PopArtLayer(hidden_size, num_tasks if self.use_popart else 1)
+        self.baseline_head = PopArtLayer(
+            hidden_size, num_tasks if self.use_popart else 1
+        )
 
     def initial_state(self, batch_size):
         with torch.no_grad():
             dummy_frame = torch.zeros(1, *self.observation_shape)
             vision_core_initial_state = tuple(
-                s.unsqueeze(0) for s in self.vision.initial_state(batch_size, dummy_frame)
+                s.unsqueeze(0)
+                for s in self.vision.initial_state(batch_size, dummy_frame)
             )
         # unsqueeze() here as well as in forward() is necessary because some of the code in monobeast.py assumes that
         # the first dimension of the returned state tensors are layers of the RNN, so we need this "dummy dimension"
 
         policy_core_initial_state = tuple(
-            torch.zeros(self.policy_core.num_layers, batch_size, self.policy_core.hidden_size)
+            torch.zeros(
+                self.policy_core.num_layers, batch_size, self.policy_core.hidden_size
+            )
             for _ in range(2)
         )
         return vision_core_initial_state + policy_core_initial_state
@@ -291,7 +379,9 @@ class AttentionAugmentedAgent(nn.Module):
         not_done = (~inputs["done"]).float()
 
         vision_core_output_list = []
-        vision_core_state = tuple(s.squeeze(0) for s in state[:2])  # see comment in initial_state()
+        vision_core_state = tuple(
+            s.squeeze(0) for s in state[:2]
+        )  # see comment in initial_state()
         for x_batch, not_done_batch in zip(x.unbind(), not_done.unbind()):
 
             # (batch_size, 1, 1, 1) => expanded to be broadcastable for the multiplication
@@ -302,14 +392,18 @@ class AttentionAugmentedAgent(nn.Module):
             # 1 (a). Vision.
             # --------------
             # (batch_size, height_ac, width_ac, c_k + c_v)
-            vision_core_output, vision_core_state = self.vision(x_batch, vision_core_state)
+            vision_core_output, vision_core_state = self.vision(
+                x_batch, vision_core_state
+            )
             vision_core_output_list.append(vision_core_output)
             # for clarity vision_core_output.unsqueeze(0) might be better, because it would be clear that this
             # is the result for one time step, but since we merge time and batch in the following steps anyway,
             # we can also just "discard" the time dimension and get the same result when we concatenate
             # the results for each time step
 
-        vision_core_state = tuple(s.unsqueeze(0) for s in vision_core_state)  # see comment in initial_state()
+        vision_core_state = tuple(
+            s.unsqueeze(0) for s in vision_core_state
+        )  # see comment in initial_state()
 
         # (time_steps * batch_size, height_ac, width_ac, c_k + c_v)
         vision_core_output = torch.cat(vision_core_output_list)
@@ -328,8 +422,19 @@ class AttentionAugmentedAgent(nn.Module):
         policy_core_output_list = []
         attention_map_list = []
         policy_core_state = state[2:]
-        for keys_batch, values_batch, prev_reward_batch, prev_action_batch, not_done_batch in zip(
-                keys.unbind(), values.unbind(), prev_reward.unbind(), prev_action.unbind(), not_done.unbind()):
+        for (
+            keys_batch,
+            values_batch,
+            prev_reward_batch,
+            prev_action_batch,
+            not_done_batch,
+        ) in zip(
+            keys.unbind(),
+            values.unbind(),
+            prev_reward.unbind(),
+            prev_action.unbind(),
+            not_done.unbind(),
+        ):
 
             # (1, batch_size, 1)
             not_done_batch = not_done_batch.view(1, -1, 1)
@@ -355,7 +460,10 @@ class AttentionAugmentedAgent(nn.Module):
             answer = torch.cat(
                 torch.chunk(answer, self.num_queries, dim=1)
                 + torch.chunk(queries, self.num_queries, dim=1)
-                + (prev_reward_batch.unsqueeze(1).float(), prev_action_batch.unsqueeze(1).float()),
+                + (
+                    prev_reward_batch.unsqueeze(1).float(),
+                    prev_action_batch.unsqueeze(1).float(),
+                ),
                 dim=2,
             ).squeeze(1)
             # (batch_size, hidden_size)
@@ -364,7 +472,9 @@ class AttentionAugmentedAgent(nn.Module):
             # 3. Policy.
             # ----------
             # (batch_size, hidden_size)
-            policy_core_output, policy_core_state = self.policy_core(answer.unsqueeze(0), policy_core_state)
+            policy_core_output, policy_core_state = self.policy_core(
+                answer.unsqueeze(0), policy_core_state
+            )
             policy_core_output_list.append(policy_core_output.squeeze(0))
             # squeeze() is needed because the LSTM input has an "extra" dimensions for the layers of the LSTM,
             # of which there is only one in this case; therefore, the concatenated input vector has an extra
@@ -391,20 +501,30 @@ class AttentionAugmentedAgent(nn.Module):
         policy_logits = policy_logits.view(time_steps, batch_size, self.num_actions)
         # (time_steps, batch_size, num_tasks)
         baseline = baseline.view(time_steps, batch_size, self.num_tasks)
-        normalized_baseline = normalized_baseline.view(time_steps, batch_size, self.num_tasks)
+        normalized_baseline = normalized_baseline.view(
+            time_steps, batch_size, self.num_tasks
+        )
         # (time_steps, batch_size, 1)
         action = action.view(time_steps, batch_size, 1)
 
         if return_attention_maps:
             return (
-                dict(policy_logits=policy_logits, baseline=baseline, action=action,
-                     normalized_baseline=normalized_baseline),
+                dict(
+                    policy_logits=policy_logits,
+                    baseline=baseline,
+                    action=action,
+                    normalized_baseline=normalized_baseline,
+                ),
                 vision_core_state + policy_core_state,
-                attention_maps
+                attention_maps,
             )
 
         return (
-            dict(policy_logits=policy_logits, baseline=baseline, action=action,
-                 normalized_baseline=normalized_baseline),
-            vision_core_state + policy_core_state
+            dict(
+                policy_logits=policy_logits,
+                baseline=baseline,
+                action=action,
+                normalized_baseline=normalized_baseline,
+            ),
+            vision_core_state + policy_core_state,
         )

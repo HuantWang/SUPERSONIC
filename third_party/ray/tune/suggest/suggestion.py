@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 def _warn_on_repeater(searcher, total_samples):
     from ray.tune.suggest.repeater import _warn_num_samples
+
     _warn_num_samples(searcher, total_samples)
 
 
@@ -58,20 +59,24 @@ class Searcher:
 
     """
 
-    def __init__(self,
-                 metric="episode_reward_mean",
-                 mode="max",
-                 max_concurrent=None,
-                 use_early_stopped_trials=None):
+    def __init__(
+        self,
+        metric="episode_reward_mean",
+        mode="max",
+        max_concurrent=None,
+        use_early_stopped_trials=None,
+    ):
         if use_early_stopped_trials is False:
             raise DeprecationWarning(
                 "Early stopped trials are now always used. If this is a "
-                "problem, file an issue: https://github.com/ray-project/ray.")
+                "problem, file an issue: https://github.com/ray-project/ray."
+            )
         if max_concurrent is not None:
             logger.warning(
                 "DeprecationWarning: `max_concurrent` is deprecated for this "
                 "search algorithm. Use tune.suggest.ConcurrencyLimiter() "
-                "instead. This will raise an error in future versions of Ray.")
+                "instead. This will raise an error in future versions of Ray."
+            )
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
         self._metric = metric
         self._mode = mode
@@ -167,7 +172,8 @@ class ConcurrencyLimiter(Searcher):
         self.max_concurrent = max_concurrent
         self.live_trials = set()
         super(ConcurrencyLimiter, self).__init__(
-            metric=self.searcher.metric, mode=self.searcher.mode)
+            metric=self.searcher.metric, mode=self.searcher.mode
+        )
 
     def suggest(self, trial_id):
         if len(self.live_trials) >= self.max_concurrent:
@@ -179,8 +185,7 @@ class ConcurrencyLimiter(Searcher):
         if trial_id not in self.live_trials:
             return
         else:
-            self.searcher.on_trial_complete(
-                trial_id, result=result, error=error)
+            self.searcher.on_trial_complete(trial_id, result=result, error=error)
             self.live_trials.remove(trial_id)
 
     def save(self, checkpoint_dir):
@@ -204,8 +209,8 @@ class SearchGenerator(SearchAlgorithm):
 
     def __init__(self, searcher):
         assert issubclass(
-            type(searcher),
-            Searcher), ("Searcher should be subclassing Searcher.")
+            type(searcher), Searcher
+        ), "Searcher should be subclassing Searcher."
         self.searcher = searcher
         self._parser = make_parser()
         self._experiment = None
@@ -221,8 +226,9 @@ class SearchGenerator(SearchAlgorithm):
         """
         logger.debug("added configurations")
         experiment_list = convert_to_experiment_list(experiments)
-        assert len(experiment_list) == 1, (
-            "SearchAlgorithms can only support 1 experiment at a time.")
+        assert (
+            len(experiment_list) == 1
+        ), "SearchAlgorithms can only support 1 experiment at a time."
         self._experiment = experiment_list[0]
         experiment_spec = self._experiment.spec
         self._total_samples = experiment_spec.get("num_samples", 1)
@@ -240,8 +246,9 @@ class SearchGenerator(SearchAlgorithm):
         """
         trials = []
         while not self.is_finished():
-            trial = self.create_trial_if_possible(self._experiment.spec,
-                                                  self._experiment.name)
+            trial = self.create_trial_if_possible(
+                self._experiment.spec, self._experiment.name
+            )
             if trial is None:
                 break
             trials.append(trial)
@@ -254,21 +261,20 @@ class SearchGenerator(SearchAlgorithm):
         if suggested_config is None:
             return
         spec = copy.deepcopy(experiment_spec)
-        spec["config"] = merge_dicts(spec["config"],
-                                     copy.deepcopy(suggested_config))
+        spec["config"] = merge_dicts(spec["config"], copy.deepcopy(suggested_config))
 
         # Create a new trial_id if duplicate trial is created
         flattened_config = resolve_nested_dict(spec["config"])
         self._counter += 1
-        tag = "{0}_{1}".format(
-            str(self._counter), format_vars(flattened_config))
+        tag = "{0}_{1}".format(str(self._counter), format_vars(flattened_config))
         trial = create_trial_from_spec(
             spec,
             output_path,
             self._parser,
             evaluated_params=flatten_dict(suggested_config),
             experiment_tag=tag,
-            trial_id=trial_id)
+            trial_id=trial_id,
+        )
         return trial
 
     def on_trial_result(self, trial_id, result):
@@ -276,8 +282,7 @@ class SearchGenerator(SearchAlgorithm):
         self.searcher.on_trial_result(trial_id, result)
 
     def on_trial_complete(self, trial_id, result=None, error=False):
-        self.searcher.on_trial_complete(
-            trial_id=trial_id, result=result, error=error)
+        self.searcher.on_trial_complete(trial_id=trial_id, result=result, error=error)
 
     def is_finished(self):
         return self._counter >= self._total_samples or self._finished
@@ -318,7 +323,8 @@ class _MockSuggestionAlgorithm(SearchGenerator):
         self.searcher = _MockSearcher(**kwargs)
         if max_concurrent:
             self.searcher = ConcurrencyLimiter(
-                self.searcher, max_concurrent=max_concurrent)
+                self.searcher, max_concurrent=max_concurrent
+            )
         super(_MockSuggestionAlgorithm, self).__init__(self.searcher)
 
     @property

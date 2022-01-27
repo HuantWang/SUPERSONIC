@@ -22,7 +22,7 @@ from ._compat import PY3
 from ._compat import unicode
 
 
-__all__ = ['pid_exists', 'wait_pid', 'disk_usage', 'get_terminal_map']
+__all__ = ["pid_exists", "wait_pid", "disk_usage", "get_terminal_map"]
 
 
 def pid_exists(pid):
@@ -58,6 +58,7 @@ def wait_pid(pid, timeout=None, proc_name=None):
 
     Raise TimeoutExpired on timeout expired.
     """
+
     def check_timeout(delay):
         if timeout is not None:
             if timer() >= stop_at:
@@ -65,12 +66,15 @@ def wait_pid(pid, timeout=None, proc_name=None):
         time.sleep(delay)
         return min(delay * 2, 0.04)
 
-    timer = getattr(time, 'monotonic', time.time)
+    timer = getattr(time, "monotonic", time.time)
     if timeout is not None:
+
         def waitcall():
             return os.waitpid(pid, os.WNOHANG)
+
         stop_at = timer() + timeout
     else:
+
         def waitcall():
             return os.waitpid(pid, 0)
 
@@ -137,13 +141,13 @@ def disk_usage(path):
 
     # Total space which is only available to root (unless changed
     # at system level).
-    total = (st.f_blocks * st.f_frsize)
+    total = st.f_blocks * st.f_frsize
     # Remaining free space usable by root.
-    avail_to_root = (st.f_bfree * st.f_frsize)
+    avail_to_root = st.f_bfree * st.f_frsize
     # Remaining free space usable by user.
-    avail_to_user = (st.f_bavail * st.f_frsize)
+    avail_to_user = st.f_bavail * st.f_frsize
     # Total space being used in general.
-    used = (total - avail_to_root)
+    used = total - avail_to_root
     # Total space which is available to user (same as 'total' but
     # for the user).
     total_user = used + avail_to_user
@@ -156,7 +160,8 @@ def disk_usage(path):
     # reserved blocks that we are currently not considering:
     # https://github.com/giampaolo/psutil/issues/829#issuecomment-223750462
     return sdiskusage(
-        total=total, used=used, free=avail_to_user, percent=usage_percent_user)
+        total=total, used=used, free=avail_to_user, percent=usage_percent_user
+    )
 
 
 @memoize
@@ -165,7 +170,7 @@ def get_terminal_map():
     Used by Process.terminal()
     """
     ret = {}
-    ls = glob.glob('/dev/tty*') + glob.glob('/dev/pts/*')
+    ls = glob.glob("/dev/tty*") + glob.glob("/dev/pts/*")
     for name in ls:
         assert name not in ret, name
         try:

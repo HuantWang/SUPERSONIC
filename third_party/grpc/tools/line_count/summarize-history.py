@@ -29,10 +29,16 @@ start_date = datetime.date(2017, 3, 26)
 end_date = datetime.date(2017, 3, 29)
 
 for dt in daterange(start_date, end_date):
-    dmy = dt.strftime('%Y-%m-%d')
+    dmy = dt.strftime("%Y-%m-%d")
     print dmy
-    subprocess.check_call([
-        'tools/line_count/yaml2csv.py', '-i',
-        '../count/%s.yaml' % dmy, '-d', dmy, '-o',
-        '../count/%s.csv' % dmy
-    ])
+    subprocess.check_call(
+        [
+            "tools/line_count/yaml2csv.py",
+            "-i",
+            "../count/%s.yaml" % dmy,
+            "-d",
+            dmy,
+            "-o",
+            "../count/%s.csv" % dmy,
+        ]
+    )

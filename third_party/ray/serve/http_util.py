@@ -101,25 +101,26 @@ class Response:
         else:
             # Delayed import since utils depends on http_util
             from ray.serve.utils import ServeEncoder
-            self.body = json.dumps(
-                content, cls=ServeEncoder, indent=2).encode()
+
+            self.body = json.dumps(content, cls=ServeEncoder, indent=2).encode()
             self.set_content_type("json")
 
     def set_content_type(self, content_type):
         if content_type == "text":
             self.raw_headers.append([b"content-type", b"text/plain"])
         elif content_type == "text-utf8":
-            self.raw_headers.append(
-                [b"content-type", b"text/plain; charset=utf-8"])
+            self.raw_headers.append([b"content-type", b"text/plain; charset=utf-8"])
         elif content_type == "json":
             self.raw_headers.append([b"content-type", b"application/json"])
         else:
             raise ValueError("Invalid content type {}".foramt(content_type))
 
     async def send(self, scope, receive, send):
-        await send({
-            "type": "http.response.start",
-            "status": self.status_code,
-            "headers": self.raw_headers,
-        })
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": self.raw_headers,
+            }
+        )
         await send({"type": "http.response.body", "body": self.body})

@@ -80,7 +80,9 @@ class RunningStat:
         if x.shape != self._M.shape:
             raise ValueError(
                 "Unexpected input shape {}, expected {}, value = {}".format(
-                    x.shape, self._M.shape, x))
+                    x.shape, self._M.shape, x
+                )
+            )
         n1 = self._n
         self._n += 1
         if self._n == 1:
@@ -107,7 +109,8 @@ class RunningStat:
 
     def __repr__(self):
         return "(n={}, mean_mean={}, mean_std={})".format(
-            self.n, np.mean(self.mean), np.mean(self.std))
+            self.n, np.mean(self.mean), np.mean(self.std)
+        )
 
     @property
     def n(self):
@@ -132,6 +135,7 @@ class RunningStat:
 
 class MeanStdFilter(Filter):
     """Keeps track of a running mean for seen states"""
+
     is_concurrent = False
 
     def __init__(self, shape, demean=True, destd=True, clip=10.0):
@@ -231,8 +235,8 @@ class MeanStdFilter(Filter):
 
     def __repr__(self):
         return "MeanStdFilter({}, {}, {}, {}, {}, {})".format(
-            self.shape, self.demean, self.destd, self.clip, self.rs,
-            self.buffer)
+            self.shape, self.demean, self.destd, self.clip, self.rs, self.buffer
+        )
 
 
 class ConcurrentMeanStdFilter(MeanStdFilter):
@@ -265,8 +269,8 @@ class ConcurrentMeanStdFilter(MeanStdFilter):
 
     def __repr__(self):
         return "ConcurrentMeanStdFilter({}, {}, {}, {}, {}, {})".format(
-            self.shape, self.demean, self.destd, self.clip, self.rs,
-            self.buffer)
+            self.shape, self.demean, self.destd, self.clip, self.rs, self.buffer
+        )
 
 
 def get_filter(filter_config, shape):

@@ -13,8 +13,7 @@ class TFModelV2(ModelV2):
     Note that this class by itself is not a valid model unless you
     implement forward() in a subclass."""
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name):
+    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
         """Initialize a TFModelV2.
 
         Here is an example implementation for a subclass
@@ -38,7 +37,8 @@ class TFModelV2(ModelV2):
             num_outputs,
             model_config,
             name,
-            framework="tf")
+            framework="tf",
+        )
         self.var_list = []
         if tf.executing_eagerly():
             self.graph = None
@@ -72,7 +72,6 @@ class TFModelV2(ModelV2):
     def trainable_variables(self, as_dict=False):
         if as_dict:
             return {
-                k: v
-                for k, v in self.variables(as_dict=True).items() if v.trainable
+                k: v for k, v in self.variables(as_dict=True).items() if v.trainable
             }
         return [v for v in self.variables() if v.trainable]

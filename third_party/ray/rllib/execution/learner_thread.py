@@ -18,8 +18,14 @@ class LearnerThread(threading.Thread):
     improves overall throughput.
     """
 
-    def __init__(self, local_worker, minibatch_buffer_size, num_sgd_iter,
-                 learner_queue_size, learner_queue_timeout):
+    def __init__(
+        self,
+        local_worker,
+        minibatch_buffer_size,
+        num_sgd_iter,
+        learner_queue_size,
+        learner_queue_timeout,
+    ):
         """Initialize the learner thread.
 
         Arguments:
@@ -43,7 +49,8 @@ class LearnerThread(threading.Thread):
             size=minibatch_buffer_size,
             timeout=learner_queue_timeout,
             num_passes=num_sgd_iter,
-            init_num_passes=num_sgd_iter)
+            init_num_passes=num_sgd_iter,
+        )
         self.queue_timer = TimerStat()
         self.grad_timer = TimerStat()
         self.load_timer = TimerStat()
@@ -77,14 +84,16 @@ class LearnerThread(threading.Thread):
         def timer_to_ms(timer):
             return round(1000 * timer.mean, 3)
 
-        result["info"].update({
-            "learner_queue": self.learner_queue_size.stats(),
-            "learner": copy.deepcopy(self.stats),
-            "timing_breakdown": {
-                "learner_grad_time_ms": timer_to_ms(self.grad_timer),
-                "learner_load_time_ms": timer_to_ms(self.load_timer),
-                "learner_load_wait_time_ms": timer_to_ms(self.load_wait_timer),
-                "learner_dequeue_time_ms": timer_to_ms(self.queue_timer),
+        result["info"].update(
+            {
+                "learner_queue": self.learner_queue_size.stats(),
+                "learner": copy.deepcopy(self.stats),
+                "timing_breakdown": {
+                    "learner_grad_time_ms": timer_to_ms(self.grad_timer),
+                    "learner_load_time_ms": timer_to_ms(self.load_timer),
+                    "learner_load_wait_time_ms": timer_to_ms(self.load_wait_timer),
+                    "learner_dequeue_time_ms": timer_to_ms(self.queue_timer),
+                },
             }
-        })
+        )
         return result

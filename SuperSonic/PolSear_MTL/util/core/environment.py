@@ -22,7 +22,6 @@ def _format_frame(frame):
 
 
 class Environment:
-
     def __init__(self, gym_env):
         self.gym_env = gym_env
         self.episode_return = None
@@ -94,7 +93,6 @@ class Environment:
             episode_step=episode_step,
             last_action=action,
         )
-
 
     def close(self):
         self.gym_env.close()

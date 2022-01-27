@@ -29,8 +29,7 @@ import logging
 import ray
 from ray import tune
 from ray.tune import function
-from ray.rllib.examples.env.windy_maze_env import WindyMazeEnv, \
-    HierarchicalWindyMazeEnv
+from ray.rllib.examples.env.windy_maze_env import WindyMazeEnv, HierarchicalWindyMazeEnv
 from ray.rllib.utils.test_utils import check_learning_achieved
 
 parser = argparse.ArgumentParser()
@@ -79,17 +78,18 @@ if __name__ == "__main__":
             "entropy_coeff": 0.01,
             "multiagent": {
                 "policies": {
-                    "high_level_policy": (None, maze.observation_space,
-                                          Discrete(4), {
-                                              "gamma": 0.9
-                                          }),
-                    "low_level_policy": (None,
-                                         Tuple([
-                                             maze.observation_space,
-                                             Discrete(4)
-                                         ]), maze.action_space, {
-                                             "gamma": 0.0
-                                         }),
+                    "high_level_policy": (
+                        None,
+                        maze.observation_space,
+                        Discrete(4),
+                        {"gamma": 0.9},
+                    ),
+                    "low_level_policy": (
+                        None,
+                        Tuple([maze.observation_space, Discrete(4)]),
+                        maze.action_space,
+                        {"gamma": 0.0},
+                    ),
                 },
                 "policy_mapping_fn": function(policy_mapping_fn),
             },

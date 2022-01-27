@@ -8,8 +8,11 @@ from ray.rllib.agents.trainer_template import build_trainer
 from ray.rllib.execution.learner_thread import LearnerThread
 from ray.rllib.execution.multi_gpu_learner import TFMultiGPULearner
 from ray.rllib.execution.tree_agg import gather_experiences_tree_aggregation
-from ray.rllib.execution.common import STEPS_TRAINED_COUNTER, \
-    _get_global_vars, _get_shared_metrics
+from ray.rllib.execution.common import (
+    STEPS_TRAINED_COUNTER,
+    _get_global_vars,
+    _get_shared_metrics,
+)
 from ray.rllib.execution.replay_ops import MixInReplay
 from ray.rllib.execution.rollout_ops import ParallelRollouts, ConcatBatches
 from ray.rllib.execution.concurrency_ops import Concurrently, Enqueue, Dequeue
@@ -107,25 +110,30 @@ class OverrideDefaultResourceRequest:
             gpu=cf["num_gpus"],
             memory=cf["memory"],
             object_store_memory=cf["object_store_memory"],
-            extra_cpu=cf["num_cpus_per_worker"] * cf["num_workers"] +
-            cf["num_aggregation_workers"],
+            extra_cpu=cf["num_cpus_per_worker"] * cf["num_workers"]
+            + cf["num_aggregation_workers"],
             extra_gpu=cf["num_gpus_per_worker"] * cf["num_workers"],
             extra_memory=cf["memory_per_worker"] * cf["num_workers"],
-            extra_object_store_memory=cf["object_store_memory_per_worker"] *
-            cf["num_workers"])
+            extra_object_store_memory=cf["object_store_memory_per_worker"]
+            * cf["num_workers"],
+        )
 
 
 def make_learner_thread(local_worker, config):
     if config["num_gpus"] > 1 or config["num_data_loader_buffers"] > 1:
         logger.info(
             "Enabling multi-GPU mode, {} GPUs, {} parallel loaders".format(
-                config["num_gpus"], config["num_data_loader_buffers"]))
+                config["num_gpus"], config["num_data_loader_buffers"]
+            )
+        )
         if config["num_data_loader_buffers"] < config["minibatch_buffer_size"]:
             raise ValueError(
                 "In multi-gpu mode you must have at least as many "
                 "parallel data loader buffers as minibatch buffers: "
-                "{} vs {}".format(config["num_data_loader_buffers"],
-                                  config["minibatch_buffer_size"]))
+                "{} vs {}".format(
+                    config["num_data_loader_buffers"], config["minibatch_buffer_size"]
+                )
+            )
         learner_thread = TFMultiGPULearner(
             local_worker,
             num_gpus=config["num_gpus"],
@@ -135,26 +143,28 @@ def make_learner_thread(local_worker, config):
             minibatch_buffer_size=config["minibatch_buffer_size"],
             num_sgd_iter=config["num_sgd_iter"],
             learner_queue_size=config["learner_queue_size"],
-            learner_queue_timeout=config["learner_queue_timeout"])
+            learner_queue_timeout=config["learner_queue_timeout"],
+        )
     else:
         learner_thread = LearnerThread(
             local_worker,
             minibatch_buffer_size=config["minibatch_buffer_size"],
             num_sgd_iter=config["num_sgd_iter"],
             learner_queue_size=config["learner_queue_size"],
-            learner_queue_timeout=config["learner_queue_timeout"])
+            learner_queue_timeout=config["learner_queue_timeout"],
+        )
     return learner_thread
 
 
 def get_policy_class(config):
     if config["framework"] == "torch":
         if config["vtrace"]:
-            from ray.rllib.agents.impala.vtrace_torch_policy import \
-                VTraceTorchPolicy
+            from ray.rllib.agents.impala.vtrace_torch_policy import VTraceTorchPolicy
+
             return VTraceTorchPolicy
         else:
-            from ray.rllib.agents.a3c.a3c_torch_policy import \
-                A3CTorchPolicy
+            from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
+
             return A3CTorchPolicy
     else:
         if config["vtrace"]:
@@ -170,7 +180,8 @@ def validate_config(config):
     if config["vtrace"] and not config["in_evaluation"]:
         if config["batch_mode"] != "truncate_episodes":
             raise ValueError(
-                "Must use `batch_mode`=truncate_episodes if `vtrace` is True.")
+                "Must use `batch_mode`=truncate_episodes if `vtrace` is True."
+            )
 
 
 # Update worker weights as they finish generating experiences.
@@ -185,8 +196,10 @@ class BroadcastUpdateLearnerWeights:
     def __call__(self, item):
         actor, batch = item
         self.steps_since_broadcast += 1
-        if (self.steps_since_broadcast >= self.broadcast_interval
-                and self.learner_thread.weights_updated):
+        if (
+            self.steps_since_broadcast >= self.broadcast_interval
+            and self.learner_thread.weights_updated
+        ):
             self.weights = ray.put(self.workers.local_worker().get_weights())
             self.steps_since_broadcast = 0
             self.learner_thread.weights_updated = False
@@ -209,17 +222,21 @@ def gather_experiences_directly(workers, config):
     rollouts = ParallelRollouts(
         workers,
         mode="async",
-        num_async=config["max_sample_requests_in_flight_per_worker"])
+        num_async=config["max_sample_requests_in_flight_per_worker"],
+    )
 
     # Augment with replay and concat to desired train batch size.
-    train_batches = rollouts \
-        .for_each(lambda batch: batch.decompress_if_needed()) \
-        .for_each(MixInReplay(
-            num_slots=config["replay_buffer_num_slots"],
-            replay_proportion=config["replay_proportion"])) \
-        .flatten() \
-        .combine(
-            ConcatBatches(min_batch_size=config["train_batch_size"]))
+    train_batches = (
+        rollouts.for_each(lambda batch: batch.decompress_if_needed())
+        .for_each(
+            MixInReplay(
+                num_slots=config["replay_buffer_num_slots"],
+                replay_proportion=config["replay_proportion"],
+            )
+        )
+        .flatten()
+        .combine(ConcatBatches(min_batch_size=config["train_batch_size"]))
+    )
 
     return train_batches
 
@@ -235,31 +252,32 @@ def execution_plan(workers, config):
     learner_thread.start()
 
     # This sub-flow sends experiences to the learner.
-    enqueue_op = train_batches \
-        .for_each(Enqueue(learner_thread.inqueue))
+    enqueue_op = train_batches.for_each(Enqueue(learner_thread.inqueue))
     # Only need to update workers if there are remote workers.
     if workers.remote_workers():
-        enqueue_op = enqueue_op.zip_with_source_actor() \
-            .for_each(BroadcastUpdateLearnerWeights(
-                learner_thread, workers,
-                broadcast_interval=config["broadcast_interval"]))
+        enqueue_op = enqueue_op.zip_with_source_actor().for_each(
+            BroadcastUpdateLearnerWeights(
+                learner_thread, workers, broadcast_interval=config["broadcast_interval"]
+            )
+        )
 
     # This sub-flow updates the steps trained counter based on learner output.
     dequeue_op = Dequeue(
-            learner_thread.outqueue, check=learner_thread.is_alive) \
-        .for_each(record_steps_trained)
+        learner_thread.outqueue, check=learner_thread.is_alive
+    ).for_each(record_steps_trained)
 
-    merged_op = Concurrently(
-        [enqueue_op, dequeue_op], mode="async", output_indexes=[1])
+    merged_op = Concurrently([enqueue_op, dequeue_op], mode="async", output_indexes=[1])
 
     # Callback for APPO to use to update KL, target network periodically.
     # The input to the callback is the learner fetches dict.
     if config["after_train_step"]:
         merged_op = merged_op.for_each(lambda t: t[1]).for_each(
-            config["after_train_step"](workers, config))
+            config["after_train_step"](workers, config)
+        )
 
-    return StandardMetricsReporting(merged_op, workers, config) \
-        .for_each(learner_thread.add_learner_metrics)
+    return StandardMetricsReporting(merged_op, workers, config).for_each(
+        learner_thread.add_learner_metrics
+    )
 
 
 ImpalaTrainer = build_trainer(
@@ -269,4 +287,5 @@ ImpalaTrainer = build_trainer(
     validate_config=validate_config,
     get_policy_class=get_policy_class,
     execution_plan=execution_plan,
-    mixins=[OverrideDefaultResourceRequest])
+    mixins=[OverrideDefaultResourceRequest],
+)

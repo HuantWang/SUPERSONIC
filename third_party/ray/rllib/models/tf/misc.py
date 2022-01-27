@@ -13,22 +13,26 @@ def normc_initializer(std=1.0):
     return _initializer
 
 
-def conv2d(x,
-           num_filters,
-           name,
-           filter_size=(3, 3),
-           stride=(1, 1),
-           pad="SAME",
-           dtype=None,
-           collections=None):
+def conv2d(
+    x,
+    num_filters,
+    name,
+    filter_size=(3, 3),
+    stride=(1, 1),
+    pad="SAME",
+    dtype=None,
+    collections=None,
+):
     if dtype is None:
         dtype = tf.float32
 
     with tf.variable_scope(name):
         stride_shape = [1, stride[0], stride[1], 1]
         filter_shape = [
-            filter_size[0], filter_size[1],
-            int(x.get_shape()[3]), num_filters
+            filter_size[0],
+            filter_size[1],
+            int(x.get_shape()[3]),
+            num_filters,
         ]
 
         # There are "num input feature maps * filter height * filter width"
@@ -45,19 +49,22 @@ def conv2d(x,
             filter_shape,
             dtype,
             tf.random_uniform_initializer(-w_bound, w_bound),
-            collections=collections)
+            collections=collections,
+        )
         b = tf.get_variable(
-            "b", [1, 1, 1, num_filters],
+            "b",
+            [1, 1, 1, num_filters],
             initializer=tf.constant_initializer(0.0),
-            collections=collections)
+            collections=collections,
+        )
         return tf.nn.conv2d(x, w, stride_shape, pad) + b
 
 
 def linear(x, size, name, initializer=None, bias_init=0):
-    w = tf.get_variable(
-        name + "/w", [x.get_shape()[1], size], initializer=initializer)
+    w = tf.get_variable(name + "/w", [x.get_shape()[1], size], initializer=initializer)
     b = tf.get_variable(
-        name + "/b", [size], initializer=tf.constant_initializer(bias_init))
+        name + "/b", [size], initializer=tf.constant_initializer(bias_init)
+    )
     return tf.matmul(x, w) + b
 
 

@@ -42,7 +42,6 @@ def get_r2_env_wrapper(env_creator, r2_config):
             if r2_config["initialize_buffer"]:
                 self._initialize_buffer(r2_config["num_init_rewards"])
 
-
         def _initialize_buffer(self, num_init_rewards=100):
             # initialize buffer with random policy
             for i in range(num_init_rewards):
@@ -52,8 +51,7 @@ def get_r2_env_wrapper(env_creator, r2_config):
                 while not done:
                     mask = obs["action_mask"]
                     probs = mask / mask.sum()
-                    action = np.random.choice(
-                        np.arange(mask.shape[0]), p=probs)
+                    action = np.random.choice(np.arange(mask.shape[0]), p=probs)
                     obs, reward, done, _ = self.env.step(action)
                 self.r2_buffer.add_reward(reward)
 
@@ -66,15 +64,15 @@ def get_r2_env_wrapper(env_creator, r2_config):
         def get_state(self):
             state = {
                 "env_state": self.env.get_state(),
-                "buffer_state": self.r2_buffer.get_state()
+                "buffer_state": self.r2_buffer.get_state(),
             }
 
             try:
-                env_new=state["env_state"][0].fork(),deepcopy(state["env_state"][1])
+                env_new = state["env_state"][0].fork(), deepcopy(state["env_state"][1])
 
                 state_new = {
                     "env_state": env_new,
-                    "buffer_state": deepcopy(state["buffer_state"])
+                    "buffer_state": deepcopy(state["buffer_state"]),
                 }
                 return state_new
             except:
@@ -82,7 +80,6 @@ def get_r2_env_wrapper(env_creator, r2_config):
 
         def reset(self):
             return self.env.reset()
-
 
         def set_state(self, state):
             obs = self.env.set_state(state["env_state"])

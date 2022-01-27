@@ -1,5 +1,4 @@
-from ray.rllib.utils.exploration.ornstein_uhlenbeck_noise import \
-    OrnsteinUhlenbeckNoise
+from ray.rllib.utils.exploration.ornstein_uhlenbeck_noise import OrnsteinUhlenbeckNoise
 from ray.rllib.utils.schedules import ConstantSchedule
 
 
@@ -11,8 +10,7 @@ class PerWorkerOrnsteinUhlenbeckNoise(OrnsteinUhlenbeckNoise):
     See Ape-X paper.
     """
 
-    def __init__(self, action_space, *, framework, num_workers, worker_index,
-                 **kwargs):
+    def __init__(self, action_space, *, framework, num_workers, worker_index, **kwargs):
         """
         Args:
             action_space (Space): The gym action space used by the environment.
@@ -25,9 +23,8 @@ class PerWorkerOrnsteinUhlenbeckNoise(OrnsteinUhlenbeckNoise):
         # Use a fixed, different epsilon per worker. See: Ape-X paper.
         if num_workers > 0:
             if worker_index > 0:
-                exponent = (1 + worker_index / float(num_workers - 1) * 7)
-                scale_schedule = ConstantSchedule(
-                    0.4**exponent, framework=framework)
+                exponent = 1 + worker_index / float(num_workers - 1) * 7
+                scale_schedule = ConstantSchedule(0.4 ** exponent, framework=framework)
             # Local worker should have zero exploration so that eval
             # rollouts run properly.
             else:
@@ -39,4 +36,5 @@ class PerWorkerOrnsteinUhlenbeckNoise(OrnsteinUhlenbeckNoise):
             num_workers=num_workers,
             worker_index=worker_index,
             framework=framework,
-            **kwargs)
+            **kwargs
+        )

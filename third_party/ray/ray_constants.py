@@ -23,15 +23,15 @@ ID_SIZE = 20
 
 # The default maximum number of bytes to allocate to the object store unless
 # overridden by the user.
-DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES = 200 * 10**9
+DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES = 200 * 10 ** 9
 # The smallest cap on the memory used by the object store that we allow.
 # This must be greater than MEMORY_RESOURCE_UNIT_BYTES * 0.7
 OBJECT_STORE_MINIMUM_MEMORY_BYTES = 75 * 1024 * 1024
 # The default maximum number of bytes that the non-primary Redis shards are
 # allowed to use unless overridden by the user.
-DEFAULT_REDIS_MAX_MEMORY_BYTES = 10**10
+DEFAULT_REDIS_MAX_MEMORY_BYTES = 10 ** 10
 # The smallest cap on the memory used by Redis that we allow.
-REDIS_MINIMUM_MEMORY_BYTES = 10**7
+REDIS_MINIMUM_MEMORY_BYTES = 10 ** 7
 # If a user does not specify a port for the primary Ray service,
 # we attempt to start the service running at this port.
 DEFAULT_PORT = 6379
@@ -49,7 +49,7 @@ DEFAULT_ACTOR_METHOD_NUM_RETURN_VALS = 1
 
 # If a remote function or actor (or some other export) has serialized size
 # greater than this quantity, print an warning.
-PICKLE_OBJECT_WARNING_SIZE = 10**7
+PICKLE_OBJECT_WARNING_SIZE = 10 ** 7
 
 # If remote functions with the same source are imported this many times, then
 # print a warning.
@@ -87,8 +87,10 @@ def to_memory_units(memory_bytes, round_up):
     if value < 1:
         raise ValueError(
             "The minimum amount of memory that can be requested is {} bytes, "
-            "however {} bytes was asked.".format(MEMORY_RESOURCE_UNIT_BYTES,
-                                                 memory_bytes))
+            "however {} bytes was asked.".format(
+                MEMORY_RESOURCE_UNIT_BYTES, memory_bytes
+            )
+        )
     if isinstance(value, float) and not value.is_integer():
         # TODO(ekl) Ray currently does not support fractional resources when
         # the quantity is greater than one. We should fix memory resources to
@@ -136,15 +138,15 @@ AUTOSCALER_MAX_LAUNCH_BATCH = env_integer("AUTOSCALER_MAX_LAUNCH_BATCH", 5)
 
 # Max number of nodes to launch at a time.
 AUTOSCALER_MAX_CONCURRENT_LAUNCHES = env_integer(
-    "AUTOSCALER_MAX_CONCURRENT_LAUNCHES", 10)
+    "AUTOSCALER_MAX_CONCURRENT_LAUNCHES", 10
+)
 
 # Interval at which to perform autoscaling updates.
 AUTOSCALER_UPDATE_INTERVAL_S = env_integer("AUTOSCALER_UPDATE_INTERVAL_S", 5)
 
 # The autoscaler will attempt to restart Ray on nodes it hasn't heard from
 # in more than this interval.
-AUTOSCALER_HEARTBEAT_TIMEOUT_S = env_integer("AUTOSCALER_HEARTBEAT_TIMEOUT_S",
-                                             30)
+AUTOSCALER_HEARTBEAT_TIMEOUT_S = env_integer("AUTOSCALER_HEARTBEAT_TIMEOUT_S", 30)
 
 # The reporter will report its statistics this often (milliseconds).
 REPORTER_UPDATE_INTERVAL_MS = env_integer("REPORTER_UPDATE_INTERVAL_MS", 2500)
@@ -154,13 +156,14 @@ BOTO_MAX_RETRIES = env_integer("BOTO_MAX_RETRIES", 12)
 # Max number of retries to create an EC2 node (retry different subnet)
 BOTO_CREATE_MAX_RETRIES = env_integer("BOTO_CREATE_MAX_RETRIES", 5)
 
-LOGGER_FORMAT = (
-    "%(asctime)s\t%(levelname)s %(filename)s:%(lineno)s -- %(message)s")
+LOGGER_FORMAT = "%(asctime)s\t%(levelname)s %(filename)s:%(lineno)s -- %(message)s"
 LOGGER_FORMAT_HELP = "The logging format. default='{}'".format(LOGGER_FORMAT)
 LOGGER_LEVEL = "info"
 LOGGER_LEVEL_CHOICES = ["debug", "info", "warning", "error", "critical"]
-LOGGER_LEVEL_HELP = ("The logging level threshold, choices=['debug', 'info',"
-                     " 'warning', 'error', 'critical'], default='info'")
+LOGGER_LEVEL_HELP = (
+    "The logging level threshold, choices=['debug', 'info',"
+    " 'warning', 'error', 'critical'], default='info'"
+)
 
 # Constants used to define the different process types.
 PROCESS_TYPE_REAPER = "reaper"

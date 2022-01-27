@@ -16,12 +16,13 @@ import subprocess
 import sys
 
 import vs_toolchain
+
 # vs_toolchain adds gyp to sys.path.
 import gyp.MSVSVersion
 
 if len(sys.argv) < 2:
-  print >>sys.stderr, "Usage: vs_env.py TARGET_ARCH CMD..."
-  sys.exit(1)
+    print >>sys.stderr, "Usage: vs_env.py TARGET_ARCH CMD..."
+    sys.exit(1)
 
 target_arch = sys.argv[1]
 cmd = sys.argv[2:]
@@ -33,5 +34,6 @@ vs_version = gyp.MSVSVersion.SelectVisualStudioVersion()
 # of the Chromium GN build's setup_toolchain.py which runs the setup script,
 # then 'set', and then parses the environment variables out. (GYP internally
 # does the same thing.)
-sys.exit(subprocess.call(vs_version.SetupScript(target_arch) + ["&&"] + cmd,
-                         shell=True))
+sys.exit(
+    subprocess.call(vs_version.SetupScript(target_arch) + ["&&"] + cmd, shell=True)
+)

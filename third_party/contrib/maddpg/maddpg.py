@@ -120,9 +120,8 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
         keys = multi_agent_batch.policy_batches[pid].data.keys()
         keys = ["_".join([k, str(i)]) for k in keys]
         samples.update(
-            dict(
-                zip(keys,
-                    multi_agent_batch.policy_batches[pid].data.values())))
+            dict(zip(keys, multi_agent_batch.policy_batches[pid].data.values()))
+        )
 
     # Make ops and feed_dict to get "new_obs" from target action sampler.
     new_obs_ph_n = [p.new_obs_ph for p in policies.values()]
@@ -136,8 +135,8 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
 
     new_act_n = p.sess.run(target_act_sampler_n, feed_dict)
     samples.update(
-        {"new_actions_%d" % i: new_act
-         for i, new_act in enumerate(new_act_n)})
+        {"new_actions_%d" % i: new_act for i, new_act in enumerate(new_act_n)}
+    )
 
     # Share samples among agents.
     policy_batches = {pid: SampleBatch(samples) for pid in policies.keys()}
@@ -152,10 +151,10 @@ def add_maddpg_postprocessing(config):
     """
 
     def f(batch, workers, config):
-        policies = dict(workers.local_worker()
-                        .foreach_trainable_policy(lambda p, i: (i, p)))
-        return before_learn_on_batch(batch, policies,
-                                     config["train_batch_size"])
+        policies = dict(
+            workers.local_worker().foreach_trainable_policy(lambda p, i: (i, p))
+        )
+        return before_learn_on_batch(batch, policies, config["train_batch_size"])
 
     config["before_learn_on_batch"] = f
     return config
@@ -166,4 +165,5 @@ MADDPGTrainer = GenericOffPolicyTrainer.with_updates(
     default_config=DEFAULT_CONFIG,
     default_policy=MADDPGTFPolicy,
     get_policy_class=None,
-    validate_config=add_maddpg_postprocessing)
+    validate_config=add_maddpg_postprocessing,
+)

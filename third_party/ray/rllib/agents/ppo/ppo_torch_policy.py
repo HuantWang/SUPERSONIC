@@ -2,12 +2,10 @@ import logging
 
 import ray
 from ray.rllib.agents.a3c.a3c_torch_policy import apply_grad_clipping
-from ray.rllib.agents.ppo.ppo_tf_policy import postprocess_ppo_gae, \
-    setup_config
+from ray.rllib.agents.ppo.ppo_tf_policy import postprocess_ppo_gae, setup_config
 from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.torch_policy import EntropyCoeffSchedule, \
-    LearningRateSchedule
+from ray.rllib.policy.torch_policy import EntropyCoeffSchedule, LearningRateSchedule
 from ray.rllib.policy.torch_policy_template import build_torch_policy
 from ray.rllib.utils.explained_variance import explained_variance
 from ray.rllib.utils.torch_ops import sequence_mask
@@ -19,24 +17,26 @@ logger = logging.getLogger(__name__)
 
 
 class PPOLoss:
-    def __init__(self,
-                 dist_class,
-                 model,
-                 value_targets,
-                 advantages,
-                 actions,
-                 prev_logits,
-                 prev_actions_logp,
-                 vf_preds,
-                 curr_action_dist,
-                 value_fn,
-                 cur_kl_coeff,
-                 valid_mask,
-                 entropy_coeff=0,
-                 clip_param=0.1,
-                 vf_clip_param=0.1,
-                 vf_loss_coeff=1.0,
-                 use_gae=True):
+    def __init__(
+        self,
+        dist_class,
+        model,
+        value_targets,
+        advantages,
+        actions,
+        prev_logits,
+        prev_actions_logp,
+        vf_preds,
+        curr_action_dist,
+        value_fn,
+        cur_kl_coeff,
+        valid_mask,
+        entropy_coeff=0,
+        clip_param=0.1,
+        vf_clip_param=0.1,
+        vf_loss_coeff=1.0,
+        use_gae=True,
+    ):
         """Constructs the loss for Proximal Policy Objective.
 
         Arguments:
@@ -78,8 +78,7 @@ class PPOLoss:
 
         prev_dist = dist_class(prev_logits, model)
         # Make loss functions.
-        logp_ratio = torch.exp(
-            curr_action_dist.logp(actions) - prev_actions_logp)
+        logp_ratio = torch.exp(curr_action_dist.logp(actions) - prev_actions_logp)
         action_kl = prev_dist.kl(curr_action_dist)
         self.mean_kl = reduce_mean_valid(action_kl)
 
@@ -88,25 +87,31 @@ class PPOLoss:
 
         surrogate_loss = torch.min(
             advantages * logp_ratio,
-            advantages * torch.clamp(logp_ratio, 1 - clip_param,
-                                     1 + clip_param))
+            advantages * torch.clamp(logp_ratio, 1 - clip_param, 1 + clip_param),
+        )
         self.mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
         if use_gae:
             vf_loss1 = torch.pow(value_fn - value_targets, 2.0)
-            vf_clipped = vf_preds + torch.clamp(value_fn - vf_preds,
-                                                -vf_clip_param, vf_clip_param)
+            vf_clipped = vf_preds + torch.clamp(
+                value_fn - vf_preds, -vf_clip_param, vf_clip_param
+            )
             vf_loss2 = torch.pow(vf_clipped - value_targets, 2.0)
             vf_loss = torch.max(vf_loss1, vf_loss2)
             self.mean_vf_loss = reduce_mean_valid(vf_loss)
             loss = reduce_mean_valid(
-                -surrogate_loss + cur_kl_coeff * action_kl +
-                vf_loss_coeff * vf_loss - entropy_coeff * curr_entropy)
+                -surrogate_loss
+                + cur_kl_coeff * action_kl
+                + vf_loss_coeff * vf_loss
+                - entropy_coeff * curr_entropy
+            )
         else:
             self.mean_vf_loss = 0.0
-            loss = reduce_mean_valid(-surrogate_loss +
-                                     cur_kl_coeff * action_kl -
-                                     entropy_coeff * curr_entropy)
+            loss = reduce_mean_valid(
+                -surrogate_loss
+                + cur_kl_coeff * action_kl
+                - entropy_coeff * curr_entropy
+            )
         self.loss = loss
 
 
@@ -153,7 +158,8 @@ def kl_and_loss_stats(policy, train_batch):
         "vf_explained_var": explained_variance(
             train_batch[Postprocessing.VALUE_TARGETS],
             policy.model.value_function(),
-            framework="torch"),
+            framework="torch",
+        ),
         "kl": policy.loss_obj.mean_kl,
         "entropy": policy.loss_obj.mean_entropy,
         "entropy_coeff": policy.entropy_coeff,
@@ -186,15 +192,20 @@ class ValueNetworkMixin:
         if config["use_gae"]:
 
             def value(ob, prev_action, prev_reward, *state):
-                model_out, _ = self.model({
-                    SampleBatch.CUR_OBS: self._convert_to_tensor([ob]),
-                    SampleBatch.PREV_ACTIONS: self._convert_to_tensor(
-                        [prev_action]),
-                    SampleBatch.PREV_REWARDS: self._convert_to_tensor(
-                        [prev_reward]),
-                    "is_training": False,
-                }, [self._convert_to_tensor(s) for s in state],
-                                          self._convert_to_tensor([1]))
+                model_out, _ = self.model(
+                    {
+                        SampleBatch.CUR_OBS: self._convert_to_tensor([ob]),
+                        SampleBatch.PREV_ACTIONS: self._convert_to_tensor(
+                            [prev_action]
+                        ),
+                        SampleBatch.PREV_REWARDS: self._convert_to_tensor(
+                            [prev_reward]
+                        ),
+                        "is_training": False,
+                    },
+                    [self._convert_to_tensor(s) for s in state],
+                    self._convert_to_tensor([1]),
+                )
                 return self.model.value_function()[0]
 
         else:
@@ -208,8 +219,9 @@ class ValueNetworkMixin:
 def setup_mixins(policy, obs_space, action_space, config):
     ValueNetworkMixin.__init__(policy, obs_space, action_space, config)
     KLCoeffMixin.__init__(policy, config)
-    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
-                                  config["entropy_coeff_schedule"])
+    EntropyCoeffSchedule.__init__(
+        policy, config["entropy_coeff"], config["entropy_coeff_schedule"]
+    )
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
@@ -224,6 +236,9 @@ PPOTorchPolicy = build_torch_policy(
     before_init=setup_config,
     after_init=setup_mixins,
     mixins=[
-        LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
-        ValueNetworkMixin
-    ])
+        LearningRateSchedule,
+        EntropyCoeffSchedule,
+        KLCoeffMixin,
+        ValueNetworkMixin,
+    ],
+)

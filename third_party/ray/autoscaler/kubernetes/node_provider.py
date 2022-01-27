@@ -27,19 +27,20 @@ class KubernetesNodeProvider(NodeProvider):
         # Match pods that are in the 'Pending' or 'Running' phase.
         # Unfortunately there is no OR operator in field selectors, so we
         # have to match on NOT any of the other phases.
-        field_selector = ",".join([
-            "status.phase!=Failed",
-            "status.phase!=Unknown",
-            "status.phase!=Succeeded",
-            "status.phase!=Terminating",
-        ])
+        field_selector = ",".join(
+            [
+                "status.phase!=Failed",
+                "status.phase!=Unknown",
+                "status.phase!=Succeeded",
+                "status.phase!=Terminating",
+            ]
+        )
 
         tag_filters[TAG_RAY_CLUSTER_NAME] = self.cluster_name
         label_selector = to_label_selector(tag_filters)
         pod_list = core_api().list_namespaced_pod(
-            self.namespace,
-            field_selector=field_selector,
-            label_selector=label_selector)
+            self.namespace, field_selector=field_selector, label_selector=label_selector
+        )
 
         return [pod.metadata.name for pod in pod_list.items]
 
@@ -75,8 +76,9 @@ class KubernetesNodeProvider(NodeProvider):
             pod_spec["metadata"]["labels"].update(tags)
         else:
             pod_spec["metadata"]["labels"] = tags
-        logger.info(log_prefix + "calling create_namespaced_pod "
-                    "(count={}).".format(count))
+        logger.info(
+            log_prefix + "calling create_namespaced_pod " "(count={}).".format(count)
+        )
         for _ in range(count):
             core_api().create_namespaced_pod(self.namespace, pod_spec)
 
@@ -87,7 +89,15 @@ class KubernetesNodeProvider(NodeProvider):
         for node_id in node_ids:
             self.terminate_node(node_id)
 
-    def get_command_runner(self, log_prefix, node_id, auth_config,
-                           cluster_name, process_runner, use_internal_ip):
-        return KubernetesCommandRunner(log_prefix, self.namespace, node_id,
-                                       auth_config, process_runner)
+    def get_command_runner(
+        self,
+        log_prefix,
+        node_id,
+        auth_config,
+        cluster_name,
+        process_runner,
+        use_internal_ip,
+    ):
+        return KubernetesCommandRunner(
+            log_prefix, self.namespace, node_id, auth_config, process_runner
+        )

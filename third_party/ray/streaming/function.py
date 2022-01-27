@@ -226,8 +226,9 @@ class SimpleFlatMapFunction(FlatMapFunction):
         self.func = func
         self.process_func = None
         sig = inspect.signature(func)
-        assert len(sig.parameters) <= 2, \
-            "func should receive value [, collector] as arguments"
+        assert (
+            len(sig.parameters) <= 2
+        ), "func should receive value [, collector] as arguments"
         if len(sig.parameters) == 2:
 
             def process(value, collector):
@@ -302,8 +303,12 @@ def load_function(descriptor_func_bytes: bytes):
         a streaming function
     """
     assert len(descriptor_func_bytes) > 0
-    function_bytes, module_name, function_name, function_interface \
-        = gateway_client.deserialize(descriptor_func_bytes)
+    (
+        function_bytes,
+        module_name,
+        function_name,
+        function_interface,
+    ) = gateway_client.deserialize(descriptor_func_bytes)
     if function_bytes:
         return deserialize(function_bytes)
     else:
@@ -329,8 +334,6 @@ def _get_simple_function_class(function_interface):
     """Get the wrapper function for the given `function_interface`."""
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj) and issubclass(obj, function_interface):
-            if obj is not function_interface and obj.__name__.startswith(
-                    "Simple"):
+            if obj is not function_interface and obj.__name__.startswith("Simple"):
                 return obj
-    raise Exception(
-        "SimpleFunction for %s doesn't exist".format(function_interface))
+    raise Exception("SimpleFunction for %s doesn't exist".format(function_interface))

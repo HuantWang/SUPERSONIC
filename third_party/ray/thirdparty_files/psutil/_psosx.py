@@ -93,15 +93,16 @@ pidtaskinfo_map = dict(
 
 
 # psutil.cpu_times()
-scputimes = namedtuple('scputimes', ['user', 'nice', 'system', 'idle'])
+scputimes = namedtuple("scputimes", ["user", "nice", "system", "idle"])
 # psutil.virtual_memory()
 svmem = namedtuple(
-    'svmem', ['total', 'available', 'percent', 'used', 'free',
-              'active', 'inactive', 'wired'])
+    "svmem",
+    ["total", "available", "percent", "used", "free", "active", "inactive", "wired"],
+)
 # psutil.Process.memory_info()
-pmem = namedtuple('pmem', ['rss', 'vms', 'pfaults', 'pageins'])
+pmem = namedtuple("pmem", ["rss", "vms", "pfaults", "pageins"])
 # psutil.Process.memory_full_info()
-pfullmem = namedtuple('pfullmem', pmem._fields + ('uss', ))
+pfullmem = namedtuple("pfullmem", pmem._fields + ("uss",))
 
 
 # =====================================================================
@@ -122,8 +123,7 @@ def virtual_memory():
     # cmdline utility.
     free -= speculative
     percent = usage_percent((total - avail), total, round_=1)
-    return svmem(total, avail, percent, used, free,
-                 active, inactive, wired)
+    return svmem(total, avail, percent, used, free, active, inactive, wired)
 
 
 def swap_memory():
@@ -165,10 +165,8 @@ def cpu_count_physical():
 
 
 def cpu_stats():
-    ctx_switches, interrupts, soft_interrupts, syscalls, traps = \
-        cext.cpu_stats()
-    return _common.scpustats(
-        ctx_switches, interrupts, soft_interrupts, syscalls)
+    ctx_switches, interrupts, soft_interrupts, syscalls, traps = cext.cpu_stats()
+    return _common.scpustats(ctx_switches, interrupts, soft_interrupts, syscalls)
 
 
 def cpu_freq():
@@ -196,8 +194,8 @@ def disk_partitions(all=False):
     partitions = cext.disk_partitions()
     for partition in partitions:
         device, mountpoint, fstype, opts = partition
-        if device == 'none':
-            device = ''
+        if device == "none":
+            device = ""
         if not all:
             if not os.path.isabs(device) or not os.path.exists(device):
                 continue
@@ -237,7 +235,7 @@ net_io_counters = cext.net_io_counters
 net_if_addrs = cext_posix.net_if_addrs
 
 
-def net_connections(kind='inet'):
+def net_connections(kind="inet"):
     """System-wide network connections."""
     # Note: on macOS this will fail with AccessDenied unless
     # the process is owned by root.
@@ -269,7 +267,7 @@ def net_if_stats():
             if err.errno != errno.ENODEV:
                 raise
         else:
-            if hasattr(_common, 'NicDuplex'):
+            if hasattr(_common, "NicDuplex"):
                 duplex = _common.NicDuplex(duplex)
             ret[name] = _common.snicstats(isup, duplex, speed, mtu)
     return ret
@@ -291,7 +289,7 @@ def users():
     rawlist = cext.users()
     for item in rawlist:
         user, tty, hostname, tstamp, pid = item
-        if tty == '~':
+        if tty == "~":
             continue  # reboot or shutdown
         if not tstamp:
             continue
@@ -328,6 +326,7 @@ def wrap_exceptions(fun):
     """Decorator which translates bare OSError exceptions into
     NoSuchProcess and AccessDenied.
     """
+
     @functools.wraps(fun)
     def wrapper(self, *args, **kwargs):
         try:
@@ -338,6 +337,7 @@ def wrap_exceptions(fun):
             raise AccessDenied(self.pid, self._name)
         except cext.ZombieProcessError:
             raise ZombieProcess(self.pid, self._name, self._ppid)
+
     return wrapper
 
 
@@ -404,7 +404,7 @@ class Process(object):
 
     @wrap_exceptions
     def name(self):
-        name = self._get_kinfo_proc()[kinfo_proc_map['name']]
+        name = self._get_kinfo_proc()[kinfo_proc_map["name"]]
         return name if name is not None else cext.proc_name(self.pid)
 
     @wrap_exceptions
@@ -424,7 +424,7 @@ class Process(object):
 
     @wrap_exceptions
     def ppid(self):
-        self._ppid = self._get_kinfo_proc()[kinfo_proc_map['ppid']]
+        self._ppid = self._get_kinfo_proc()[kinfo_proc_map["ppid"]]
         return self._ppid
 
     @wrap_exceptions
@@ -436,21 +436,23 @@ class Process(object):
     def uids(self):
         rawtuple = self._get_kinfo_proc()
         return _common.puids(
-            rawtuple[kinfo_proc_map['ruid']],
-            rawtuple[kinfo_proc_map['euid']],
-            rawtuple[kinfo_proc_map['suid']])
+            rawtuple[kinfo_proc_map["ruid"]],
+            rawtuple[kinfo_proc_map["euid"]],
+            rawtuple[kinfo_proc_map["suid"]],
+        )
 
     @wrap_exceptions
     def gids(self):
         rawtuple = self._get_kinfo_proc()
         return _common.puids(
-            rawtuple[kinfo_proc_map['rgid']],
-            rawtuple[kinfo_proc_map['egid']],
-            rawtuple[kinfo_proc_map['sgid']])
+            rawtuple[kinfo_proc_map["rgid"]],
+            rawtuple[kinfo_proc_map["egid"]],
+            rawtuple[kinfo_proc_map["sgid"]],
+        )
 
     @wrap_exceptions
     def terminal(self):
-        tty_nr = self._get_kinfo_proc()[kinfo_proc_map['ttynr']]
+        tty_nr = self._get_kinfo_proc()[kinfo_proc_map["ttynr"]]
         tmap = _psposix.get_terminal_map()
         try:
             return tmap[tty_nr]
@@ -461,42 +463,44 @@ class Process(object):
     def memory_info(self):
         rawtuple = self._get_pidtaskinfo()
         return pmem(
-            rawtuple[pidtaskinfo_map['rss']],
-            rawtuple[pidtaskinfo_map['vms']],
-            rawtuple[pidtaskinfo_map['pfaults']],
-            rawtuple[pidtaskinfo_map['pageins']],
+            rawtuple[pidtaskinfo_map["rss"]],
+            rawtuple[pidtaskinfo_map["vms"]],
+            rawtuple[pidtaskinfo_map["pfaults"]],
+            rawtuple[pidtaskinfo_map["pageins"]],
         )
 
     @wrap_exceptions
     def memory_full_info(self):
         basic_mem = self.memory_info()
         uss = cext.proc_memory_uss(self.pid)
-        return pfullmem(*basic_mem + (uss, ))
+        return pfullmem(*basic_mem + (uss,))
 
     @wrap_exceptions
     def cpu_times(self):
         rawtuple = self._get_pidtaskinfo()
         return _common.pcputimes(
-            rawtuple[pidtaskinfo_map['cpuutime']],
-            rawtuple[pidtaskinfo_map['cpustime']],
+            rawtuple[pidtaskinfo_map["cpuutime"]],
+            rawtuple[pidtaskinfo_map["cpustime"]],
             # children user / system times are not retrievable (set to 0)
-            0.0, 0.0)
+            0.0,
+            0.0,
+        )
 
     @wrap_exceptions
     def create_time(self):
-        return self._get_kinfo_proc()[kinfo_proc_map['ctime']]
+        return self._get_kinfo_proc()[kinfo_proc_map["ctime"]]
 
     @wrap_exceptions
     def num_ctx_switches(self):
         # Unvoluntary value seems not to be available;
         # getrusage() numbers seems to confirm this theory.
         # We set it to 0.
-        vol = self._get_pidtaskinfo()[pidtaskinfo_map['volctxsw']]
+        vol = self._get_pidtaskinfo()[pidtaskinfo_map["volctxsw"]]
         return _common.pctxsw(vol, 0)
 
     @wrap_exceptions
     def num_threads(self):
-        return self._get_pidtaskinfo()[pidtaskinfo_map['numthreads']]
+        return self._get_pidtaskinfo()[pidtaskinfo_map["numthreads"]]
 
     @wrap_exceptions
     def open_files(self):
@@ -512,18 +516,19 @@ class Process(object):
         return files
 
     @wrap_exceptions
-    def connections(self, kind='inet'):
+    def connections(self, kind="inet"):
         if kind not in conn_tmap:
-            raise ValueError("invalid %r kind argument; choose between %s"
-                             % (kind, ', '.join([repr(x) for x in conn_tmap])))
+            raise ValueError(
+                "invalid %r kind argument; choose between %s"
+                % (kind, ", ".join([repr(x) for x in conn_tmap]))
+            )
         families, types = conn_tmap[kind]
         with catch_zombie(self):
             rawlist = cext.proc_connections(self.pid, families, types)
         ret = []
         for item in rawlist:
             fd, fam, type, laddr, raddr, status = item
-            nt = conn_to_ntuple(fd, fam, type, laddr, raddr, status,
-                                TCP_STATUSES)
+            nt = conn_to_ntuple(fd, fam, type, laddr, raddr, status, TCP_STATUSES)
             ret.append(nt)
         return ret
 
@@ -550,9 +555,9 @@ class Process(object):
 
     @wrap_exceptions
     def status(self):
-        code = self._get_kinfo_proc()[kinfo_proc_map['status']]
+        code = self._get_kinfo_proc()[kinfo_proc_map["status"]]
         # XXX is '?' legit? (we're not supposed to return it anyway)
-        return PROC_STATUSES.get(code, '?')
+        return PROC_STATUSES.get(code, "?")
 
     @wrap_exceptions
     def threads(self):

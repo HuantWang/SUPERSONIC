@@ -22,10 +22,10 @@ from grpc.framework.foundation import logging_pool
 
 from tests.unit.framework.common import test_constants
 
-_REQUEST = b'\x00\x00\x00'
-_RESPONSE = b'\x00\x00\x01'
+_REQUEST = b"\x00\x00\x00"
+_RESPONSE = b"\x00\x00\x01"
 
-_UNARY_UNARY = '/test/UnaryUnary'
+_UNARY_UNARY = "/test/UnaryUnary"
 
 
 def _handle_unary_unary(unused_request, unused_servicer_context):
@@ -52,7 +52,7 @@ def _pick_and_bind_port(sock_opt):
             continue  # this address family is unavailable
         s.setsockopt(socket.SOL_SOCKET, sock_opt, 1)
         try:
-            s.bind(('localhost', port))
+            s.bind(("localhost", port))
             # for socket.SOCK_STREAM sockets, it is necessary to call
             # listen to get the desired behavior.
             s.listen(1)
@@ -71,21 +71,20 @@ def _pick_and_bind_port(sock_opt):
 
 
 class ReconnectTest(unittest.TestCase):
-
     def test_reconnect(self):
         server_pool = logging_pool.pool(test_constants.THREAD_CONCURRENCY)
-        handler = grpc.method_handlers_generic_handler('test', {
-            'UnaryUnary':
-            grpc.unary_unary_rpc_method_handler(_handle_unary_unary)
-        })
+        handler = grpc.method_handlers_generic_handler(
+            "test",
+            {"UnaryUnary": grpc.unary_unary_rpc_method_handler(_handle_unary_unary)},
+        )
         sock_opt = _get_reuse_socket_option()
         port = _pick_and_bind_port(sock_opt)
         self.assertIsNotNone(port)
 
         server = grpc.server(server_pool, (handler,))
-        server.add_insecure_port('[::]:{}'.format(port))
+        server.add_insecure_port("[::]:{}".format(port))
         server.start()
-        channel = grpc.insecure_channel('localhost:%d' % port)
+        channel = grpc.insecure_channel("localhost:%d" % port)
         multi_callable = channel.unary_unary(_UNARY_UNARY)
         self.assertEqual(_RESPONSE, multi_callable(_REQUEST))
         server.stop(None)
@@ -94,10 +93,10 @@ class ReconnectTest(unittest.TestCase):
         # this.
         time.sleep(5.1)
         server = grpc.server(server_pool, (handler,))
-        server.add_insecure_port('[::]:{}'.format(port))
+        server.add_insecure_port("[::]:{}".format(port))
         server.start()
         self.assertEqual(_RESPONSE, multi_callable(_REQUEST))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

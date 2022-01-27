@@ -29,8 +29,7 @@ class AsyncGradientsOptimizer(PolicyOptimizer):
         self.grads_per_step = grads_per_step
         self.learner_stats = {}
         if not self.workers.remote_workers():
-            raise ValueError(
-                "Async optimizer requires at least 1 remote workers")
+            raise ValueError("Async optimizer requires at least 1 remote workers")
 
     @override(PolicyOptimizer)
     def step(self):
@@ -47,8 +46,7 @@ class AsyncGradientsOptimizer(PolicyOptimizer):
 
         while pending_gradients:
             with self.wait_timer:
-                wait_results = ray.wait(
-                    list(pending_gradients.keys()), num_returns=1)
+                wait_results = ray.wait(list(pending_gradients.keys()), num_returns=1)
                 ready_list = wait_results[0]
                 future = ready_list[0]
 
@@ -64,8 +62,7 @@ class AsyncGradientsOptimizer(PolicyOptimizer):
 
             if num_gradients < self.grads_per_step:
                 with self.dispatch_timer:
-                    e.set_weights.remote(
-                        self.workers.local_worker().get_weights())
+                    e.set_weights.remote(self.workers.local_worker().get_weights())
                     future = e.compute_gradients.remote(e.sample.remote())
 
                     pending_gradients[future] = e
@@ -74,9 +71,11 @@ class AsyncGradientsOptimizer(PolicyOptimizer):
     @override(PolicyOptimizer)
     def stats(self):
         return dict(
-            PolicyOptimizer.stats(self), **{
+            PolicyOptimizer.stats(self),
+            **{
                 "wait_time_ms": round(1000 * self.wait_timer.mean, 3),
                 "apply_time_ms": round(1000 * self.apply_timer.mean, 3),
                 "dispatch_time_ms": round(1000 * self.dispatch_timer.mean, 3),
                 "learner": self.learner_stats,
-            })
+            }
+        )

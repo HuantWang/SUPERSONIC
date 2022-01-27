@@ -56,12 +56,11 @@ SOCK_SEQPACKET = getattr(socket, "SOCK_SEQPACKET", object())
 
 
 class Base(object):
-
     def setUp(self):
         safe_rmpath(TESTFN)
         if not (NETBSD or FREEBSD):
             # process opens a UNIX socket to /var/log/run.
-            cons = thisproc.connections(kind='all')
+            cons = thisproc.connections(kind="all")
             assert not cons, cons
 
     def tearDown(self):
@@ -70,10 +69,10 @@ class Base(object):
         if not (FREEBSD or NETBSD):
             # Make sure we closed all resources.
             # NetBSD opens a UNIX socket to /var/log/run.
-            cons = thisproc.connections(kind='all')
+            cons = thisproc.connections(kind="all")
             assert not cons, cons
 
-    def compare_procsys_connections(self, pid, proc_cons, kind='all'):
+    def compare_procsys_connections(self, pid, proc_cons, kind="all"):
         """Given a process PID and its list of connections compare
         those against system-wide connections retrieved via
         psutil.net_connections.
@@ -95,6 +94,7 @@ class Base(object):
 
     def check_connection_ntuple(self, conn):
         """Check validity of a connection namedtuple."""
+
         def check_ntuple(conn):
             has_pid = len(conn) == 7
             self.assertIn(len(conn), (6, 7))
@@ -153,8 +153,7 @@ class Base(object):
 
         def check_status(conn):
             self.assertIsInstance(conn.status, str)
-            valids = [getattr(psutil, x) for x in dir(psutil)
-                      if x.startswith('CONN_')]
+            valids = [getattr(psutil, x) for x in dir(psutil) if x.startswith("CONN_")]
             self.assertIn(conn.status, valids)
             if conn.family in (AF_INET, AF_INET6) and conn.type == SOCK_STREAM:
                 self.assertNotEqual(conn.status, psutil.CONN_NONE)
@@ -169,28 +168,27 @@ class Base(object):
 
 
 class TestBase(Base, unittest.TestCase):
-
     @unittest.skipIf(SKIP_SYSCONS, "requires root")
     def test_system(self):
         with create_sockets():
-            for conn in psutil.net_connections(kind='all'):
+            for conn in psutil.net_connections(kind="all"):
                 self.check_connection_ntuple(conn)
 
     def test_process(self):
         with create_sockets():
-            for conn in psutil.Process().connections(kind='all'):
+            for conn in psutil.Process().connections(kind="all"):
                 self.check_connection_ntuple(conn)
 
     def test_invalid_kind(self):
-        self.assertRaises(ValueError, thisproc.connections, kind='???')
-        self.assertRaises(ValueError, psutil.net_connections, kind='???')
+        self.assertRaises(ValueError, thisproc.connections, kind="???")
+        self.assertRaises(ValueError, psutil.net_connections, kind="???")
 
 
 class TestUnconnectedSockets(Base, unittest.TestCase):
     """Tests sockets which are open but not connected to anything."""
 
     def get_conn_from_sock(self, sock):
-        cons = thisproc.connections(kind='all')
+        cons = thisproc.connections(kind="all")
         smap = dict([(c.fd, c) for c in cons])
         if NETBSD or FREEBSD:
             # NetBSD opens a UNIX socket to /var/log/run
@@ -215,8 +213,7 @@ class TestUnconnectedSockets(Base, unittest.TestCase):
             self.assertEqual(conn.fd, sock.fileno())
         self.assertEqual(conn.family, sock.family)
         # see: http://bugs.python.org/issue30204
-        self.assertEqual(
-            conn.type, sock.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE))
+        self.assertEqual(conn.type, sock.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE))
 
         # local address
         laddr = sock.getsockname()
@@ -233,8 +230,8 @@ class TestUnconnectedSockets(Base, unittest.TestCase):
 
         # XXX Solaris can't retrieve system-wide UNIX sockets
         if sock.family == AF_UNIX and HAS_CONNECTIONS_UNIX:
-            cons = thisproc.connections(kind='all')
-            self.compare_procsys_connections(os.getpid(), cons, kind='all')
+            cons = thisproc.connections(kind="all")
+            self.compare_procsys_connections(os.getpid(), cons, kind="all")
         return conn
 
     def test_tcp_v4(self):
@@ -267,7 +264,7 @@ class TestUnconnectedSockets(Base, unittest.TestCase):
             assert not conn.raddr
             self.assertEqual(conn.status, psutil.CONN_NONE)
 
-    @unittest.skipIf(not POSIX, 'POSIX only')
+    @unittest.skipIf(not POSIX, "POSIX only")
     def test_unix_tcp(self):
         with unix_socket_path() as name:
             with closing(bind_unix_socket(name, type=SOCK_STREAM)) as sock:
@@ -275,7 +272,7 @@ class TestUnconnectedSockets(Base, unittest.TestCase):
                 assert not conn.raddr
                 self.assertEqual(conn.status, psutil.CONN_NONE)
 
-    @unittest.skipIf(not POSIX, 'POSIX only')
+    @unittest.skipIf(not POSIX, "POSIX only")
     def test_unix_udp(self):
         with unix_socket_path() as name:
             with closing(bind_unix_socket(name, type=SOCK_STREAM)) as sock:
@@ -294,10 +291,10 @@ class TestConnectedSocket(Base, unittest.TestCase):
     @unittest.skipIf(SUNOS, "unreliable on SUONS")
     def test_tcp(self):
         addr = ("127.0.0.1", get_free_port())
-        assert not thisproc.connections(kind='tcp4')
+        assert not thisproc.connections(kind="tcp4")
         server, client = tcp_socketpair(AF_INET, addr=addr)
         try:
-            cons = thisproc.connections(kind='tcp4')
+            cons = thisproc.connections(kind="tcp4")
             self.assertEqual(len(cons), 2)
             self.assertEqual(cons[0].status, psutil.CONN_ESTABLISHED)
             self.assertEqual(cons[1].status, psutil.CONN_ESTABLISHED)
@@ -311,21 +308,24 @@ class TestConnectedSocket(Base, unittest.TestCase):
             server.close()
             client.close()
 
-    @unittest.skipIf(not POSIX, 'POSIX only')
+    @unittest.skipIf(not POSIX, "POSIX only")
     def test_unix(self):
         with unix_socket_path() as name:
             server, client = unix_socketpair(name)
             try:
-                cons = thisproc.connections(kind='unix')
+                cons = thisproc.connections(kind="unix")
                 assert not (cons[0].laddr and cons[0].raddr)
                 assert not (cons[1].laddr and cons[1].raddr)
                 if NETBSD or FREEBSD:
                     # On NetBSD creating a UNIX socket will cause
                     # a UNIX connection to  /var/run/log.
-                    cons = [c for c in cons if c.raddr != '/var/run/log']
+                    cons = [c for c in cons if c.raddr != "/var/run/log"]
                     if CIRRUS:
-                        cons = [c for c in cons if c.fd in
-                                (server.fileno(), client.fileno())]
+                        cons = [
+                            c
+                            for c in cons
+                            if c.fd in (server.fileno(), client.fileno())
+                        ]
                 self.assertEqual(len(cons), 2, msg=cons)
                 if LINUX or FREEBSD or SUNOS:
                     # remote path is never set
@@ -335,8 +335,12 @@ class TestConnectedSocket(Base, unittest.TestCase):
                     self.assertEqual(name, cons[0].laddr or cons[1].laddr)
                 elif OPENBSD:
                     # No addresses whatsoever here.
-                    for addr in (cons[0].laddr, cons[0].raddr,
-                                 cons[1].laddr, cons[1].raddr):
+                    for addr in (
+                        cons[0].laddr,
+                        cons[0].raddr,
+                        cons[1].laddr,
+                        cons[1].raddr,
+                    ):
                         self.assertEqual(addr, "")
                 else:
                     # On other systems either the laddr or raddr
@@ -349,7 +353,6 @@ class TestConnectedSocket(Base, unittest.TestCase):
 
 
 class TestFilters(Base, unittest.TestCase):
-
     def test_filters(self):
         def check(kind, families, types):
             for conn in thisproc.connections(kind=kind):
@@ -361,43 +364,37 @@ class TestFilters(Base, unittest.TestCase):
                     self.assertIn(conn.type, types)
 
         with create_sockets():
-            check('all',
-                  [AF_INET, AF_INET6, AF_UNIX],
-                  [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET])
-            check('inet',
-                  [AF_INET, AF_INET6],
-                  [SOCK_STREAM, SOCK_DGRAM])
-            check('inet4',
-                  [AF_INET],
-                  [SOCK_STREAM, SOCK_DGRAM])
-            check('tcp',
-                  [AF_INET, AF_INET6],
-                  [SOCK_STREAM])
-            check('tcp4',
-                  [AF_INET],
-                  [SOCK_STREAM])
-            check('tcp6',
-                  [AF_INET6],
-                  [SOCK_STREAM])
-            check('udp',
-                  [AF_INET, AF_INET6],
-                  [SOCK_DGRAM])
-            check('udp4',
-                  [AF_INET],
-                  [SOCK_DGRAM])
-            check('udp6',
-                  [AF_INET6],
-                  [SOCK_DGRAM])
+            check(
+                "all",
+                [AF_INET, AF_INET6, AF_UNIX],
+                [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET],
+            )
+            check("inet", [AF_INET, AF_INET6], [SOCK_STREAM, SOCK_DGRAM])
+            check("inet4", [AF_INET], [SOCK_STREAM, SOCK_DGRAM])
+            check("tcp", [AF_INET, AF_INET6], [SOCK_STREAM])
+            check("tcp4", [AF_INET], [SOCK_STREAM])
+            check("tcp6", [AF_INET6], [SOCK_STREAM])
+            check("udp", [AF_INET, AF_INET6], [SOCK_DGRAM])
+            check("udp4", [AF_INET], [SOCK_DGRAM])
+            check("udp6", [AF_INET6], [SOCK_DGRAM])
             if HAS_CONNECTIONS_UNIX:
-                check('unix',
-                      [AF_UNIX],
-                      [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET])
+                check("unix", [AF_UNIX], [SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET])
 
     @skip_on_access_denied(only_if=MACOS)
     def test_combos(self):
         def check_conn(proc, conn, family, type, laddr, raddr, status, kinds):
-            all_kinds = ("all", "inet", "inet4", "inet6", "tcp", "tcp4",
-                         "tcp6", "udp", "udp4", "udp6")
+            all_kinds = (
+                "all",
+                "inet",
+                "inet4",
+                "inet6",
+                "tcp",
+                "tcp4",
+                "tcp6",
+                "udp",
+                "udp4",
+                "udp6",
+            )
             self.check_connection_ntuple(conn)
             self.assertEqual(conn.family, family)
             self.assertEqual(conn.type, type)
@@ -416,7 +413,8 @@ class TestFilters(Base, unittest.TestCase):
             if HAS_CONNECTIONS_UNIX:
                 self.compare_procsys_connections(proc.pid, [conn])
 
-        tcp_template = textwrap.dedent("""
+        tcp_template = textwrap.dedent(
+            """
             import socket, time
             s = socket.socket($family, socket.SOCK_STREAM)
             s.bind(('$addr', 0))
@@ -424,27 +422,35 @@ class TestFilters(Base, unittest.TestCase):
             with open('$testfn', 'w') as f:
                 f.write(str(s.getsockname()[:2]))
             time.sleep(60)
-        """)
+        """
+        )
 
-        udp_template = textwrap.dedent("""
+        udp_template = textwrap.dedent(
+            """
             import socket, time
             s = socket.socket($family, socket.SOCK_DGRAM)
             s.bind(('$addr', 0))
             with open('$testfn', 'w') as f:
                 f.write(str(s.getsockname()[:2]))
             time.sleep(60)
-        """)
+        """
+        )
 
         from string import Template
+
         testfile = os.path.basename(TESTFN)
         tcp4_template = Template(tcp_template).substitute(
-            family=int(AF_INET), addr="127.0.0.1", testfn=testfile)
+            family=int(AF_INET), addr="127.0.0.1", testfn=testfile
+        )
         udp4_template = Template(udp_template).substitute(
-            family=int(AF_INET), addr="127.0.0.1", testfn=testfile)
+            family=int(AF_INET), addr="127.0.0.1", testfn=testfile
+        )
         tcp6_template = Template(tcp_template).substitute(
-            family=int(AF_INET6), addr="::1", testfn=testfile)
+            family=int(AF_INET6), addr="::1", testfn=testfile
+        )
         udp6_template = Template(udp_template).substitute(
-            family=int(AF_INET6), addr="::1", testfn=testfile)
+            family=int(AF_INET6), addr="::1", testfn=testfile
+        )
 
         # launch various subprocess instantiating a socket of various
         # families and types to enrich psutil results
@@ -469,70 +475,98 @@ class TestFilters(Base, unittest.TestCase):
             for conn in cons:
                 # TCP v4
                 if p.pid == tcp4_proc.pid:
-                    check_conn(p, conn, AF_INET, SOCK_STREAM, tcp4_addr, (),
-                               psutil.CONN_LISTEN,
-                               ("all", "inet", "inet4", "tcp", "tcp4"))
+                    check_conn(
+                        p,
+                        conn,
+                        AF_INET,
+                        SOCK_STREAM,
+                        tcp4_addr,
+                        (),
+                        psutil.CONN_LISTEN,
+                        ("all", "inet", "inet4", "tcp", "tcp4"),
+                    )
                 # UDP v4
                 elif p.pid == udp4_proc.pid:
-                    check_conn(p, conn, AF_INET, SOCK_DGRAM, udp4_addr, (),
-                               psutil.CONN_NONE,
-                               ("all", "inet", "inet4", "udp", "udp4"))
+                    check_conn(
+                        p,
+                        conn,
+                        AF_INET,
+                        SOCK_DGRAM,
+                        udp4_addr,
+                        (),
+                        psutil.CONN_NONE,
+                        ("all", "inet", "inet4", "udp", "udp4"),
+                    )
                 # TCP v6
                 elif p.pid == getattr(tcp6_proc, "pid", None):
-                    check_conn(p, conn, AF_INET6, SOCK_STREAM, tcp6_addr, (),
-                               psutil.CONN_LISTEN,
-                               ("all", "inet", "inet6", "tcp", "tcp6"))
+                    check_conn(
+                        p,
+                        conn,
+                        AF_INET6,
+                        SOCK_STREAM,
+                        tcp6_addr,
+                        (),
+                        psutil.CONN_LISTEN,
+                        ("all", "inet", "inet6", "tcp", "tcp6"),
+                    )
                 # UDP v6
                 elif p.pid == getattr(udp6_proc, "pid", None):
-                    check_conn(p, conn, AF_INET6, SOCK_DGRAM, udp6_addr, (),
-                               psutil.CONN_NONE,
-                               ("all", "inet", "inet6", "udp", "udp6"))
+                    check_conn(
+                        p,
+                        conn,
+                        AF_INET6,
+                        SOCK_DGRAM,
+                        udp6_addr,
+                        (),
+                        psutil.CONN_NONE,
+                        ("all", "inet", "inet6", "udp", "udp6"),
+                    )
 
     def test_count(self):
         with create_sockets():
             # tcp
-            cons = thisproc.connections(kind='tcp')
+            cons = thisproc.connections(kind="tcp")
             self.assertEqual(len(cons), 2 if supports_ipv6() else 1)
             for conn in cons:
                 self.assertIn(conn.family, (AF_INET, AF_INET6))
                 self.assertEqual(conn.type, SOCK_STREAM)
             # tcp4
-            cons = thisproc.connections(kind='tcp4')
+            cons = thisproc.connections(kind="tcp4")
             self.assertEqual(len(cons), 1)
             self.assertEqual(cons[0].family, AF_INET)
             self.assertEqual(cons[0].type, SOCK_STREAM)
             # tcp6
             if supports_ipv6():
-                cons = thisproc.connections(kind='tcp6')
+                cons = thisproc.connections(kind="tcp6")
                 self.assertEqual(len(cons), 1)
                 self.assertEqual(cons[0].family, AF_INET6)
                 self.assertEqual(cons[0].type, SOCK_STREAM)
             # udp
-            cons = thisproc.connections(kind='udp')
+            cons = thisproc.connections(kind="udp")
             self.assertEqual(len(cons), 2 if supports_ipv6() else 1)
             for conn in cons:
                 self.assertIn(conn.family, (AF_INET, AF_INET6))
                 self.assertEqual(conn.type, SOCK_DGRAM)
             # udp4
-            cons = thisproc.connections(kind='udp4')
+            cons = thisproc.connections(kind="udp4")
             self.assertEqual(len(cons), 1)
             self.assertEqual(cons[0].family, AF_INET)
             self.assertEqual(cons[0].type, SOCK_DGRAM)
             # udp6
             if supports_ipv6():
-                cons = thisproc.connections(kind='udp6')
+                cons = thisproc.connections(kind="udp6")
                 self.assertEqual(len(cons), 1)
                 self.assertEqual(cons[0].family, AF_INET6)
                 self.assertEqual(cons[0].type, SOCK_DGRAM)
             # inet
-            cons = thisproc.connections(kind='inet')
+            cons = thisproc.connections(kind="inet")
             self.assertEqual(len(cons), 4 if supports_ipv6() else 2)
             for conn in cons:
                 self.assertIn(conn.family, (AF_INET, AF_INET6))
                 self.assertIn(conn.type, (SOCK_STREAM, SOCK_DGRAM))
             # inet6
             if supports_ipv6():
-                cons = thisproc.connections(kind='inet6')
+                cons = thisproc.connections(kind="inet6")
                 self.assertEqual(len(cons), 2)
                 for conn in cons:
                     self.assertEqual(conn.family, AF_INET6)
@@ -540,7 +574,7 @@ class TestFilters(Base, unittest.TestCase):
             # Skipped on BSD becayse by default the Python process
             # creates a UNIX socket to '/var/run/log'.
             if HAS_CONNECTIONS_UNIX and not (FREEBSD or NETBSD):
-                cons = thisproc.connections(kind='unix')
+                cons = thisproc.connections(kind="unix")
                 self.assertEqual(len(cons), 3)
                 for conn in cons:
                     self.assertEqual(conn.family, AF_UNIX)
@@ -561,9 +595,10 @@ class TestSystemWideConnections(Base, unittest.TestCase):
 
         with create_sockets():
             from psutil._common import conn_tmap
+
             for kind, groups in conn_tmap.items():
                 # XXX: SunOS does not retrieve UNIX sockets.
-                if kind == 'unix' and not HAS_CONNECTIONS_UNIX:
+                if kind == "unix" and not HAS_CONNECTIONS_UNIX:
                     continue
                 families, types_ = groups
                 cons = psutil.net_connections(kind)
@@ -585,14 +620,17 @@ class TestSystemWideConnections(Base, unittest.TestCase):
         times = 10
         for i in range(times):
             fname = os.path.realpath(TESTFN) + str(i)
-            src = textwrap.dedent("""\
+            src = textwrap.dedent(
+                """\
                 import time, os
                 from psutil.tests import create_sockets
                 with create_sockets():
                     with open(r'%s', 'w') as f:
                         f.write(str(os.getpid()))
                     time.sleep(60)
-                """ % fname)
+                """
+                % fname
+            )
             sproc = pyrun(src)
             pids.append(sproc.pid)
             self.addCleanup(safe_rmpath, fname)
@@ -602,22 +640,19 @@ class TestSystemWideConnections(Base, unittest.TestCase):
             fname = TESTFN + str(i)
             wait_for_file(fname)
 
-        syscons = [x for x in psutil.net_connections(kind='all') if x.pid
-                   in pids]
+        syscons = [x for x in psutil.net_connections(kind="all") if x.pid in pids]
         for pid in pids:
-            self.assertEqual(len([x for x in syscons if x.pid == pid]),
-                             expected)
+            self.assertEqual(len([x for x in syscons if x.pid == pid]), expected)
             p = psutil.Process(pid)
-            self.assertEqual(len(p.connections('all')), expected)
+            self.assertEqual(len(p.connections("all")), expected)
 
 
 class TestMisc(unittest.TestCase):
-
     def test_connection_constants(self):
         ints = []
         strs = []
         for name in dir(psutil):
-            if name.startswith('CONN_'):
+            if name.startswith("CONN_"):
                 num = getattr(psutil, name)
                 str_ = str(num)
                 assert str_.isupper(), str_
@@ -632,6 +667,7 @@ class TestMisc(unittest.TestCase):
             psutil.CONN_DELETE_TCB
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from psutil.tests.runner import run
+
     run(__file__)

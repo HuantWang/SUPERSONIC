@@ -58,34 +58,49 @@ class RemoteFunction:
             different workers.
     """
 
-    def __init__(self, language, function, function_descriptor, num_cpus,
-                 num_gpus, memory, object_store_memory, resources,
-                 num_return_vals, max_calls, max_retries):
+    def __init__(
+        self,
+        language,
+        function,
+        function_descriptor,
+        num_cpus,
+        num_gpus,
+        memory,
+        object_store_memory,
+        resources,
+        num_return_vals,
+        max_calls,
+        max_retries,
+    ):
         self._language = language
         self._function = function
-        self._function_name = (
-            self._function.__module__ + "." + self._function.__name__)
+        self._function_name = self._function.__module__ + "." + self._function.__name__
         self._function_descriptor = function_descriptor
         self._is_cross_language = language != Language.PYTHON
-        self._num_cpus = (DEFAULT_REMOTE_FUNCTION_CPUS
-                          if num_cpus is None else num_cpus)
+        self._num_cpus = DEFAULT_REMOTE_FUNCTION_CPUS if num_cpus is None else num_cpus
         self._num_gpus = num_gpus
         self._memory = memory
         if object_store_memory is not None:
             raise NotImplementedError(
-                "setting object_store_memory is not implemented for tasks")
+                "setting object_store_memory is not implemented for tasks"
+            )
         self._object_store_memory = None
         self._resources = resources
-        self._num_return_vals = (DEFAULT_REMOTE_FUNCTION_NUM_RETURN_VALS if
-                                 num_return_vals is None else num_return_vals)
-        self._max_calls = (DEFAULT_REMOTE_FUNCTION_MAX_CALLS
-                           if max_calls is None else max_calls)
-        self._max_retries = (DEFAULT_REMOTE_FUNCTION_NUM_TASK_RETRIES
-                             if max_retries is None else max_retries)
-        self._decorator = getattr(function, "__ray_invocation_decorator__",
-                                  None)
-        self._function_signature = ray.signature.extract_signature(
-            self._function)
+        self._num_return_vals = (
+            DEFAULT_REMOTE_FUNCTION_NUM_RETURN_VALS
+            if num_return_vals is None
+            else num_return_vals
+        )
+        self._max_calls = (
+            DEFAULT_REMOTE_FUNCTION_MAX_CALLS if max_calls is None else max_calls
+        )
+        self._max_retries = (
+            DEFAULT_REMOTE_FUNCTION_NUM_TASK_RETRIES
+            if max_retries is None
+            else max_retries
+        )
+        self._decorator = getattr(function, "__ray_invocation_decorator__", None)
+        self._function_signature = ray.signature.extract_signature(self._function)
 
         self._last_export_session_and_job = None
 
@@ -97,26 +112,31 @@ class RemoteFunction:
         self.remote = _remote_proxy
 
     def __call__(self, *args, **kwargs):
-        raise TypeError("Remote functions cannot be called directly. Instead "
-                        "of running '{}()', try '{}.remote()'.".format(
-                            self._function_name, self._function_name))
+        raise TypeError(
+            "Remote functions cannot be called directly. Instead "
+            "of running '{}()', try '{}.remote()'.".format(
+                self._function_name, self._function_name
+            )
+        )
 
-    def _submit(self,
-                args=None,
-                kwargs=None,
-                num_return_vals=None,
-                num_cpus=None,
-                num_gpus=None,
-                resources=None):
-        logger.warning(
-            "WARNING: _submit() is being deprecated. Please use _remote().")
+    def _submit(
+        self,
+        args=None,
+        kwargs=None,
+        num_return_vals=None,
+        num_cpus=None,
+        num_gpus=None,
+        resources=None,
+    ):
+        logger.warning("WARNING: _submit() is being deprecated. Please use _remote().")
         return self._remote(
             args=args,
             kwargs=kwargs,
             num_return_vals=num_return_vals,
             num_cpus=num_cpus,
             num_gpus=num_gpus,
-            resources=resources)
+            resources=resources,
+        )
 
     def options(self, **options):
         """Convenience method for executing a task with options.
@@ -138,26 +158,29 @@ class RemoteFunction:
 
         return FuncWrapper()
 
-    def _remote(self,
-                args=None,
-                kwargs=None,
-                num_return_vals=None,
-                is_direct_call=None,
-                num_cpus=None,
-                num_gpus=None,
-                memory=None,
-                object_store_memory=None,
-                resources=None,
-                max_retries=None):
+    def _remote(
+        self,
+        args=None,
+        kwargs=None,
+        num_return_vals=None,
+        is_direct_call=None,
+        num_cpus=None,
+        num_gpus=None,
+        memory=None,
+        object_store_memory=None,
+        resources=None,
+        max_retries=None,
+    ):
         """Submit the remote function for execution."""
         worker = ray.worker.global_worker
         worker.check_connected()
 
         # If this function was not exported in this session and job, we need to
         # export this function again, because the current GCS doesn't have it.
-        if not self._is_cross_language and \
-                self._last_export_session_and_job != \
-                worker.current_session_and_job:
+        if (
+            not self._is_cross_language
+            and self._last_export_session_and_job != worker.current_session_and_job
+        ):
             # There is an interesting question here. If the remote function is
             # used by a subsequent driver (in the same script), should the
             # second driver pickle the function again? If yes, then the remote
@@ -170,7 +193,8 @@ class RemoteFunction:
             self._pickled_function = pickle.dumps(self._function)
 
             self._function_descriptor = PythonFunctionDescriptor.from_function(
-                self._function, self._pickled_function)
+                self._function, self._pickled_function
+            )
 
             self._last_export_session_and_job = worker.current_session_and_job
             worker.function_actor_manager.export(self)
@@ -186,9 +210,17 @@ class RemoteFunction:
             max_retries = self._max_retries
 
         resources = ray.utils.resources_from_resource_arguments(
-            self._num_cpus, self._num_gpus, self._memory,
-            self._object_store_memory, self._resources, num_cpus, num_gpus,
-            memory, object_store_memory, resources)
+            self._num_cpus,
+            self._num_gpus,
+            self._memory,
+            self._object_store_memory,
+            self._resources,
+            num_cpus,
+            num_gpus,
+            memory,
+            object_store_memory,
+            resources,
+        )
 
         def invocation(args, kwargs):
             if self._is_cross_language:
@@ -197,15 +229,21 @@ class RemoteFunction:
                 list_args = []
             else:
                 list_args = ray.signature.flatten_args(
-                    self._function_signature, args, kwargs)
+                    self._function_signature, args, kwargs
+                )
 
             if worker.mode == ray.worker.LOCAL_MODE:
-                assert not self._is_cross_language, \
-                    "Cross language remote function " \
-                    "cannot be executed locally."
+                assert not self._is_cross_language, (
+                    "Cross language remote function " "cannot be executed locally."
+                )
             object_ids = worker.core_worker.submit_task(
-                self._language, self._function_descriptor, list_args,
-                num_return_vals, resources, max_retries)
+                self._language,
+                self._function_descriptor,
+                list_args,
+                num_return_vals,
+                resources,
+                max_retries,
+            )
 
             if len(object_ids) == 1:
                 return object_ids[0]

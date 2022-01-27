@@ -38,8 +38,10 @@ def make_argument_parser(name, params, wildcards):
             else:
                 raise ValueError(
                     "Parameter {} has type {} which is not supported. "
-                    "Type must be one of {}".format(name, param["type"],
-                                                    list(types.keys())))
+                    "Type must be one of {}".format(
+                        name, param["type"], list(types.keys())
+                    )
+                )
         parser.add_argument("--" + name, dest=name, **argparse_kwargs)
 
     return parser, choices
@@ -119,7 +121,8 @@ class ProjectDefinition:
         if not command_to_run:
             raise ValueError(
                 "Cannot find the command named '{}' in commmands section "
-                "of the project file.".format(command_name))
+                "of the project file.".format(command_name)
+            )
 
         parser, choices = make_argument_parser(command_name, params, wildcards)
         parsed_args = vars(parser.parse_args(list(args)))
@@ -149,8 +152,7 @@ def find_root(directory):
     while prev != directory:
         if os.path.isdir(os.path.join(directory, "ray-project")):
             return directory
-        prev, directory = directory, os.path.abspath(
-            os.path.join(directory, os.pardir))
+        prev, directory = directory, os.path.abspath(os.path.join(directory, os.pardir))
     return None
 
 
@@ -187,27 +189,30 @@ def check_project_config(project_root, project_config):
     validate_project_schema(project_config)
 
     # Make sure the cluster yaml file exists
-    cluster_file = os.path.join(project_root,
-                                project_config["cluster"]["config"])
+    cluster_file = os.path.join(project_root, project_config["cluster"]["config"])
     if not os.path.exists(cluster_file):
-        raise ValueError("'cluster' file does not exist "
-                         "in {}".format(project_root))
+        raise ValueError("'cluster' file does not exist " "in {}".format(project_root))
 
     if "environment" in project_config:
         env = project_config["environment"]
 
         if sum(["dockerfile" in env, "dockerimage" in env]) > 1:
-            raise ValueError("Cannot specify both 'dockerfile' and "
-                             "'dockerimage' in environment.")
+            raise ValueError(
+                "Cannot specify both 'dockerfile' and " "'dockerimage' in environment."
+            )
 
         if "requirements" in env:
             requirements_file = os.path.join(project_root, env["requirements"])
             if not os.path.exists(requirements_file):
-                raise ValueError("'requirements' file in 'environment' does "
-                                 "not exist in {}".format(project_root))
+                raise ValueError(
+                    "'requirements' file in 'environment' does "
+                    "not exist in {}".format(project_root)
+                )
 
         if "dockerfile" in env:
             docker_file = os.path.join(project_root, env["dockerfile"])
             if not os.path.exists(docker_file):
-                raise ValueError("'dockerfile' file in 'environment' does "
-                                 "not exist in {}".format(project_root))
+                raise ValueError(
+                    "'dockerfile' file in 'environment' does "
+                    "not exist in {}".format(project_root)
+                )

@@ -4,8 +4,9 @@ from gym.spaces import Dict, Tuple, Box, Discrete
 import ray
 import ray.tune as tune
 from ray.tune.registry import register_env
-from ray.rllib.examples.env.nested_space_repeat_after_me_env import \
-    NestedSpaceRepeatAfterMeEnv
+from ray.rllib.examples.env.nested_space_repeat_after_me_env import (
+    NestedSpaceRepeatAfterMeEnv,
+)
 from ray.rllib.utils.test_utils import check_learning_achieved
 
 parser = argparse.ArgumentParser()
@@ -20,21 +21,20 @@ parser.add_argument("--num-cpus", type=int, default=0)
 if __name__ == "__main__":
     args = parser.parse_args()
     ray.init(num_cpus=args.num_cpus or None)
-    register_env("NestedSpaceRepeatAfterMeEnv",
-                 lambda c: NestedSpaceRepeatAfterMeEnv(c))
+    register_env(
+        "NestedSpaceRepeatAfterMeEnv", lambda c: NestedSpaceRepeatAfterMeEnv(c)
+    )
 
     config = {
         "env": "NestedSpaceRepeatAfterMeEnv",
         "env_config": {
-            "space": Dict({
-                "a": Tuple(
-                    [Dict({
-                        "d": Box(-10.0, 10.0, ()),
-                        "e": Discrete(2)
-                    })]),
-                "b": Box(-10.0, 10.0, (2, )),
-                "c": Discrete(4)
-            }),
+            "space": Dict(
+                {
+                    "a": Tuple([Dict({"d": Box(-10.0, 10.0, ()), "e": Discrete(2)})]),
+                    "b": Box(-10.0, 10.0, (2,)),
+                    "c": Discrete(4),
+                }
+            ),
         },
         "entropy_coeff": 0.00005,  # We don't want high entropy in this Env.
         "gamma": 0.0,  # No history in Env (bandit problem).

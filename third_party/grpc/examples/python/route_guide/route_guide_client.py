@@ -27,7 +27,8 @@ import route_guide_resources
 def make_route_note(message, latitude, longitude):
     return route_guide_pb2.RouteNote(
         message=message,
-        location=route_guide_pb2.Point(latitude=latitude, longitude=longitude))
+        location=route_guide_pb2.Point(latitude=latitude, longitude=longitude),
+    )
 
 
 def guide_get_one_feature(stub, point):
@@ -43,16 +44,17 @@ def guide_get_one_feature(stub, point):
 
 
 def guide_get_feature(stub):
-    guide_get_one_feature(stub,
-                          route_guide_pb2.Point(
-                              latitude=409146138, longitude=-746188906))
+    guide_get_one_feature(
+        stub, route_guide_pb2.Point(latitude=409146138, longitude=-746188906)
+    )
     guide_get_one_feature(stub, route_guide_pb2.Point(latitude=0, longitude=0))
 
 
 def guide_list_features(stub):
     rectangle = route_guide_pb2.Rectangle(
         lo=route_guide_pb2.Point(latitude=400000000, longitude=-750000000),
-        hi=route_guide_pb2.Point(latitude=420000000, longitude=-730000000))
+        hi=route_guide_pb2.Point(latitude=420000000, longitude=-730000000),
+    )
     print("Looking for features between 40, -75 and 42, -73")
 
     features = stub.ListFeatures(rectangle)
@@ -95,12 +97,11 @@ def generate_messages():
 def guide_route_chat(stub):
     responses = stub.RouteChat(generate_messages())
     for response in responses:
-        print("Received message %s at %s" % (response.message,
-                                             response.location))
+        print("Received message %s at %s" % (response.message, response.location))
 
 
 def run():
-    channel = grpc.insecure_channel('localhost:50051')
+    channel = grpc.insecure_channel("localhost:50051")
     stub = route_guide_pb2_grpc.RouteGuideStub(channel)
     print("-------------- GetFeature --------------")
     guide_get_feature(stub)
@@ -112,5 +113,5 @@ def run():
     guide_route_chat(stub)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

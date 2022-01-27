@@ -3,8 +3,11 @@
 import logging
 
 import ray
-from ray.rllib.agents.dqn.simple_q_tf_policy import build_q_models, \
-    get_distribution_inputs_and_class, compute_q_values
+from ray.rllib.agents.dqn.simple_q_tf_policy import (
+    build_q_models,
+    get_distribution_inputs_and_class,
+    compute_q_values,
+)
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from ray.rllib.policy.torch_policy_template import build_torch_policy
@@ -23,16 +26,17 @@ class TargetNetworkMixin:
         def do_update():
             # Update_target_fn will be called periodically to copy Q network to
             # target Q network.
-            assert len(self.q_func_vars) == len(self.target_q_func_vars), \
-                (self.q_func_vars, self.target_q_func_vars)
+            assert len(self.q_func_vars) == len(self.target_q_func_vars), (
+                self.q_func_vars,
+                self.target_q_func_vars,
+            )
             self.target_q_model.load_state_dict(self.q_model.state_dict())
 
         self.update_target = do_update
 
 
 def build_q_model_and_distribution(policy, obs_space, action_space, config):
-    return build_q_models(policy, obs_space, action_space, config), \
-        TorchCategorical
+    return build_q_models(policy, obs_space, action_space, config), TorchCategorical
 
 
 def build_q_losses(policy, model, dist_class, train_batch):
@@ -42,7 +46,8 @@ def build_q_losses(policy, model, dist_class, train_batch):
         policy.q_model,
         train_batch[SampleBatch.CUR_OBS],
         explore=False,
-        is_training=True)
+        is_training=True,
+    )
 
     # target q network evalution
     q_tp1 = compute_q_values(
@@ -50,23 +55,27 @@ def build_q_losses(policy, model, dist_class, train_batch):
         policy.target_q_model,
         train_batch[SampleBatch.NEXT_OBS],
         explore=False,
-        is_training=True)
+        is_training=True,
+    )
 
     # q scores for actions which we know were selected in the given state.
-    one_hot_selection = F.one_hot(train_batch[SampleBatch.ACTIONS],
-                                  policy.action_space.n)
+    one_hot_selection = F.one_hot(
+        train_batch[SampleBatch.ACTIONS], policy.action_space.n
+    )
     q_t_selected = torch.sum(q_t * one_hot_selection, 1)
 
     # compute estimate of best possible value starting from state at t + 1
     dones = train_batch[SampleBatch.DONES].float()
     q_tp1_best_one_hot_selection = F.one_hot(
-        torch.argmax(q_tp1, 1), policy.action_space.n)
+        torch.argmax(q_tp1, 1), policy.action_space.n
+    )
     q_tp1_best = torch.sum(q_tp1 * q_tp1_best_one_hot_selection, 1)
     q_tp1_best_masked = (1.0 - dones) * q_tp1_best
 
     # compute RHS of bellman equation
-    q_t_selected_target = (train_batch[SampleBatch.REWARDS] +
-                           policy.config["gamma"] * q_tp1_best_masked)
+    q_t_selected_target = (
+        train_batch[SampleBatch.REWARDS] + policy.config["gamma"] * q_tp1_best_masked
+    )
 
     # Compute the error (Square/Huber).
     td_error = q_t_selected - q_t_selected_target.detach()

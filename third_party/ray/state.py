@@ -10,7 +10,7 @@ from ray import (
     gcs_utils,
     services,
 )
-from ray.utils import (decode, binary_to_hex, hex_to_binary)
+from ray.utils import decode, binary_to_hex, hex_to_binary
 
 from ray._raylet import GlobalStateAccessor
 
@@ -47,16 +47,22 @@ class GlobalState:
                 called yet.
         """
         if self.redis_client is None:
-            raise RuntimeError("The ray global state API cannot be used "
-                               "before ray.init has been called.")
+            raise RuntimeError(
+                "The ray global state API cannot be used "
+                "before ray.init has been called."
+            )
 
         if self.redis_clients is None:
-            raise RuntimeError("The ray global state API cannot be used "
-                               "before ray.init has been called.")
+            raise RuntimeError(
+                "The ray global state API cannot be used "
+                "before ray.init has been called."
+            )
 
         if self.global_state_accessor is None:
-            raise RuntimeError("The ray global state API cannot be used "
-                               "before ray.init has been called.")
+            raise RuntimeError(
+                "The ray global state API cannot be used "
+                "before ray.init has been called."
+            )
 
     def disconnect(self):
         """Disconnect global state from GCS."""
@@ -66,10 +72,7 @@ class GlobalState:
             self.global_state_accessor.disconnect()
             self.global_state_accessor = None
 
-    def _initialize_global_state(self,
-                                 redis_address,
-                                 redis_password=None,
-                                 timeout=20):
+    def _initialize_global_state(self, redis_address, redis_password=None, timeout=20):
         """Initialize the GlobalState object by connecting to Redis.
 
         It's possible that certain keys in Redis may not have been fully
@@ -80,10 +83,10 @@ class GlobalState:
             redis_address: The Redis address to connect.
             redis_password: The password of the redis server.
         """
-        self.redis_client = services.create_redis_client(
-            redis_address, redis_password)
+        self.redis_client = services.create_redis_client(redis_address, redis_password)
         self.global_state_accessor = GlobalStateAccessor(
-            redis_address, redis_password, False)
+            redis_address, redis_password, False
+        )
         self.global_state_accessor.connect()
         start_time = time.time()
 
@@ -98,13 +101,16 @@ class GlobalState:
                 time.sleep(1)
                 continue
             num_redis_shards = int(num_redis_shards)
-            assert num_redis_shards >= 1, (
-                "Expected at least one Redis "
-                "shard, found {}.".format(num_redis_shards))
+            assert (
+                num_redis_shards >= 1
+            ), "Expected at least one Redis " "shard, found {}.".format(
+                num_redis_shards
+            )
 
             # Attempt to get all of the Redis shards.
             redis_shard_addresses = self.redis_client.lrange(
-                "RedisShards", start=0, end=-1)
+                "RedisShards", start=0, end=-1
+            )
             if len(redis_shard_addresses) != num_redis_shards:
                 print("Waiting longer for RedisShards to be populated.")
                 time.sleep(1)
@@ -115,17 +121,20 @@ class GlobalState:
 
         # Check to see if we timed out.
         if time.time() - start_time >= timeout:
-            raise TimeoutError("Timed out while attempting to initialize the "
-                               "global state. num_redis_shards = {}, "
-                               "redis_shard_addresses = {}".format(
-                                   num_redis_shards, redis_shard_addresses))
+            raise TimeoutError(
+                "Timed out while attempting to initialize the "
+                "global state. num_redis_shards = {}, "
+                "redis_shard_addresses = {}".format(
+                    num_redis_shards, redis_shard_addresses
+                )
+            )
 
         # Get the rest of the information.
         self.redis_clients = []
         for shard_address in redis_shard_addresses:
             self.redis_clients.append(
-                services.create_redis_client(shard_address.decode(),
-                                             redis_password))
+                services.create_redis_client(shard_address.decode(), redis_password)
+            )
 
     def _execute_command(self, key, *args):
         """Execute a Redis command on the appropriate Redis shard based on key.
@@ -137,8 +146,7 @@ class GlobalState:
         Returns:
             The value returned by the Redis command.
         """
-        client = self.redis_clients[key.redis_shard_hash() % len(
-            self.redis_clients)]
+        client = self.redis_clients[key.redis_shard_hash() % len(self.redis_clients)]
         return client.execute_command(*args)
 
     def _keys(self, pattern):
@@ -174,16 +182,19 @@ class GlobalState:
                 return {}
             else:
                 object_location_info = gcs_utils.ObjectLocationInfo.FromString(
-                    object_info)
+                    object_info
+                )
                 return self._gen_object_info(object_location_info)
         else:
             object_table = self.global_state_accessor.get_object_table()
             results = {}
             for i in range(len(object_table)):
                 object_location_info = gcs_utils.ObjectLocationInfo.FromString(
-                    object_table[i])
-                results[binary_to_hex(object_location_info.object_id)] = \
-                    self._gen_object_info(object_location_info)
+                    object_table[i]
+                )
+                results[
+                    binary_to_hex(object_location_info.object_id)
+                ] = self._gen_object_info(object_location_info)
             return results
 
     def _gen_object_info(self, object_location_info):
@@ -196,8 +207,7 @@ class GlobalState:
             locations.append(ray.utils.binary_to_hex(location.manager))
 
         object_info = {
-            "ObjectID": ray.utils.binary_to_hex(
-                object_location_info.object_id),
+            "ObjectID": ray.utils.binary_to_hex(object_location_info.object_id),
             "Locations": locations,
         }
         return object_info
@@ -220,17 +230,16 @@ class GlobalState:
             if actor_info is None:
                 return {}
             else:
-                actor_table_data = gcs_utils.ActorTableData.FromString(
-                    actor_info)
+                actor_table_data = gcs_utils.ActorTableData.FromString(actor_info)
                 return self._gen_actor_info(actor_table_data)
         else:
             actor_table = self.global_state_accessor.get_actor_table()
             results = {}
             for i in range(len(actor_table)):
-                actor_table_data = gcs_utils.ActorTableData.FromString(
-                    actor_table[i])
-                results[binary_to_hex(actor_table_data.actor_id)] = \
-                    self._gen_actor_info(actor_table_data)
+                actor_table_data = gcs_utils.ActorTableData.FromString(actor_table[i])
+                results[
+                    binary_to_hex(actor_table_data.actor_id)
+                ] = self._gen_actor_info(actor_table_data)
 
             return results
 
@@ -245,11 +254,11 @@ class GlobalState:
             "JobID": binary_to_hex(actor_table_data.job_id),
             "Address": {
                 "IPAddress": actor_table_data.address.ip_address,
-                "Port": actor_table_data.address.port
+                "Port": actor_table_data.address.port,
             },
             "OwnerAddress": {
                 "IPAddress": actor_table_data.owner_address.ip_address,
-                "Port": actor_table_data.owner_address.port
+                "Port": actor_table_data.owner_address.port,
             },
             "State": actor_table_data.state,
             "Timestamp": actor_table_data.timestamp,
@@ -268,13 +277,11 @@ class GlobalState:
         self._check_connected()
 
         node_id = ray.ClientID(hex_to_binary(node_id))
-        node_resource_bytes = \
-            self.global_state_accessor.get_node_resource_info(node_id)
+        node_resource_bytes = self.global_state_accessor.get_node_resource_info(node_id)
         if node_resource_bytes is None:
             return {}
         else:
-            node_resource_info = gcs_utils.ResourceMap.FromString(
-                node_resource_bytes)
+            node_resource_info = gcs_utils.ResourceMap.FromString(node_resource_bytes)
             return {
                 key: value.resource_capacity
                 for key, value in node_resource_info.items.items()
@@ -295,18 +302,21 @@ class GlobalState:
             item = gcs_utils.GcsNodeInfo.FromString(node_info_item)
             node_info = {
                 "NodeID": ray.utils.binary_to_hex(item.node_id),
-                "Alive": item.state ==
-                gcs_utils.GcsNodeInfo.GcsNodeState.Value("ALIVE"),
+                "Alive": item.state
+                == gcs_utils.GcsNodeInfo.GcsNodeState.Value("ALIVE"),
                 "NodeManagerAddress": item.node_manager_address,
                 "NodeManagerHostname": item.node_manager_hostname,
                 "NodeManagerPort": item.node_manager_port,
                 "ObjectManagerPort": item.object_manager_port,
                 "ObjectStoreSocketName": item.object_store_socket_name,
-                "RayletSocketName": item.raylet_socket_name
+                "RayletSocketName": item.raylet_socket_name,
             }
             node_info["alive"] = node_info["Alive"]
-            node_info["Resources"] = self.node_resource_table(
-                node_info["NodeID"]) if node_info["Alive"] else {}
+            node_info["Resources"] = (
+                self.node_resource_table(node_info["NodeID"])
+                if node_info["Alive"]
+                else {}
+            )
             results.append(node_info)
         return results
 
@@ -365,7 +375,7 @@ class GlobalState:
                     "component_type": component_type,
                     "start_time": event.start_time,
                     "end_time": event.end_time,
-                    "extra_data": extra_data
+                    "extra_data": extra_data,
                 }
 
                 result[component_id].append(profile_event)
@@ -374,13 +384,14 @@ class GlobalState:
 
     def _seconds_to_microseconds(self, time_in_seconds):
         """A helper function for converting seconds to microseconds."""
-        time_in_microseconds = 10**6 * time_in_seconds
+        time_in_microseconds = 10 ** 6 * time_in_seconds
         return time_in_microseconds
 
     # Colors are specified at
     # https://github.com/catapult-project/catapult/blob/master/tracing/tracing/base/color_scheme.html.  # noqa: E501
     _default_color_mapping = defaultdict(
-        lambda: "generic_work", {
+        lambda: "generic_work",
+        {
             "worker_idle": "cq_build_abandoned",
             "task": "rail_response",
             "task:deserialize_arguments": "rail_load",
@@ -393,7 +404,8 @@ class GlobalState:
             "submit_task": "background_memory_dump",
             "fetch_and_run_function": "detailed_memory_dump",
             "register_remote_function": "detailed_memory_dump",
-        })
+        },
+    )
 
     # These colors are for use in Chrome tracing.
     _chrome_tracing_colors = [
@@ -475,13 +487,13 @@ class GlobalState:
                     # appears in.
                     "pid": event["node_ip_address"],
                     # The identifier for the row that the event appears in.
-                    "tid": event["component_type"] + ":" +
-                    event["component_id"],
+                    "tid": event["component_type"] + ":" + event["component_id"],
                     # The start time in microseconds.
                     "ts": self._seconds_to_microseconds(event["start_time"]),
                     # The duration in microseconds.
-                    "dur": self._seconds_to_microseconds(event["end_time"] -
-                                                         event["start_time"]),
+                    "dur": self._seconds_to_microseconds(
+                        event["end_time"] - event["start_time"]
+                    ),
                     # What is this?
                     "ph": "X",
                     # This is the name of the color to display the box in.
@@ -526,8 +538,8 @@ class GlobalState:
         node_id_to_address = {}
         for node_info in self.node_table():
             node_id_to_address[node_info["NodeID"]] = "{}:{}".format(
-                node_info["NodeManagerAddress"],
-                node_info["ObjectManagerPort"])
+                node_info["NodeManagerAddress"], node_info["ObjectManagerPort"]
+            )
 
         all_events = []
 
@@ -552,8 +564,9 @@ class GlobalState:
                 # Choose a color by reading the first couple of hex digits of
                 # the object ID as an integer and turning that into a color.
                 object_id_int = int(object_id[:2], 16)
-                color = self._chrome_tracing_colors[object_id_int % len(
-                    self._chrome_tracing_colors)]
+                color = self._chrome_tracing_colors[
+                    object_id_int % len(self._chrome_tracing_colors)
+                ]
 
                 new_event = {
                     # The category of the event.
@@ -568,8 +581,9 @@ class GlobalState:
                     # The start time in microseconds.
                     "ts": self._seconds_to_microseconds(event["start_time"]),
                     # The duration in microseconds.
-                    "dur": self._seconds_to_microseconds(event["end_time"] -
-                                                         event["start_time"]),
+                    "dur": self._seconds_to_microseconds(
+                        event["end_time"] - event["start_time"]
+                    ),
                     # What is this?
                     "ph": "X",
                     # This is the name of the color to display the box in.
@@ -607,19 +621,20 @@ class GlobalState:
 
         for worker_key in worker_keys:
             worker_info = self.redis_client.hgetall(worker_key)
-            worker_id = binary_to_hex(worker_key[len("Workers:"):])
+            worker_id = binary_to_hex(worker_key[len("Workers:") :])
 
             workers_data[worker_id] = {
                 "node_ip_address": decode(worker_info[b"node_ip_address"]),
-                "plasma_store_socket": decode(
-                    worker_info[b"plasma_store_socket"])
+                "plasma_store_socket": decode(worker_info[b"plasma_store_socket"]),
             }
             if b"stderr_file" in worker_info:
                 workers_data[worker_id]["stderr_file"] = decode(
-                    worker_info[b"stderr_file"])
+                    worker_info[b"stderr_file"]
+                )
             if b"stdout_file" in worker_info:
                 workers_data[worker_id]["stdout_file"] = decode(
-                    worker_info[b"stdout_file"])
+                    worker_info[b"stdout_file"]
+                )
         return workers_data
 
     def _job_length(self):
@@ -629,15 +644,16 @@ class GlobalState:
         num_tasks = 0
         for event_log_set in event_log_sets:
             fwd_range = self.redis_client.zrange(
-                event_log_set, start=0, end=0, withscores=True)
+                event_log_set, start=0, end=0, withscores=True
+            )
             overall_smallest = min(overall_smallest, fwd_range[0][1])
 
             rev_range = self.redis_client.zrevrange(
-                event_log_set, start=0, end=0, withscores=True)
+                event_log_set, start=0, end=0, withscores=True
+            )
             overall_largest = max(overall_largest, rev_range[0][1])
 
-            num_tasks += self.redis_client.zcount(
-                event_log_set, min=0, max=time.time())
+            num_tasks += self.redis_client.zcount(event_log_set, min=0, max=time.time())
         if num_tasks == 0:
             return 0, 0, 0
         return overall_smallest, overall_largest, num_tasks
@@ -665,10 +681,7 @@ class GlobalState:
 
     def _live_client_ids(self):
         """Returns a set of client IDs corresponding to clients still alive."""
-        return {
-            client["NodeID"]
-            for client in self.node_table() if (client["Alive"])
-        }
+        return {client["NodeID"] for client in self.node_table() if (client["Alive"])}
 
     def available_resources(self):
         """Get the current available cluster resources.
@@ -686,8 +699,7 @@ class GlobalState:
 
         available_resources_by_id = {}
 
-        subscribe_client = self.redis_client.pubsub(
-            ignore_subscribe_messages=True)
+        subscribe_client = self.redis_client.pubsub(ignore_subscribe_messages=True)
         subscribe_client.psubscribe(gcs_utils.XRAY_HEARTBEAT_PATTERN)
 
         client_ids = self._live_client_ids()
@@ -695,8 +707,10 @@ class GlobalState:
         while set(available_resources_by_id.keys()) != client_ids:
             # Parse client message
             raw_message = subscribe_client.get_message()
-            if (raw_message is None or raw_message["pattern"] !=
-                    gcs_utils.XRAY_HEARTBEAT_PATTERN):
+            if (
+                raw_message is None
+                or raw_message["pattern"] != gcs_utils.XRAY_HEARTBEAT_PATTERN
+            ):
                 continue
             data = raw_message["data"]
             pub_message = gcs_utils.PubSubMessage.FromString(data)
@@ -707,8 +721,7 @@ class GlobalState:
             dynamic_resources = {}
             for i in range(num_resources):
                 resource_id = message.resources_available_label[i]
-                dynamic_resources[resource_id] = (
-                    message.resources_available_capacity[i])
+                dynamic_resources[resource_id] = message.resources_available_capacity[i]
 
             # Update available resources for this client
             client_id = ray.utils.binary_to_hex(message.client_id)
@@ -744,8 +757,11 @@ class GlobalState:
         """
         assert isinstance(job_id, ray.JobID)
         message = self.redis_client.execute_command(
-            "RAY.TABLE_LOOKUP", gcs_utils.TablePrefix.Value("ERROR_INFO"), "",
-            job_id.binary())
+            "RAY.TABLE_LOOKUP",
+            gcs_utils.TablePrefix.Value("ERROR_INFO"),
+            "",
+            job_id.binary(),
+        )
 
         # If there are no errors, return early.
         if message is None:
@@ -783,9 +799,10 @@ class GlobalState:
             return self._error_messages(job_id)
 
         error_table_keys = self.redis_client.keys(
-            gcs_utils.TablePrefix_ERROR_INFO_string + "*")
+            gcs_utils.TablePrefix_ERROR_INFO_string + "*"
+        )
         job_ids = [
-            key[len(gcs_utils.TablePrefix_ERROR_INFO_string):]
+            key[len(gcs_utils.TablePrefix_ERROR_INFO_string) :]
             for key in error_table_keys
         ]
 
@@ -813,8 +830,7 @@ class GlobalState:
         if message is None:
             return None
         gcs_entry = gcs_utils.GcsEntry.FromString(message)
-        entry = gcs_utils.ActorCheckpointIdData.FromString(
-            gcs_entry.entries[0])
+        entry = gcs_utils.ActorCheckpointIdData.FromString(gcs_entry.entries[0])
         checkpoint_ids = [
             ray.ActorCheckpointID(checkpoint_id)
             for checkpoint_id in entry.checkpoint_ids
@@ -863,8 +879,7 @@ def current_node_id():
     Returns:
         Id of the current node.
     """
-    return ray.resource_spec.NODE_ID_PREFIX + ray.services.get_node_ip_address(
-    )
+    return ray.resource_spec.NODE_ID_PREFIX + ray.services.get_node_ip_address()
 
 
 def node_ids():

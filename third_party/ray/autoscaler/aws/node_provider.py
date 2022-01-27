@@ -8,8 +8,12 @@ import botocore
 from botocore.config import Config
 
 from ray.autoscaler.node_provider import NodeProvider
-from ray.autoscaler.tags import TAG_RAY_CLUSTER_NAME, TAG_RAY_NODE_NAME, \
-    TAG_RAY_LAUNCH_CONFIG, TAG_RAY_NODE_TYPE
+from ray.autoscaler.tags import (
+    TAG_RAY_CLUSTER_NAME,
+    TAG_RAY_NODE_NAME,
+    TAG_RAY_LAUNCH_CONFIG,
+    TAG_RAY_NODE_TYPE,
+)
 from ray.ray_constants import BOTO_MAX_RETRIES, BOTO_CREATE_MAX_RETRIES
 from ray.autoscaler.log_timer import LogTimer
 
@@ -38,25 +42,25 @@ def make_ec2_client(region, max_retries, aws_credentials=None):
     """Make client, retrying requests up to `max_retries`."""
     config = Config(retries={"max_attempts": max_retries})
     aws_credentials = aws_credentials or {}
-    return boto3.resource(
-        "ec2", region_name=region, config=config, **aws_credentials)
+    return boto3.resource("ec2", region_name=region, config=config, **aws_credentials)
 
 
 class AWSNodeProvider(NodeProvider):
     def __init__(self, provider_config, cluster_name):
         NodeProvider.__init__(self, provider_config, cluster_name)
-        self.cache_stopped_nodes = provider_config.get("cache_stopped_nodes",
-                                                       True)
+        self.cache_stopped_nodes = provider_config.get("cache_stopped_nodes", True)
         aws_credentials = provider_config.get("aws_credentials")
 
         self.ec2 = make_ec2_client(
             region=provider_config["region"],
             max_retries=BOTO_MAX_RETRIES,
-            aws_credentials=aws_credentials)
+            aws_credentials=aws_credentials,
+        )
         self.ec2_fail_fast = make_ec2_client(
             region=provider_config["region"],
             max_retries=0,
-            aws_credentials=aws_credentials)
+            aws_credentials=aws_credentials,
+        )
 
         # Try availability zones round-robin, starting from random offset
         self.subnet_idx = random.randint(0, 100)
@@ -66,8 +70,7 @@ class AWSNodeProvider(NodeProvider):
         self.tag_cache_lock = threading.Lock()
         self.tag_cache_update_event = threading.Event()
         self.tag_cache_kill_event = threading.Event()
-        self.tag_update_thread = threading.Thread(
-            target=self._node_tag_update_loop)
+        self.tag_update_thread = threading.Thread(target=self._node_tag_update_loop)
         self.tag_update_thread.start()
 
         # Cache of node objects from the last nodes() call. This avoids
@@ -100,11 +103,7 @@ class AWSNodeProvider(NodeProvider):
                     if k == TAG_RAY_NODE_NAME:
                         k = "Name"
                     self.ec2.meta.client.create_tags(
-                        Resources=node_ids,
-                        Tags=[{
-                            "Key": k,
-                            "Value": v
-                        }],
+                        Resources=node_ids, Tags=[{"Key": k, "Value": v}],
                     )
 
             self.tag_cache_kill_event.wait(timeout=5)
@@ -116,20 +115,16 @@ class AWSNodeProvider(NodeProvider):
         #       node initialization, and so can never be sitting in the cache.
         tag_filters = to_aws_format(tag_filters)
         filters = [
-            {
-                "Name": "instance-state-name",
-                "Values": ["pending", "running"],
-            },
+            {"Name": "instance-state-name", "Values": ["pending", "running"],},
             {
                 "Name": "tag:{}".format(TAG_RAY_CLUSTER_NAME),
                 "Values": [self.cluster_name],
             },
         ]
         for k, v in tag_filters.items():
-            filters.append({
-                "Name": "tag:{}".format(k),
-                "Values": [v],
-            })
+            filters.append(
+                {"Name": "tag:{}".format(k), "Values": [v],}
+            )
 
         nodes = list(self.ec2.instances.filter(Filters=filters))
         # Populate the tag cache with initial information if necessary
@@ -138,8 +133,8 @@ class AWSNodeProvider(NodeProvider):
                 continue
 
             self.tag_cache[node.id] = from_aws_format(
-                {x["Key"]: x["Value"]
-                 for x in node.tags})
+                {x["Key"]: x["Value"] for x in node.tags}
+            )
 
         self.cached_nodes = {node.id: node for node in nodes}
         return [node.id for node in nodes]
@@ -188,10 +183,7 @@ class AWSNodeProvider(NodeProvider):
         # Try to reuse previously stopped nodes with compatible configs
         if self.cache_stopped_nodes:
             filters = [
-                {
-                    "Name": "instance-state-name",
-                    "Values": ["stopped", "stopping"],
-                },
+                {"Name": "instance-state-name", "Values": ["stopped", "stopping"],},
                 {
                     "Name": "tag:{}".format(TAG_RAY_CLUSTER_NAME),
                     "Values": [self.cluster_name],
@@ -206,26 +198,28 @@ class AWSNodeProvider(NodeProvider):
                 },
             ]
 
-            reuse_nodes = list(
-                self.ec2.instances.filter(Filters=filters))[:count]
+            reuse_nodes = list(self.ec2.instances.filter(Filters=filters))[:count]
             reuse_node_ids = [n.id for n in reuse_nodes]
             if reuse_nodes:
-                logger.info("AWSNodeProvider: reusing instances {}. "
-                            "To disable reuse, set "
-                            "'cache_stopped_nodes: False' in the provider "
-                            "config.".format(reuse_node_ids))
+                logger.info(
+                    "AWSNodeProvider: reusing instances {}. "
+                    "To disable reuse, set "
+                    "'cache_stopped_nodes: False' in the provider "
+                    "config.".format(reuse_node_ids)
+                )
 
                 for node in reuse_nodes:
                     self.tag_cache[node.id] = from_aws_format(
-                        {x["Key"]: x["Value"]
-                         for x in node.tags})
+                        {x["Key"]: x["Value"] for x in node.tags}
+                    )
                     if node.state["Name"] == "stopping":
-                        logger.info("AWSNodeProvider: waiting for instance "
-                                    "{} to fully stop...".format(node.id))
+                        logger.info(
+                            "AWSNodeProvider: waiting for instance "
+                            "{} to fully stop...".format(node.id)
+                        )
                         node.wait_until_stopped()
 
-                self.ec2.meta.client.start_instances(
-                    InstanceIds=reuse_node_ids)
+                self.ec2.meta.client.start_instances(InstanceIds=reuse_node_ids)
                 for node_id in reuse_node_ids:
                     self.set_node_tags(node_id, tags)
                 count -= len(reuse_node_ids)
@@ -243,19 +237,12 @@ class AWSNodeProvider(NodeProvider):
         except KeyError:
             pass
 
-        tag_pairs = [{
-            "Key": TAG_RAY_CLUSTER_NAME,
-            "Value": self.cluster_name,
-        }]
+        tag_pairs = [{"Key": TAG_RAY_CLUSTER_NAME, "Value": self.cluster_name,}]
         for k, v in tags.items():
-            tag_pairs.append({
-                "Key": k,
-                "Value": v,
-            })
-        tag_specs = [{
-            "ResourceType": "instance",
-            "Tags": tag_pairs,
-        }]
+            tag_pairs.append(
+                {"Key": k, "Value": v,}
+            )
+        tag_specs = [{"ResourceType": "instance", "Tags": tag_pairs,}]
         user_tag_specs = conf.get("TagSpecifications", [])
         # Allow users to add tags and override values of existing
         # tags with their own. This only applies to the resource type
@@ -282,28 +269,37 @@ class AWSNodeProvider(NodeProvider):
         for attempt in range(1, BOTO_CREATE_MAX_RETRIES + 1):
             try:
                 subnet_id = subnet_ids[self.subnet_idx % len(subnet_ids)]
-                logger.info("NodeProvider: calling create_instances "
-                            "with {} (count={}).".format(subnet_id, count))
+                logger.info(
+                    "NodeProvider: calling create_instances "
+                    "with {} (count={}).".format(subnet_id, count)
+                )
                 self.subnet_idx += 1
-                conf.update({
-                    "MinCount": 1,
-                    "MaxCount": count,
-                    "SubnetId": subnet_id,
-                    "TagSpecifications": tag_specs
-                })
+                conf.update(
+                    {
+                        "MinCount": 1,
+                        "MaxCount": count,
+                        "SubnetId": subnet_id,
+                        "TagSpecifications": tag_specs,
+                    }
+                )
                 created = self.ec2_fail_fast.create_instances(**conf)
                 for instance in created:
-                    logger.info("NodeProvider: Created instance "
-                                "[id={}, name={}, info={}]".format(
-                                    instance.instance_id,
-                                    instance.state["Name"],
-                                    instance.state_reason["Message"]))
+                    logger.info(
+                        "NodeProvider: Created instance "
+                        "[id={}, name={}, info={}]".format(
+                            instance.instance_id,
+                            instance.state["Name"],
+                            instance.state_reason["Message"],
+                        )
+                    )
                 break
             except botocore.exceptions.ClientError as exc:
                 if attempt == BOTO_CREATE_MAX_RETRIES:
                     logger.error(
                         "create_instances: Max attempts ({}) exceeded.".format(
-                            BOTO_CREATE_MAX_RETRIES))
+                            BOTO_CREATE_MAX_RETRIES
+                        )
+                    )
                     raise exc
                 else:
                     logger.error(exc)
@@ -314,13 +310,15 @@ class AWSNodeProvider(NodeProvider):
             if node.spot_instance_request_id:
                 logger.info(
                     "AWSNodeProvider: terminating node {} (spot nodes cannot "
-                    "be stopped, only terminated)".format(node_id))
+                    "be stopped, only terminated)".format(node_id)
+                )
                 node.terminate()
             else:
                 logger.info(
                     "AWSNodeProvider: stopping node {}. To terminate nodes "
                     "on stop, set 'cache_stopped_nodes: False' in the "
-                    "provider config.".format(node_id))
+                    "provider config.".format(node_id)
+                )
                 node.stop()
         else:
             node.terminate()
@@ -345,12 +343,14 @@ class AWSNodeProvider(NodeProvider):
                 logger.info(
                     "AWSNodeProvider: stopping nodes {}. To terminate nodes "
                     "on stop, set 'cache_stopped_nodes: False' in the "
-                    "provider config.".format(on_demand_ids))
+                    "provider config.".format(on_demand_ids)
+                )
                 self.ec2.meta.client.stop_instances(InstanceIds=on_demand_ids)
             if spot_ids:
                 logger.info(
                     "AWSNodeProvider: terminating nodes {} (spot nodes cannot "
-                    "be stopped, only terminated)".format(spot_ids))
+                    "be stopped, only terminated)".format(spot_ids)
+                )
                 self.ec2.meta.client.terminate_instances(InstanceIds=spot_ids)
         else:
             self.ec2.meta.client.terminate_instances(InstanceIds=node_ids)

@@ -1,8 +1,8 @@
 import gym
-import compiler_gym                      # imports the CompilerGym environments
+import compiler_gym  # imports the CompilerGym environments
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = gym.make("Stoke-v0")
     env.reset()
     env.step(env.action_space.sample())

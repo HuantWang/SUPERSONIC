@@ -39,15 +39,19 @@ class JobWorker(object):
         self.config = worker_context.conf
         execution_graph = ExecutionGraph(worker_context.graph)
         self.execution_graph = execution_graph
-        self.execution_task = self.execution_graph. \
-            get_execution_task_by_task_id(self.task_id)
-        self.execution_node = self.execution_graph. \
-            get_execution_node_by_task_id(self.task_id)
+        self.execution_task = self.execution_graph.get_execution_task_by_task_id(
+            self.task_id
+        )
+        self.execution_node = self.execution_graph.get_execution_node_by_task_id(
+            self.task_id
+        )
         operator = self.execution_node.stream_operator
         self.stream_processor = processor.build_processor(operator)
         logger.info(
             "Initializing JobWorker, task_id: {}, operator: {}.".format(
-                self.task_id, self.stream_processor))
+                self.task_id, self.stream_processor
+            )
+        )
 
         if self.config.get(Config.CHANNEL_TYPE, Config.NATIVE_CHANNEL):
             self.reader_client = _streaming.ReaderClient()
@@ -62,11 +66,11 @@ class JobWorker(object):
         if isinstance(self.stream_processor, processor.SourceProcessor):
             return SourceStreamTask(self.task_id, self.stream_processor, self)
         elif isinstance(self.stream_processor, processor.OneInputProcessor):
-            return OneInputStreamTask(self.task_id, self.stream_processor,
-                                      self)
+            return OneInputStreamTask(self.task_id, self.stream_processor, self)
         else:
-            raise Exception("Unsupported processor type: " +
-                            type(self.stream_processor))
+            raise Exception(
+                "Unsupported processor type: " + type(self.stream_processor)
+            )
 
     def on_reader_message(self, buffer: bytes):
         """Called by upstream queue writer to send data message to downstream

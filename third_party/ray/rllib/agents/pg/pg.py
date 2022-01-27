@@ -17,6 +17,7 @@ DEFAULT_CONFIG = with_common_config({
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.pg.pg_torch_policy import PGTorchPolicy
+
         return PGTorchPolicy
     else:
         return PGTFPolicy
@@ -26,4 +27,5 @@ PGTrainer = build_trainer(
     name="PG",
     default_config=DEFAULT_CONFIG,
     default_policy=PGTFPolicy,
-    get_policy_class=get_policy_class)
+    get_policy_class=get_policy_class,
+)

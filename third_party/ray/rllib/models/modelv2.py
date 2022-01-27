@@ -1,8 +1,7 @@
 from collections import OrderedDict
 import gym
 
-from ray.rllib.models.preprocessors import get_preprocessor, \
-    RepeatedValuesPreprocessor
+from ray.rllib.models.preprocessors import get_preprocessor, RepeatedValuesPreprocessor
 from ray.rllib.models.repeated_values import RepeatedValues
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.annotations import DeveloperAPI, PublicAPI
@@ -35,8 +34,9 @@ class ModelV2:
         framework (str): either "tf" or "torch"
     """
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config,
-                 name, framework):
+    def __init__(
+        self, obs_space, action_space, num_outputs, model_config, name, framework
+    ):
         """Initialize the model.
 
         This method should create any variables used by the model.
@@ -171,18 +171,19 @@ class ModelV2:
 
         restored = input_dict.copy()
         restored["obs"] = restore_original_dimensions(
-            input_dict["obs"], self.obs_space, self.framework)
+            input_dict["obs"], self.obs_space, self.framework
+        )
         if len(input_dict["obs"].shape) > 2:
             restored["obs_flat"] = flatten(input_dict["obs"], self.framework)
         else:
             restored["obs_flat"] = input_dict["obs"]
         with self.context():
             res = self.forward(restored, state or [], seq_lens)
-        if ((not isinstance(res, list) and not isinstance(res, tuple))
-                or len(res) != 2):
+        if (not isinstance(res, list) and not isinstance(res, tuple)) or len(res) != 2:
             raise ValueError(
                 "forward() must return a tuple of (output, state) tensors, "
-                "got {}".format(res))
+                "got {}".format(res)
+            )
         outputs, state = res
 
         try:
@@ -193,7 +194,9 @@ class ModelV2:
             if len(shape) != 2 or int(shape[1]) != self.num_outputs:
                 raise ValueError(
                     "Expected output shape of [None, {}], got {}".format(
-                        self.num_outputs, shape))
+                        self.num_outputs, shape
+                    )
+                )
         if not isinstance(state, list):
             raise ValueError("State output is not a list: {}".format(state))
 
@@ -343,9 +346,11 @@ def _unpack_obs(obs, space, tensorlib=tf):
         tensorlib: The library used to unflatten (reshape) the array/tensor
     """
 
-    if (isinstance(space, gym.spaces.Dict)
-            or isinstance(space, gym.spaces.Tuple)
-            or isinstance(space, Repeated)):
+    if (
+        isinstance(space, gym.spaces.Dict)
+        or isinstance(space, gym.spaces.Tuple)
+        or isinstance(space, Repeated)
+    ):
         if id(space) in _cache:
             prep = _cache[id(space)]
         else:
@@ -356,7 +361,9 @@ def _unpack_obs(obs, space, tensorlib=tf):
         if len(obs.shape) < 2 or obs.shape[-1] != prep.shape[0]:
             raise ValueError(
                 "Expected flattened obs shape of [..., {}], got {}".format(
-                    prep.shape[0], obs.shape))
+                    prep.shape[0], obs.shape
+                )
+            )
         offset = 0
         if tensorlib == tf:
             batch_dims = [v.value for v in obs.shape[:-1]]
@@ -364,29 +371,33 @@ def _unpack_obs(obs, space, tensorlib=tf):
         else:
             batch_dims = list(obs.shape[:-1])
         if isinstance(space, gym.spaces.Tuple):
-            assert len(prep.preprocessors) == len(space.spaces), \
-                (len(prep.preprocessors) == len(space.spaces))
+            assert len(prep.preprocessors) == len(space.spaces), len(
+                prep.preprocessors
+            ) == len(space.spaces)
             u = []
             for p, v in zip(prep.preprocessors, space.spaces):
-                obs_slice = obs[..., offset:offset + p.size]
+                obs_slice = obs[..., offset : offset + p.size]
                 offset += p.size
                 u.append(
                     _unpack_obs(
-                        tensorlib.reshape(obs_slice,
-                                          batch_dims + list(p.shape)),
+                        tensorlib.reshape(obs_slice, batch_dims + list(p.shape)),
                         v,
-                        tensorlib=tensorlib))
+                        tensorlib=tensorlib,
+                    )
+                )
         elif isinstance(space, gym.spaces.Dict):
-            assert len(prep.preprocessors) == len(space.spaces), \
-                (len(prep.preprocessors) == len(space.spaces))
+            assert len(prep.preprocessors) == len(space.spaces), len(
+                prep.preprocessors
+            ) == len(space.spaces)
             u = OrderedDict()
             for p, (k, v) in zip(prep.preprocessors, space.spaces.items()):
-                obs_slice = obs[..., offset:offset + p.size]
+                obs_slice = obs[..., offset : offset + p.size]
                 offset += p.size
                 u[k] = _unpack_obs(
                     tensorlib.reshape(obs_slice, batch_dims + list(p.shape)),
                     v,
-                    tensorlib=tensorlib)
+                    tensorlib=tensorlib,
+                )
         elif isinstance(space, Repeated):
             assert isinstance(prep, RepeatedValuesPreprocessor), prep
             child_size = prep.child_preprocessor.size
@@ -394,12 +405,11 @@ def _unpack_obs(obs, space, tensorlib=tf):
             lengths = obs[..., 0]
             # [B, ..., 1 + max_len * child_sz] -> [B, ..., max_len, child_sz]
             with_repeat_dim = tensorlib.reshape(
-                obs[..., 1:], batch_dims + [space.max_len, child_size])
+                obs[..., 1:], batch_dims + [space.max_len, child_size]
+            )
             # Retry the unpack, dropping the List container space.
-            u = _unpack_obs(
-                with_repeat_dim, space.child_space, tensorlib=tensorlib)
-            return RepeatedValues(
-                u, lengths=lengths, max_len=prep._obs_space.max_len)
+            u = _unpack_obs(with_repeat_dim, space.child_space, tensorlib=tensorlib)
+            return RepeatedValues(u, lengths=lengths, max_len=prep._obs_space.max_len)
         else:
             assert False, space
         return u

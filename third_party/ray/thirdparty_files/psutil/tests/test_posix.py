@@ -44,24 +44,24 @@ def ps(fmt, pid=None):
     support for a narrow range of features.
     """
 
-    cmd = ['ps']
+    cmd = ["ps"]
 
     if LINUX:
-        cmd.append('--no-headers')
+        cmd.append("--no-headers")
 
     if pid is not None:
-        cmd.extend(['-p', str(pid)])
+        cmd.extend(["-p", str(pid)])
     else:
         if SUNOS or AIX:
-            cmd.append('-A')
+            cmd.append("-A")
         else:
-            cmd.append('ax')
+            cmd.append("ax")
 
     if SUNOS:
-        fmt_map = set(('command', 'comm', 'start', 'stime'))
+        fmt_map = set(("command", "comm", "start", "stime"))
         fmt = fmt_map.get(fmt, fmt)
 
-    cmd.extend(['-o', fmt])
+    cmd.extend(["-o", fmt])
 
     output = sh(cmd)
 
@@ -85,6 +85,7 @@ def ps(fmt, pid=None):
         return all_output
     else:
         return all_output[0]
+
 
 # ps "-o" field names differ wildly between platforms.
 # "comm" means "only executable name" but is not available on BSD platforms.
@@ -132,8 +133,9 @@ class TestProcess(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.pid = get_test_subprocess([PYTHON_EXE, "-E", "-O"],
-                                      stdin=subprocess.PIPE).pid
+        cls.pid = get_test_subprocess(
+            [PYTHON_EXE, "-E", "-O"], stdin=subprocess.PIPE
+        ).pid
         wait_for_pid(cls.pid)
 
     @classmethod
@@ -141,22 +143,22 @@ class TestProcess(unittest.TestCase):
         reap_children()
 
     def test_ppid(self):
-        ppid_ps = ps('ppid', self.pid)
+        ppid_ps = ps("ppid", self.pid)
         ppid_psutil = psutil.Process(self.pid).ppid()
         self.assertEqual(ppid_ps, ppid_psutil)
 
     def test_uid(self):
-        uid_ps = ps('uid', self.pid)
+        uid_ps = ps("uid", self.pid)
         uid_psutil = psutil.Process(self.pid).uids().real
         self.assertEqual(uid_ps, uid_psutil)
 
     def test_gid(self):
-        gid_ps = ps('rgid', self.pid)
+        gid_ps = ps("rgid", self.pid)
         gid_psutil = psutil.Process(self.pid).gids().real
         self.assertEqual(gid_ps, gid_psutil)
 
     def test_username(self):
-        username_ps = ps('user', self.pid)
+        username_ps = ps("user", self.pid)
         username_psutil = psutil.Process(self.pid).username()
         self.assertEqual(username_ps, username_psutil)
 
@@ -209,10 +211,8 @@ class TestProcess(unittest.TestCase):
         # full name from the cmdline.
         name = "long-program-name"
         cmdline = ["long-program-name-extended", "foo", "bar"]
-        with mock.patch("psutil._psplatform.Process.name",
-                        return_value=name):
-            with mock.patch("psutil._psplatform.Process.cmdline",
-                            return_value=cmdline):
+        with mock.patch("psutil._psplatform.Process.name", return_value=name):
+            with mock.patch("psutil._psplatform.Process.cmdline", return_value=cmdline):
                 p = psutil.Process()
                 self.assertEqual(p.name(), "long-program-name-extended")
 
@@ -221,10 +221,11 @@ class TestProcess(unittest.TestCase):
         # AccessDenied in which case psutil is supposed to return
         # the truncated name instead of crashing.
         name = "long-program-name"
-        with mock.patch("psutil._psplatform.Process.name",
-                        return_value=name):
-            with mock.patch("psutil._psplatform.Process.cmdline",
-                            side_effect=psutil.AccessDenied(0, "")):
+        with mock.patch("psutil._psplatform.Process.name", return_value=name):
+            with mock.patch(
+                "psutil._psplatform.Process.cmdline",
+                side_effect=psutil.AccessDenied(0, ""),
+            ):
                 p = psutil.Process()
                 self.assertEqual(p.name(), "long-program-name")
 
@@ -232,24 +233,27 @@ class TestProcess(unittest.TestCase):
         # Same as above but emulates a case where cmdline() raises NSP
         # which is supposed to propagate.
         name = "long-program-name"
-        with mock.patch("psutil._psplatform.Process.name",
-                        return_value=name):
-            with mock.patch("psutil._psplatform.Process.cmdline",
-                            side_effect=psutil.NoSuchProcess(0, "")):
+        with mock.patch("psutil._psplatform.Process.name", return_value=name):
+            with mock.patch(
+                "psutil._psplatform.Process.cmdline",
+                side_effect=psutil.NoSuchProcess(0, ""),
+            ):
                 p = psutil.Process()
                 self.assertRaises(psutil.NoSuchProcess, p.name)
 
-    @unittest.skipIf(MACOS or BSD, 'ps -o start not available')
+    @unittest.skipIf(MACOS or BSD, "ps -o start not available")
     def test_create_time(self):
-        time_ps = ps('start', self.pid)
+        time_ps = ps("start", self.pid)
         time_psutil = psutil.Process(self.pid).create_time()
-        time_psutil_tstamp = datetime.datetime.fromtimestamp(
-            time_psutil).strftime("%H:%M:%S")
+        time_psutil_tstamp = datetime.datetime.fromtimestamp(time_psutil).strftime(
+            "%H:%M:%S"
+        )
         # sometimes ps shows the time rounded up instead of down, so we check
         # for both possible values
         round_time_psutil = round(time_psutil)
         round_time_psutil_tstamp = datetime.datetime.fromtimestamp(
-            round_time_psutil).strftime("%H:%M:%S")
+            round_time_psutil
+        ).strftime("%H:%M:%S")
         self.assertIn(time_ps, [time_psutil_tstamp, round_time_psutil_tstamp])
 
     def test_exe(self):
@@ -264,7 +268,7 @@ class TestProcess(unittest.TestCase):
             # "/usr/local/bin/python"
             # We do not want to consider this difference in accuracy
             # an error.
-            adjusted_ps_pathname = ps_pathname[:len(ps_pathname)]
+            adjusted_ps_pathname = ps_pathname[: len(ps_pathname)]
             self.assertEqual(ps_pathname, adjusted_ps_pathname)
 
     def test_cmdline(self):
@@ -280,7 +284,7 @@ class TestProcess(unittest.TestCase):
     @unittest.skipIf(SUNOS, "not reliable on SUNOS")
     @unittest.skipIf(AIX, "not reliable on AIX")
     def test_nice(self):
-        ps_nice = ps('nice', self.pid)
+        ps_nice = ps("nice", self.pid)
         psutil_nice = psutil.Process().nice()
         self.assertEqual(ps_nice, psutil_nice)
 
@@ -291,7 +295,7 @@ class TestProcess(unittest.TestCase):
             args = ()
             attr = getattr(p, name, None)
             if attr is not None and callable(attr):
-                if name == 'rlimit':
+                if name == "rlimit":
                     args = (psutil.RLIMIT_NOFILE,)
                 attr(*args)
             else:
@@ -299,15 +303,26 @@ class TestProcess(unittest.TestCase):
 
         p = psutil.Process(os.getpid())
         failures = []
-        ignored_names = ['terminate', 'kill', 'suspend', 'resume', 'nice',
-                         'send_signal', 'wait', 'children', 'as_dict',
-                         'memory_info_ex', 'parent', 'parents']
+        ignored_names = [
+            "terminate",
+            "kill",
+            "suspend",
+            "resume",
+            "nice",
+            "send_signal",
+            "wait",
+            "children",
+            "as_dict",
+            "memory_info_ex",
+            "parent",
+            "parents",
+        ]
         if LINUX and get_kernel_version() < (2, 6, 36):
-            ignored_names.append('rlimit')
+            ignored_names.append("rlimit")
         if LINUX and get_kernel_version() < (2, 6, 23):
-            ignored_names.append('num_ctx_switches')
+            ignored_names.append("num_ctx_switches")
         for name in dir(psutil.Process):
-            if (name.startswith('_') or name in ignored_names):
+            if name.startswith("_") or name in ignored_names:
                 continue
             else:
                 try:
@@ -319,11 +334,13 @@ class TestProcess(unittest.TestCase):
                     pass
                 else:
                     if abs(num2 - num1) > 1:
-                        fail = "failure while processing Process.%s method " \
-                               "(before=%s, after=%s)" % (name, num1, num2)
+                        fail = (
+                            "failure while processing Process.%s method "
+                            "(before=%s, after=%s)" % (name, num1, num2)
+                        )
                         failures.append(fail)
         if failures:
-            self.fail('\n' + '\n'.join(failures))
+            self.fail("\n" + "\n".join(failures))
 
 
 @unittest.skipIf(not POSIX, "POSIX only")
@@ -343,15 +360,16 @@ class TestSystemAPIs(unittest.TestCase):
 
         # There will often be one more process in pids_ps for ps itself
         if len(pids_ps) - len(pids_psutil) > 1:
-            difference = [x for x in pids_psutil if x not in pids_ps] + \
-                         [x for x in pids_ps if x not in pids_psutil]
+            difference = [x for x in pids_psutil if x not in pids_ps] + [
+                x for x in pids_ps if x not in pids_psutil
+            ]
             self.fail("difference: " + str(difference))
 
     # for some reason ifconfig -a does not report all interfaces
     # returned by psutil
     @unittest.skipIf(SUNOS, "unreliable on SUNOS")
     @unittest.skipIf(TRAVIS, "unreliable on TRAVIS")
-    @unittest.skipIf(not which('ifconfig'), "no ifconfig cmd")
+    @unittest.skipIf(not which("ifconfig"), "no ifconfig cmd")
     @unittest.skipIf(not HAS_NET_IO_COUNTERS, "not supported")
     def test_nic_names(self):
         output = sh("ifconfig -a")
@@ -361,14 +379,14 @@ class TestSystemAPIs(unittest.TestCase):
                     break
             else:
                 self.fail(
-                    "couldn't find %s nic in 'ifconfig -a' output\n%s" % (
-                        nic, output))
+                    "couldn't find %s nic in 'ifconfig -a' output\n%s" % (nic, output)
+                )
 
     @unittest.skipIf(CI_TESTING and not psutil.users(), "unreliable on CI")
     @retry_on_failure()
     def test_users(self):
         out = sh("who")
-        lines = out.split('\n')
+        lines = out.split("\n")
         if not lines:
             raise self.skipTest("no users on this system")
         users = [x.split()[0] for x in lines]
@@ -382,34 +400,38 @@ class TestSystemAPIs(unittest.TestCase):
         # According to "man 2 kill" possible error values for kill
         # are (EINVAL, EPERM, ESRCH). Test that any other errno
         # results in an exception.
-        with mock.patch("psutil._psposix.os.kill",
-                        side_effect=OSError(errno.EBADF, "")) as m:
+        with mock.patch(
+            "psutil._psposix.os.kill", side_effect=OSError(errno.EBADF, "")
+        ) as m:
             self.assertRaises(OSError, psutil._psposix.pid_exists, os.getpid())
             assert m.called
 
     def test_os_waitpid_let_raise(self):
         # os.waitpid() is supposed to catch EINTR and ECHILD only.
         # Test that any other errno results in an exception.
-        with mock.patch("psutil._psposix.os.waitpid",
-                        side_effect=OSError(errno.EBADF, "")) as m:
+        with mock.patch(
+            "psutil._psposix.os.waitpid", side_effect=OSError(errno.EBADF, "")
+        ) as m:
             self.assertRaises(OSError, psutil._psposix.wait_pid, os.getpid())
             assert m.called
 
     def test_os_waitpid_eintr(self):
         # os.waitpid() is supposed to "retry" on EINTR.
-        with mock.patch("psutil._psposix.os.waitpid",
-                        side_effect=OSError(errno.EINTR, "")) as m:
+        with mock.patch(
+            "psutil._psposix.os.waitpid", side_effect=OSError(errno.EINTR, "")
+        ) as m:
             self.assertRaises(
                 psutil._psposix.TimeoutExpired,
-                psutil._psposix.wait_pid, os.getpid(), timeout=0.01)
+                psutil._psposix.wait_pid,
+                os.getpid(),
+                timeout=0.01,
+            )
             assert m.called
 
     def test_os_waitpid_bad_ret_status(self):
         # Simulate os.waitpid() returning a bad status.
-        with mock.patch("psutil._psposix.os.waitpid",
-                        return_value=(1, -1)) as m:
-            self.assertRaises(ValueError,
-                              psutil._psposix.wait_pid, os.getpid())
+        with mock.patch("psutil._psposix.os.waitpid", return_value=(1, -1)) as m:
+            self.assertRaises(ValueError, psutil._psposix.wait_pid, os.getpid())
             assert m.called
 
     # AIX can return '-' in df output instead of numbers, e.g. for /proc
@@ -417,12 +439,12 @@ class TestSystemAPIs(unittest.TestCase):
     def test_disk_usage(self):
         def df(device):
             out = sh("df -k %s" % device).strip()
-            line = out.split('\n')[1]
+            line = out.split("\n")[1]
             fields = line.split()
             total = int(fields[1]) * 1024
             used = int(fields[2]) * 1024
             free = int(fields[3]) * 1024
-            percent = float(fields[4].replace('%', ''))
+            percent = float(fields[4].replace("%", ""))
             return (total, used, free, percent)
 
         tolerance = 4 * 1024 * 1024  # 4MB
@@ -435,9 +457,11 @@ class TestSystemAPIs(unittest.TestCase):
                 # https://travis-ci.org/giampaolo/psutil/jobs/138338464
                 # https://travis-ci.org/giampaolo/psutil/jobs/138343361
                 err = str(err).lower()
-                if "no such file or directory" in err or \
-                        "raw devices not supported" in err or \
-                        "permission denied" in err:
+                if (
+                    "no such file or directory" in err
+                    or "raw devices not supported" in err
+                    or "permission denied" in err
+                ):
                     continue
                 else:
                     raise
@@ -448,6 +472,7 @@ class TestSystemAPIs(unittest.TestCase):
                 self.assertAlmostEqual(usage.percent, percent, delta=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from psutil.tests.runner import run
+
     run(__file__)

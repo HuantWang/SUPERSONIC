@@ -7,8 +7,7 @@ import platform
 import os
 
 import ray
-from ray.util.debug import log_once, disable_log_once_globally, \
-    enable_periodic_logging
+from ray.util.debug import log_once, disable_log_once_globally, enable_periodic_logging
 from ray.util.iter import ParallelIteratorWorker
 from ray.rllib.env.atari_wrappers import wrap_deepmind, is_atari
 from ray.rllib.env.base_env import BaseEnv
@@ -100,56 +99,61 @@ class RolloutWorker(ParallelIteratorWorker):
 
     @DeveloperAPI
     @classmethod
-    def as_remote(cls,
-                  num_cpus=None,
-                  num_gpus=None,
-                  memory=None,
-                  object_store_memory=None,
-                  resources=None):
+    def as_remote(
+        cls,
+        num_cpus=None,
+        num_gpus=None,
+        memory=None,
+        object_store_memory=None,
+        resources=None,
+    ):
         return ray.remote(
             num_cpus=num_cpus,
             num_gpus=num_gpus,
             memory=memory,
             object_store_memory=object_store_memory,
-            resources=resources)(cls)
+            resources=resources,
+        )(cls)
 
     @DeveloperAPI
-    def __init__(self,
-                 env_creator,
-                 policy,
-                 policy_mapping_fn=None,
-                 policies_to_train=None,
-                 tf_session_creator=None,
-                 rollout_fragment_length=100,
-                 batch_mode="truncate_episodes",
-                 episode_horizon=None,
-                 preprocessor_pref="deepmind",
-                 sample_async=False,
-                 compress_observations=False,
-                 num_envs=1,
-                 observation_fn=None,
-                 observation_filter="NoFilter",
-                 clip_rewards=None,
-                 clip_actions=True,
-                 env_config=None,
-                 model_config=None,
-                 policy_config=None,
-                 worker_index=0,
-                 num_workers=0,
-                 monitor_path=None,
-                 log_dir=None,
-                 log_level=None,
-                 callbacks=None,
-                 input_creator=lambda ioctx: ioctx.default_sampler_input(),
-                 input_evaluation=frozenset([]),
-                 output_creator=lambda ioctx: NoopOutput(),
-                 remote_worker_envs=False,
-                 remote_env_batch_wait_ms=0,
-                 soft_horizon=False,
-                 no_done_at_end=False,
-                 seed=None,
-                 extra_python_environs=None,
-                 fake_sampler=False):
+    def __init__(
+        self,
+        env_creator,
+        policy,
+        policy_mapping_fn=None,
+        policies_to_train=None,
+        tf_session_creator=None,
+        rollout_fragment_length=100,
+        batch_mode="truncate_episodes",
+        episode_horizon=None,
+        preprocessor_pref="deepmind",
+        sample_async=False,
+        compress_observations=False,
+        num_envs=1,
+        observation_fn=None,
+        observation_filter="NoFilter",
+        clip_rewards=None,
+        clip_actions=True,
+        env_config=None,
+        model_config=None,
+        policy_config=None,
+        worker_index=0,
+        num_workers=0,
+        monitor_path=None,
+        log_dir=None,
+        log_level=None,
+        callbacks=None,
+        input_creator=lambda ioctx: ioctx.default_sampler_input(),
+        input_evaluation=frozenset([]),
+        output_creator=lambda ioctx: NoopOutput(),
+        remote_worker_envs=False,
+        remote_env_batch_wait_ms=0,
+        soft_horizon=False,
+        no_done_at_end=False,
+        seed=None,
+        extra_python_environs=None,
+        fake_sampler=False,
+    ):
         """Initialize a rollout worker.
 
         Arguments:
@@ -265,11 +269,14 @@ class RolloutWorker(ParallelIteratorWorker):
         ParallelIteratorWorker.__init__(self, gen_rollouts, False)
 
         policy_config = policy_config or {}
-        if (tf and policy_config.get("framework") == "tfe"
-                and not policy_config.get("no_eager_on_workers")
-                # This eager check is necessary for certain all-framework tests
-                # that use tf's eager_mode() context generator.
-                and not tf.executing_eagerly()):
+        if (
+            tf
+            and policy_config.get("framework") == "tfe"
+            and not policy_config.get("no_eager_on_workers")
+            # This eager check is necessary for certain all-framework tests
+            # that use tf's eager_mode() context generator.
+            and not tf.executing_eagerly()
+        ):
             tf.enable_eager_execution()
 
         if log_level:
@@ -286,12 +293,12 @@ class RolloutWorker(ParallelIteratorWorker):
             self.callbacks = callbacks()
         else:
             from ray.rllib.agents.callbacks import DefaultCallbacks
+
             self.callbacks = DefaultCallbacks()
         self.worker_index = worker_index
         self.num_workers = num_workers
         model_config = model_config or {}
-        policy_mapping_fn = (policy_mapping_fn
-                             or (lambda agent_id: DEFAULT_POLICY_ID))
+        policy_mapping_fn = policy_mapping_fn or (lambda agent_id: DEFAULT_POLICY_ID)
         if not callable(policy_mapping_fn):
             raise ValueError("Policy mapping function not callable?")
         self.env_creator = env_creator
@@ -309,9 +316,11 @@ class RolloutWorker(ParallelIteratorWorker):
             def wrap(env):
                 return env  # we can't auto-wrap these env types
 
-        elif is_atari(self.env) and \
-                not model_config.get("custom_preprocessor") and \
-                preprocessor_pref == "deepmind":
+        elif (
+            is_atari(self.env)
+            and not model_config.get("custom_preprocessor")
+            and preprocessor_pref == "deepmind"
+        ):
 
             # Deepmind wrappers already handle all preprocessing
             self.preprocessing_enabled = False
@@ -323,16 +332,20 @@ class RolloutWorker(ParallelIteratorWorker):
                 env = wrap_deepmind(
                     env,
                     dim=model_config.get("dim"),
-                    framestack=model_config.get("framestack"))
+                    framestack=model_config.get("framestack"),
+                )
                 if monitor_path:
                     from gym import wrappers
+
                     env = wrappers.Monitor(env, monitor_path, resume=True)
                 return env
+
         else:
 
             def wrap(env):
                 if monitor_path:
                     from gym import wrappers
+
                     env = wrappers.Monitor(env, monitor_path, resume=True)
                 return env
 
@@ -342,7 +355,10 @@ class RolloutWorker(ParallelIteratorWorker):
             return wrap(
                 env_creator(
                     env_context.copy_with_overrides(
-                        vector_index=vector_index, remote=remote_worker_envs)))
+                        vector_index=vector_index, remote=remote_worker_envs
+                    )
+                )
+            )
 
         self.tf_sess = None
         policy_dict = _validate_and_canonicalize(policy, self.env)
@@ -352,16 +368,14 @@ class RolloutWorker(ParallelIteratorWorker):
             np.random.seed(seed)
             random.seed(seed)
             if not hasattr(self.env, "seed"):
-                raise ValueError("Env doesn't support env.seed(): {}".format(
-                    self.env))
+                raise ValueError("Env doesn't support env.seed(): {}".format(self.env))
             self.env.seed(seed)
             try:
                 assert torch is not None
                 torch.manual_seed(seed)
             except AssertionError:
                 logger.info("Could not seed torch")
-        if _has_tensorflow_graph(policy_dict) and not (tf and
-                                                       tf.executing_eagerly()):
+        if _has_tensorflow_graph(policy_dict) and not (tf and tf.executing_eagerly()):
             if not tf:
                 raise ImportError("Could not import tensorflow")
             with tf.Graph().as_default():
@@ -370,43 +384,50 @@ class RolloutWorker(ParallelIteratorWorker):
                 else:
                     self.tf_sess = tf.Session(
                         config=tf.ConfigProto(
-                            gpu_options=tf.GPUOptions(allow_growth=True)))
+                            gpu_options=tf.GPUOptions(allow_growth=True)
+                        )
+                    )
                 with self.tf_sess.as_default():
                     # set graph-level seed
                     if seed is not None:
                         tf.set_random_seed(seed)
-                    self.policy_map, self.preprocessors = \
-                        self._build_policy_map(policy_dict, policy_config)
-            if (ray.is_initialized()
-                    and ray.worker._mode() != ray.worker.LOCAL_MODE):
+                    self.policy_map, self.preprocessors = self._build_policy_map(
+                        policy_dict, policy_config
+                    )
+            if ray.is_initialized() and ray.worker._mode() != ray.worker.LOCAL_MODE:
                 if not ray.get_gpu_ids():
                     logger.debug(
-                        "Creating policy evaluation worker {}".format(
-                            worker_index) +
-                        " on CPU (please ignore any CUDA init errors)")
+                        "Creating policy evaluation worker {}".format(worker_index)
+                        + " on CPU (please ignore any CUDA init errors)"
+                    )
                 elif not tf.test.is_gpu_available():
                     raise RuntimeError(
                         "GPUs were assigned to this worker by Ray, but "
                         "TensorFlow reports GPU acceleration is disabled. "
-                        "This could be due to a bad CUDA or TF installation.")
+                        "This could be due to a bad CUDA or TF installation."
+                    )
         else:
             self.policy_map, self.preprocessors = self._build_policy_map(
-                policy_dict, policy_config)
+                policy_dict, policy_config
+            )
 
         self.multiagent = set(self.policy_map.keys()) != {DEFAULT_POLICY_ID}
         if self.multiagent:
-            if not ((isinstance(self.env, MultiAgentEnv)
-                     or isinstance(self.env, ExternalMultiAgentEnv))
-                    or isinstance(self.env, BaseEnv)):
+            if not (
+                (
+                    isinstance(self.env, MultiAgentEnv)
+                    or isinstance(self.env, ExternalMultiAgentEnv)
+                )
+                or isinstance(self.env, BaseEnv)
+            ):
                 raise ValueError(
-                    "Have multiple policies {}, but the env ".format(
-                        self.policy_map) +
-                    "{} is not a subclass of BaseEnv, MultiAgentEnv or "
-                    "ExternalMultiAgentEnv?".format(self.env))
+                    "Have multiple policies {}, but the env ".format(self.policy_map)
+                    + "{} is not a subclass of BaseEnv, MultiAgentEnv or "
+                    "ExternalMultiAgentEnv?".format(self.env)
+                )
 
         self.filters = {
-            policy_id: get_filter(observation_filter,
-                                  policy.observation_space.shape)
+            policy_id: get_filter(observation_filter, policy.observation_space.shape)
             for (policy_id, policy) in self.policy_map.items()
         }
         if self.worker_index == 0:
@@ -418,7 +439,8 @@ class RolloutWorker(ParallelIteratorWorker):
             make_env=make_env,
             num_envs=num_envs,
             remote_envs=remote_worker_envs,
-            remote_env_batch_wait_ms=remote_env_batch_wait_ms)
+            remote_env_batch_wait_ms=remote_env_batch_wait_ms,
+        )
         self.num_envs = num_envs
 
         # `truncate_episodes`: Allow a batch to contain more than one episode
@@ -432,8 +454,7 @@ class RolloutWorker(ParallelIteratorWorker):
             rollout_fragment_length = float("inf")
             pack = False
         else:
-            raise ValueError("Unsupported batch mode: {}".format(
-                self.batch_mode))
+            raise ValueError("Unsupported batch mode: {}".format(self.batch_mode))
 
         self.io_context = IOContext(log_dir, policy_config, worker_index, self)
         self.reward_estimators = []
@@ -441,18 +462,17 @@ class RolloutWorker(ParallelIteratorWorker):
             if method == "simulation":
                 logger.warning(
                     "Requested 'simulation' input evaluation method: "
-                    "will discard all sampler outputs and keep only metrics.")
+                    "will discard all sampler outputs and keep only metrics."
+                )
                 sample_async = True
             elif method == "is":
                 ise = ImportanceSamplingEstimator.create(self.io_context)
                 self.reward_estimators.append(ise)
             elif method == "wis":
-                wise = WeightedImportanceSamplingEstimator.create(
-                    self.io_context)
+                wise = WeightedImportanceSamplingEstimator.create(self.io_context)
                 self.reward_estimators.append(wise)
             else:
-                raise ValueError(
-                    "Unknown evaluation method: {}".format(method))
+                raise ValueError("Unknown evaluation method: {}".format(method))
 
         if sample_async:
             self.sampler = AsyncSampler(
@@ -472,7 +492,8 @@ class RolloutWorker(ParallelIteratorWorker):
                 blackhole_outputs="simulation" in input_evaluation,
                 soft_horizon=soft_horizon,
                 no_done_at_end=no_done_at_end,
-                observation_fn=observation_fn)
+                observation_fn=observation_fn,
+            )
             # Start the Sampler thread.
             self.sampler.start()
         else:
@@ -492,7 +513,8 @@ class RolloutWorker(ParallelIteratorWorker):
                 clip_actions=clip_actions,
                 soft_horizon=soft_horizon,
                 no_done_at_end=no_done_at_end,
-                observation_fn=observation_fn)
+                observation_fn=observation_fn,
+            )
 
         self.input_reader = input_creator(self.io_context)
         assert isinstance(self.input_reader, InputReader), self.input_reader
@@ -501,7 +523,9 @@ class RolloutWorker(ParallelIteratorWorker):
 
         logger.debug(
             "Created rollout worker with env {} ({}), policies {}".format(
-                self.async_env, self.env, self.policy_map))
+                self.async_env, self.env, self.policy_map
+            )
+        )
 
     @DeveloperAPI
     def sample(self):
@@ -522,8 +546,11 @@ class RolloutWorker(ParallelIteratorWorker):
             return self.last_batch
 
         if log_once("sample_start"):
-            logger.info("Generating sample batch of size {}".format(
-                self.rollout_fragment_length))
+            logger.info(
+                "Generating sample batch of size {}".format(
+                    self.rollout_fragment_length
+                )
+            )
 
         batches = [self.input_reader.next()]
         steps_so_far = batches[0].count
@@ -535,8 +562,9 @@ class RolloutWorker(ParallelIteratorWorker):
         else:
             max_batches = float("inf")
 
-        while (steps_so_far < self.rollout_fragment_length
-               and len(batches) < max_batches):
+        while (
+            steps_so_far < self.rollout_fragment_length and len(batches) < max_batches
+        ):
             batch = self.input_reader.next()
             steps_so_far += batch.count
             batches.append(batch)
@@ -555,8 +583,7 @@ class RolloutWorker(ParallelIteratorWorker):
                     estimator.process(sub_batch)
 
         if log_once("sample_end"):
-            logger.info("Completed sample batch:\n\n{}\n".format(
-                summarize(batch)))
+            logger.info("Completed sample batch:\n\n{}\n".format(summarize(batch)))
 
         if self.compress_observations == "bulk":
             batch.compress(bulk=True)
@@ -589,7 +616,8 @@ class RolloutWorker(ParallelIteratorWorker):
             policies = self.policy_map.keys()
         return {
             pid: policy.get_weights()
-            for pid, policy in self.policy_map.items() if pid in policies
+            for pid, policy in self.policy_map.items()
+            if pid in policies
         }
 
     @DeveloperAPI
@@ -620,8 +648,7 @@ class RolloutWorker(ParallelIteratorWorker):
             >>> grads, info = worker.compute_gradients(samples)
         """
         if log_once("compute_gradients"):
-            logger.info("Compute gradients on:\n\n{}\n".format(
-                summarize(samples)))
+            logger.info("Compute gradients on:\n\n{}\n".format(summarize(samples)))
         if isinstance(samples, MultiAgentBatch):
             grad_out, info_out = {}, {}
             if self.tf_sess is not None:
@@ -629,24 +656,25 @@ class RolloutWorker(ParallelIteratorWorker):
                 for pid, batch in samples.policy_batches.items():
                     if pid not in self.policies_to_train:
                         continue
-                    grad_out[pid], info_out[pid] = (
-                        self.policy_map[pid]._build_compute_gradients(
-                            builder, batch))
+                    grad_out[pid], info_out[pid] = self.policy_map[
+                        pid
+                    ]._build_compute_gradients(builder, batch)
                 grad_out = {k: builder.get(v) for k, v in grad_out.items()}
                 info_out = {k: builder.get(v) for k, v in info_out.items()}
             else:
                 for pid, batch in samples.policy_batches.items():
                     if pid not in self.policies_to_train:
                         continue
-                    grad_out[pid], info_out[pid] = (
-                        self.policy_map[pid].compute_gradients(batch))
+                    grad_out[pid], info_out[pid] = self.policy_map[
+                        pid
+                    ].compute_gradients(batch)
         else:
-            grad_out, info_out = (
-                self.policy_map[DEFAULT_POLICY_ID].compute_gradients(samples))
+            grad_out, info_out = self.policy_map[DEFAULT_POLICY_ID].compute_gradients(
+                samples
+            )
         info_out["batch_count"] = samples.count
         if log_once("grad_out"):
-            logger.info("Compute grad info:\n\n{}\n".format(
-                summarize(info_out)))
+            logger.info("Compute grad info:\n\n{}\n".format(summarize(info_out)))
         return grad_out, info_out
 
     @DeveloperAPI
@@ -664,8 +692,7 @@ class RolloutWorker(ParallelIteratorWorker):
             if self.tf_sess is not None:
                 builder = TFRunBuilder(self.tf_sess, "apply_gradients")
                 outputs = {
-                    pid: self.policy_map[pid]._build_apply_gradients(
-                        builder, grad)
+                    pid: self.policy_map[pid]._build_apply_gradients(builder, grad)
                     for pid, grad in grads.items()
                 }
                 return {k: builder.get(v) for k, v in outputs.items()}
@@ -694,7 +721,9 @@ class RolloutWorker(ParallelIteratorWorker):
         if log_once("learn_on_batch"):
             logger.info(
                 "Training on concatenated sample batches:\n\n{}\n".format(
-                    summarize(samples)))
+                    summarize(samples)
+                )
+            )
         if isinstance(samples, MultiAgentBatch):
             info_out = {}
             to_fetch = {}
@@ -707,22 +736,23 @@ class RolloutWorker(ParallelIteratorWorker):
                     continue
                 policy = self.policy_map[pid]
                 if builder and hasattr(policy, "_build_learn_on_batch"):
-                    to_fetch[pid] = policy._build_learn_on_batch(
-                        builder, batch)
+                    to_fetch[pid] = policy._build_learn_on_batch(builder, batch)
                 else:
                     info_out[pid] = policy.learn_on_batch(batch)
             info_out.update({k: builder.get(v) for k, v in to_fetch.items()})
         else:
             info_out = {
-                DEFAULT_POLICY_ID: self.policy_map[DEFAULT_POLICY_ID]
-                .learn_on_batch(samples)
+                DEFAULT_POLICY_ID: self.policy_map[DEFAULT_POLICY_ID].learn_on_batch(
+                    samples
+                )
             }
         if log_once("learn_out"):
             logger.debug("Training out:\n\n{}\n".format(summarize(info_out)))
         return info_out
 
-    def sample_and_learn(self, expected_batch_size, num_sgd_iter,
-                         sgd_minibatch_size, standardize_fields):
+    def sample_and_learn(
+        self, expected_batch_size, num_sgd_iter, sgd_minibatch_size, standardize_fields
+    ):
         """Sample and batch and learn on it.
 
         This is typically used in combination with distributed allreduce.
@@ -738,14 +768,26 @@ class RolloutWorker(ParallelIteratorWorker):
             count: number of samples learned on.
         """
         batch = self.sample()
-        assert batch.count == expected_batch_size, \
-            ("Batch size possibly out of sync between workers, expected:",
-             expected_batch_size, "got:", batch.count)
-        logger.info("Executing distributed minibatch SGD "
-                    "with epoch size {}, minibatch size {}".format(
-                        batch.count, sgd_minibatch_size))
-        info = do_minibatch_sgd(batch, self.policy_map, self, num_sgd_iter,
-                                sgd_minibatch_size, standardize_fields)
+        assert batch.count == expected_batch_size, (
+            "Batch size possibly out of sync between workers, expected:",
+            expected_batch_size,
+            "got:",
+            batch.count,
+        )
+        logger.info(
+            "Executing distributed minibatch SGD "
+            "with epoch size {}, minibatch size {}".format(
+                batch.count, sgd_minibatch_size
+            )
+        )
+        info = do_minibatch_sgd(
+            batch,
+            self.policy_map,
+            self,
+            num_sgd_iter,
+            sgd_minibatch_size,
+            standardize_fields,
+        )
         return info, batch.count
 
     @DeveloperAPI
@@ -804,7 +846,8 @@ class RolloutWorker(ParallelIteratorWorker):
                 `func([policy], [ID])`-calls.
         """
         return [
-            func(policy, pid) for pid, policy in self.policy_map.items()
+            func(policy, pid)
+            for pid, policy in self.policy_map.items()
             if pid in self.policies_to_train
         ]
 
@@ -839,10 +882,7 @@ class RolloutWorker(ParallelIteratorWorker):
     @DeveloperAPI
     def save(self):
         filters = self.get_filters(flush_after=True)
-        state = {
-            pid: self.policy_map[pid].get_state()
-            for pid in self.policy_map
-        }
+        state = {pid: self.policy_map[pid].get_state() for pid in self.policy_map}
         return pickle.dumps({"filters": filters, "state": state})
 
     @DeveloperAPI
@@ -866,18 +906,14 @@ class RolloutWorker(ParallelIteratorWorker):
         self.policy_map[policy_id].export_model(export_dir)
 
     @DeveloperAPI
-    def import_policy_model_from_h5(self,
-                                    import_file,
-                                    policy_id=DEFAULT_POLICY_ID):
+    def import_policy_model_from_h5(self, import_file, policy_id=DEFAULT_POLICY_ID):
         self.policy_map[policy_id].import_model_from_h5(import_file)
 
     @DeveloperAPI
-    def export_policy_checkpoint(self,
-                                 export_dir,
-                                 filename_prefix="model",
-                                 policy_id=DEFAULT_POLICY_ID):
-        self.policy_map[policy_id].export_checkpoint(export_dir,
-                                                     filename_prefix)
+    def export_policy_checkpoint(
+        self, export_dir, filename_prefix="model", policy_id=DEFAULT_POLICY_ID
+    ):
+        self.policy_map[policy_id].export_checkpoint(export_dir, filename_prefix)
 
     @DeveloperAPI
     def stop(self):
@@ -903,25 +939,27 @@ class RolloutWorker(ParallelIteratorWorker):
     def _build_policy_map(self, policy_dict, policy_config):
         policy_map = {}
         preprocessors = {}
-        for name, (cls, obs_space, act_space,
-                   conf) in sorted(policy_dict.items()):
+        for name, (cls, obs_space, act_space, conf) in sorted(policy_dict.items()):
             logger.debug("Creating policy for {}".format(name))
             merged_conf = merge_dicts(policy_config, conf)
             merged_conf["num_workers"] = self.num_workers
             merged_conf["worker_index"] = self.worker_index
             if self.preprocessing_enabled:
                 preprocessor = ModelCatalog.get_preprocessor_for_space(
-                    obs_space, merged_conf.get("model"))
+                    obs_space, merged_conf.get("model")
+                )
                 preprocessors[name] = preprocessor
                 obs_space = preprocessor.observation_space
             else:
                 preprocessors[name] = NoPreprocessor(obs_space)
-            if isinstance(obs_space, gym.spaces.Dict) or \
-                    isinstance(obs_space, gym.spaces.Tuple):
+            if isinstance(obs_space, gym.spaces.Dict) or isinstance(
+                obs_space, gym.spaces.Tuple
+            ):
                 raise ValueError(
                     "Found raw Tuple|Dict space as input to policy. "
                     "Please preprocess these observations with a "
-                    "Tuple|DictFlatteningPreprocessor.")
+                    "Tuple|DictFlatteningPreprocessor."
+                )
             if tf and tf.executing_eagerly():
                 if hasattr(cls, "as_eager"):
                     cls = cls.as_eager()
@@ -930,8 +968,10 @@ class RolloutWorker(ParallelIteratorWorker):
                 elif not issubclass(cls, TFPolicy):
                     pass  # could be some other type of policy
                 else:
-                    raise ValueError("This policy does not support eager "
-                                     "execution: {}".format(cls))
+                    raise ValueError(
+                        "This policy does not support eager "
+                        "execution: {}".format(cls)
+                    )
             if tf:
                 with tf.variable_scope(name):
                     policy_map[name] = cls(obs_space, act_space, merged_conf)
@@ -945,19 +985,19 @@ class RolloutWorker(ParallelIteratorWorker):
     def setup_torch_data_parallel(self, url, world_rank, world_size, backend):
         """Join a torch process group for distributed SGD."""
 
-        logger.info("Joining process group, url={}, world_rank={}, "
-                    "world_size={}, backend={}".format(url, world_rank,
-                                                       world_size, backend))
+        logger.info(
+            "Joining process group, url={}, world_rank={}, "
+            "world_size={}, backend={}".format(url, world_rank, world_size, backend)
+        )
         torch.distributed.init_process_group(
-            backend=backend,
-            init_method=url,
-            rank=world_rank,
-            world_size=world_size)
+            backend=backend, init_method=url, rank=world_rank, world_size=world_size
+        )
 
         for pid, policy in self.policy_map.items():
             if not isinstance(policy, TorchPolicy):
                 raise ValueError(
-                    "This policy does not support torch distributed", policy)
+                    "This policy does not support torch distributed", policy
+                )
             policy.distributed_world_size = world_size
 
     def get_node_ip(self):
@@ -967,6 +1007,7 @@ class RolloutWorker(ParallelIteratorWorker):
     def find_free_port(self):
         """Finds a free port on the current node."""
         from ray.util.sgd import utils
+
         return utils.find_free_port()
 
     def __del__(self):
@@ -981,42 +1022,47 @@ def _validate_and_canonicalize(policy, env):
     elif not issubclass(policy, Policy):
         raise ValueError("policy must be a rllib.Policy class")
     else:
-        if (isinstance(env, MultiAgentEnv)
-                and not hasattr(env, "observation_space")):
+        if isinstance(env, MultiAgentEnv) and not hasattr(env, "observation_space"):
             raise ValueError(
                 "MultiAgentEnv must have observation_space defined if run "
-                "in a single-agent configuration.")
+                "in a single-agent configuration."
+            )
         return {
-            DEFAULT_POLICY_ID: (policy, env.observation_space,
-                                env.action_space, {})
+            DEFAULT_POLICY_ID: (policy, env.observation_space, env.action_space, {})
         }
 
 
 def _validate_multiagent_config(policy, allow_none_graph=False):
     for k, v in policy.items():
         if not isinstance(k, str):
-            raise ValueError("policy keys must be strs, got {}".format(
-                type(k)))
+            raise ValueError("policy keys must be strs, got {}".format(type(k)))
         if not isinstance(v, (tuple, list)) or len(v) != 4:
             raise ValueError(
                 "policy values must be tuples/lists of "
-                "(cls or None, obs_space, action_space, config), got {}".
-                format(v))
+                "(cls or None, obs_space, action_space, config), got {}".format(v)
+            )
         if allow_none_graph and v[0] is None:
             pass
         elif not issubclass(v[0], Policy):
-            raise ValueError("policy tuple value 0 must be a rllib.Policy "
-                             "class or None, got {}".format(v[0]))
+            raise ValueError(
+                "policy tuple value 0 must be a rllib.Policy "
+                "class or None, got {}".format(v[0])
+            )
         if not isinstance(v[1], gym.Space):
             raise ValueError(
                 "policy tuple value 1 (observation_space) must be a "
-                "gym.Space, got {}".format(type(v[1])))
+                "gym.Space, got {}".format(type(v[1]))
+            )
         if not isinstance(v[2], gym.Space):
-            raise ValueError("policy tuple value 2 (action_space) must be a "
-                             "gym.Space, got {}".format(type(v[2])))
+            raise ValueError(
+                "policy tuple value 2 (action_space) must be a "
+                "gym.Space, got {}".format(type(v[2]))
+            )
         if not isinstance(v[3], dict):
-            raise ValueError("policy tuple value 3 (config) must be a dict, "
-                             "got {}".format(type(v[3])))
+            raise ValueError(
+                "policy tuple value 3 (config) must be a dict, "
+                "got {}".format(type(v[3]))
+            )
 
 
 def _validate_env(env):
@@ -1029,7 +1075,8 @@ def _validate_env(env):
         raise ValueError(
             "Returned env should be an instance of gym.Env, MultiAgentEnv, "
             "ExternalEnv, VectorEnv, or BaseEnv. The provided env creator "
-            "function returned {} ({}).".format(env, type(env)))
+            "function returned {} ({}).".format(env, type(env))
+        )
     return env
 
 

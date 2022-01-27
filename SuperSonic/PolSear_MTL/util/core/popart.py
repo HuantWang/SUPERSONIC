@@ -7,7 +7,6 @@ import torch
 
 
 class PopArtLayer(torch.nn.Module):
-
     def __init__(self, input_features, output_features, beta=4e-4):
         self.beta = beta
 
@@ -19,8 +18,8 @@ class PopArtLayer(torch.nn.Module):
         self.weight = torch.nn.Parameter(torch.Tensor(output_features, input_features))
         self.bias = torch.nn.Parameter(torch.Tensor(output_features))
 
-        self.register_buffer('mu', torch.zeros(output_features, requires_grad=False))
-        self.register_buffer('sigma', torch.ones(output_features, requires_grad=False))
+        self.register_buffer("mu", torch.zeros(output_features, requires_grad=False))
+        self.register_buffer("sigma", torch.ones(output_features, requires_grad=False))
 
         self.reset_parameters()
 
@@ -49,9 +48,9 @@ class PopArtLayer(torch.nn.Module):
         vs = vs * task
         n = task.sum((0, 1))
         mu = vs.sum((0, 1)) / n
-        nu = torch.sum(vs**2, (0, 1)) / n
-        sigma = torch.sqrt(nu - mu**2)
-        sigma = torch.clamp(sigma, min=1e-4, max=1e+6)
+        nu = torch.sum(vs ** 2, (0, 1)) / n
+        sigma = torch.sqrt(nu - mu ** 2)
+        sigma = torch.clamp(sigma, min=1e-4, max=1e6)
 
         mu[torch.isnan(mu)] = self.mu[torch.isnan(mu)]
         sigma[torch.isnan(sigma)] = self.sigma[torch.isnan(sigma)]
@@ -61,4 +60,3 @@ class PopArtLayer(torch.nn.Module):
 
         self.weight.data = (self.weight.t() * oldsigma / self.sigma).t()
         self.bias.data = (oldsigma * self.bias + oldmu - self.mu) / self.sigma
-

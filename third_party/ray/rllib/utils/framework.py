@@ -52,6 +52,7 @@ def try_import_tf(error=False):
     try:
         # Try "reducing" tf to tf.compat.v1.
         import tensorflow.compat.v1 as tf
+
         tf.logging.set_verbosity(tf.logging.ERROR)
         # Disable v2 eager mode.
         tf.disable_v2_behavior()
@@ -59,6 +60,7 @@ def try_import_tf(error=False):
     except ImportError:
         try:
             import tensorflow as tf
+
             return tf
         except ImportError as e:
             if error:
@@ -95,12 +97,12 @@ def try_import_tfp(error=False):
         ImportError: If error=True and tfp is not installed.
     """
     if "RLLIB_TEST_NO_TF_IMPORT" in os.environ:
-        logger.warning("Not importing TensorFlow Probability for test "
-                       "purposes.")
+        logger.warning("Not importing TensorFlow Probability for test " "purposes.")
         return None
 
     try:
         import tensorflow_probability as tfp
+
         return tfp
     except ImportError as e:
         if error:
@@ -141,6 +143,7 @@ def try_import_torch(error=False):
     try:
         import torch
         import torch.nn as nn
+
         return torch, nn
     except ImportError as e:
         if error:
@@ -153,12 +156,14 @@ def _torch_stubs():
     return None, nn
 
 
-def get_variable(value,
-                 framework="tf",
-                 trainable=False,
-                 tf_name="unnamed-variable",
-                 torch_tensor=False,
-                 device=None):
+def get_variable(
+    value,
+    framework="tf",
+    trainable=False,
+    tf_name="unnamed-variable",
+    torch_tensor=False,
+    device=None,
+):
     """
     Args:
         value (any): The initial value to use. In the non-tf case, this will
@@ -177,12 +182,19 @@ def get_variable(value,
     """
     if framework == "tf":
         import tensorflow as tf
+
         dtype = getattr(
-            value, "dtype", tf.float32
-            if isinstance(value, float) else tf.int32
-            if isinstance(value, int) else None)
+            value,
+            "dtype",
+            tf.float32
+            if isinstance(value, float)
+            else tf.int32
+            if isinstance(value, int)
+            else None,
+        )
         return tf.compat.v1.get_variable(
-            tf_name, initializer=value, dtype=dtype, trainable=trainable)
+            tf_name, initializer=value, dtype=dtype, trainable=trainable
+        )
     elif framework == "torch" and torch_tensor is True:
         torch, _ = try_import_torch()
         var_ = torch.from_numpy(value)
@@ -224,8 +236,9 @@ def get_activation_fn(name, framework="tf"):
         if fn is not None:
             return fn
 
-    raise ValueError("Unknown activation ({}) for framework={}!".format(
-        name, framework))
+    raise ValueError(
+        "Unknown activation ({}) for framework={}!".format(name, framework)
+    )
 
 
 # This call should never happen inside a module's functions/classes

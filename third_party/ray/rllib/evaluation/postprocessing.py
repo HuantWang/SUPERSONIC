@@ -16,12 +16,9 @@ class Postprocessing:
 
 
 @DeveloperAPI
-def compute_advantages(rollout,
-                       last_r,
-                       gamma=0.9,
-                       lambda_=1.0,
-                       use_gae=True,
-                       use_critic=True):
+def compute_advantages(
+    rollout, last_r, gamma=0.9, lambda_=1.0, use_gae=True, use_critic=True
+):
     """
     Given a rollout, compute its value targets and the advantage.
 
@@ -44,43 +41,46 @@ def compute_advantages(rollout,
     for key in rollout:
         traj[key] = np.stack(rollout[key])
 
-    assert SampleBatch.VF_PREDS in rollout or not use_critic, \
-        "use_critic=True but values not found"
-    assert use_critic or not use_gae, \
-        "Can't use gae without using a value function"
+    assert (
+        SampleBatch.VF_PREDS in rollout or not use_critic
+    ), "use_critic=True but values not found"
+    assert use_critic or not use_gae, "Can't use gae without using a value function"
 
     if use_gae:
-        vpred_t = np.concatenate(
-            [rollout[SampleBatch.VF_PREDS],
-             np.array([last_r])])
-        delta_t = (
-            traj[SampleBatch.REWARDS] + gamma * vpred_t[1:] - vpred_t[:-1])
+        vpred_t = np.concatenate([rollout[SampleBatch.VF_PREDS], np.array([last_r])])
+        delta_t = traj[SampleBatch.REWARDS] + gamma * vpred_t[1:] - vpred_t[:-1]
         # This formula for the advantage comes from:
         # "Generalized Advantage Estimation": https://arxiv.org/abs/1506.02438
         traj[Postprocessing.ADVANTAGES] = discount(delta_t, gamma * lambda_)
         traj[Postprocessing.VALUE_TARGETS] = (
-            traj[Postprocessing.ADVANTAGES] +
-            traj[SampleBatch.VF_PREDS]).copy().astype(np.float32)
+            (traj[Postprocessing.ADVANTAGES] + traj[SampleBatch.VF_PREDS])
+            .copy()
+            .astype(np.float32)
+        )
     else:
         rewards_plus_v = np.concatenate(
-            [rollout[SampleBatch.REWARDS],
-             np.array([last_r])])
-        discounted_returns = discount(rewards_plus_v,
-                                      gamma)[:-1].copy().astype(np.float32)
+            [rollout[SampleBatch.REWARDS], np.array([last_r])]
+        )
+        discounted_returns = (
+            discount(rewards_plus_v, gamma)[:-1].copy().astype(np.float32)
+        )
 
         if use_critic:
-            traj[Postprocessing.
-                 ADVANTAGES] = discounted_returns - rollout[SampleBatch.
-                                                            VF_PREDS]
+            traj[Postprocessing.ADVANTAGES] = (
+                discounted_returns - rollout[SampleBatch.VF_PREDS]
+            )
             traj[Postprocessing.VALUE_TARGETS] = discounted_returns
         else:
             traj[Postprocessing.ADVANTAGES] = discounted_returns
             traj[Postprocessing.VALUE_TARGETS] = np.zeros_like(
-                traj[Postprocessing.ADVANTAGES])
+                traj[Postprocessing.ADVANTAGES]
+            )
 
-    traj[Postprocessing.ADVANTAGES] = traj[
-        Postprocessing.ADVANTAGES].copy().astype(np.float32)
+    traj[Postprocessing.ADVANTAGES] = (
+        traj[Postprocessing.ADVANTAGES].copy().astype(np.float32)
+    )
 
-    assert all(val.shape[0] == trajsize for val in traj.values()), \
-        "Rollout stacked incorrectly!"
+    assert all(
+        val.shape[0] == trajsize for val in traj.values()
+    ), "Rollout stacked incorrectly!"
     return SampleBatch(traj)

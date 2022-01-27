@@ -35,8 +35,9 @@ if __name__ == "__main__":
     ray.init()
 
     # Simple environment with 4 independent cartpole entities
-    register_env("multi_agent_cartpole",
-                 lambda _: MultiAgentCartPole({"num_agents": 4}))
+    register_env(
+        "multi_agent_cartpole", lambda _: MultiAgentCartPole({"num_agents": 4})
+    )
     single_env = gym.make("CartPole-v0")
     obs_space = single_env.observation_space
     act_space = single_env.action_space
@@ -54,13 +55,17 @@ if __name__ == "__main__":
             "env": "multi_agent_cartpole",
             "multiagent": {
                 "policies": {
-                    "pg_policy": (None, obs_space, act_space, {
-                        "framework": "torch" if args.torch else "tf",
-                    }),
+                    "pg_policy": (
+                        None,
+                        obs_space,
+                        act_space,
+                        {"framework": "torch" if args.torch else "tf",},
+                    ),
                     "random": (RandomPolicy, obs_space, act_space, {}),
                 },
                 "policy_mapping_fn": (
-                    lambda agent_id: ["pg_policy", "random"][agent_id % 2]),
+                    lambda agent_id: ["pg_policy", "random"][agent_id % 2]
+                ),
             },
             "framework": "torch" if args.torch else "tf",
         },

@@ -26,11 +26,9 @@ class PoolTaskError(Exception):
 
 
 class ResultThread(threading.Thread):
-    def __init__(self,
-                 object_ids,
-                 callback=None,
-                 error_callback=None,
-                 total_object_ids=None):
+    def __init__(
+        self, object_ids, callback=None, error_callback=None, total_object_ids=None
+    ):
         threading.Thread.__init__(self, daemon=True)
         self._got_error = False
         self._object_ids = []
@@ -113,14 +111,11 @@ class AsyncResult:
     This should not be constructed directly.
     """
 
-    def __init__(self,
-                 chunk_object_ids,
-                 callback=None,
-                 error_callback=None,
-                 single_result=False):
+    def __init__(
+        self, chunk_object_ids, callback=None, error_callback=None, single_result=False
+    ):
         self._single_result = single_result
-        self._result_thread = ResultThread(chunk_object_ids, callback,
-                                           error_callback)
+        self._result_thread = ResultThread(chunk_object_ids, callback, error_callback)
         self._result_thread.start()
 
     def wait(self, timeout=None):
@@ -188,8 +183,7 @@ class IMapIterator:
         self._iterator = iter(iterable)
         self._chunksize = chunksize or pool._calculate_chunksize(iterable)
         self._total_chunks = div_round_up(len(iterable), chunksize)
-        self._result_thread = ResultThread(
-            [], total_object_ids=self._total_chunks)
+        self._result_thread = ResultThread([], total_object_ids=self._total_chunks)
         self._result_thread.start()
 
         for _ in range(len(self._pool._actor_pool)):
@@ -201,8 +195,9 @@ class IMapIterator:
             return
 
         actor_index = len(self._submitted_chunks) % len(self._pool._actor_pool)
-        new_chunk_id = self._pool._submit_chunk(self._func, self._iterator,
-                                                self._chunksize, actor_index)
+        new_chunk_id = self._pool._submit_chunk(
+            self._func, self._iterator, self._chunksize, actor_index
+        )
         self._submitted_chunks.append(False)
         self._result_thread.add_object_id(new_chunk_id)
 
@@ -243,11 +238,11 @@ class OrderedIMapIterator(IMapIterator):
                 if timeout is not None:
                     timeout = max(0, timeout - (time.time() - start))
 
-            while self._next_chunk_index < len(
-                    self._submitted_chunks
-            ) and self._submitted_chunks[self._next_chunk_index]:
-                for result in self._result_thread.result(
-                        self._next_chunk_index):
+            while (
+                self._next_chunk_index < len(self._submitted_chunks)
+                and self._submitted_chunks[self._next_chunk_index]
+            ):
+                for result in self._result_thread.result(self._next_chunk_index):
                     self._ready_objects.append(result)
                 self._next_chunk_index += 1
 
@@ -323,13 +318,15 @@ class Pool:
             also be specified using the `RAY_ADDRESS` environment variable.
     """
 
-    def __init__(self,
-                 processes=None,
-                 initializer=None,
-                 initargs=None,
-                 maxtasksperchild=None,
-                 context=None,
-                 ray_address=None):
+    def __init__(
+        self,
+        processes=None,
+        initializer=None,
+        initargs=None,
+        maxtasksperchild=None,
+        context=None,
+        ray_address=None,
+    ):
         self._closed = False
         self._initializer = initializer
         self._initargs = initargs
@@ -337,9 +334,11 @@ class Pool:
         self._actor_deletion_ids = []
 
         if context:
-            logger.warning("The 'context' argument is not supported using "
-                           "ray. Please refer to the documentation for how "
-                           "to control ray initialization.")
+            logger.warning(
+                "The 'context' argument is not supported using "
+                "ray. Please refer to the documentation for how "
+                "to control ray initialization."
+            )
 
         processes = self._init_ray(processes, ray_address)
         self._start_actor_pool(processes)
@@ -351,12 +350,16 @@ class Pool:
         if not ray.is_initialized():
             # Cluster mode.
             if ray_address is None and RAY_ADDRESS_ENV in os.environ:
-                logger.info("Connecting to ray cluster at address='{}'".format(
-                    os.environ[RAY_ADDRESS_ENV]))
+                logger.info(
+                    "Connecting to ray cluster at address='{}'".format(
+                        os.environ[RAY_ADDRESS_ENV]
+                    )
+                )
                 ray.init()
             elif ray_address is not None:
-                logger.info("Connecting to ray cluster at address='{}'".format(
-                    ray_address))
+                logger.info(
+                    "Connecting to ray cluster at address='{}'".format(ray_address)
+                )
                 ray.init(address=ray_address)
             # Local mode.
             else:
@@ -369,10 +372,11 @@ class Pool:
         if processes <= 0:
             raise ValueError("Processes in the pool must be >0.")
         if ray_cpus < processes:
-            raise ValueError("Tried to start a pool with {} processes on an "
-                             "existing ray cluster, but there are only {} "
-                             "CPUs in the ray cluster.".format(
-                                 processes, ray_cpus))
+            raise ValueError(
+                "Tried to start a pool with {} processes on an "
+                "existing ray cluster, but there are only {} "
+                "CPUs in the ray cluster.".format(processes, ray_cpus)
+            )
 
         return processes
 
@@ -389,7 +393,8 @@ class Pool:
         _, deleting = ray.wait(
             self._actor_deletion_ids,
             num_returns=len(self._actor_deletion_ids),
-            timeout=timeout)
+            timeout=timeout,
+        )
         self._actor_deletion_ids = deleting
 
     def _stop_actor(self, actor):
@@ -435,12 +440,9 @@ class Pool:
 
         return self.apply_async(func, args, kwargs).get()
 
-    def apply_async(self,
-                    func,
-                    args=None,
-                    kwargs=None,
-                    callback=None,
-                    error_callback=None):
+    def apply_async(
+        self, func, args=None, kwargs=None, callback=None, error_callback=None
+    ):
         """Run the given function on a random actor process and return an
         asynchronous interface to the result.
 
@@ -459,10 +461,8 @@ class Pool:
         """
 
         self._check_running()
-        object_id = self._run_batch(self._random_actor_index(), func,
-                                    [(args, kwargs)])
-        return AsyncResult(
-            [object_id], callback, error_callback, single_result=True)
+        object_id = self._run_batch(self._random_actor_index(), func, [(args, kwargs)])
+        return AsyncResult([object_id], callback, error_callback, single_result=True)
 
     def _calculate_chunksize(self, iterable):
         chunksize, extra = divmod(len(iterable), len(self._actor_pool) * 4)
@@ -470,18 +470,13 @@ class Pool:
             chunksize += 1
         return chunksize
 
-    def _submit_chunk(self,
-                      func,
-                      iterator,
-                      chunksize,
-                      actor_index,
-                      unpack_args=False):
+    def _submit_chunk(self, func, iterator, chunksize, actor_index, unpack_args=False):
         chunk = []
         while len(chunk) < chunksize:
             try:
                 args = next(iterator)
                 if not unpack_args:
-                    args = (args, )
+                    args = (args,)
                 chunk.append((args, {}))
             except StopIteration:
                 break
@@ -491,8 +486,7 @@ class Pool:
 
         return self._run_batch(actor_index, func, chunk)
 
-    def _chunk_and_run(self, func, iterable, chunksize=None,
-                       unpack_args=False):
+    def _chunk_and_run(self, func, iterable, chunksize=None, unpack_args=False):
         if not hasattr(iterable, "__len__"):
             iterable = [iterable]
 
@@ -505,24 +499,25 @@ class Pool:
             actor_index = len(chunk_object_ids) % len(self._actor_pool)
             chunk_object_ids.append(
                 self._submit_chunk(
-                    func,
-                    iterator,
-                    chunksize,
-                    actor_index,
-                    unpack_args=unpack_args))
+                    func, iterator, chunksize, actor_index, unpack_args=unpack_args
+                )
+            )
 
         return chunk_object_ids
 
-    def _map_async(self,
-                   func,
-                   iterable,
-                   chunksize=None,
-                   unpack_args=False,
-                   callback=None,
-                   error_callback=None):
+    def _map_async(
+        self,
+        func,
+        iterable,
+        chunksize=None,
+        unpack_args=False,
+        callback=None,
+        error_callback=None,
+    ):
         self._check_running()
         object_ids = self._chunk_and_run(
-            func, iterable, chunksize=chunksize, unpack_args=unpack_args)
+            func, iterable, chunksize=chunksize, unpack_args=unpack_args
+        )
         return AsyncResult(object_ids, callback, error_callback)
 
     def map(self, func, iterable, chunksize=None):
@@ -541,14 +536,12 @@ class Pool:
         """
 
         return self._map_async(
-            func, iterable, chunksize=chunksize, unpack_args=False).get()
+            func, iterable, chunksize=chunksize, unpack_args=False
+        ).get()
 
-    def map_async(self,
-                  func,
-                  iterable,
-                  chunksize=None,
-                  callback=None,
-                  error_callback=None):
+    def map_async(
+        self, func, iterable, chunksize=None, callback=None, error_callback=None
+    ):
         """Run the given function on each element in the iterable round-robin
         on the actor processes and return an asynchronous interface to the
         results.
@@ -574,7 +567,8 @@ class Pool:
             chunksize=chunksize,
             unpack_args=False,
             callback=callback,
-            error_callback=error_callback)
+            error_callback=error_callback,
+        )
 
     def starmap(self, func, iterable, chunksize=None):
         """Same as `map`, but unpacks each element of the iterable as the
@@ -582,10 +576,10 @@ class Pool:
         """
 
         return self._map_async(
-            func, iterable, chunksize=chunksize, unpack_args=True).get()
+            func, iterable, chunksize=chunksize, unpack_args=True
+        ).get()
 
-    def starmap_async(self, func, iterable, callback=None,
-                      error_callback=None):
+    def starmap_async(self, func, iterable, callback=None, error_callback=None):
         """Same as `map_async`, but unpacks each element of the iterable as the
         arguments to func like: [func(*args) for args in iterable].
         """
@@ -595,7 +589,8 @@ class Pool:
             iterable,
             unpack_args=True,
             callback=callback,
-            error_callback=error_callback)
+            error_callback=error_callback,
+        )
 
     def imap(self, func, iterable, chunksize=1):
         """Same as `map`, but only submits one batch of tasks to each actor

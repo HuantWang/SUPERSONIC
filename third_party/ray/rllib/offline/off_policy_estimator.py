@@ -6,8 +6,7 @@ from ray.rllib.utils.annotations import DeveloperAPI
 
 logger = logging.getLogger(__name__)
 
-OffPolicyEstimate = namedtuple("OffPolicyEstimate",
-                               ["estimator_name", "metrics"])
+OffPolicyEstimate = namedtuple("OffPolicyEstimate", ["estimator_name", "metrics"])
 
 
 @DeveloperAPI
@@ -35,7 +34,8 @@ class OffPolicyEstimator:
         if len(keys) > 1:
             raise NotImplementedError(
                 "Off-policy estimation is not implemented for multi-agent. "
-                "You can set `input_evaluation: []` to resolve this.")
+                "You can set `input_evaluation: []` to resolve this."
+            )
         policy = ioctx.worker.get_policy(keys[0])
         return cls(policy, gamma)
 
@@ -62,7 +62,8 @@ class OffPolicyEstimator:
             obs_batch=batch[SampleBatch.CUR_OBS],
             state_batches=[batch[k] for k in state_keys],
             prev_action_batch=batch.data.get(SampleBatch.PREV_ACTIONS),
-            prev_reward_batch=batch.data.get(SampleBatch.PREV_REWARDS))
+            prev_reward_batch=batch.data.get(SampleBatch.PREV_REWARDS),
+        )
         return log_likelihoods
 
     @DeveloperAPI
@@ -76,7 +77,8 @@ class OffPolicyEstimator:
         if isinstance(batch, MultiAgentBatch):
             raise ValueError(
                 "IS-estimation is not implemented for multi-agent batches. "
-                "You can set `input_evaluation: []` to resolve this.")
+                "You can set `input_evaluation: []` to resolve this."
+            )
 
         if "action_prob" not in batch:
             raise ValueError(
@@ -84,7 +86,8 @@ class OffPolicyEstimator:
                 "include action probabilities (i.e., the policy is stochastic "
                 "and emits the 'action_prob' key). For DQN this means using "
                 "`exploration_config: {type: 'SoftQ'}`. You can also set "
-                "`input_evaluation: []` to disable estimation.")
+                "`input_evaluation: []` to disable estimation."
+            )
 
     @DeveloperAPI
     def get_metrics(self):

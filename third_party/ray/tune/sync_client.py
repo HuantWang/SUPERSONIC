@@ -44,8 +44,9 @@ def get_sync_client(sync_function, delete_function=None):
         delete_function = delete_function or noop_template
         client_cls = CommandBasedClient
     else:
-        raise ValueError("Sync function {} must be string or function".format(
-            sync_function))
+        raise ValueError(
+            "Sync function {} must be string or function".format(sync_function)
+        )
     return client_cls(sync_function, sync_function, delete_function)
 
 
@@ -62,19 +63,22 @@ def get_cloud_sync_client(remote_path):
         if not distutils.spawn.find_executable("aws"):
             raise ValueError(
                 "Upload uri starting with '{}' requires awscli tool"
-                " to be installed".format(S3_PREFIX))
+                " to be installed".format(S3_PREFIX)
+            )
         template = "aws s3 sync {source} {target} --only-show-errors"
         delete_template = "aws s3 rm {target} --recursive --only-show-errors"
     elif remote_path.startswith(GS_PREFIX):
         if not distutils.spawn.find_executable("gsutil"):
             raise ValueError(
                 "Upload uri starting with '{}' requires gsutil tool"
-                " to be installed".format(GS_PREFIX))
+                " to be installed".format(GS_PREFIX)
+            )
         template = "gsutil rsync -r {source} {target}"
         delete_template = "gsutil rm -r {target}"
     else:
-        raise ValueError("Upload uri must start with one of: {}"
-                         "".format(ALLOWED_REMOTE_PREFIXES))
+        raise ValueError(
+            "Upload uri must start with one of: {}" "".format(ALLOWED_REMOTE_PREFIXES)
+        )
     return CommandBasedClient(template, template, delete_template)
 
 
@@ -148,10 +152,9 @@ NOOP = FunctionBasedClient(noop, noop)
 
 
 class CommandBasedClient(SyncClient):
-    def __init__(self,
-                 sync_up_template,
-                 sync_down_template,
-                 delete_template=noop_template):
+    def __init__(
+        self, sync_up_template, sync_down_template, delete_template=noop_template
+    ):
         """Syncs between two directories with the given command.
 
         Arguments:
@@ -177,7 +180,8 @@ class CommandBasedClient(SyncClient):
             logdir (str): Log directory.
         """
         self.logfile = tempfile.NamedTemporaryFile(
-            prefix="log_sync_out", dir=logdir, suffix=".log", delete=False)
+            prefix="log_sync_out", dir=logdir, suffix=".log", delete=False
+        )
 
     def sync_up(self, source, target):
         return self._execute(self.sync_up_template, source, target)
@@ -192,7 +196,8 @@ class CommandBasedClient(SyncClient):
         final_cmd = self.delete_template.format(target=quote(target))
         logger.debug("Running delete: {}".format(final_cmd))
         self.cmd_process = subprocess.Popen(
-            final_cmd, shell=True, stderr=subprocess.PIPE, stdout=self.logfile)
+            final_cmd, shell=True, stderr=subprocess.PIPE, stdout=self.logfile
+        )
         return True
 
     def wait(self):
@@ -203,9 +208,10 @@ class CommandBasedClient(SyncClient):
             args = self.cmd_process.args
             self.cmd_process = None
             if code != 0:
-                raise TuneError("Sync error. Ran command: {}\n"
-                                "Error message ({}): {}".format(
-                                    args, code, error_msg))
+                raise TuneError(
+                    "Sync error. Ran command: {}\n"
+                    "Error message ({}): {}".format(args, code, error_msg)
+                )
 
     def reset(self):
         if self.is_running:
@@ -225,11 +231,11 @@ class CommandBasedClient(SyncClient):
         if self.is_running:
             logger.warning("Last sync client cmd still in progress, skipping.")
             return False
-        final_cmd = sync_template.format(
-            source=quote(source), target=quote(target))
+        final_cmd = sync_template.format(source=quote(source), target=quote(target))
         logger.debug("Running sync: {}".format(final_cmd))
         self.cmd_process = subprocess.Popen(
-            final_cmd, shell=True, stderr=subprocess.PIPE, stdout=self.logfile)
+            final_cmd, shell=True, stderr=subprocess.PIPE, stdout=self.logfile
+        )
         return True
 
     @staticmethod

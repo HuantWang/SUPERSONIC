@@ -62,7 +62,8 @@ class FunctionStopper(Stopper):
         if is_function and hasattr(fn, "stop_all"):
             raise ValueError(
                 "Stop object must be ray.tune.Stopper subclass to be detected "
-                "correctly.")
+                "correctly."
+            )
         return is_function
 
 
@@ -94,17 +95,18 @@ class EarlyStopping(Stopper):
                 a strictly positive integer.
         """
         if mode not in ("min", "max"):
-            raise ValueError("The mode parameter can only be"
-                             " either min or max.")
+            raise ValueError("The mode parameter can only be" " either min or max.")
         if not isinstance(top, int) or top <= 1:
-            raise ValueError("Top results to consider must be"
-                             " a positive integer greater than one.")
+            raise ValueError(
+                "Top results to consider must be"
+                " a positive integer greater than one."
+            )
         if not isinstance(patience, int) or patience < 0:
-            raise ValueError("Patience must be"
-                             " a strictly positive integer.")
+            raise ValueError("Patience must be" " a strictly positive integer.")
         if not isinstance(std, float) or std <= 0:
-            raise ValueError("The standard deviation must be"
-                             " a strictly positive float number.")
+            raise ValueError(
+                "The standard deviation must be" " a strictly positive float number."
+            )
         self._mode = mode
         self._metric = metric
         self._patience = patience
@@ -117,9 +119,9 @@ class EarlyStopping(Stopper):
         """Return a boolean representing if the tuning has to stop."""
         self._top_values.append(result[self._metric])
         if self._mode == "min":
-            self._top_values = sorted(self._top_values)[:self._top]
+            self._top_values = sorted(self._top_values)[: self._top]
         else:
-            self._top_values = sorted(self._top_values)[-self._top:]
+            self._top_values = sorted(self._top_values)[-self._top :]
 
         # If the current iteration has to stop
         if self.has_plateaued():
@@ -134,8 +136,9 @@ class EarlyStopping(Stopper):
         return self.stop_all()
 
     def has_plateaued(self):
-        return (len(self._top_values) == self._top
-                and np.std(self._top_values) <= self._std)
+        return (
+            len(self._top_values) == self._top and np.std(self._top_values) <= self._std
+        )
 
     def stop_all(self):
         """Return whether to stop and prevent trials from starting."""

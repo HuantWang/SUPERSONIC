@@ -18,12 +18,8 @@ def get(object_ids):
     if isinstance(object_ids, (tuple, np.ndarray)):
         return ray.get(list(object_ids))
     elif isinstance(object_ids, dict):
-        keys_to_get = [
-            k for k, v in object_ids.items() if isinstance(v, ray.ObjectID)
-        ]
-        ids_to_get = [
-            v for k, v in object_ids.items() if isinstance(v, ray.ObjectID)
-        ]
+        keys_to_get = [k for k, v in object_ids.items() if isinstance(v, ray.ObjectID)]
+        ids_to_get = [v for k, v in object_ids.items() if isinstance(v, ray.ObjectID)]
         values = ray.get(ids_to_get)
 
         result = object_ids.copy()
@@ -53,7 +49,6 @@ def wait(object_ids, num_returns=1, timeout=None):
             IDs.
     """
     if isinstance(object_ids, (tuple, np.ndarray)):
-        return ray.wait(
-            list(object_ids), num_returns=num_returns, timeout=timeout)
+        return ray.wait(list(object_ids), num_returns=num_returns, timeout=timeout)
 
     return ray.wait(object_ids, num_returns=num_returns, timeout=timeout)

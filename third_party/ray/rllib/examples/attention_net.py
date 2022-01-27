@@ -31,16 +31,13 @@ if __name__ == "__main__":
     ray.init(num_cpus=args.num_cpus or None)
 
     registry.register_env("RepeatAfterMeEnv", lambda c: RepeatAfterMeEnv(c))
-    registry.register_env("RepeatInitialObsEnv",
-                          lambda _: RepeatInitialObsEnv())
+    registry.register_env("RepeatInitialObsEnv", lambda _: RepeatInitialObsEnv())
     registry.register_env("LookAndPush", lambda _: OneHot(LookAndPush()))
     registry.register_env("StatelessCartPole", lambda _: StatelessCartPole())
 
     config = {
         "env": args.env,
-        "env_config": {
-            "repeat_delay": 2,
-        },
+        "env_config": {"repeat_delay": 2,},
         "gamma": 0.99,
         "num_workers": 0,
         "num_envs_per_worker": 20,

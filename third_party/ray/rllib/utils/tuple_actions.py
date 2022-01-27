@@ -12,7 +12,8 @@ class TupleActions(namedtuple("TupleActions", ["batches"])):
         deprecation_warning(
             old="TupleActions",
             new="`native python tuples (arbitrarily nested)`",
-            error=True)
+            error=True,
+        )
         return super(TupleActions, cls).__new__(cls, batches)
 
     def numpy(self):

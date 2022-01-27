@@ -7,7 +7,7 @@ from ray import serve
 from ray.serve import context as serve_context
 from ray.serve.context import FakeFlaskRequest
 from collections import defaultdict
-from ray.serve.utils import (parse_request_item, _get_logger)
+from ray.serve.utils import parse_request_item, _get_logger
 from ray.serve.exceptions import RayServeException
 from ray.serve.metric import MetricClient
 from ray.async_compat import sync_to_async
@@ -26,11 +26,7 @@ def create_backend_worker(func_or_class):
         assert False, "func_or_class must be function or class."
 
     class RayServeWrappedWorker(object):
-        def __init__(self,
-                     backend_tag,
-                     replica_tag,
-                     init_args,
-                     instance_name=None):
+        def __init__(self, backend_tag, replica_tag, init_args, instance_name=None):
             serve.init(name=instance_name)
             if is_function:
                 _callable = func_or_class
@@ -40,9 +36,11 @@ def create_backend_worker(func_or_class):
             master = serve.api._get_master_actor()
             [metric_exporter] = ray.get(master.get_metric_exporter.remote())
             metric_client = MetricClient(
-                metric_exporter, default_labels={"backend": backend_tag})
-            self.backend = RayServeWorker(backend_tag, replica_tag, _callable,
-                                          is_function, metric_client)
+                metric_exporter, default_labels={"backend": backend_tag}
+            )
+            self.backend = RayServeWorker(
+                backend_tag, replica_tag, _callable, is_function, metric_client
+            )
 
         async def handle_request(self, request):
             return await self.backend.handle_request(request)
@@ -75,8 +73,7 @@ def ensure_async(func):
 class RayServeWorker:
     """Handles requests with the provided callable."""
 
-    def __init__(self, name, replica_tag, _callable, is_function,
-                 metric_client):
+    def __init__(self, name, replica_tag, _callable, is_function, metric_client):
         self.name = name
         self.replica_tag = replica_tag
         self.callable = _callable
@@ -85,29 +82,33 @@ class RayServeWorker:
         self.metric_client = metric_client
         self.request_counter = self.metric_client.new_counter(
             "backend_request_counter",
-            description=("Number of queries that have been "
-                         "processed in this replica"),
+            description=(
+                "Number of queries that have been " "processed in this replica"
+            ),
         )
         self.error_counter = self.metric_client.new_counter(
             "backend_error_counter",
-            description=("Number of exceptions that have "
-                         "occurred in the backend"),
+            description=("Number of exceptions that have " "occurred in the backend"),
         )
         self.restart_counter = self.metric_client.new_counter(
             "backend_worker_starts",
-            description=("The number of time this replica workers "
-                         "has been restarted due to failure."),
-            label_names=("replica_tag", ))
+            description=(
+                "The number of time this replica workers "
+                "has been restarted due to failure."
+            ),
+            label_names=("replica_tag",),
+        )
 
         self.restart_counter.labels(replica_tag=self.replica_tag).add()
 
     def get_runner_method(self, request_item):
         method_name = request_item.call_method
         if not hasattr(self.callable, method_name):
-            raise RayServeException("Backend doesn't have method {} "
-                                    "which is specified in the request. "
-                                    "The available methods are {}".format(
-                                        method_name, dir(self.callable)))
+            raise RayServeException(
+                "Backend doesn't have method {} "
+                "which is specified in the request. "
+                "The available methods are {}".format(method_name, dir(self.callable))
+            )
         return getattr(self.callable, method_name)
 
     def has_positional_args(self, f):
@@ -119,8 +120,10 @@ class RayServeWorker:
 
         signature = inspect.signature(f)
         for param in signature.parameters.values():
-            if (param.kind == param.POSITIONAL_OR_KEYWORD
-                    and param.default is param.empty):
+            if (
+                param.kind == param.POSITIONAL_OR_KEYWORD
+                and param.default is param.empty
+            ):
                 return True
         return False
 
@@ -188,13 +191,15 @@ class RayServeWorker:
             if len(context_flags) != 1:
                 raise RayServeException(
                     "Batched queries contain mixed context. Please only send "
-                    "the same type of requests in batching mode.")
+                    "the same type of requests in batching mode."
+                )
             serve_context.web = context_flags.pop()
 
             if len(call_methods) != 1:
                 raise RayServeException(
                     "Queries contain mixed calling methods. Please only send "
-                    "the same type of requests in batching mode.")
+                    "the same type of requests in batching mode."
+                )
             call_method = ensure_async(call_methods.pop())
 
             serve_context.batch_size = batch_size
@@ -205,22 +210,26 @@ class RayServeWorker:
             result_list = await call_method(*arg_list, **kwargs_list)
 
             if not isinstance(result_list, Iterable) or isinstance(
-                    result_list, (dict, set)):
-                error_message = ("RayServe expects an ordered iterable object "
-                                 "but the worker returned a {}".format(
-                                     type(result_list)))
+                result_list, (dict, set)
+            ):
+                error_message = (
+                    "RayServe expects an ordered iterable object "
+                    "but the worker returned a {}".format(type(result_list))
+                )
                 raise RayServeException(error_message)
 
             # Normalize the result into a list type. This operation is fast
             # in Python because it doesn't copy anything.
             result_list = list(result_list)
 
-            if (len(result_list) != batch_size):
-                error_message = ("Worker doesn't preserve batch size. The "
-                                 "input has length {} but the returned list "
-                                 "has length {}. Please return a list of "
-                                 "results with length equal to the batch size"
-                                 ".".format(batch_size, len(result_list)))
+            if len(result_list) != batch_size:
+                error_message = (
+                    "Worker doesn't preserve batch size. The "
+                    "input has length {} but the returned list "
+                    "has length {}. Please return a list of "
+                    "results with length equal to the batch size"
+                    ".".format(batch_size, len(result_list))
+                )
                 raise RayServeException(error_message)
             return result_list
         except Exception as e:

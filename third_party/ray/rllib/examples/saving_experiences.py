@@ -13,8 +13,7 @@ from ray.rllib.offline.json_writer import JsonWriter
 
 if __name__ == "__main__":
     batch_builder = SampleBatchBuilder()  # or MultiAgentSampleBatchBuilder
-    writer = JsonWriter(
-        os.path.join(ray.utils.get_user_temp_dir(), "demo-out"))
+    writer = JsonWriter(os.path.join(ray.utils.get_user_temp_dir(), "demo-out"))
 
     # You normally wouldn't want to manually create sample batches if a
     # simulator is available, but let's do it anyways for example purposes:
@@ -47,7 +46,8 @@ if __name__ == "__main__":
                 prev_rewards=prev_reward,
                 dones=done,
                 infos=info,
-                new_obs=prep.transform(new_obs))
+                new_obs=prep.transform(new_obs),
+            )
             obs = new_obs
             prev_action = action
             prev_reward = rew

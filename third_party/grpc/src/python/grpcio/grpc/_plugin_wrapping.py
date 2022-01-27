@@ -22,15 +22,13 @@ from grpc._cython import cygrpc
 
 
 class _AuthMetadataContext(
-        collections.namedtuple('AuthMetadataContext', (
-            'service_url',
-            'method_name',
-        )), grpc.AuthMetadataContext):
+    collections.namedtuple("AuthMetadataContext", ("service_url", "method_name",)),
+    grpc.AuthMetadataContext,
+):
     pass
 
 
 class _CallbackState(object):
-
     def __init__(self):
         self.lock = threading.Lock()
         self.called = False
@@ -38,7 +36,6 @@ class _CallbackState(object):
 
 
 class _AuthMetadataPluginCallback(grpc.AuthMetadataPluginCallback):
-
     def __init__(self, state, callback):
         self._state = state
         self._callback = callback
@@ -48,43 +45,45 @@ class _AuthMetadataPluginCallback(grpc.AuthMetadataPluginCallback):
             if self._state.exception is None:
                 if self._state.called:
                     raise RuntimeError(
-                        'AuthMetadataPluginCallback invoked more than once!')
+                        "AuthMetadataPluginCallback invoked more than once!"
+                    )
                 else:
                     self._state.called = True
             else:
                 raise RuntimeError(
                     'AuthMetadataPluginCallback raised exception "{}"!'.format(
-                        self._state.exception))
+                        self._state.exception
+                    )
+                )
         if error is None:
             self._callback(metadata, cygrpc.StatusCode.ok, None)
         else:
-            self._callback(None, cygrpc.StatusCode.internal,
-                           _common.encode(str(error)))
+            self._callback(None, cygrpc.StatusCode.internal, _common.encode(str(error)))
 
 
 class _Plugin(object):
-
     def __init__(self, metadata_plugin):
         self._metadata_plugin = metadata_plugin
 
     def __call__(self, service_url, method_name, callback):
         context = _AuthMetadataContext(
-            _common.decode(service_url), _common.decode(method_name))
+            _common.decode(service_url), _common.decode(method_name)
+        )
         callback_state = _CallbackState()
         try:
-            self._metadata_plugin(context,
-                                  _AuthMetadataPluginCallback(
-                                      callback_state, callback))
+            self._metadata_plugin(
+                context, _AuthMetadataPluginCallback(callback_state, callback)
+            )
         except Exception as exception:  # pylint: disable=broad-except
             logging.exception(
                 'AuthMetadataPluginCallback "%s" raised exception!',
-                self._metadata_plugin)
+                self._metadata_plugin,
+            )
             with callback_state.lock:
                 callback_state.exception = exception
                 if callback_state.called:
                     return
-            callback(None, cygrpc.StatusCode.internal,
-                     _common.encode(str(exception)))
+            callback(None, cygrpc.StatusCode.internal, _common.encode(str(exception)))
 
 
 def metadata_plugin_call_credentials(metadata_plugin, name):
@@ -97,4 +96,6 @@ def metadata_plugin_call_credentials(metadata_plugin, name):
         effective_name = name
     return grpc.CallCredentials(
         cygrpc.MetadataPluginCallCredentials(
-            _Plugin(metadata_plugin), _common.encode(effective_name)))
+            _Plugin(metadata_plugin), _common.encode(effective_name)
+        )
+    )

@@ -4,8 +4,11 @@ import random
 from ray.util.iter import from_actors, LocalIterator, _NextValueNotReady
 from ray.util.iter_metrics import SharedMetrics
 from ray.rllib.execution.replay_buffer import LocalReplayBuffer
-from ray.rllib.execution.common import SampleBatchType, \
-    STEPS_SAMPLED_COUNTER, _get_shared_metrics
+from ray.rllib.execution.common import (
+    SampleBatchType,
+    STEPS_SAMPLED_COUNTER,
+    _get_shared_metrics,
+)
 
 
 class StoreToReplayBuffer:
@@ -26,13 +29,16 @@ class StoreToReplayBuffer:
         SampleBatch(...)
     """
 
-    def __init__(self,
-                 *,
-                 local_buffer: LocalReplayBuffer = None,
-                 actors: List["ActorHandle"] = None):
+    def __init__(
+        self,
+        *,
+        local_buffer: LocalReplayBuffer = None,
+        actors: List["ActorHandle"] = None
+    ):
         if bool(local_buffer) == bool(actors):
             raise ValueError(
-                "Exactly one of local_buffer and replay_actors must be given.")
+                "Exactly one of local_buffer and replay_actors must be given."
+            )
 
         if local_buffer:
             self.local_actor = local_buffer
@@ -50,10 +56,12 @@ class StoreToReplayBuffer:
         return batch
 
 
-def Replay(*,
-           local_buffer: LocalReplayBuffer = None,
-           actors: List["ActorHandle"] = None,
-           num_async=4):
+def Replay(
+    *,
+    local_buffer: LocalReplayBuffer = None,
+    actors: List["ActorHandle"] = None,
+    num_async=4
+):
     """Replay experiences from the given buffer or actors.
 
     This should be combined with the StoreToReplayActors operation using the
@@ -75,13 +83,11 @@ def Replay(*,
     """
 
     if bool(local_buffer) == bool(actors):
-        raise ValueError(
-            "Exactly one of local_buffer and replay_actors must be given.")
+        raise ValueError("Exactly one of local_buffer and replay_actors must be given.")
 
     if actors:
         replay = from_actors(actors)
-        return replay.gather_async(
-            num_async=num_async).filter(lambda x: x is not None)
+        return replay.gather_async(num_async=num_async).filter(lambda x: x is not None)
 
     def gen_replay(_):
         while True:
@@ -162,8 +168,7 @@ class MixInReplay:
             [SampleBatch(<input>)]
         """
         if replay_proportion > 0 and num_slots == 0:
-            raise ValueError(
-                "You must set num_slots > 0 if replay_proportion > 0.")
+            raise ValueError("You must set num_slots > 0 if replay_proportion > 0.")
         self.replay_buffer = SimpleReplayBuffer(num_slots)
         self.replay_proportion = replay_proportion
 

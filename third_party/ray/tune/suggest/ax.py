@@ -67,11 +67,9 @@ class AxSearch(Searcher):
 
     """
 
-    def __init__(self,
-                 ax_client,
-                 mode="max",
-                 use_early_stopped_trials=None,
-                 max_concurrent=None):
+    def __init__(
+        self, ax_client, mode="max", use_early_stopped_trials=None, max_concurrent=None
+    ):
         assert ax is not None, "Ax must be installed!"
         self._ax = ax_client
         exp = self._ax.experiment
@@ -83,10 +81,13 @@ class AxSearch(Searcher):
             metric=self._objective_name,
             mode=mode,
             max_concurrent=max_concurrent,
-            use_early_stopped_trials=use_early_stopped_trials)
+            use_early_stopped_trials=use_early_stopped_trials,
+        )
         if self._ax._enforce_sequential_optimization:
-            logger.warning("Detected sequential enforcement. Be sure to use "
-                           "a ConcurrencyLimiter.")
+            logger.warning(
+                "Detected sequential enforcement. Be sure to use "
+                "a ConcurrencyLimiter."
+            )
 
     def suggest(self, trial_id):
         if self.max_concurrent:
@@ -107,13 +108,10 @@ class AxSearch(Searcher):
 
     def _process_result(self, trial_id, result):
         ax_trial_index = self._live_trial_mapping[trial_id]
-        metric_dict = {
-            self._objective_name: (result[self._objective_name], 0.0)
-        }
+        metric_dict = {self._objective_name: (result[self._objective_name], 0.0)}
         outcome_names = [
-            oc.metric.name for oc in
-            self._ax.experiment.optimization_config.outcome_constraints
+            oc.metric.name
+            for oc in self._ax.experiment.optimization_config.outcome_constraints
         ]
         metric_dict.update({on: (result[on], 0.0) for on in outcome_names})
-        self._ax.complete_trial(
-            trial_index=ax_trial_index, raw_data=metric_dict)
+        self._ax.complete_trial(trial_index=ax_trial_index, raw_data=metric_dict)

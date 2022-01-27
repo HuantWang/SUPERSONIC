@@ -52,11 +52,10 @@ import psutil
 # Make sure code reflects what doc promises in terms of APIs
 # availability.
 
-class TestAvailConstantsAPIs(unittest.TestCase):
 
+class TestAvailConstantsAPIs(unittest.TestCase):
     def test_PROCFS_PATH(self):
-        self.assertEqual(hasattr(psutil, "PROCFS_PATH"),
-                         LINUX or SUNOS or AIX)
+        self.assertEqual(hasattr(psutil, "PROCFS_PATH"), LINUX or SUNOS or AIX)
 
     def test_win_priority(self):
         ae = self.assertEqual
@@ -107,7 +106,6 @@ class TestAvailConstantsAPIs(unittest.TestCase):
 
 
 class TestAvailSystemAPIs(unittest.TestCase):
-
     def test_win_service_iter(self):
         self.assertEqual(hasattr(psutil, "win_service_iter"), WINDOWS)
 
@@ -115,29 +113,32 @@ class TestAvailSystemAPIs(unittest.TestCase):
         self.assertEqual(hasattr(psutil, "win_service_get"), WINDOWS)
 
     def test_cpu_freq(self):
-        linux = (LINUX and
-                 (os.path.exists("/sys/devices/system/cpu/cpufreq") or
-                  os.path.exists("/sys/devices/system/cpu/cpu0/cpufreq")))
-        self.assertEqual(hasattr(psutil, "cpu_freq"),
-                         linux or MACOS or WINDOWS or FREEBSD)
+        linux = LINUX and (
+            os.path.exists("/sys/devices/system/cpu/cpufreq")
+            or os.path.exists("/sys/devices/system/cpu/cpu0/cpufreq")
+        )
+        self.assertEqual(
+            hasattr(psutil, "cpu_freq"), linux or MACOS or WINDOWS or FREEBSD
+        )
 
     def test_sensors_temperatures(self):
-        self.assertEqual(
-            hasattr(psutil, "sensors_temperatures"), LINUX or FREEBSD)
+        self.assertEqual(hasattr(psutil, "sensors_temperatures"), LINUX or FREEBSD)
 
     def test_sensors_fans(self):
         self.assertEqual(hasattr(psutil, "sensors_fans"), LINUX)
 
     def test_battery(self):
-        self.assertEqual(hasattr(psutil, "sensors_battery"),
-                         LINUX or WINDOWS or FREEBSD or MACOS)
+        self.assertEqual(
+            hasattr(psutil, "sensors_battery"), LINUX or WINDOWS or FREEBSD or MACOS
+        )
 
 
 class TestAvailProcessAPIs(unittest.TestCase):
-
     def test_environ(self):
-        self.assertEqual(hasattr(psutil.Process, "environ"),
-                         LINUX or MACOS or WINDOWS or AIX or SUNOS)
+        self.assertEqual(
+            hasattr(psutil.Process, "environ"),
+            LINUX or MACOS or WINDOWS or AIX or SUNOS,
+        )
 
     def test_uids(self):
         self.assertEqual(hasattr(psutil.Process, "uids"), POSIX)
@@ -165,17 +166,16 @@ class TestAvailProcessAPIs(unittest.TestCase):
         self.assertEqual(hasattr(psutil.Process, "num_handles"), WINDOWS)
 
     def test_cpu_affinity(self):
-        self.assertEqual(hasattr(psutil.Process, "cpu_affinity"),
-                         LINUX or WINDOWS or FREEBSD)
+        self.assertEqual(
+            hasattr(psutil.Process, "cpu_affinity"), LINUX or WINDOWS or FREEBSD
+        )
 
     def test_cpu_num(self):
-        self.assertEqual(hasattr(psutil.Process, "cpu_num"),
-                         LINUX or FREEBSD or SUNOS)
+        self.assertEqual(hasattr(psutil.Process, "cpu_num"), LINUX or FREEBSD or SUNOS)
 
     def test_memory_maps(self):
         hasit = hasattr(psutil.Process, "memory_maps")
-        self.assertEqual(
-            hasit, False if OPENBSD or NETBSD or AIX or MACOS else True)
+        self.assertEqual(hasit, False if OPENBSD or NETBSD or AIX or MACOS else True)
 
 
 # ===================================================================
@@ -242,7 +242,7 @@ class TestSystemAPITypes(unittest.TestCase):
     @unittest.skipIf(SKIP_SYSCONS, "requires root")
     def test_net_connections(self):
         with create_sockets():
-            ret = psutil.net_connections('all')
+            ret = psutil.net_connections("all")
             self.assertEqual(len(ret), len(set(ret)))
             for conn in ret:
                 assert is_namedtuple(conn)
@@ -272,7 +272,7 @@ class TestSystemAPITypes(unittest.TestCase):
             self.assertIsInstance(info.speed, int)
             self.assertIsInstance(info.mtu, int)
 
-    @unittest.skipIf(not HAS_NET_IO_COUNTERS, 'not supported')
+    @unittest.skipIf(not HAS_NET_IO_COUNTERS, "not supported")
     def test_net_io_counters(self):
         # Duplicate of test_system.py. Keep it anyway.
         for ifname, _ in psutil.net_io_counters(pernic=True).items():
@@ -322,13 +322,24 @@ class TestFetchAllProcesses(unittest.TestCase):
     """
 
     def get_attr_names(self):
-        excluded_names = set([
-            'send_signal', 'suspend', 'resume', 'terminate', 'kill', 'wait',
-            'as_dict', 'parent', 'parents', 'children', 'memory_info_ex',
-            'oneshot',
-        ])
+        excluded_names = set(
+            [
+                "send_signal",
+                "suspend",
+                "resume",
+                "terminate",
+                "kill",
+                "wait",
+                "as_dict",
+                "parent",
+                "parents",
+                "children",
+                "memory_info_ex",
+                "oneshot",
+            ]
+        )
         if LINUX and not HAS_RLIMIT:
-            excluded_names.add('rlimit')
+            excluded_names.add("rlimit")
         attrs = []
         for name in dir(psutil.Process):
             if name.startswith("_"):
@@ -350,10 +361,10 @@ class TestFetchAllProcesses(unittest.TestCase):
         kwargs = {}
         attr = getattr(p, name, None)
         if attr is not None and callable(attr):
-            if name == 'rlimit':
+            if name == "rlimit":
                 args = (psutil.RLIMIT_NOFILE,)
-            elif name == 'memory_maps':
-                kwargs = {'grouped': False}
+            elif name == "memory_maps":
+                kwargs = {"grouped": False}
             return attr(*args, **kwargs)
         else:
             return attr
@@ -368,7 +379,8 @@ class TestFetchAllProcesses(unittest.TestCase):
                 ret = self.call_meth(p, name)
             except NotImplementedError:
                 msg = "%r was skipped because not implemented" % (
-                    self.__class__.__name__ + '.test_' + name)
+                    self.__class__.__name__ + ".test_" + name
+                )
                 warn(msg)
             except (psutil.NoSuchProcess, psutil.AccessDenied) as err:
                 self.assertEqual(err.pid, p.pid)
@@ -379,26 +391,26 @@ class TestFetchAllProcesses(unittest.TestCase):
                 assert str(err)
                 assert err.msg
             except Exception:
-                s = '\n' + '=' * 70 + '\n'
+                s = "\n" + "=" * 70 + "\n"
                 s += "FAIL: test_%s (proc=%s" % (name, p)
                 if ret != default:
                     s += ", ret=%s)" % repr(ret)
-                s += ')\n'
-                s += '-' * 70
+                s += ")\n"
+                s += "-" * 70
                 s += "\n%s" % traceback.format_exc()
                 s = "\n".join((" " * 4) + i for i in s.splitlines())
-                s += '\n'
+                s += "\n"
                 failures.append(s)
                 break
             else:
                 valid_procs += 1
-                if ret not in (0, 0.0, [], None, '', {}):
+                if ret not in (0, 0.0, [], None, "", {}):
                     assert ret, ret
                 meth = getattr(self, name)
                 meth(ret, p)
 
         if failures:
-            self.fail(''.join(failures))
+            self.fail("".join(failures))
 
         # we should always have a non-empty list, not including PID 0 etc.
         # special cases.
@@ -412,16 +424,16 @@ class TestFetchAllProcesses(unittest.TestCase):
     def exe(self, ret, proc):
         self.assertIsInstance(ret, (str, type(None)))
         if not ret:
-            self.assertEqual(ret, '')
+            self.assertEqual(ret, "")
         else:
-            if WINDOWS and not ret.endswith('.exe'):
+            if WINDOWS and not ret.endswith(".exe"):
                 return  # May be "Registry", "MemCompression", ...
             assert os.path.isabs(ret), ret
             # Note: os.stat() may return False even if the file is there
             # hence we skip the test, see:
             # http://stackoverflow.com/questions/3112546/os-path-exists-lies
             if POSIX and os.path.isfile(ret):
-                if hasattr(os, 'access') and hasattr(os, "X_OK"):
+                if hasattr(os, "access") and hasattr(os, "X_OK"):
                     # XXX may fail on MACOS
                     assert os.access(ret, os.X_OK)
 
@@ -477,7 +489,7 @@ class TestFetchAllProcesses(unittest.TestCase):
     def status(self, ret, proc):
         self.assertIsInstance(ret, str)
         assert ret
-        self.assertNotEqual(ret, '?')  # XXX
+        self.assertNotEqual(ret, "?")  # XXX
         self.assertIn(ret, VALID_PROC_STATUSES)
 
     def io_counters(self, ret, proc):
@@ -498,7 +510,8 @@ class TestFetchAllProcesses(unittest.TestCase):
                 psutil.IOPRIO_VERYLOW,
                 psutil.IOPRIO_LOW,
                 psutil.IOPRIO_NORMAL,
-                psutil.IOPRIO_HIGH]
+                psutil.IOPRIO_HIGH,
+            ]
             self.assertIsInstance(ret, int)
             self.assertGreaterEqual(ret, 0)
             self.assertIn(ret, choices)
@@ -555,7 +568,7 @@ class TestFetchAllProcesses(unittest.TestCase):
             value = getattr(ret, name)
             self.assertIsInstance(value, (int, long))
             self.assertGreaterEqual(value, 0, msg=(name, value))
-            if LINUX or OSX and name in ('vms', 'data'):
+            if LINUX or OSX and name in ("vms", "data"):
                 # On Linux there are processes (e.g. 'goa-daemon') whose
                 # VMS is incredibly high for some reason.
                 continue
@@ -576,7 +589,7 @@ class TestFetchAllProcesses(unittest.TestCase):
                 self.assertIsInstance(f.mode, str)
                 self.assertIsInstance(f.flags, int)
                 self.assertGreaterEqual(f.position, 0)
-                self.assertIn(f.mode, ('r', 'w', 'a', 'r+', 'a+'))
+                self.assertIn(f.mode, ("r", "w", "a", "r+", "a+"))
                 self.assertGreater(f.flags, 0)
             elif BSD and not f.path:
                 # XXX see: https://github.com/giampaolo/psutil/issues/595
@@ -595,14 +608,13 @@ class TestFetchAllProcesses(unittest.TestCase):
                 assert is_namedtuple(conn)
 
     def cwd(self, ret, proc):
-        if ret:     # 'ret' can be None or empty
+        if ret:  # 'ret' can be None or empty
             self.assertIsInstance(ret, str)
             assert os.path.isabs(ret), ret
             try:
                 st = os.stat(ret)
             except OSError as err:
-                if WINDOWS and err.errno in \
-                        psutil._psplatform.ACCESS_DENIED_SET:
+                if WINDOWS and err.errno in psutil._psplatform.ACCESS_DENIED_SET:
                     pass
                 # directory has been removed in mean time
                 elif err.errno != errno.ENOENT:
@@ -638,15 +650,15 @@ class TestFetchAllProcesses(unittest.TestCase):
             self.assertIsInstance(nt.path, str)
             for fname in nt._fields:
                 value = getattr(nt, fname)
-                if fname == 'path':
-                    if not value.startswith('['):
+                if fname == "path":
+                    if not value.startswith("["):
                         assert os.path.isabs(nt.path), nt.path
                         # commented as on Linux we might get
                         # '/foo/bar (deleted)'
                         # assert os.path.exists(nt.path), nt.path
-                elif fname == 'addr':
+                elif fname == "addr":
                     assert value, repr(value)
-                elif fname == 'perms':
+                elif fname == "perms":
                     if not WINDOWS:
                         assert value, repr(value)
                 else:
@@ -662,8 +674,9 @@ class TestFetchAllProcesses(unittest.TestCase):
         if POSIX:
             assert -20 <= ret <= 20, ret
         else:
-            priorities = [getattr(psutil, x) for x in dir(psutil)
-                          if x.endswith('_PRIORITY_CLASS')]
+            priorities = [
+                getattr(psutil, x) for x in dir(psutil) if x.endswith("_PRIORITY_CLASS")
+            ]
             self.assertIn(ret, priorities)
 
     def num_ctx_switches(self, ret, proc):
@@ -685,6 +698,7 @@ class TestFetchAllProcesses(unittest.TestCase):
             self.assertIsInstance(v, str)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from psutil.tests.runner import run
+
     run(__file__)

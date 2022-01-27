@@ -8,8 +8,7 @@ from ray.rllib.agents.impala.vtrace_tf_policy import postprocess_trajectory
 import ray.rllib.agents.impala.vtrace_torch as vtrace
 from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.torch_policy import LearningRateSchedule, \
-    EntropyCoeffSchedule
+from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from ray.rllib.policy.torch_policy_template import build_torch_policy
 from ray.rllib.utils.explained_variance import explained_variance
 from ray.rllib.utils.framework import try_import_torch
@@ -21,26 +20,28 @@ logger = logging.getLogger(__name__)
 
 
 class VTraceLoss:
-    def __init__(self,
-                 actions,
-                 actions_logp,
-                 actions_entropy,
-                 dones,
-                 behaviour_action_logp,
-                 behaviour_logits,
-                 target_logits,
-                 discount,
-                 rewards,
-                 values,
-                 bootstrap_value,
-                 dist_class,
-                 model,
-                 valid_mask,
-                 config,
-                 vf_loss_coeff=0.5,
-                 entropy_coeff=0.01,
-                 clip_rho_threshold=1.0,
-                 clip_pg_rho_threshold=1.0):
+    def __init__(
+        self,
+        actions,
+        actions_logp,
+        actions_entropy,
+        dones,
+        behaviour_action_logp,
+        behaviour_logits,
+        target_logits,
+        discount,
+        rewards,
+        values,
+        bootstrap_value,
+        dist_class,
+        model,
+        valid_mask,
+        config,
+        vf_loss_coeff=0.5,
+        entropy_coeff=0.01,
+        clip_rho_threshold=1.0,
+        clip_pg_rho_threshold=1.0,
+    ):
         """Policy gradient loss with vtrace importance weighting.
 
         VTraceLoss takes tensors of shape [T, B, ...], where `B` is the
@@ -90,14 +91,15 @@ class VTraceLoss:
             dist_class=dist_class,
             model=model,
             clip_rho_threshold=clip_rho_threshold,
-            clip_pg_rho_threshold=clip_pg_rho_threshold)
+            clip_pg_rho_threshold=clip_pg_rho_threshold,
+        )
         # Move v-trace results back to GPU for actual loss computing.
         self.value_targets = self.vtrace_returns.vs.to(device)
 
         # The policy gradients loss.
         self.pi_loss = -torch.sum(
-            actions_logp * self.vtrace_returns.pg_advantages.to(device) *
-            valid_mask)
+            actions_logp * self.vtrace_returns.pg_advantages.to(device) * valid_mask
+        )
 
         # The baseline loss.
         delta = (values - self.value_targets) * valid_mask
@@ -107,8 +109,9 @@ class VTraceLoss:
         self.entropy = torch.sum(actions_entropy * valid_mask)
 
         # The summed weighted loss.
-        self.total_loss = (self.pi_loss + self.vf_loss * vf_loss_coeff -
-                           self.entropy * entropy_coeff)
+        self.total_loss = (
+            self.pi_loss + self.vf_loss * vf_loss_coeff - self.entropy * entropy_coeff
+        )
 
 
 def build_vtrace_loss(policy, model, dist_class, train_batch):
@@ -118,8 +121,7 @@ def build_vtrace_loss(policy, model, dist_class, train_batch):
     if isinstance(policy.action_space, gym.spaces.Discrete):
         is_multidiscrete = False
         output_hidden_shape = [policy.action_space.n]
-    elif isinstance(policy.action_space,
-                    gym.spaces.multi_discrete.MultiDiscrete):
+    elif isinstance(policy.action_space, gym.spaces.multi_discrete.MultiDiscrete):
         is_multidiscrete = True
         output_hidden_shape = policy.action_space.nvec.astype(np.int32)
     else:
@@ -127,8 +129,7 @@ def build_vtrace_loss(policy, model, dist_class, train_batch):
         output_hidden_shape = 1
 
     def _make_time_major(*args, **kw):
-        return make_time_major(policy, train_batch.get("seq_lens"), *args,
-                               **kw)
+        return make_time_major(policy, train_batch.get("seq_lens"), *args, **kw)
 
     actions = train_batch[SampleBatch.ACTIONS]
     dones = train_batch[SampleBatch.DONES]
@@ -137,12 +138,13 @@ def build_vtrace_loss(policy, model, dist_class, train_batch):
     behaviour_logits = train_batch[SampleBatch.ACTION_DIST_INPUTS]
     if isinstance(output_hidden_shape, (list, tuple, np.ndarray)):
         unpacked_behaviour_logits = torch.split(
-            behaviour_logits, list(output_hidden_shape), dim=1)
-        unpacked_outputs = torch.split(
-            model_out, list(output_hidden_shape), dim=1)
+            behaviour_logits, list(output_hidden_shape), dim=1
+        )
+        unpacked_outputs = torch.split(model_out, list(output_hidden_shape), dim=1)
     else:
         unpacked_behaviour_logits = torch.chunk(
-            behaviour_logits, output_hidden_shape, dim=1)
+            behaviour_logits, output_hidden_shape, dim=1
+        )
         unpacked_outputs = torch.chunk(model_out, output_hidden_shape, dim=1)
     values = model.value_function()
 
@@ -154,21 +156,16 @@ def build_vtrace_loss(policy, model, dist_class, train_batch):
         mask = torch.ones_like(rewards)
 
     # Prepare actions for loss.
-    loss_actions = actions if is_multidiscrete else torch.unsqueeze(
-        actions, dim=1)
+    loss_actions = actions if is_multidiscrete else torch.unsqueeze(actions, dim=1)
 
     # Inputs are reshaped from [B * T] => [T - 1, B] for V-trace calc.
     policy.loss = VTraceLoss(
         actions=_make_time_major(loss_actions, drop_last=True),
-        actions_logp=_make_time_major(
-            action_dist.logp(actions), drop_last=True),
-        actions_entropy=_make_time_major(
-            action_dist.entropy(), drop_last=True),
+        actions_logp=_make_time_major(action_dist.logp(actions), drop_last=True),
+        actions_entropy=_make_time_major(action_dist.entropy(), drop_last=True),
         dones=_make_time_major(dones, drop_last=True),
-        behaviour_action_logp=_make_time_major(
-            behaviour_action_logp, drop_last=True),
-        behaviour_logits=_make_time_major(
-            unpacked_behaviour_logits, drop_last=True),
+        behaviour_action_logp=_make_time_major(behaviour_action_logp, drop_last=True),
+        behaviour_logits=_make_time_major(unpacked_behaviour_logits, drop_last=True),
         target_logits=_make_time_major(unpacked_outputs, drop_last=True),
         discount=policy.config["gamma"],
         rewards=_make_time_major(rewards, drop_last=True),
@@ -181,7 +178,8 @@ def build_vtrace_loss(policy, model, dist_class, train_batch):
         vf_loss_coeff=policy.config["vf_loss_coeff"],
         entropy_coeff=policy.entropy_coeff,
         clip_rho_threshold=policy.config["vtrace_clip_rho_threshold"],
-        clip_pg_rho_threshold=policy.config["vtrace_clip_pg_rho_threshold"])
+        clip_pg_rho_threshold=policy.config["vtrace_clip_pg_rho_threshold"],
+    )
 
     return policy.loss.total_loss
 
@@ -201,9 +199,7 @@ def make_time_major(policy, seq_lens, tensor, drop_last=False):
         swapped axes.
     """
     if isinstance(tensor, (list, tuple)):
-        return [
-            make_time_major(policy, seq_lens, t, drop_last) for t in tensor
-        ]
+        return [make_time_major(policy, seq_lens, t, drop_last) for t in tensor]
 
     if policy.is_recurrent():
         B = seq_lens.shape[0]
@@ -228,7 +224,8 @@ def stats(policy, train_batch):
         policy,
         train_batch.get("seq_lens"),
         policy.model.value_function(),
-        drop_last=policy.config["vtrace"])
+        drop_last=policy.config["vtrace"],
+    )
 
     return {
         "cur_lr": policy.cur_lr,
@@ -240,26 +237,28 @@ def stats(policy, train_batch):
         "vf_explained_var": explained_variance(
             torch.reshape(policy.loss.value_targets, [-1]),
             torch.reshape(values_batched, [-1]),
-            framework="torch"),
+            framework="torch",
+        ),
     }
 
 
 def choose_optimizer(policy, config):
     if policy.config["opt_type"] == "adam":
-        return torch.optim.Adam(
-            params=policy.model.parameters(), lr=policy.cur_lr)
+        return torch.optim.Adam(params=policy.model.parameters(), lr=policy.cur_lr)
     else:
         return torch.optim.RMSProp(
             params=policy.model.parameters(),
             lr=policy.cur_lr,
             weight_decay=config["decay"],
             momentum=config["momentum"],
-            eps=config["epsilon"])
+            eps=config["epsilon"],
+        )
 
 
 def setup_mixins(policy, obs_space, action_space, config):
-    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
-                                  config["entropy_coeff_schedule"])
+    EntropyCoeffSchedule.__init__(
+        policy, config["entropy_coeff"], config["entropy_coeff_schedule"]
+    )
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
@@ -273,4 +272,5 @@ VTraceTorchPolicy = build_torch_policy(
     optimizer_fn=choose_optimizer,
     before_init=setup_mixins,
     mixins=[LearningRateSchedule, EntropyCoeffSchedule],
-    get_batch_divisibility_req=lambda p: p.config["rollout_fragment_length"])
+    get_batch_divisibility_req=lambda p: p.config["rollout_fragment_length"],
+)

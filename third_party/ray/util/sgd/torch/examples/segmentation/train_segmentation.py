@@ -20,20 +20,18 @@ except ImportError:
     amp = None
 
 
-def get_dataset(name,
-                image_set,
-                transform,
-                num_classes_only=False,
-                download="auto"):
+def get_dataset(name, image_set, transform, num_classes_only=False, download="auto"):
     def sbd(*args, **kwargs):
-        return torchvision.datasets.SBDataset(
-            *args, mode="segmentation", **kwargs)
+        return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
     paths = {
-        "voc": (os.path.expanduser("~/datasets01/VOC/060817/"),
-                torchvision.datasets.VOCSegmentation, 21),
+        "voc": (
+            os.path.expanduser("~/datasets01/VOC/060817/"),
+            torchvision.datasets.VOCSegmentation,
+            21,
+        ),
         "voc_aug": (os.path.expanduser("~/datasets01/SBDD/072318/"), sbd, 21),
-        "coco": (os.path.expanduser("~/datasets01/COCO/022719/"), get_coco, 21)
+        "coco": (os.path.expanduser("~/datasets01/COCO/022719/"), get_coco, 21),
     }
     p, ds_fn, num_classes = paths[name]
     if num_classes_only:
@@ -42,8 +40,7 @@ def get_dataset(name,
     if download == "auto" and os.path.exists(p):
         download = False
     try:
-        ds = ds_fn(
-            p, download=download, image_set=image_set, transforms=transform)
+        ds = ds_fn(p, download=download, image_set=image_set, transforms=transform)
     except RuntimeError:
         print("data loading failed. Retrying this.")
         ds = ds_fn(p, download=True, image_set=image_set, transforms=transform)
@@ -52,23 +49,23 @@ def get_dataset(name,
 
 def data_creator(config):
     # Within a machine, this code runs synchronously.
-    dataset, num_classes = get_dataset(
-        args.dataset, "train", get_transform(train=True))
+    dataset, num_classes = get_dataset(args.dataset, "train", get_transform(train=True))
     config["num_classes"] = num_classes
-    dataset_test, _ = get_dataset(
-        args.dataset, "val", get_transform(train=False))
+    dataset_test, _ = get_dataset(args.dataset, "val", get_transform(train=False))
     data_loader = torch.utils.data.DataLoader(
         dataset,
         batch_size=args.batch_size,
         num_workers=args.data_workers,
         collate_fn=utils.collate_fn,
-        drop_last=True)
+        drop_last=True,
+    )
 
     data_loader_test = torch.utils.data.DataLoader(
         dataset_test,
         batch_size=1,
         num_workers=args.data_workers,
-        collate_fn=utils.collate_fn)
+        collate_fn=utils.collate_fn,
+    )
     return data_loader, data_loader_test
 
 
@@ -85,7 +82,8 @@ def get_transform(train):
         transforms.append(T.RandomCrop(crop_size))
     transforms.append(T.ToTensor())
     transforms.append(
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    )
 
     return T.Compose(transforms)
 
@@ -135,27 +133,18 @@ class SegOperator(TrainingOperator):
 def optimizer_creator(model, config):
     args = config["args"]
     params_to_optimize = [
-        {
-            "params": [
-                p for p in model.backbone.parameters() if p.requires_grad
-            ]
-        },
-        {
-            "params": [
-                p for p in model.classifier.parameters() if p.requires_grad
-            ]
-        },
+        {"params": [p for p in model.backbone.parameters() if p.requires_grad]},
+        {"params": [p for p in model.classifier.parameters() if p.requires_grad]},
     ]
     if args.aux_loss:
-        params = [
-            p for p in model.aux_classifier.parameters() if p.requires_grad
-        ]
+        params = [p for p in model.aux_classifier.parameters() if p.requires_grad]
         params_to_optimize.append({"params": params, "lr": args.lr * 10})
     return torch.optim.SGD(
         params_to_optimize,
         lr=args.lr,
         momentum=args.momentum,
-        weight_decay=args.weight_decay)
+        weight_decay=args.weight_decay,
+    )
 
 
 def model_creator(config):
@@ -163,7 +152,8 @@ def model_creator(config):
     model = torchvision.models.segmentation.__dict__[args.model](
         num_classes=config["num_classes"],
         aux_loss=args.aux_loss,
-        pretrained=args.pretrained)
+        pretrained=args.pretrained,
+    )
     if config["num_workers"] > 1:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
     return model
@@ -184,7 +174,8 @@ def main(args):
         use_fp16=True,
         num_workers=config["num_workers"],
         config=config,
-        use_gpu=torch.cuda.is_available())
+        use_gpu=torch.cuda.is_available(),
+    )
 
     for epoch in range(args.epochs):
         trainer.train()
@@ -192,8 +183,9 @@ def main(args):
         print(confmat)
         state_dict = trainer.state_dict()
         state_dict.update(epoch=epoch, args=args)
-        torch.save(state_dict,
-                   os.path.join(args.output_dir, "model_{}.pth".format(epoch)))
+        torch.save(
+            state_dict, os.path.join(args.output_dir, "model_{}.pth".format(epoch))
+        )
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -202,37 +194,42 @@ def main(args):
 
 def parse_args():
     import argparse
+
     parser = argparse.ArgumentParser(
-        description="PyTorch Segmentation Training with RaySGD")
+        description="PyTorch Segmentation Training with RaySGD"
+    )
     parser.add_argument(
         "--address",
         required=False,
         default=None,
-        help="the address to use for connecting to a Ray cluster.")
+        help="the address to use for connecting to a Ray cluster.",
+    )
     parser.add_argument("--dataset", default="voc", help="dataset")
     parser.add_argument("--model", default="fcn_resnet101", help="model")
-    parser.add_argument(
-        "--aux-loss", action="store_true", help="auxiliar loss")
+    parser.add_argument("--aux-loss", action="store_true", help="auxiliar loss")
     parser.add_argument("--device", default="cuda", help="device")
     parser.add_argument("-b", "--batch-size", default=8, type=int)
     parser.add_argument(
-        "-n", "--num-workers", default=1, type=int, help="GPU parallelism")
+        "-n", "--num-workers", default=1, type=int, help="GPU parallelism"
+    )
     parser.add_argument(
         "--epochs",
         default=30,
         type=int,
         metavar="N",
-        help="number of total epochs to run")
+        help="number of total epochs to run",
+    )
     parser.add_argument(
         "--data-workers",
         default=16,
         type=int,
         metavar="N",
-        help="number of data loading workers (default: 16)")
+        help="number of data loading workers (default: 16)",
+    )
+    parser.add_argument("--lr", default=0.01, type=float, help="initial learning rate")
     parser.add_argument(
-        "--lr", default=0.01, type=float, help="initial learning rate")
-    parser.add_argument(
-        "--momentum", default=0.9, type=float, metavar="M", help="momentum")
+        "--momentum", default=0.9, type=float, metavar="M", help="momentum"
+    )
     parser.add_argument(
         "--wd",
         "--weight-decay",
@@ -240,7 +237,8 @@ def parse_args():
         type=float,
         metavar="W",
         help="weight decay (default: 1e-4)",
-        dest="weight_decay")
+        dest="weight_decay",
+    )
     parser.add_argument("--output-dir", default=".", help="path where to save")
     parser.add_argument(
         "--pretrained",

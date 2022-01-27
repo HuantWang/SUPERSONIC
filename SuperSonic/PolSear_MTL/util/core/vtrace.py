@@ -148,8 +148,10 @@ def from_importance_weights(
         else:
             clipped_pg_rhos = rhos
 
-        #pg_advantages = clipped_pg_rhos * (rewards + discounts * vs_t_plus_1 - values)
-        pg_advantages = clipped_pg_rhos * (((rewards + discounts * vs_t_plus_1) - mu) / sigma - normalized_values)
+        # pg_advantages = clipped_pg_rhos * (rewards + discounts * vs_t_plus_1 - values)
+        pg_advantages = clipped_pg_rhos * (
+            ((rewards + discounts * vs_t_plus_1) - mu) / sigma - normalized_values
+        )
 
         # Make sure no gradients backpropagated through the returned values.
         return VTraceReturns(vs=vs, pg_advantages=pg_advantages)

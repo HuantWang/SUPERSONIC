@@ -22,7 +22,6 @@ from tests.unit import _thread_pool
 
 
 class _Callback(object):
-
     def __init__(self):
         self._condition = threading.Condition()
         self._value = None
@@ -40,9 +39,8 @@ class _Callback(object):
 
 
 class ChannelReadyFutureTest(unittest.TestCase):
-
     def test_lonely_channel_connectivity(self):
-        channel = grpc.insecure_channel('localhost:12345')
+        channel = grpc.insecure_channel("localhost:12345")
         callback = _Callback()
 
         ready_future = grpc.channel_ready_future(channel)
@@ -61,16 +59,15 @@ class ChannelReadyFutureTest(unittest.TestCase):
 
     def test_immediately_connectable_channel_connectivity(self):
         thread_pool = _thread_pool.RecordingThreadPool(max_workers=None)
-        server = grpc.server(thread_pool, options=(('grpc.so_reuseport', 0),))
-        port = server.add_insecure_port('[::]:0')
+        server = grpc.server(thread_pool, options=(("grpc.so_reuseport", 0),))
+        port = server.add_insecure_port("[::]:0")
         server.start()
-        channel = grpc.insecure_channel('localhost:{}'.format(port))
+        channel = grpc.insecure_channel("localhost:{}".format(port))
         callback = _Callback()
 
         ready_future = grpc.channel_ready_future(channel)
         ready_future.add_done_callback(callback.accept_value)
-        self.assertIsNone(
-            ready_future.result(timeout=test_constants.LONG_TIMEOUT))
+        self.assertIsNone(ready_future.result(timeout=test_constants.LONG_TIMEOUT))
         value_passed_to_callback = callback.block_until_called()
         self.assertIs(ready_future, value_passed_to_callback)
         self.assertFalse(ready_future.cancelled())
@@ -84,5 +81,5 @@ class ChannelReadyFutureTest(unittest.TestCase):
         self.assertFalse(thread_pool.was_used())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

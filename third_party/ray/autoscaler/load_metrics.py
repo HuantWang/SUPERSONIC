@@ -39,8 +39,7 @@ class LoadMetrics:
         self.dynamic_resources_by_ip[ip] = dynamic_resources_update
 
         now = time.time()
-        if ip not in self.last_used_time_by_ip or \
-                static_resources != dynamic_resources:
+        if ip not in self.last_used_time_by_ip or static_resources != dynamic_resources:
             self.last_used_time_by_ip[ip] = now
         self.last_heartbeat_time_by_ip[ip] = now
 
@@ -56,15 +55,20 @@ class LoadMetrics:
         def prune(mapping):
             unwanted = set(mapping) - active_ips
             for unwanted_key in unwanted:
-                logger.info("LoadMetrics: "
-                            "Removed mapping: {} - {}".format(
-                                unwanted_key, mapping[unwanted_key]))
+                logger.info(
+                    "LoadMetrics: "
+                    "Removed mapping: {} - {}".format(
+                        unwanted_key, mapping[unwanted_key]
+                    )
+                )
                 del mapping[unwanted_key]
             if unwanted:
                 logger.info(
                     "LoadMetrics: "
                     "Removed {} stale ip mappings: {} not in {}".format(
-                        len(unwanted), unwanted, active_ips))
+                        len(unwanted), unwanted, active_ips
+                    )
+                )
             assert not (unwanted & set(mapping))
 
         prune(self.last_used_time_by_ip)
@@ -129,47 +133,50 @@ class LoadMetrics:
 
     def info_string(self):
         return ", ".join(
-            ["{}={}".format(k, v) for k, v in sorted(self._info().items())])
+            ["{}={}".format(k, v) for k, v in sorted(self._info().items())]
+        )
 
     def _info(self):
         nodes_used, resources_used, resources_total = self.get_resource_usage()
 
         now = time.time()
         idle_times = [now - t for t in self.last_used_time_by_ip.values()]
-        heartbeat_times = [
-            now - t for t in self.last_heartbeat_time_by_ip.values()
-        ]
+        heartbeat_times = [now - t for t in self.last_heartbeat_time_by_ip.values()]
         most_delayed_heartbeats = sorted(
-            self.last_heartbeat_time_by_ip.items(),
-            key=lambda pair: pair[1])[:5]
-        most_delayed_heartbeats = {
-            ip: (now - t)
-            for ip, t in most_delayed_heartbeats
-        }
+            self.last_heartbeat_time_by_ip.items(), key=lambda pair: pair[1]
+        )[:5]
+        most_delayed_heartbeats = {ip: (now - t) for ip, t in most_delayed_heartbeats}
 
         def format_resource(key, value):
             if key in ["object_store_memory", "memory"]:
                 return "{} GiB".format(
-                    round(value * MEMORY_RESOURCE_UNIT_BYTES / 1e9, 2))
+                    round(value * MEMORY_RESOURCE_UNIT_BYTES / 1e9, 2)
+                )
             else:
                 return round(value, 2)
 
         return {
-            "ResourceUsage": ", ".join([
-                "{}/{} {}".format(
-                    format_resource(rid, resources_used[rid]),
-                    format_resource(rid, resources_total[rid]), rid)
-                for rid in sorted(resources_used)
-            ]),
+            "ResourceUsage": ", ".join(
+                [
+                    "{}/{} {}".format(
+                        format_resource(rid, resources_used[rid]),
+                        format_resource(rid, resources_total[rid]),
+                        rid,
+                    )
+                    for rid in sorted(resources_used)
+                ]
+            ),
             "NumNodesConnected": len(self.static_resources_by_ip),
             "NumNodesUsed": round(nodes_used, 2),
             "NodeIdleSeconds": "Min={} Mean={} Max={}".format(
                 int(np.min(idle_times)) if idle_times else -1,
                 int(np.mean(idle_times)) if idle_times else -1,
-                int(np.max(idle_times)) if idle_times else -1),
+                int(np.max(idle_times)) if idle_times else -1,
+            ),
             "TimeSinceLastHeartbeat": "Min={} Mean={} Max={}".format(
                 int(np.min(heartbeat_times)) if heartbeat_times else -1,
                 int(np.mean(heartbeat_times)) if heartbeat_times else -1,
-                int(np.max(heartbeat_times)) if heartbeat_times else -1),
+                int(np.max(heartbeat_times)) if heartbeat_times else -1,
+            ),
             "MostDelayedHeartbeats": most_delayed_heartbeats,
         }

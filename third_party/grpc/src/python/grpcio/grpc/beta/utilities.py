@@ -23,11 +23,11 @@ from grpc.framework.foundation import callable_util
 from grpc.framework.foundation import future
 
 _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE = (
-    'Exception calling connectivity future "done" callback!')
+    'Exception calling connectivity future "done" callback!'
+)
 
 
 class _ChannelReadyFuture(future.Future):
-
     def __init__(self, channel):
         self._condition = threading.Condition()
         self._channel = channel
@@ -56,8 +56,10 @@ class _ChannelReadyFuture(future.Future):
 
     def _update(self, connectivity):
         with self._condition:
-            if (not self._cancelled and
-                    connectivity is interfaces.ChannelConnectivity.READY):
+            if (
+                not self._cancelled
+                and connectivity is interfaces.ChannelConnectivity.READY
+            ):
                 self._matured = True
                 self._channel.unsubscribe(self._update)
                 self._condition.notify_all()
@@ -68,7 +70,8 @@ class _ChannelReadyFuture(future.Future):
 
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
-                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)
+                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self
+            )
 
     def cancel(self):
         with self._condition:
@@ -83,7 +86,8 @@ class _ChannelReadyFuture(future.Future):
 
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
-                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)
+                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self
+            )
 
     def cancelled(self):
         with self._condition:

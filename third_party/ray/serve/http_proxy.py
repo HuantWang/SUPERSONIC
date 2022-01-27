@@ -31,8 +31,10 @@ class HTTPProxy:
         assert ray.is_initialized()
         master = serve.api._get_master_actor()
 
-        self.route_table, [self.router_handle
-                           ] = await master.get_http_proxy_config.remote()
+        (
+            self.route_table,
+            [self.router_handle],
+        ) = await master.get_http_proxy_config.remote()
 
         # The exporter is required to return results for /-/metrics endpoint.
         [self.metric_exporter] = await master.get_metric_exporter.remote()
@@ -41,7 +43,8 @@ class HTTPProxy:
         self.request_counter = self.metric_client.new_counter(
             "num_http_requests",
             description="The number of requests processed",
-            label_names=("route", ))
+            label_names=("route",),
+        )
 
     def set_route_table(self, route_table):
         self.route_table = route_table
@@ -76,21 +79,20 @@ class HTTPProxy:
         relative_slo_ms = self._validate_slo_ms(relative_slo_ms)
         absolute_slo_ms = self._validate_slo_ms(absolute_slo_ms)
         if relative_slo_ms is not None and absolute_slo_ms is not None:
-            raise ValueError("Both relative and absolute slo's"
-                             "cannot be specified.")
+            raise ValueError("Both relative and absolute slo's" "cannot be specified.")
         return relative_slo_ms, absolute_slo_ms
 
     def _validate_slo_ms(self, request_slo_ms):
         if request_slo_ms is None:
             return None
         if len(request_slo_ms) != 1:
-            raise ValueError(
-                "Multiple SLO specified, please specific only one.")
+            raise ValueError("Multiple SLO specified, please specific only one.")
         request_slo_ms = request_slo_ms[0]
         request_slo_ms = float(request_slo_ms)
         if request_slo_ms < 0:
-            raise ValueError("Request SLO must be positive, it is {}".format(
-                request_slo_ms))
+            raise ValueError(
+                "Request SLO must be positive, it is {}".format(request_slo_ms)
+            )
         return request_slo_ms
 
     def _make_error_sender(self, scope, receive, send):
@@ -109,8 +111,8 @@ class HTTPProxy:
             await Response(metric_info).send(scope, receive, send)
         else:
             await Response(
-                "System path {} not found".format(current_path),
-                status_code=404).send(scope, receive, send)
+                "System path {} not found".format(current_path), status_code=404
+            ).send(scope, receive, send)
 
     async def __call__(self, scope, receive, send):
         # NOTE: This implements ASGI protocol specified in
@@ -122,8 +124,9 @@ class HTTPProxy:
 
         error_sender = self._make_error_sender(scope, receive, send)
 
-        assert self.route_table is not None, (
-            "Route table must be set via set_route_table.")
+        assert (
+            self.route_table is not None
+        ), "Route table must be set via set_route_table."
         assert scope["type"] == "http"
         current_path = scope["path"]
 
@@ -144,9 +147,9 @@ class HTTPProxy:
             return
 
         if scope["method"] not in methods_allowed:
-            error_message = ("Methods {} not allowed. "
-                             "Available HTTP methods are {}.").format(
-                                 scope["method"], methods_allowed)
+            error_message = (
+                "Methods {} not allowed. " "Available HTTP methods are {}."
+            ).format(scope["method"], methods_allowed)
             await error_sender(error_message, 405)
             return
 
@@ -173,7 +176,8 @@ class HTTPProxy:
         while retries <= MAX_ACTOR_DEAD_RETRIES:
             try:
                 result = await self.router_handle.enqueue_request.remote(
-                    request_metadata, scope, http_body_bytes)
+                    request_metadata, scope, http_body_bytes
+                )
                 if not isinstance(result, ray.exceptions.RayActorError):
                     await Response(result).send(scope, receive, send)
                     break
@@ -186,7 +190,8 @@ class HTTPProxy:
         else:
             logger.debug("Maximum actor death retries exceeded")
             await error_sender(
-                "Internal Error. Maximum actor death retries exceeded", 500)
+                "Internal Error. Maximum actor death retries exceeded", 500
+            )
 
 
 @ray.remote

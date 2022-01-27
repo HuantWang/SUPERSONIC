@@ -26,8 +26,8 @@ def _wrap(behavior):
             return behavior(*args, **kwargs)
         except Exception:
             logging.exception(
-                'Unexpected exception from %s executed in logging pool!',
-                behavior)
+                "Unexpected exception from %s executed in logging pool!", behavior
+            )
             raise
 
     return _wrapping
@@ -50,7 +50,8 @@ class _LoggingPool(object):
 
     def map(self, func, *iterables, **kwargs):
         return self._backing_pool.map(
-            _wrap(func), *iterables, timeout=kwargs.get('timeout', None))
+            _wrap(func), *iterables, timeout=kwargs.get("timeout", None)
+        )
 
     def shutdown(self, wait=True):
         self._backing_pool.shutdown(wait=wait)

@@ -36,13 +36,12 @@ import tests.protoc_plugin.protos.responses.test_responses_pb2 as response_pb2
 import tests.protoc_plugin.protos.service.test_service_pb2_grpc as service_pb2_grpc
 
 # Identifiers of entities we expect to find in the generated module.
-STUB_IDENTIFIER = 'TestServiceStub'
-SERVICER_IDENTIFIER = 'TestServiceServicer'
-ADD_SERVICER_TO_SERVER_IDENTIFIER = 'add_TestServiceServicer_to_server'
+STUB_IDENTIFIER = "TestServiceStub"
+SERVICER_IDENTIFIER = "TestServiceServicer"
+ADD_SERVICER_TO_SERVER_IDENTIFIER = "add_TestServiceServicer_to_server"
 
 
 class _ServicerMethods(object):
-
     def __init__(self):
         self._condition = threading.Condition()
         self._paused = False
@@ -75,7 +74,7 @@ class _ServicerMethods(object):
     def UnaryCall(self, request, unused_rpc_context):
         response = response_pb2.SimpleResponse()
         response.payload.payload_type = payload_pb2.COMPRESSABLE
-        response.payload.payload_compressable = 'a' * request.response_size
+        response.payload.payload_compressable = "a" * request.response_size
         self._control()
         return response
 
@@ -83,7 +82,7 @@ class _ServicerMethods(object):
         for parameter in request.response_parameters:
             response = response_pb2.StreamingOutputCallResponse()
             response.payload.payload_type = payload_pb2.COMPRESSABLE
-            response.payload.payload_compressable = 'a' * parameter.size
+            response.payload.payload_compressable = "a" * parameter.size
             self._control()
             yield response
 
@@ -101,7 +100,7 @@ class _ServicerMethods(object):
             for parameter in request.response_parameters:
                 response = response_pb2.StreamingOutputCallResponse()
                 response.payload.payload_type = payload_pb2.COMPRESSABLE
-                response.payload.payload_compressable = 'a' * parameter.size
+                response.payload.payload_compressable = "a" * parameter.size
                 self._control()
                 yield response
 
@@ -111,7 +110,7 @@ class _ServicerMethods(object):
             for parameter in request.response_parameters:
                 response = response_pb2.StreamingOutputCallResponse()
                 response.payload.payload_type = payload_pb2.COMPRESSABLE
-                response.payload.payload_compressable = 'a' * parameter.size
+                response.payload.payload_compressable = "a" * parameter.size
                 self._control()
                 responses.append(response)
         for response in responses:
@@ -119,11 +118,8 @@ class _ServicerMethods(object):
 
 
 class _Service(
-        collections.namedtuple('_Service', (
-            'servicer_methods',
-            'server',
-            'stub',
-        ))):
+    collections.namedtuple("_Service", ("servicer_methods", "server", "stub",))
+):
     """A live and running service.
 
   Attributes:
@@ -142,7 +138,6 @@ def _CreateService():
     servicer_methods = _ServicerMethods()
 
     class Servicer(getattr(service_pb2_grpc, SERVICER_IDENTIFIER)):
-
         def UnaryCall(self, request, context):
             return servicer_methods.UnaryCall(request, context)
 
@@ -159,11 +154,10 @@ def _CreateService():
             return servicer_methods.HalfDuplexCall(request_iter, context)
 
     server = test_common.test_server()
-    getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER)(Servicer(),
-                                                                 server)
-    port = server.add_insecure_port('[::]:0')
+    getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER)(Servicer(), server)
+    port = server.add_insecure_port("[::]:0")
     server.start()
-    channel = grpc.insecure_channel('localhost:{}'.format(port))
+    channel = grpc.insecure_channel("localhost:{}".format(port))
     stub = getattr(service_pb2_grpc, STUB_IDENTIFIER)(channel)
     return _Service(servicer_methods, server, stub)
 
@@ -180,11 +174,10 @@ def _CreateIncompleteService():
         pass
 
     server = test_common.test_server()
-    getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER)(Servicer(),
-                                                                 server)
-    port = server.add_insecure_port('[::]:0')
+    getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER)(Servicer(), server)
+    port = server.add_insecure_port("[::]:0")
     server.start()
-    channel = grpc.insecure_channel('localhost:{}'.format(port))
+    channel = grpc.insecure_channel("localhost:{}".format(port))
     stub = getattr(service_pb2_grpc, STUB_IDENTIFIER)(channel)
     return _Service(None, server, stub)
 
@@ -193,7 +186,7 @@ def _streaming_input_request_iterator():
     for _ in range(3):
         request = request_pb2.StreamingInputCallRequest()
         request.payload.payload_type = payload_pb2.COMPRESSABLE
-        request.payload.payload_compressable = 'a'
+        request.payload.payload_compressable = "a"
         yield request
 
 
@@ -227,10 +220,10 @@ class PythonPluginTest(unittest.TestCase):
     def testImportAttributes(self):
         # check that we can access the generated module and its members.
         self.assertIsNotNone(getattr(service_pb2_grpc, STUB_IDENTIFIER, None))
+        self.assertIsNotNone(getattr(service_pb2_grpc, SERVICER_IDENTIFIER, None))
         self.assertIsNotNone(
-            getattr(service_pb2_grpc, SERVICER_IDENTIFIER, None))
-        self.assertIsNotNone(
-            getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER, None))
+            getattr(service_pb2_grpc, ADD_SERVICER_TO_SERVER_IDENTIFIER, None)
+        )
 
     def testUpDown(self):
         service = _CreateService()
@@ -244,8 +237,7 @@ class PythonPluginTest(unittest.TestCase):
         request = request_pb2.SimpleRequest(response_size=13)
         with self.assertRaises(grpc.RpcError) as exception_context:
             service.stub.UnaryCall(request)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.UNIMPLEMENTED)
+        self.assertIs(exception_context.exception.code(), grpc.StatusCode.UNIMPLEMENTED)
         service.server.stop(None)
 
     def testUnaryCall(self):
@@ -253,7 +245,8 @@ class PythonPluginTest(unittest.TestCase):
         request = request_pb2.SimpleRequest(response_size=13)
         response = service.stub.UnaryCall(request)
         expected_response = service.servicer_methods.UnaryCall(
-            request, 'not a real context!')
+            request, "not a real context!"
+        )
         self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -265,7 +258,8 @@ class PythonPluginTest(unittest.TestCase):
             response_future = service.stub.UnaryCall.future(request)
         response = response_future.result()
         expected_response = service.servicer_methods.UnaryCall(
-            request, 'not a real RpcContext!')
+            request, "not a real RpcContext!"
+        )
         self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -274,11 +268,13 @@ class PythonPluginTest(unittest.TestCase):
         request = request_pb2.SimpleRequest(response_size=13)
         with service.servicer_methods.pause():
             response_future = service.stub.UnaryCall.future(
-                request, timeout=test_constants.SHORT_TIMEOUT)
+                request, timeout=test_constants.SHORT_TIMEOUT
+            )
             with self.assertRaises(grpc.RpcError) as exception_context:
                 response_future.result()
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
+        self.assertIs(
+            exception_context.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
         self.assertIs(response_future.code(), grpc.StatusCode.DEADLINE_EXCEEDED)
         service.server.stop(None)
 
@@ -306,9 +302,11 @@ class PythonPluginTest(unittest.TestCase):
         request = _streaming_output_request()
         responses = service.stub.StreamingOutputCall(request)
         expected_responses = service.servicer_methods.StreamingOutputCall(
-            request, 'not a real RpcContext!')
+            request, "not a real RpcContext!"
+        )
         for expected_response, response in moves.zip_longest(
-                expected_responses, responses):
+            expected_responses, responses
+        ):
             self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -317,11 +315,13 @@ class PythonPluginTest(unittest.TestCase):
         request = _streaming_output_request()
         with service.servicer_methods.pause():
             responses = service.stub.StreamingOutputCall(
-                request, timeout=test_constants.SHORT_TIMEOUT)
+                request, timeout=test_constants.SHORT_TIMEOUT
+            )
             with self.assertRaises(grpc.RpcError) as exception_context:
                 list(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
+        self.assertIs(
+            exception_context.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
         service.server.stop(None)
 
     def testStreamingOutputCallCancelled(self):
@@ -343,16 +343,15 @@ class PythonPluginTest(unittest.TestCase):
             self.assertIsNotNone(responses)
             with self.assertRaises(grpc.RpcError) as exception_context:
                 next(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.UNKNOWN)
+        self.assertIs(exception_context.exception.code(), grpc.StatusCode.UNKNOWN)
         service.server.stop(None)
 
     def testStreamingInputCall(self):
         service = _CreateService()
-        response = service.stub.StreamingInputCall(
-            _streaming_input_request_iterator())
+        response = service.stub.StreamingInputCall(_streaming_input_request_iterator())
         expected_response = service.servicer_methods.StreamingInputCall(
-            _streaming_input_request_iterator(), 'not a real RpcContext!')
+            _streaming_input_request_iterator(), "not a real RpcContext!"
+        )
         self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -360,10 +359,12 @@ class PythonPluginTest(unittest.TestCase):
         service = _CreateService()
         with service.servicer_methods.pause():
             response_future = service.stub.StreamingInputCall.future(
-                _streaming_input_request_iterator())
+                _streaming_input_request_iterator()
+            )
         response = response_future.result()
         expected_response = service.servicer_methods.StreamingInputCall(
-            _streaming_input_request_iterator(), 'not a real RpcContext!')
+            _streaming_input_request_iterator(), "not a real RpcContext!"
+        )
         self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -372,21 +373,25 @@ class PythonPluginTest(unittest.TestCase):
         with service.servicer_methods.pause():
             response_future = service.stub.StreamingInputCall.future(
                 _streaming_input_request_iterator(),
-                timeout=test_constants.SHORT_TIMEOUT)
+                timeout=test_constants.SHORT_TIMEOUT,
+            )
             with self.assertRaises(grpc.RpcError) as exception_context:
                 response_future.result()
         self.assertIsInstance(response_future.exception(), grpc.RpcError)
-        self.assertIs(response_future.exception().code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
+        self.assertIs(
+            response_future.exception().code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
+        self.assertIs(
+            exception_context.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
         service.server.stop(None)
 
     def testStreamingInputCallFutureCancelled(self):
         service = _CreateService()
         with service.servicer_methods.pause():
             response_future = service.stub.StreamingInputCall.future(
-                _streaming_input_request_iterator())
+                _streaming_input_request_iterator()
+            )
             response_future.cancel()
         self.assertTrue(response_future.cancelled())
         with self.assertRaises(grpc.FutureCancelledError):
@@ -397,7 +402,8 @@ class PythonPluginTest(unittest.TestCase):
         service = _CreateService()
         with service.servicer_methods.fail():
             response_future = service.stub.StreamingInputCall.future(
-                _streaming_input_request_iterator())
+                _streaming_input_request_iterator()
+            )
             self.assertIsNotNone(response_future.exception())
             self.assertIs(response_future.code(), grpc.StatusCode.UNKNOWN)
         service.server.stop(None)
@@ -406,9 +412,11 @@ class PythonPluginTest(unittest.TestCase):
         service = _CreateService()
         responses = service.stub.FullDuplexCall(_full_duplex_request_iterator())
         expected_responses = service.servicer_methods.FullDuplexCall(
-            _full_duplex_request_iterator(), 'not a real RpcContext!')
+            _full_duplex_request_iterator(), "not a real RpcContext!"
+        )
         for expected_response, response in moves.zip_longest(
-                expected_responses, responses):
+            expected_responses, responses
+        ):
             self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -417,11 +425,13 @@ class PythonPluginTest(unittest.TestCase):
         service = _CreateService()
         with service.servicer_methods.pause():
             responses = service.stub.FullDuplexCall(
-                request_iterator, timeout=test_constants.SHORT_TIMEOUT)
+                request_iterator, timeout=test_constants.SHORT_TIMEOUT
+            )
             with self.assertRaises(grpc.RpcError) as exception_context:
                 list(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
+        self.assertIs(
+            exception_context.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
         service.server.stop(None)
 
     def testFullDuplexCallCancelled(self):
@@ -432,8 +442,7 @@ class PythonPluginTest(unittest.TestCase):
         responses.cancel()
         with self.assertRaises(grpc.RpcError) as exception_context:
             next(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.CANCELLED)
+        self.assertIs(exception_context.exception.code(), grpc.StatusCode.CANCELLED)
         service.server.stop(None)
 
     def testFullDuplexCallFailed(self):
@@ -443,8 +452,7 @@ class PythonPluginTest(unittest.TestCase):
             responses = service.stub.FullDuplexCall(request_iterator)
             with self.assertRaises(grpc.RpcError) as exception_context:
                 next(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.UNKNOWN)
+        self.assertIs(exception_context.exception.code(), grpc.StatusCode.UNKNOWN)
         service.server.stop(None)
 
     def testHalfDuplexCall(self):
@@ -461,9 +469,11 @@ class PythonPluginTest(unittest.TestCase):
 
         responses = service.stub.HalfDuplexCall(half_duplex_request_iterator())
         expected_responses = service.servicer_methods.HalfDuplexCall(
-            half_duplex_request_iterator(), 'not a real RpcContext!')
+            half_duplex_request_iterator(), "not a real RpcContext!"
+        )
         for expected_response, response in moves.zip_longest(
-                expected_responses, responses):
+            expected_responses, responses
+        ):
             self.assertEqual(expected_response, response)
         service.server.stop(None)
 
@@ -492,15 +502,16 @@ class PythonPluginTest(unittest.TestCase):
         service = _CreateService()
         with wait():
             responses = service.stub.HalfDuplexCall(
-                half_duplex_request_iterator(),
-                timeout=test_constants.SHORT_TIMEOUT)
+                half_duplex_request_iterator(), timeout=test_constants.SHORT_TIMEOUT
+            )
             # half-duplex waits for the client to send all info
             with self.assertRaises(grpc.RpcError) as exception_context:
                 next(responses)
-        self.assertIs(exception_context.exception.code(),
-                      grpc.StatusCode.DEADLINE_EXCEEDED)
+        self.assertIs(
+            exception_context.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED
+        )
         service.server.stop(None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

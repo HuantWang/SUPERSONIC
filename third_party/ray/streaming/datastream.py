@@ -28,8 +28,7 @@ class Stream(ABC):
         Returns:
             the parallelism of this transformation
         """
-        return self._gateway_client(). \
-            call_method(self._j_stream, "getParallelism")
+        return self._gateway_client().call_method(self._j_stream, "getParallelism")
 
     def set_parallelism(self, parallelism: int):
         """Sets the parallelism of this transformation
@@ -40,8 +39,9 @@ class Stream(ABC):
         Returns:
             self
         """
-        self._gateway_client(). \
-            call_method(self._j_stream, "setParallelism", parallelism)
+        self._gateway_client().call_method(
+            self._j_stream, "setParallelism", parallelism
+        )
         return self
 
     def get_input_stream(self):
@@ -56,8 +56,7 @@ class Stream(ABC):
         Returns:
             An unique id identifies this stream.
         """
-        return self._gateway_client(). \
-            call_method(self._j_stream, "getId")
+        return self._gateway_client().call_method(self._j_stream, "getId")
 
     def with_config(self, key=None, value=None, conf=None):
         """Set stream config.
@@ -73,14 +72,12 @@ class Stream(ABC):
         if key is not None:
             assert type(key) is str
             assert type(value) is str
-            self._gateway_client(). \
-                call_method(self._j_stream, "withConfig", key, value)
+            self._gateway_client().call_method(self._j_stream, "withConfig", key, value)
         if conf is not None:
             for k, v in conf.items():
                 assert type(k) is str
                 assert type(v) is str
-            self._gateway_client(). \
-                call_method(self._j_stream, "withConfig", conf)
+            self._gateway_client().call_method(self._j_stream, "withConfig", conf)
         return self
 
     def get_config(self):
@@ -106,8 +103,7 @@ class DataStream(Stream):
     """
 
     def __init__(self, input_stream, j_stream, streaming_context=None):
-        super().__init__(
-            input_stream, j_stream, streaming_context=streaming_context)
+        super().__init__(input_stream, j_stream, streaming_context=streaming_context)
 
     def get_language(self):
         return function.Language.PYTHON
@@ -128,10 +124,8 @@ class DataStream(Stream):
         """
         if not isinstance(func, function.MapFunction):
             func = function.SimpleMapFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "map", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "map", j_func)
         return DataStream(self, j_stream)
 
     def flat_map(self, func):
@@ -152,10 +146,8 @@ class DataStream(Stream):
         """
         if not isinstance(func, function.FlatMapFunction):
             func = function.SimpleFlatMapFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "flatMap", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "flatMap", j_func)
         return DataStream(self, j_stream)
 
     def filter(self, func):
@@ -176,10 +168,8 @@ class DataStream(Stream):
         """
         if not isinstance(func, function.FilterFunction):
             func = function.SimpleFilterFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "filter", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "filter", j_func)
         return DataStream(self, j_stream)
 
     def union(self, *streams):
@@ -213,10 +203,8 @@ class DataStream(Stream):
         self._check_partition_call()
         if not isinstance(func, function.KeyFunction):
             func = function.SimpleKeyFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "keyBy", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "keyBy", j_func)
         return KeyDataStream(self, j_stream)
 
     def broadcast(self):
@@ -249,9 +237,9 @@ class DataStream(Stream):
         if not isinstance(partition_func, partition.Partition):
             partition_func = partition.SimplePartition(partition_func)
         j_partition = self._gateway_client().create_py_func(
-            partition.serialize(partition_func))
-        self._gateway_client(). \
-            call_method(self._j_stream, "partitionBy", j_partition)
+            partition.serialize(partition_func)
+        )
+        self._gateway_client().call_method(self._j_stream, "partitionBy", j_partition)
         return self
 
     def _check_partition_call(self):
@@ -259,10 +247,14 @@ class DataStream(Stream):
         If parent stream is a java stream, we can't call partition related
         methods in the python stream
         """
-        if self.input_stream is not None and \
-                self.input_stream.get_language() == function.Language.JAVA:
-            raise Exception("Partition related methods can't be called on a "
-                            "python stream if parent stream is a java stream.")
+        if (
+            self.input_stream is not None
+            and self.input_stream.get_language() == function.Language.JAVA
+        ):
+            raise Exception(
+                "Partition related methods can't be called on a "
+                "python stream if parent stream is a java stream."
+            )
 
     def sink(self, func):
         """
@@ -276,10 +268,8 @@ class DataStream(Stream):
         """
         if not isinstance(func, function.SinkFunction):
             func = function.SimpleSinkFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "sink", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "sink", j_func)
         return StreamSink(self, j_stream, func)
 
     def as_java_stream(self):
@@ -289,8 +279,7 @@ class DataStream(Stream):
         which has same stream id. Changes in converted stream will be reflected
         in this stream and vice versa.
         """
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "asJavaStream")
+        j_stream = self._gateway_client().call_method(self._j_stream, "asJavaStream")
         return JavaDataStream(self, j_stream)
 
 
@@ -302,8 +291,7 @@ class JavaDataStream(Stream):
     """
 
     def __init__(self, input_stream, j_stream, streaming_context=None):
-        super().__init__(
-            input_stream, j_stream, streaming_context=streaming_context)
+        super().__init__(input_stream, j_stream, streaming_context=streaming_context)
 
     def get_language(self):
         return function.Language.JAVA
@@ -314,13 +302,11 @@ class JavaDataStream(Stream):
 
     def flat_map(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.flatMap"""
-        return JavaDataStream(self, self._unary_call("flatMap",
-                                                     java_func_class))
+        return JavaDataStream(self, self._unary_call("flatMap", java_func_class))
 
     def filter(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.filter"""
-        return JavaDataStream(self, self._unary_call("filter",
-                                                     java_func_class))
+        return JavaDataStream(self, self._unary_call("filter", java_func_class))
 
     def union(self, *streams):
         """See io.ray.streaming.api.stream.DataStream.union"""
@@ -332,20 +318,17 @@ class JavaDataStream(Stream):
     def key_by(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.keyBy"""
         self._check_partition_call()
-        return JavaKeyDataStream(self,
-                                 self._unary_call("keyBy", java_func_class))
+        return JavaKeyDataStream(self, self._unary_call("keyBy", java_func_class))
 
     def broadcast(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.broadcast"""
         self._check_partition_call()
-        return JavaDataStream(self,
-                              self._unary_call("broadcast", java_func_class))
+        return JavaDataStream(self, self._unary_call("broadcast", java_func_class))
 
     def partition_by(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.partitionBy"""
         self._check_partition_call()
-        return JavaDataStream(self,
-                              self._unary_call("partitionBy", java_func_class))
+        return JavaDataStream(self, self._unary_call("partitionBy", java_func_class))
 
     def sink(self, java_func_class):
         """See io.ray.streaming.api.stream.DataStream.sink"""
@@ -358,8 +341,7 @@ class JavaDataStream(Stream):
         which has same stream id. Changes in converted stream will be reflected
         in this stream and vice versa.
         """
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "asPythonStream")
+        j_stream = self._gateway_client().call_method(self._j_stream, "asPythonStream")
         return DataStream(self, j_stream)
 
     def _check_partition_call(self):
@@ -367,15 +349,18 @@ class JavaDataStream(Stream):
         If parent stream is a python stream, we can't call partition related
         methods in the java stream
         """
-        if self.input_stream is not None and \
-                self.input_stream.get_language() == function.Language.PYTHON:
-            raise Exception("Partition related methods can't be called on a"
-                            "java stream if parent stream is a python stream.")
+        if (
+            self.input_stream is not None
+            and self.input_stream.get_language() == function.Language.PYTHON
+        ):
+            raise Exception(
+                "Partition related methods can't be called on a"
+                "java stream if parent stream is a python stream."
+            )
 
     def _unary_call(self, func_name, java_func_class):
         j_func = self._gateway_client().new_instance(java_func_class)
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, func_name, j_func)
+        j_stream = self._gateway_client().call_method(self._j_stream, func_name, j_func)
         return j_stream
 
 
@@ -406,10 +391,8 @@ class KeyDataStream(DataStream):
         """
         if not isinstance(func, function.ReduceFunction):
             func = function.SimpleReduceFunction(func)
-        j_func = self._gateway_client().create_py_func(
-            function.serialize(func))
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "reduce", j_func)
+        j_func = self._gateway_client().create_py_func(function.serialize(func))
+        j_stream = self._gateway_client().call_method(self._j_stream, "reduce", j_func)
         return DataStream(self, j_stream)
 
     def as_java_stream(self):
@@ -419,8 +402,7 @@ class KeyDataStream(DataStream):
         which has same stream id. Changes in converted stream will be reflected
         in this stream and vice versa.
         """
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "asJavaStream")
+        j_stream = self._gateway_client().call_method(self._j_stream, "asJavaStream")
         return JavaKeyDataStream(self, j_stream)
 
 
@@ -435,8 +417,7 @@ class JavaKeyDataStream(JavaDataStream):
 
     def reduce(self, java_func_class):
         """See io.ray.streaming.api.stream.KeyDataStream.reduce"""
-        return JavaDataStream(self,
-                              super()._unary_call("reduce", java_func_class))
+        return JavaDataStream(self, super()._unary_call("reduce", java_func_class))
 
     def as_python_stream(self):
         """
@@ -445,8 +426,7 @@ class JavaKeyDataStream(JavaDataStream):
         which has same stream id. Changes in converted stream will be reflected
         in this stream and vice versa.
         """
-        j_stream = self._gateway_client(). \
-            call_method(self._j_stream, "asPythonStream")
+        j_stream = self._gateway_client().call_method(self._j_stream, "asPythonStream")
         return KeyDataStream(self, j_stream)
 
 
@@ -495,8 +475,9 @@ class StreamSource(DataStream):
         Returns:
             A StreamSource
         """
-        j_stream = streaming_context._gateway_client. \
-            create_py_stream_source(function.serialize(func))
+        j_stream = streaming_context._gateway_client.create_py_stream_source(
+            function.serialize(func)
+        )
         return StreamSource(j_stream, streaming_context, func)
 
 
@@ -520,11 +501,14 @@ class JavaStreamSource(JavaDataStream):
         Returns:
             A java StreamSource
         """
-        j_func = streaming_context._gateway_client() \
-            .new_instance(java_source_func_class)
-        j_stream = streaming_context._gateway_client() \
-            .call_function("io.ray.streaming.api.stream.DataStreamSource"
-                           "fromSource", streaming_context._j_ctx, j_func)
+        j_func = streaming_context._gateway_client().new_instance(
+            java_source_func_class
+        )
+        j_stream = streaming_context._gateway_client().call_function(
+            "io.ray.streaming.api.stream.DataStreamSource" "fromSource",
+            streaming_context._j_ctx,
+            j_func,
+        )
         return JavaStreamSource(j_stream, streaming_context)
 
 

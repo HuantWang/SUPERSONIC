@@ -20,7 +20,6 @@ import grpc
 
 
 class _ServicePipeline(object):
-
     def __init__(self, interceptors):
         self.interceptors = tuple(interceptors)
 
@@ -44,10 +43,11 @@ def service_pipeline(interceptors):
 
 
 class _ClientCallDetails(
-        collections.namedtuple(
-            '_ClientCallDetails',
-            ('method', 'timeout', 'metadata', 'credentials')),
-        grpc.ClientCallDetails):
+    collections.namedtuple(
+        "_ClientCallDetails", ("method", "timeout", "metadata", "credentials")
+    ),
+    grpc.ClientCallDetails,
+):
     pass
 
 
@@ -76,7 +76,6 @@ def _unwrap_client_call_details(call_details, default_details):
 
 
 class _LocalFailure(grpc.RpcError, grpc.Future, grpc.Call):
-
     def __init__(self, exception, traceback):
         super(_LocalFailure, self).__init__()
         self._exception = exception
@@ -92,7 +91,7 @@ class _LocalFailure(grpc.RpcError, grpc.Future, grpc.Call):
         return grpc.StatusCode.INTERNAL
 
     def details(self):
-        return 'Exception raised while intercepting the RPC'
+        return "Exception raised while intercepting the RPC"
 
     def cancel(self):
         return False
@@ -126,7 +125,6 @@ class _LocalFailure(grpc.RpcError, grpc.Future, grpc.Call):
 
 
 class _UnaryUnaryMultiCallable(grpc.UnaryUnaryMultiCallable):
-
     def __init__(self, thunk, method, interceptor):
         self._thunk = thunk
         self._method = method
@@ -134,156 +132,164 @@ class _UnaryUnaryMultiCallable(grpc.UnaryUnaryMultiCallable):
 
     def __call__(self, request, timeout=None, metadata=None, credentials=None):
         call_future = self.future(
-            request,
-            timeout=timeout,
-            metadata=metadata,
-            credentials=credentials)
+            request, timeout=timeout, metadata=metadata, credentials=credentials
+        )
         return call_future.result()
 
     def with_call(self, request, timeout=None, metadata=None, credentials=None):
         call_future = self.future(
-            request,
-            timeout=timeout,
-            metadata=metadata,
-            credentials=credentials)
+            request, timeout=timeout, metadata=metadata, credentials=credentials
+        )
         return call_future.result(), call_future
 
     def future(self, request, timeout=None, metadata=None, credentials=None):
 
-        client_call_details = _ClientCallDetails(self._method, timeout,
-                                                 metadata, credentials)
+        client_call_details = _ClientCallDetails(
+            self._method, timeout, metadata, credentials
+        )
 
         def continuation(new_details, request):
-            new_method, new_timeout, new_metadata, new_credentials = (
-                _unwrap_client_call_details(new_details, client_call_details))
+            (
+                new_method,
+                new_timeout,
+                new_metadata,
+                new_credentials,
+            ) = _unwrap_client_call_details(new_details, client_call_details)
             return self._thunk(new_method).future(
                 request,
                 timeout=new_timeout,
                 metadata=new_metadata,
-                credentials=new_credentials)
+                credentials=new_credentials,
+            )
 
         try:
             return self._interceptor.intercept_unary_unary(
-                continuation, client_call_details, request)
+                continuation, client_call_details, request
+            )
         except Exception as exception:  # pylint:disable=broad-except
             return _LocalFailure(exception, sys.exc_info()[2])
 
 
 class _UnaryStreamMultiCallable(grpc.UnaryStreamMultiCallable):
-
     def __init__(self, thunk, method, interceptor):
         self._thunk = thunk
         self._method = method
         self._interceptor = interceptor
 
     def __call__(self, request, timeout=None, metadata=None, credentials=None):
-        client_call_details = _ClientCallDetails(self._method, timeout,
-                                                 metadata, credentials)
+        client_call_details = _ClientCallDetails(
+            self._method, timeout, metadata, credentials
+        )
 
         def continuation(new_details, request):
-            new_method, new_timeout, new_metadata, new_credentials = (
-                _unwrap_client_call_details(new_details, client_call_details))
+            (
+                new_method,
+                new_timeout,
+                new_metadata,
+                new_credentials,
+            ) = _unwrap_client_call_details(new_details, client_call_details)
             return self._thunk(new_method)(
                 request,
                 timeout=new_timeout,
                 metadata=new_metadata,
-                credentials=new_credentials)
+                credentials=new_credentials,
+            )
 
         try:
             return self._interceptor.intercept_unary_stream(
-                continuation, client_call_details, request)
+                continuation, client_call_details, request
+            )
         except Exception as exception:  # pylint:disable=broad-except
             return _LocalFailure(exception, sys.exc_info()[2])
 
 
 class _StreamUnaryMultiCallable(grpc.StreamUnaryMultiCallable):
-
     def __init__(self, thunk, method, interceptor):
         self._thunk = thunk
         self._method = method
         self._interceptor = interceptor
 
-    def __call__(self,
-                 request_iterator,
-                 timeout=None,
-                 metadata=None,
-                 credentials=None):
+    def __call__(self, request_iterator, timeout=None, metadata=None, credentials=None):
         call_future = self.future(
             request_iterator,
             timeout=timeout,
             metadata=metadata,
-            credentials=credentials)
+            credentials=credentials,
+        )
         return call_future.result()
 
-    def with_call(self,
-                  request_iterator,
-                  timeout=None,
-                  metadata=None,
-                  credentials=None):
+    def with_call(
+        self, request_iterator, timeout=None, metadata=None, credentials=None
+    ):
         call_future = self.future(
             request_iterator,
             timeout=timeout,
             metadata=metadata,
-            credentials=credentials)
+            credentials=credentials,
+        )
         return call_future.result(), call_future
 
-    def future(self,
-               request_iterator,
-               timeout=None,
-               metadata=None,
-               credentials=None):
-        client_call_details = _ClientCallDetails(self._method, timeout,
-                                                 metadata, credentials)
+    def future(self, request_iterator, timeout=None, metadata=None, credentials=None):
+        client_call_details = _ClientCallDetails(
+            self._method, timeout, metadata, credentials
+        )
 
         def continuation(new_details, request_iterator):
-            new_method, new_timeout, new_metadata, new_credentials = (
-                _unwrap_client_call_details(new_details, client_call_details))
+            (
+                new_method,
+                new_timeout,
+                new_metadata,
+                new_credentials,
+            ) = _unwrap_client_call_details(new_details, client_call_details)
             return self._thunk(new_method).future(
                 request_iterator,
                 timeout=new_timeout,
                 metadata=new_metadata,
-                credentials=new_credentials)
+                credentials=new_credentials,
+            )
 
         try:
             return self._interceptor.intercept_stream_unary(
-                continuation, client_call_details, request_iterator)
+                continuation, client_call_details, request_iterator
+            )
         except Exception as exception:  # pylint:disable=broad-except
             return _LocalFailure(exception, sys.exc_info()[2])
 
 
 class _StreamStreamMultiCallable(grpc.StreamStreamMultiCallable):
-
     def __init__(self, thunk, method, interceptor):
         self._thunk = thunk
         self._method = method
         self._interceptor = interceptor
 
-    def __call__(self,
-                 request_iterator,
-                 timeout=None,
-                 metadata=None,
-                 credentials=None):
-        client_call_details = _ClientCallDetails(self._method, timeout,
-                                                 metadata, credentials)
+    def __call__(self, request_iterator, timeout=None, metadata=None, credentials=None):
+        client_call_details = _ClientCallDetails(
+            self._method, timeout, metadata, credentials
+        )
 
         def continuation(new_details, request_iterator):
-            new_method, new_timeout, new_metadata, new_credentials = (
-                _unwrap_client_call_details(new_details, client_call_details))
+            (
+                new_method,
+                new_timeout,
+                new_metadata,
+                new_credentials,
+            ) = _unwrap_client_call_details(new_details, client_call_details)
             return self._thunk(new_method)(
                 request_iterator,
                 timeout=new_timeout,
                 metadata=new_metadata,
-                credentials=new_credentials)
+                credentials=new_credentials,
+            )
 
         try:
             return self._interceptor.intercept_stream_stream(
-                continuation, client_call_details, request_iterator)
+                continuation, client_call_details, request_iterator
+            )
         except Exception as exception:  # pylint:disable=broad-except
             return _LocalFailure(exception, sys.exc_info()[2])
 
 
 class _Channel(grpc.Channel):
-
     def __init__(self, channel, interceptor):
         self._channel = channel
         self._interceptor = interceptor
@@ -294,41 +300,39 @@ class _Channel(grpc.Channel):
     def unsubscribe(self, *args, **kwargs):
         self._channel.unsubscribe(*args, **kwargs)
 
-    def unary_unary(self,
-                    method,
-                    request_serializer=None,
-                    response_deserializer=None):
-        thunk = lambda m: self._channel.unary_unary(m, request_serializer, response_deserializer)
+    def unary_unary(self, method, request_serializer=None, response_deserializer=None):
+        thunk = lambda m: self._channel.unary_unary(
+            m, request_serializer, response_deserializer
+        )
         if isinstance(self._interceptor, grpc.UnaryUnaryClientInterceptor):
             return _UnaryUnaryMultiCallable(thunk, method, self._interceptor)
         else:
             return thunk(method)
 
-    def unary_stream(self,
-                     method,
-                     request_serializer=None,
-                     response_deserializer=None):
-        thunk = lambda m: self._channel.unary_stream(m, request_serializer, response_deserializer)
+    def unary_stream(self, method, request_serializer=None, response_deserializer=None):
+        thunk = lambda m: self._channel.unary_stream(
+            m, request_serializer, response_deserializer
+        )
         if isinstance(self._interceptor, grpc.UnaryStreamClientInterceptor):
             return _UnaryStreamMultiCallable(thunk, method, self._interceptor)
         else:
             return thunk(method)
 
-    def stream_unary(self,
-                     method,
-                     request_serializer=None,
-                     response_deserializer=None):
-        thunk = lambda m: self._channel.stream_unary(m, request_serializer, response_deserializer)
+    def stream_unary(self, method, request_serializer=None, response_deserializer=None):
+        thunk = lambda m: self._channel.stream_unary(
+            m, request_serializer, response_deserializer
+        )
         if isinstance(self._interceptor, grpc.StreamUnaryClientInterceptor):
             return _StreamUnaryMultiCallable(thunk, method, self._interceptor)
         else:
             return thunk(method)
 
-    def stream_stream(self,
-                      method,
-                      request_serializer=None,
-                      response_deserializer=None):
-        thunk = lambda m: self._channel.stream_stream(m, request_serializer, response_deserializer)
+    def stream_stream(
+        self, method, request_serializer=None, response_deserializer=None
+    ):
+        thunk = lambda m: self._channel.stream_stream(
+            m, request_serializer, response_deserializer
+        )
         if isinstance(self._interceptor, grpc.StreamStreamClientInterceptor):
             return _StreamStreamMultiCallable(thunk, method, self._interceptor)
         else:
@@ -350,14 +354,18 @@ class _Channel(grpc.Channel):
 
 def intercept_channel(channel, *interceptors):
     for interceptor in reversed(list(interceptors)):
-        if not isinstance(interceptor, grpc.UnaryUnaryClientInterceptor) and \
-           not isinstance(interceptor, grpc.UnaryStreamClientInterceptor) and \
-           not isinstance(interceptor, grpc.StreamUnaryClientInterceptor) and \
-           not isinstance(interceptor, grpc.StreamStreamClientInterceptor):
-            raise TypeError('interceptor must be '
-                            'grpc.UnaryUnaryClientInterceptor or '
-                            'grpc.UnaryStreamClientInterceptor or '
-                            'grpc.StreamUnaryClientInterceptor or '
-                            'grpc.StreamStreamClientInterceptor or ')
+        if (
+            not isinstance(interceptor, grpc.UnaryUnaryClientInterceptor)
+            and not isinstance(interceptor, grpc.UnaryStreamClientInterceptor)
+            and not isinstance(interceptor, grpc.StreamUnaryClientInterceptor)
+            and not isinstance(interceptor, grpc.StreamStreamClientInterceptor)
+        ):
+            raise TypeError(
+                "interceptor must be "
+                "grpc.UnaryUnaryClientInterceptor or "
+                "grpc.UnaryStreamClientInterceptor or "
+                "grpc.StreamUnaryClientInterceptor or "
+                "grpc.StreamStreamClientInterceptor or "
+            )
         channel = _Channel(channel, interceptor)
     return channel

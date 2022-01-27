@@ -4,6 +4,7 @@ from gym.utils import seeding
 import numpy as np
 from gym import spaces
 from SuperSonic.policy_definition.action import action_functions
+
 # from compiler_gym.mdp_search.observation import get_observation, obs_init
 from SuperSonic.policy_definition.reward import reward_function
 import sys
@@ -34,7 +35,9 @@ class BanditStokeEnv(gym.Env):
         self.all_policy, self.n_bandits = policy[0], policy[1]
         self.dataset = data
         self.action_space = spaces.Discrete(self.n_bandits)
-        self.observation_space = spaces.box.Box(-1.0, 1.0, shape=(20,), dtype=np.float64)  #
+        self.observation_space = spaces.box.Box(
+            -1.0, 1.0, shape=(20,), dtype=np.float64
+        )  #
         # self.observation_space = spaces.Discrete(1)
         self.num = 0
         self.obsv_size = 20
@@ -50,11 +53,12 @@ class BanditStokeEnv(gym.Env):
         # print("actionspace",self.action_space)
         # print("action",action)
         if len(self.actions) < self.obsv_size:
-            self.observation = np.hstack((np.array(self.actions), np.zeros(self.obsv_size - len(self.actions))))[
-                               :self.obsv_size]
+            self.observation = np.hstack(
+                (np.array(self.actions), np.zeros(self.obsv_size - len(self.actions)))
+            )[: self.obsv_size]
             # print("observation111111",self.observation)
         else:
-            self.observation = self.actions[-self.obsv_size:]
+            self.observation = self.actions[-self.obsv_size :]
             # print("observation222222", self.observation)
         return self.observation
 
@@ -81,7 +85,7 @@ class BanditStokeEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
-        reward = data['checkpoints'][0]['last_result']['episode_reward_max']
+        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
         # data = [json.loads(line) for line in open(full_path, "r")]
         # reward_mean = data[-1]["episode_reward_mean"]
         # reward_min = data[-1]["episode_reward_max"]
@@ -94,7 +98,7 @@ class BanditStokeEnv(gym.Env):
         # result['reward_max'].append(reward_max)
         # result['total_loss'].append(total_loss)
 
-        conn = sqlite3.connect('../../SuperSonic/SQL/supersonic.db')
+        conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
 
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
@@ -124,6 +128,7 @@ class BanditStokeEnv(gym.Env):
         self.num = self.num + 1
         print("self.num : ", self.num)
         import random
+
         if action == 0:
             reward = 0
         else:
@@ -138,7 +143,7 @@ class BanditStokeEnv(gym.Env):
         # result['reward_max'].append(reward_max)
         # result['total_loss'].append(total_loss)
 
-        conn = sqlite3.connect('/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db')
+        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
 
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) VALUES (?, ?, ?, ?)"
@@ -182,9 +187,8 @@ class BanditStokeEnv(gym.Env):
     def reset(self):
         return np.random.rand(20)  #
 
-    def render(self, mode='human', close=False):
+    def render(self, mode="human", close=False):
         pass
 
     def close(self):
         return None
-

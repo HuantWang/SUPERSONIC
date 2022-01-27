@@ -43,27 +43,32 @@ class MyTrainableClass(Trainable):
 
 if __name__ == "__main__":
     import ConfigSpace as CS
+
     ray.init(num_cpus=8)
 
     # BOHB uses ConfigSpace for their hyperparameter search space
     config_space = CS.ConfigurationSpace()
     config_space.add_hyperparameter(
-        CS.UniformFloatHyperparameter("height", lower=10, upper=100))
+        CS.UniformFloatHyperparameter("height", lower=10, upper=100)
+    )
     config_space.add_hyperparameter(
-        CS.UniformFloatHyperparameter("width", lower=0, upper=100))
+        CS.UniformFloatHyperparameter("width", lower=0, upper=100)
+    )
 
     experiment_metrics = dict(metric="episode_reward_mean", mode="max")
     bohb_hyperband = HyperBandForBOHB(
         time_attr="training_iteration",
         max_t=100,
         reduction_factor=4,
-        **experiment_metrics)
-    bohb_search = TuneBOHB(
-        config_space, max_concurrent=4, **experiment_metrics)
+        **experiment_metrics
+    )
+    bohb_search = TuneBOHB(config_space, max_concurrent=4, **experiment_metrics)
 
-    run(MyTrainableClass,
+    run(
+        MyTrainableClass,
         name="bohb_test",
         scheduler=bohb_hyperband,
         search_alg=bohb_search,
         num_samples=10,
-        stop={"training_iteration": 100})
+        stop={"training_iteration": 100},
+    )

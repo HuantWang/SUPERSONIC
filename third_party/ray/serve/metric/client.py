@@ -14,10 +14,10 @@ logger = _get_logger()
 
 class MetricClient:
     def __init__(
-            self,
-            metric_exporter_actor,
-            push_interval: float = METRIC_PUSH_INTERVAL_S,
-            default_labels: Optional[Dict[str, str]] = None,
+        self,
+        metric_exporter_actor,
+        push_interval: float = METRIC_PUSH_INTERVAL_S,
+        default_labels: Optional[Dict[str, str]] = None,
     ):
         """Initialize a client to push metrics to the exporter actor.
 
@@ -34,14 +34,17 @@ class MetricClient:
 
         assert asyncio.get_event_loop().is_running()
         self.push_task = asyncio.get_event_loop().create_task(
-            self.push_to_exporter_forever(push_interval))
+            self.push_to_exporter_forever(push_interval)
+        )
         logger.debug("Initialized client")
 
-    def new_counter(self,
-                    name: str,
-                    *,
-                    description: Optional[str] = "",
-                    label_names: Optional[Tuple[str]] = ()):
+    def new_counter(
+        self,
+        name: str,
+        *,
+        description: Optional[str] = "",
+        label_names: Optional[Tuple[str]] = ()
+    ):
         """Create a new counter.
 
         Counters are used to capture changes in running sums. An essential
@@ -63,14 +66,15 @@ class MetricClient:
                 label_names=("route", "status_code"))
         >>> counter.labels(route="/hi", status_code=200).add()
         """
-        return self._new_metric(name, MetricType.COUNTER, description,
-                                label_names)
+        return self._new_metric(name, MetricType.COUNTER, description, label_names)
 
-    def new_measure(self,
-                    name,
-                    *,
-                    description: Optional[str] = "",
-                    label_names: Optional[Tuple[str]] = ()):
+    def new_measure(
+        self,
+        name,
+        *,
+        description: Optional[str] = "",
+        label_names: Optional[Tuple[str]] = ()
+    ):
         """Create a new measure.
 
         Measure instruments are independent. They cannot be combined as with
@@ -91,23 +95,22 @@ class MetricClient:
                 label_names=("route"))
         >>> measure.labels(route="/hi").record(42)
         """
-        return self._new_metric(name, MetricType.MEASURE, description,
-                                label_names)
+        return self._new_metric(name, MetricType.MEASURE, description, label_names)
 
     def _new_metric(
-            self,
-            name,
-            metric_type: MetricType,
-            description: str,
-            label_names: Tuple[str] = (),
+        self,
+        name,
+        metric_type: MetricType,
+        description: str,
+        label_names: Tuple[str] = (),
     ):
         if name in self.registered_metrics:
-            raise ValueError(
-                "Metric with name {} is already registered.".format(name))
+            raise ValueError("Metric with name {} is already registered.".format(name))
 
         if not isinstance(label_names, tuple):
-            raise ValueError("label_names need to be a tuple, it is {}".format(
-                type(label_names)))
+            raise ValueError(
+                "label_names need to be a tuple, it is {}".format(type(label_names))
+            )
 
         metric_metadata = MetricMetadata(
             name=name,
@@ -117,8 +120,7 @@ class MetricClient:
             default_labels=self.default_labels.copy(),
         )
         metric_class = convert_event_type_to_class(metric_type)
-        metric_object = metric_class(
-            client=self, name=name, label_names=label_names)
+        metric_object = metric_class(client=self, name=name, label_names=label_names)
 
         self.registered_metrics[name] = metric_metadata
         return metric_object

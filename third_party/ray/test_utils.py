@@ -19,6 +19,7 @@ if sys.platform == "win32":
 
 class RayTestTimeoutException(Exception):
     """Exception used to identify timeouts from test utilities."""
+
     pass
 
 
@@ -38,8 +39,7 @@ def _pid_alive(pid):
             SYNCHRONIZE = 0x00100000  # access mask defined in <winnt.h>
             handle = _winapi.OpenProcess(SYNCHRONIZE, False, pid)
             try:
-                alive = (_winapi.WaitForSingleObject(handle, 0) !=
-                         _winapi.WAIT_OBJECT_0)
+                alive = _winapi.WaitForSingleObject(handle, 0) != _winapi.WAIT_OBJECT_0
             finally:
                 _winapi.CloseHandle(handle)
         else:
@@ -58,7 +58,8 @@ def wait_for_pid_to_exit(pid, timeout=20):
             return
         time.sleep(0.1)
     raise RayTestTimeoutException(
-        "Timed out while waiting for process {} to exit.".format(pid))
+        "Timed out while waiting for process {} to exit.".format(pid)
+    )
 
 
 def wait_for_children_of_pid(pid, num_children=1, timeout=20):
@@ -71,7 +72,8 @@ def wait_for_children_of_pid(pid, num_children=1, timeout=20):
         time.sleep(0.1)
     raise RayTestTimeoutException(
         "Timed out while waiting for process {} children to start "
-        "({}/{} started).".format(pid, num_alive, num_children))
+        "({}/{} started).".format(pid, num_alive, num_children)
+    )
 
 
 def wait_for_children_of_pid_to_exit(pid, timeout=20):
@@ -83,7 +85,8 @@ def wait_for_children_of_pid_to_exit(pid, timeout=20):
     if len(alive) > 0:
         raise RayTestTimeoutException(
             "Timed out while waiting for process children to exit."
-            " Children still alive: {}.".format([p.name() for p in alive]))
+            " Children still alive: {}.".format([p.name() for p in alive])
+        )
 
 
 def kill_process_by_name(name, SIGKILL=False):
@@ -109,8 +112,8 @@ def run_string_as_driver(driver_script):
         f.write(driver_script.encode("ascii"))
         f.flush()
         out = ray.utils.decode(
-            subprocess.check_output(
-                [sys.executable, f.name], stderr=subprocess.STDOUT))
+            subprocess.check_output([sys.executable, f.name], stderr=subprocess.STDOUT)
+        )
     return out
 
 
@@ -129,8 +132,7 @@ def run_string_as_driver_nonblocking(driver_script):
     with tempfile.NamedTemporaryFile(delete=False) as f:
         f.write(driver_script.encode("ascii"))
         f.flush()
-        return subprocess.Popen(
-            [sys.executable, f.name], stdout=subprocess.PIPE)
+        return subprocess.Popen([sys.executable, f.name], stdout=subprocess.PIPE)
 
 
 def flat_errors():
@@ -150,8 +152,9 @@ def wait_for_errors(error_type, num_errors, timeout=20):
         if len(relevant_errors(error_type)) >= num_errors:
             return
         time.sleep(0.1)
-    raise RayTestTimeoutException("Timed out waiting for {} {} errors.".format(
-        num_errors, error_type))
+    raise RayTestTimeoutException(
+        "Timed out waiting for {} {} errors.".format(num_errors, error_type)
+    )
 
 
 def wait_for_condition(condition_predictor, timeout=30, retry_interval_ms=100):
@@ -173,11 +176,9 @@ def wait_for_condition(condition_predictor, timeout=30, retry_interval_ms=100):
     return False
 
 
-def wait_until_succeeded_without_exception(func,
-                                           exceptions,
-                                           *args,
-                                           timeout_ms=1000,
-                                           retry_interval_ms=100):
+def wait_until_succeeded_without_exception(
+    func, exceptions, *args, timeout_ms=1000, retry_interval_ms=100
+):
     """A helper function that waits until a given function
         completes without exceptions.
 
@@ -267,9 +268,7 @@ def put_object(obj, use_ray_put):
         return _put.remote(obj)
 
 
-def wait_until_server_available(address,
-                                timeout_ms=5000,
-                                retry_interval_ms=100):
+def wait_until_server_available(address, timeout_ms=5000, retry_interval_ms=100):
     ip_port = address.split(":")
     ip = ip_port[0]
     port = int(ip_port[1])
@@ -293,8 +292,9 @@ def wait_until_server_available(address,
 def get_other_nodes(cluster, exclude_head=False):
     """Get all nodes except the one that we're connected to."""
     return [
-        node for node in cluster.list_all_nodes() if
-        node._raylet_socket_name != ray.worker._global_node._raylet_socket_name
+        node
+        for node in cluster.list_all_nodes()
+        if node._raylet_socket_name != ray.worker._global_node._raylet_socket_name
         and (exclude_head is False or node.head is False)
     ]
 

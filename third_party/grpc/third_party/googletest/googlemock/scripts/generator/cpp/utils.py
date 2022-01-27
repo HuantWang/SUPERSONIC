@@ -17,7 +17,7 @@
 
 """Generic utilities for C++ parsing."""
 
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
+__author__ = "nnorwitz@google.com (Neal Norwitz)"
 
 
 import sys
@@ -37,5 +37,5 @@ def ReadFile(filename, print_error=True):
             fp.close()
     except IOError:
         if print_error:
-            print('Error reading %s: %s' % (filename, sys.exc_info()[1]))
+            print("Error reading %s: %s" % (filename, sys.exc_info()[1]))
         return None

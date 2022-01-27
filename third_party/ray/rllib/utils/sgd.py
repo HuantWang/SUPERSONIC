@@ -7,8 +7,11 @@ import random
 
 from ray.util import log_once
 from ray.rllib.evaluation.metrics import LEARNER_STATS_KEY
-from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
-    MultiAgentBatch
+from ray.rllib.policy.sample_batch import (
+    SampleBatch,
+    DEFAULT_POLICY_ID,
+    MultiAgentBatch,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +64,8 @@ def minibatches(samples, sgd_minibatch_size):
 
     if isinstance(samples, MultiAgentBatch):
         raise NotImplementedError(
-            "Minibatching not implemented for multi-agent in simple mode")
+            "Minibatching not implemented for multi-agent in simple mode"
+        )
 
     if "state_in_0" in samples.data:
         if log_once("not_shuffling_rnn_data_in_simple_mode"):
@@ -80,8 +84,14 @@ def minibatches(samples, sgd_minibatch_size):
         yield samples.slice(i, j)
 
 
-def do_minibatch_sgd(samples, policies, local_worker, num_sgd_iter,
-                     sgd_minibatch_size, standardize_fields):
+def do_minibatch_sgd(
+    samples,
+    policies,
+    local_worker,
+    num_sgd_iter,
+    sgd_minibatch_size,
+    standardize_fields,
+):
     """Execute minibatch SGD.
 
     Arguments:
@@ -111,10 +121,11 @@ def do_minibatch_sgd(samples, policies, local_worker, num_sgd_iter,
         for i in range(num_sgd_iter):
             iter_extra_fetches = defaultdict(list)
             for minibatch in minibatches(batch, sgd_minibatch_size):
-                batch_fetches = (local_worker.learn_on_batch(
-                    MultiAgentBatch({
-                        policy_id: minibatch
-                    }, minibatch.count)))[policy_id]
+                batch_fetches = (
+                    local_worker.learn_on_batch(
+                        MultiAgentBatch({policy_id: minibatch}, minibatch.count)
+                    )
+                )[policy_id]
                 for k, v in batch_fetches.get(LEARNER_STATS_KEY, {}).items():
                     iter_extra_fetches[k].append(v)
             logger.debug("{} {}".format(i, averaged(iter_extra_fetches)))

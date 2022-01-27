@@ -11,14 +11,16 @@ logger = logging.getLogger(__name__)
 class TorchDistributedDataParallelOptimizer(PolicyOptimizer):
     """EXPERIMENTAL: torch distributed multi-node SGD."""
 
-    def __init__(self,
-                 workers,
-                 expected_batch_size,
-                 num_sgd_iter=1,
-                 sgd_minibatch_size=0,
-                 standardize_fields=frozenset([]),
-                 keep_local_weights_in_sync=True,
-                 backend="gloo"):
+    def __init__(
+        self,
+        workers,
+        expected_batch_size,
+        num_sgd_iter=1,
+        sgd_minibatch_size=0,
+        standardize_fields=frozenset([]),
+        keep_local_weights_in_sync=True,
+        backend="gloo",
+    ):
         PolicyOptimizer.__init__(self, workers)
         self.learner_stats = {}
         self.num_sgd_iter = num_sgd_iter
@@ -36,15 +38,17 @@ class TorchDistributedDataParallelOptimizer(PolicyOptimizer):
         ip = ray.get(workers.remote_workers()[0].get_node_ip.remote())
         port = ray.get(workers.remote_workers()[0].find_free_port.remote())
         address = "tcp://{ip}:{port}".format(ip=ip, port=port)
-        logger.info(
-            "Creating torch process group with leader {}".format(address))
+        logger.info("Creating torch process group with leader {}".format(address))
 
         # Get setup tasks in order to throw errors on failure.
-        ray.get([
-            worker.setup_torch_data_parallel.remote(
-                address, i, len(workers.remote_workers()), backend)
-            for i, worker in enumerate(workers.remote_workers())
-        ])
+        ray.get(
+            [
+                worker.setup_torch_data_parallel.remote(
+                    address, i, len(workers.remote_workers()), backend
+                )
+                for i, worker in enumerate(workers.remote_workers())
+            ]
+        )
         logger.info("Torch process group init completed")
 
     @override(PolicyOptimizer)
@@ -59,12 +63,17 @@ class TorchDistributedDataParallelOptimizer(PolicyOptimizer):
                     e.set_weights.remote(weights)
 
         with self.learn_timer:
-            results = ray.get([
-                w.sample_and_learn.remote(
-                    self.expected_batch_size, self.num_sgd_iter,
-                    self.sgd_minibatch_size, self.standardize_fields)
-                for w in self.workers.remote_workers()
-            ])
+            results = ray.get(
+                [
+                    w.sample_and_learn.remote(
+                        self.expected_batch_size,
+                        self.num_sgd_iter,
+                        self.sgd_minibatch_size,
+                        self.standardize_fields,
+                    )
+                    for w in self.workers.remote_workers()
+                ]
+            )
         for info, count in results:
             self.num_steps_sampled += count
             self.num_steps_trained += count
@@ -72,9 +81,9 @@ class TorchDistributedDataParallelOptimizer(PolicyOptimizer):
 
         # In debug mode, check the allreduce successfully synced the weights.
         if logger.isEnabledFor(logging.DEBUG):
-            weights = ray.get([
-                w.get_weights.remote() for w in self.workers.remote_workers()
-            ])
+            weights = ray.get(
+                [w.get_weights.remote() for w in self.workers.remote_workers()]
+            )
             sums = []
             for w in weights:
                 acc = 0
@@ -90,19 +99,19 @@ class TorchDistributedDataParallelOptimizer(PolicyOptimizer):
         if self.keep_local_weights_in_sync:
             with self.sync_down_timer:
                 self.workers.local_worker().set_weights(
-                    ray.get(
-                        self.workers.remote_workers()[0].get_weights.remote()))
+                    ray.get(self.workers.remote_workers()[0].get_weights.remote())
+                )
 
         return self.learner_stats
 
     @override(PolicyOptimizer)
     def stats(self):
         return dict(
-            PolicyOptimizer.stats(self), **{
-                "sync_weights_up_time": round(1000 * self.sync_up_timer.mean,
-                                              3),
-                "sync_weights_down_time": round(
-                    1000 * self.sync_down_timer.mean, 3),
+            PolicyOptimizer.stats(self),
+            **{
+                "sync_weights_up_time": round(1000 * self.sync_up_timer.mean, 3),
+                "sync_weights_down_time": round(1000 * self.sync_down_timer.mean, 3),
                 "learn_time_ms": round(1000 * self.learn_timer.mean, 3),
                 "learner": self.learner_stats,
-            })
+            }
+        )

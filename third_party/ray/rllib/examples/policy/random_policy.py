@@ -12,12 +12,14 @@ class RandomPolicy(Policy):
         super().__init__(*args, **kwargs)
 
     @override(Policy)
-    def compute_actions(self,
-                        obs_batch,
-                        state_batches=None,
-                        prev_action_batch=None,
-                        prev_reward_batch=None,
-                        **kwargs):
+    def compute_actions(
+        self,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+        **kwargs
+    ):
         # Alternatively, a numpy array would work here as well.
         # e.g.: np.array([random.choice([0, 1])] * len(obs_batch))
         return [self.action_space.sample() for _ in obs_batch], [], {}
@@ -28,10 +30,12 @@ class RandomPolicy(Policy):
         return {}
 
     @override(Policy)
-    def compute_log_likelihoods(self,
-                                actions,
-                                obs_batch,
-                                state_batches=None,
-                                prev_action_batch=None,
-                                prev_reward_batch=None):
+    def compute_log_likelihoods(
+        self,
+        actions,
+        obs_batch,
+        state_batches=None,
+        prev_action_batch=None,
+        prev_reward_batch=None,
+    ):
         return np.array([random.random()] * len(obs_batch))

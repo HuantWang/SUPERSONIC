@@ -150,8 +150,9 @@ def subprocess_supports_unicode(name):
 
 # An invalid unicode string.
 if PY3:
-    INVALID_NAME = (TESTFN.encode('utf8') + b"f\xc0\x80").decode(
-        'utf8', 'surrogateescape')
+    INVALID_NAME = (TESTFN.encode("utf8") + b"f\xc0\x80").decode(
+        "utf8", "surrogateescape"
+    )
 else:
     INVALID_NAME = TESTFN + "f\xc0\x80"
 
@@ -186,8 +187,7 @@ class _BaseFSAPIsTests(object):
         exe = p.exe()
         self.assertIsInstance(exe, str)
         if self.expect_exact_path_match():
-            self.assertEqual(os.path.normcase(exe),
-                             os.path.normcase(self.funky_name))
+            self.assertEqual(os.path.normcase(exe), os.path.normcase(self.funky_name))
 
     def test_proc_name(self):
         subp = get_test_subprocess(cmd=[self.funky_name])
@@ -220,7 +220,7 @@ class _BaseFSAPIsTests(object):
     def test_proc_open_files(self):
         p = psutil.Process()
         start = set(p.open_files())
-        with open(self.funky_name, 'rb'):
+        with open(self.funky_name, "rb"):
             new = set(p.open_files())
         path = (new - start).pop().path
         self.assertIsInstance(path, str)
@@ -228,8 +228,7 @@ class _BaseFSAPIsTests(object):
             # XXX - see https://github.com/giampaolo/psutil/issues/595
             return self.skipTest("open_files on BSD is broken")
         if self.expect_exact_path_match():
-            self.assertEqual(os.path.normcase(path),
-                             os.path.normcase(self.funky_name))
+            self.assertEqual(os.path.normcase(path), os.path.normcase(self.funky_name))
 
     @unittest.skipIf(not POSIX, "POSIX only")
     def test_proc_connections(self):
@@ -243,7 +242,7 @@ class _BaseFSAPIsTests(object):
                 else:
                     raise unittest.SkipTest("not supported")
             with closing(sock):
-                conn = psutil.Process().connections('unix')[0]
+                conn = psutil.Process().connections("unix")[0]
                 self.assertIsInstance(conn.laddr, str)
                 # AF_UNIX addr not set on OpenBSD
                 if not OPENBSD and not CIRRUS:  # XXX
@@ -269,7 +268,7 @@ class _BaseFSAPIsTests(object):
                 else:
                     raise unittest.SkipTest("not supported")
             with closing(sock):
-                cons = psutil.net_connections(kind='unix')
+                cons = psutil.net_connections(kind="unix")
                 # AF_UNIX addr not set on OpenBSD
                 if not OPENBSD:
                     conn = find_sock(cons)
@@ -284,16 +283,18 @@ class _BaseFSAPIsTests(object):
 
     @unittest.skipIf(not HAS_MEMORY_MAPS, "not supported")
     @unittest.skipIf(not PY3, "ctypes does not support unicode on PY2")
-    @unittest.skipIf(PYPY and WINDOWS,
-                     "copyload_shared_lib() unsupported on PYPY + WINDOWS")
+    @unittest.skipIf(
+        PYPY and WINDOWS, "copyload_shared_lib() unsupported on PYPY + WINDOWS"
+    )
     def test_memory_maps(self):
         # XXX: on Python 2, using ctypes.CDLL with a unicode path
         # opens a message box which blocks the test run.
         with copyload_shared_lib(dst_prefix=self.funky_name) as funky_path:
+
             def normpath(p):
                 return os.path.realpath(os.path.normcase(p))
-            libpaths = [normpath(x.path)
-                        for x in psutil.Process().memory_maps()]
+
+            libpaths = [normpath(x.path) for x in psutil.Process().memory_maps()]
             # ...just to have a clearer msg in case of failure
             libpaths = [x for x in libpaths if TESTFILE_PREFIX in x]
             self.assertIn(normpath(funky_path), libpaths)
@@ -305,17 +306,20 @@ class _BaseFSAPIsTests(object):
 @unittest.skipIf(PYPY and TRAVIS, "unreliable on PYPY + TRAVIS")
 @unittest.skipIf(MACOS and TRAVIS, "unreliable on TRAVIS")  # TODO
 @unittest.skipIf(ASCII_FS, "ASCII fs")
-@unittest.skipIf(not subprocess_supports_unicode(TESTFN_UNICODE),
-                 "subprocess can't deal with unicode")
+@unittest.skipIf(
+    not subprocess_supports_unicode(TESTFN_UNICODE),
+    "subprocess can't deal with unicode",
+)
 class TestFSAPIs(_BaseFSAPIsTests, unittest.TestCase):
     """Test FS APIs with a funky, valid, UTF8 path name."""
+
     funky_name = TESTFN_UNICODE
 
     @classmethod
     def expect_exact_path_match(cls):
         # Do not expect psutil to correctly handle unicode paths on
         # Python 2 if os.listdir() is not able either.
-        here = '.' if isinstance(cls.funky_name, str) else u('.')
+        here = "." if isinstance(cls.funky_name, str) else u(".")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return cls.funky_name in os.listdir(here)
@@ -324,10 +328,13 @@ class TestFSAPIs(_BaseFSAPIsTests, unittest.TestCase):
 @unittest.skipIf(PYPY and TRAVIS, "unreliable on PYPY + TRAVIS")
 @unittest.skipIf(MACOS and TRAVIS, "unreliable on TRAVIS")  # TODO
 @unittest.skipIf(PYPY, "unreliable on PYPY")
-@unittest.skipIf(not subprocess_supports_unicode(INVALID_NAME),
-                 "subprocess can't deal with invalid unicode")
+@unittest.skipIf(
+    not subprocess_supports_unicode(INVALID_NAME),
+    "subprocess can't deal with invalid unicode",
+)
 class TestFSAPIsWithInvalidPath(_BaseFSAPIsTests, unittest.TestCase):
     """Test FS APIs with a funky, invalid path name."""
+
     funky_name = INVALID_NAME
 
     @classmethod
@@ -356,17 +363,18 @@ class TestNonFSAPIS(unittest.TestCase):
         # we use "è", which is part of the extended ASCII table
         # (unicode point <= 255).
         env = os.environ.copy()
-        funky_str = TESTFN_UNICODE if PY3 else 'è'
-        env['FUNNY_ARG'] = funky_str
+        funky_str = TESTFN_UNICODE if PY3 else "è"
+        env["FUNNY_ARG"] = funky_str
         sproc = get_test_subprocess(env=env)
         p = psutil.Process(sproc.pid)
         env = p.environ()
         for k, v in env.items():
             self.assertIsInstance(k, str)
             self.assertIsInstance(v, str)
-        self.assertEqual(env['FUNNY_ARG'], funky_str)
+        self.assertEqual(env["FUNNY_ARG"], funky_str)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from psutil.tests.runner import run
+
     run(__file__)

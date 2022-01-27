@@ -22,19 +22,24 @@ from grpc.framework.foundation import stream  # pylint: disable=unused-import
 from grpc.framework.interfaces.face import face
 
 
-class _MethodImplementation(face.MethodImplementation,
-                            collections.namedtuple('_MethodImplementation', [
-                                'cardinality',
-                                'style',
-                                'unary_unary_inline',
-                                'unary_stream_inline',
-                                'stream_unary_inline',
-                                'stream_stream_inline',
-                                'unary_unary_event',
-                                'unary_stream_event',
-                                'stream_unary_event',
-                                'stream_stream_event',
-                            ])):
+class _MethodImplementation(
+    face.MethodImplementation,
+    collections.namedtuple(
+        "_MethodImplementation",
+        [
+            "cardinality",
+            "style",
+            "unary_unary_inline",
+            "unary_stream_inline",
+            "stream_unary_inline",
+            "stream_stream_inline",
+            "unary_unary_event",
+            "unary_stream_event",
+            "stream_unary_event",
+            "stream_stream_event",
+        ],
+    ),
+):
     pass
 
 
@@ -49,9 +54,18 @@ def unary_unary_inline(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.UNARY_UNARY,
-                                 style.Service.INLINE, behavior, None, None,
-                                 None, None, None, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.UNARY_UNARY,
+        style.Service.INLINE,
+        behavior,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
 
 
 def unary_stream_inline(behavior):
@@ -65,9 +79,18 @@ def unary_stream_inline(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.UNARY_STREAM,
-                                 style.Service.INLINE, None, behavior, None,
-                                 None, None, None, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.UNARY_STREAM,
+        style.Service.INLINE,
+        None,
+        behavior,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
 
 
 def stream_unary_inline(behavior):
@@ -81,9 +104,18 @@ def stream_unary_inline(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.STREAM_UNARY,
-                                 style.Service.INLINE, None, None, behavior,
-                                 None, None, None, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.STREAM_UNARY,
+        style.Service.INLINE,
+        None,
+        None,
+        behavior,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
 
 
 def stream_stream_inline(behavior):
@@ -97,9 +129,18 @@ def stream_stream_inline(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.STREAM_STREAM,
-                                 style.Service.INLINE, None, None, None,
-                                 behavior, None, None, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.STREAM_STREAM,
+        style.Service.INLINE,
+        None,
+        None,
+        None,
+        behavior,
+        None,
+        None,
+        None,
+        None,
+    )
 
 
 def unary_unary_event(behavior):
@@ -113,9 +154,18 @@ def unary_unary_event(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.UNARY_UNARY,
-                                 style.Service.EVENT, None, None, None, None,
-                                 behavior, None, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.UNARY_UNARY,
+        style.Service.EVENT,
+        None,
+        None,
+        None,
+        None,
+        behavior,
+        None,
+        None,
+        None,
+    )
 
 
 def unary_stream_event(behavior):
@@ -129,9 +179,18 @@ def unary_stream_event(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.UNARY_STREAM,
-                                 style.Service.EVENT, None, None, None, None,
-                                 None, behavior, None, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.UNARY_STREAM,
+        style.Service.EVENT,
+        None,
+        None,
+        None,
+        None,
+        None,
+        behavior,
+        None,
+        None,
+    )
 
 
 def stream_unary_event(behavior):
@@ -146,9 +205,18 @@ def stream_unary_event(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.STREAM_UNARY,
-                                 style.Service.EVENT, None, None, None, None,
-                                 None, None, behavior, None)
+    return _MethodImplementation(
+        cardinality.Cardinality.STREAM_UNARY,
+        style.Service.EVENT,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        behavior,
+        None,
+    )
 
 
 def stream_stream_event(behavior):
@@ -163,6 +231,15 @@ def stream_stream_event(behavior):
   Returns:
     An face.MethodImplementation derived from the given behavior.
   """
-    return _MethodImplementation(cardinality.Cardinality.STREAM_STREAM,
-                                 style.Service.EVENT, None, None, None, None,
-                                 None, None, None, behavior)
+    return _MethodImplementation(
+        cardinality.Cardinality.STREAM_STREAM,
+        style.Service.EVENT,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        behavior,
+    )

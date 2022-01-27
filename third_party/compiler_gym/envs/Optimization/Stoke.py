@@ -22,7 +22,9 @@ class StokeEnv(gym.Env):
 
     """
 
-    def __init__(self, state_function,action_function,reward_function):#state_function,action_function,reward_function
+    def __init__(
+        self, state_function, action_function, reward_function
+    ):  # state_function,action_function,reward_function
         """ Defines the reinforcement leaning environment.
         Modify to match different task shape.
         """
@@ -31,33 +33,39 @@ class StokeEnv(gym.Env):
         self.action_function = action_function
         self.reward_function = reward_function
 
-
-        self.interleave_action_length,self.obsv_size = 9,100
+        self.interleave_action_length, self.obsv_size = 9, 100
         self.obsv_low = 0
         self.obsv_high = 1
-        self.action_space, self.observation_space = action_functions().init_actions(self.interleave_action_length,
-                                                                                    self.obsv_low,self.obsv_high,self.obsv_size,self.action_function)
+        self.action_space, self.observation_space = action_functions().init_actions(
+            self.interleave_action_length,
+            self.obsv_low,
+            self.obsv_high,
+            self.obsv_size,
+            self.action_function,
+        )
 
         self.state = None
         self.tstart = time.time()
 
-    def get_reward(self, action,state_reward):
-        #reward_new = get_reward("hamming", action)
+    def get_reward(self, action, state_reward):
+        # reward_new = get_reward("hamming", action)
         # self.reward_function = "relative_measure"
         # # reward,self.min_exec_time_sec = reward_function().get_reward\
         # #     (self.response.exec_time_sec, self.min_exec_time_sec, weight=self.reward_scale, method=self.reward_function)
         reward_new = state_reward
         return reward_new
 
-    def get_obs(self, action,state_code):
-        self.state_code=state_code
+    def get_obs(self, action, state_code):
+        self.state_code = state_code
         # self.state_code = "abc"
-        #observation = get_observation(self.observation_method, self.state_code)
+        # observation = get_observation(self.observation_method, self.state_code)
 
         self.input = [self.state_code]
-        observation = observation_function().get_observation(self.input,self.obsv_size,self.state_function)
+        observation = observation_function().get_observation(
+            self.input, self.obsv_size, self.state_function
+        )
         return observation
-    
+
     def step(self, action, state_code, reward):
         assert self.action_space.contains(action), "%r (%s) invalid" % (
             action,
@@ -68,10 +76,10 @@ class StokeEnv(gym.Env):
 
         done = True
         rew = reward  # update reward
-        #save to db
-        #print(state_code.replace("nop\n",""))
-        #print(str(self.env.actions))
-        ''' 
+        # save to db
+        # print(state_code.replace("nop\n",""))
+        # print(str(self.env.actions))
+        """ 
         conn = sqlite3.connect('/home/SuperSonic/tasks/src/opt_test/MCTS/examples/supersonic.db')
         c = conn.cursor()
         sql = "INSERT INTO STOKE (TIME, RESULT, REWARD) \
@@ -80,12 +88,12 @@ class StokeEnv(gym.Env):
 
         conn.commit()
         conn.close()
-        '''
+        """
         info = {}
         return self.state, rew, done, info
 
     def reset(self):
-        #self.state = obs_init(self.observation_method)
+        # self.state = obs_init(self.observation_method)
         self.state = np.random.random(100)
         return self.state
 
@@ -103,8 +111,3 @@ class StokeEnv(gym.Env):
 #     print(env.state)
 #     env.step(env.action_space.sample())
 #     print(env.state)
-
-
-
-
-

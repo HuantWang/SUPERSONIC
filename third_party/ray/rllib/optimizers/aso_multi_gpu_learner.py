@@ -26,18 +26,20 @@ class TFMultiGPULearner(LearnerThread):
     This is for use with AsyncSamplesOptimizer.
     """
 
-    def __init__(self,
-                 local_worker,
-                 num_gpus=1,
-                 lr=0.0005,
-                 train_batch_size=500,
-                 num_data_loader_buffers=1,
-                 minibatch_buffer_size=1,
-                 num_sgd_iter=1,
-                 learner_queue_size=16,
-                 learner_queue_timeout=300,
-                 num_data_load_threads=16,
-                 _fake_gpus=False):
+    def __init__(
+        self,
+        local_worker,
+        num_gpus=1,
+        lr=0.0005,
+        train_batch_size=500,
+        num_data_loader_buffers=1,
+        minibatch_buffer_size=1,
+        num_sgd_iter=1,
+        learner_queue_size=16,
+        learner_queue_timeout=300,
+        num_data_load_threads=16,
+        _fake_gpus=False,
+    ):
         """Initialize a multi-gpu learner thread.
 
         Arguments:
@@ -57,9 +59,14 @@ class TFMultiGPULearner(LearnerThread):
             num_data_loader_threads (int): number of threads to use to load
                 data into GPU memory in parallel
         """
-        LearnerThread.__init__(self, local_worker, minibatch_buffer_size,
-                               num_sgd_iter, learner_queue_size,
-                               learner_queue_timeout)
+        LearnerThread.__init__(
+            self,
+            local_worker,
+            minibatch_buffer_size,
+            num_sgd_iter,
+            learner_queue_size,
+            learner_queue_timeout,
+        )
         self.lr = lr
         self.train_batch_size = train_batch_size
         if not num_gpus:
@@ -88,9 +95,7 @@ class TFMultiGPULearner(LearnerThread):
             with self.local_worker.tf_sess.as_default():
                 with tf.variable_scope(DEFAULT_POLICY_ID, reuse=tf.AUTO_REUSE):
                     if self.policy._state_inputs:
-                        rnn_inputs = self.policy._state_inputs + [
-                            self.policy._seq_lens
-                        ]
+                        rnn_inputs = self.policy._state_inputs + [self.policy._seq_lens]
                     else:
                         rnn_inputs = []
                     adam = tf.train.AdamOptimizer(self.lr)
@@ -102,7 +107,9 @@ class TFMultiGPULearner(LearnerThread):
                                 [v for _, v in self.policy._loss_inputs],
                                 rnn_inputs,
                                 999999,  # it will get rounded down
-                                self.policy.copy))
+                                self.policy.copy,
+                            )
+                        )
 
                 self.sess = self.local_worker.tf_sess
                 self.sess.run(tf.global_variables_initializer())
@@ -116,8 +123,11 @@ class TFMultiGPULearner(LearnerThread):
             self.loader_thread.start()
 
         self.minibatch_buffer = MinibatchBuffer(
-            self.ready_optimizers, minibatch_buffer_size,
-            learner_queue_timeout, num_sgd_iter)
+            self.ready_optimizers,
+            minibatch_buffer_size,
+            learner_queue_timeout,
+            num_sgd_iter,
+        )
 
     @override(LearnerThread)
     def step(self):
@@ -167,7 +177,8 @@ class _LoaderThread(threading.Thread):
                 state_keys = s.policy._state_inputs + [s.policy._seq_lens]
             else:
                 state_keys = []
-            opt.load_data(s.sess, [tuples[k] for k in data_keys],
-                          [tuples[k] for k in state_keys])
+            opt.load_data(
+                s.sess, [tuples[k] for k in data_keys], [tuples[k] for k in state_keys]
+            )
 
         s.ready_optimizers.put(opt)

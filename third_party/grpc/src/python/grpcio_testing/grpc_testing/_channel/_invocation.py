@@ -21,7 +21,7 @@ _NOT_YET_OBSERVED = object()
 
 
 def _cancel(handler):
-    return handler.cancel(grpc.StatusCode.CANCELLED, 'Locally cancelled!')
+    return handler.cancel(grpc.StatusCode.CANCELLED, "Locally cancelled!")
 
 
 def _is_active(handler):
@@ -56,7 +56,6 @@ def _details(handler):
 
 
 class _Call(grpc.Call):
-
     def __init__(self, handler):
         self._handler = handler
 
@@ -86,7 +85,6 @@ class _Call(grpc.Call):
 
 
 class _RpcErrorCall(grpc.RpcError, grpc.Call):
-
     def __init__(self, handler):
         self._handler = handler
 
@@ -126,7 +124,6 @@ def _next(handler):
 
 
 class _HandlerExtras(object):
-
     def __init__(self):
         self.condition = threading.Condition()
         self.unary_response = _NOT_YET_OBSERVED
@@ -135,7 +132,7 @@ class _HandlerExtras(object):
 
 def _with_extras_cancel(handler, extras):
     with extras.condition:
-        if handler.cancel(grpc.StatusCode.CANCELLED, 'Locally cancelled!'):
+        if handler.cancel(grpc.StatusCode.CANCELLED, "Locally cancelled!"):
             extras.cancelled = True
             return True
         else:
@@ -169,11 +166,11 @@ def _with_extras_unary_response(handler, extras):
 
 
 def _exception(unused_handler):
-    raise NotImplementedError('TODO!')
+    raise NotImplementedError("TODO!")
 
 
 def _traceback(unused_handler):
-    raise NotImplementedError('TODO!')
+    raise NotImplementedError("TODO!")
 
 
 def _add_done_callback(handler, callback, future):
@@ -183,7 +180,6 @@ def _add_done_callback(handler, callback, future):
 
 
 class _FutureCall(grpc.Future, grpc.Call):
-
     def __init__(self, handler, extras):
         self._handler = handler
         self._extras = extras
@@ -235,7 +231,6 @@ class _FutureCall(grpc.Future, grpc.Call):
 
 
 def consume_requests(request_iterator, handler):
-
     def _consume():
         while True:
             try:
@@ -247,7 +242,7 @@ def consume_requests(request_iterator, handler):
                 handler.close_requests()
                 break
             except Exception:  # pylint: disable=broad-except
-                details = 'Exception iterating requests!'
+                details = "Exception iterating requests!"
                 logging.exception(details)
                 handler.cancel(grpc.StatusCode.UNKNOWN, details)
 
@@ -284,7 +279,6 @@ def future_call(handler):
 
 
 class ResponseIteratorCall(grpc.Call):
-
     def __init__(self, handler):
         self._handler = handler
 

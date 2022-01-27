@@ -44,32 +44,91 @@ PY3 = sys.version_info[0] == 3
 
 __all__ = [
     # OS constants
-    'FREEBSD', 'BSD', 'LINUX', 'NETBSD', 'OPENBSD', 'MACOS', 'OSX', 'POSIX',
-    'SUNOS', 'WINDOWS',
+    "FREEBSD",
+    "BSD",
+    "LINUX",
+    "NETBSD",
+    "OPENBSD",
+    "MACOS",
+    "OSX",
+    "POSIX",
+    "SUNOS",
+    "WINDOWS",
     # connection constants
-    'CONN_CLOSE', 'CONN_CLOSE_WAIT', 'CONN_CLOSING', 'CONN_ESTABLISHED',
-    'CONN_FIN_WAIT1', 'CONN_FIN_WAIT2', 'CONN_LAST_ACK', 'CONN_LISTEN',
-    'CONN_NONE', 'CONN_SYN_RECV', 'CONN_SYN_SENT', 'CONN_TIME_WAIT',
+    "CONN_CLOSE",
+    "CONN_CLOSE_WAIT",
+    "CONN_CLOSING",
+    "CONN_ESTABLISHED",
+    "CONN_FIN_WAIT1",
+    "CONN_FIN_WAIT2",
+    "CONN_LAST_ACK",
+    "CONN_LISTEN",
+    "CONN_NONE",
+    "CONN_SYN_RECV",
+    "CONN_SYN_SENT",
+    "CONN_TIME_WAIT",
     # net constants
-    'NIC_DUPLEX_FULL', 'NIC_DUPLEX_HALF', 'NIC_DUPLEX_UNKNOWN',
+    "NIC_DUPLEX_FULL",
+    "NIC_DUPLEX_HALF",
+    "NIC_DUPLEX_UNKNOWN",
     # process status constants
-    'STATUS_DEAD', 'STATUS_DISK_SLEEP', 'STATUS_IDLE', 'STATUS_LOCKED',
-    'STATUS_RUNNING', 'STATUS_SLEEPING', 'STATUS_STOPPED', 'STATUS_SUSPENDED',
-    'STATUS_TRACING_STOP', 'STATUS_WAITING', 'STATUS_WAKE_KILL',
-    'STATUS_WAKING', 'STATUS_ZOMBIE', 'STATUS_PARKED',
+    "STATUS_DEAD",
+    "STATUS_DISK_SLEEP",
+    "STATUS_IDLE",
+    "STATUS_LOCKED",
+    "STATUS_RUNNING",
+    "STATUS_SLEEPING",
+    "STATUS_STOPPED",
+    "STATUS_SUSPENDED",
+    "STATUS_TRACING_STOP",
+    "STATUS_WAITING",
+    "STATUS_WAKE_KILL",
+    "STATUS_WAKING",
+    "STATUS_ZOMBIE",
+    "STATUS_PARKED",
     # other constants
-    'ENCODING', 'ENCODING_ERRS', 'AF_INET6',
+    "ENCODING",
+    "ENCODING_ERRS",
+    "AF_INET6",
     # named tuples
-    'pconn', 'pcputimes', 'pctxsw', 'pgids', 'pio', 'pionice', 'popenfile',
-    'pthread', 'puids', 'sconn', 'scpustats', 'sdiskio', 'sdiskpart',
-    'sdiskusage', 'snetio', 'snicaddr', 'snicstats', 'sswap', 'suser',
+    "pconn",
+    "pcputimes",
+    "pctxsw",
+    "pgids",
+    "pio",
+    "pionice",
+    "popenfile",
+    "pthread",
+    "puids",
+    "sconn",
+    "scpustats",
+    "sdiskio",
+    "sdiskpart",
+    "sdiskusage",
+    "snetio",
+    "snicaddr",
+    "snicstats",
+    "sswap",
+    "suser",
     # utility functions
-    'conn_tmap', 'deprecated_method', 'isfile_strict', 'memoize',
-    'parse_environ_block', 'path_exists_strict', 'usage_percent',
-    'supports_ipv6', 'sockfam_to_enum', 'socktype_to_enum', "wrap_numbers",
-    'bytes2human', 'conn_to_ntuple', 'debug',
+    "conn_tmap",
+    "deprecated_method",
+    "isfile_strict",
+    "memoize",
+    "parse_environ_block",
+    "path_exists_strict",
+    "usage_percent",
+    "supports_ipv6",
+    "sockfam_to_enum",
+    "socktype_to_enum",
+    "wrap_numbers",
+    "bytes2human",
+    "conn_to_ntuple",
+    "debug",
     # shell utils
-    'hilite', 'term_supports_colors', 'print_color',
+    "hilite",
+    "term_supports_colors",
+    "print_color",
 ]
 
 
@@ -132,6 +191,7 @@ if enum is None:
     NIC_DUPLEX_HALF = 1
     NIC_DUPLEX_UNKNOWN = 0
 else:
+
     class NicDuplex(enum.IntEnum):
         NIC_DUPLEX_FULL = 2
         NIC_DUPLEX_HALF = 1
@@ -144,6 +204,7 @@ if enum is None:
     POWER_TIME_UNKNOWN = -1
     POWER_TIME_UNLIMITED = -2
 else:
+
     class BatteryTime(enum.IntEnum):
         POWER_TIME_UNKNOWN = -1
         POWER_TIME_UNLIMITED = -2
@@ -169,70 +230,83 @@ else:
 # --- for system functions
 
 # psutil.swap_memory()
-sswap = namedtuple('sswap', ['total', 'used', 'free', 'percent', 'sin',
-                             'sout'])
+sswap = namedtuple("sswap", ["total", "used", "free", "percent", "sin", "sout"])
 # psutil.disk_usage()
-sdiskusage = namedtuple('sdiskusage', ['total', 'used', 'free', 'percent'])
+sdiskusage = namedtuple("sdiskusage", ["total", "used", "free", "percent"])
 # psutil.disk_io_counters()
-sdiskio = namedtuple('sdiskio', ['read_count', 'write_count',
-                                 'read_bytes', 'write_bytes',
-                                 'read_time', 'write_time'])
+sdiskio = namedtuple(
+    "sdiskio",
+    [
+        "read_count",
+        "write_count",
+        "read_bytes",
+        "write_bytes",
+        "read_time",
+        "write_time",
+    ],
+)
 # psutil.disk_partitions()
-sdiskpart = namedtuple('sdiskpart', ['device', 'mountpoint', 'fstype', 'opts'])
+sdiskpart = namedtuple("sdiskpart", ["device", "mountpoint", "fstype", "opts"])
 # psutil.net_io_counters()
-snetio = namedtuple('snetio', ['bytes_sent', 'bytes_recv',
-                               'packets_sent', 'packets_recv',
-                               'errin', 'errout',
-                               'dropin', 'dropout'])
+snetio = namedtuple(
+    "snetio",
+    [
+        "bytes_sent",
+        "bytes_recv",
+        "packets_sent",
+        "packets_recv",
+        "errin",
+        "errout",
+        "dropin",
+        "dropout",
+    ],
+)
 # psutil.users()
-suser = namedtuple('suser', ['name', 'terminal', 'host', 'started', 'pid'])
+suser = namedtuple("suser", ["name", "terminal", "host", "started", "pid"])
 # psutil.net_connections()
-sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr',
-                             'status', 'pid'])
+sconn = namedtuple("sconn", ["fd", "family", "type", "laddr", "raddr", "status", "pid"])
 # psutil.net_if_addrs()
-snicaddr = namedtuple('snicaddr',
-                      ['family', 'address', 'netmask', 'broadcast', 'ptp'])
+snicaddr = namedtuple("snicaddr", ["family", "address", "netmask", "broadcast", "ptp"])
 # psutil.net_if_stats()
-snicstats = namedtuple('snicstats', ['isup', 'duplex', 'speed', 'mtu'])
+snicstats = namedtuple("snicstats", ["isup", "duplex", "speed", "mtu"])
 # psutil.cpu_stats()
 scpustats = namedtuple(
-    'scpustats', ['ctx_switches', 'interrupts', 'soft_interrupts', 'syscalls'])
+    "scpustats", ["ctx_switches", "interrupts", "soft_interrupts", "syscalls"]
+)
 # psutil.cpu_freq()
-scpufreq = namedtuple('scpufreq', ['current', 'min', 'max'])
+scpufreq = namedtuple("scpufreq", ["current", "min", "max"])
 # psutil.sensors_temperatures()
-shwtemp = namedtuple(
-    'shwtemp', ['label', 'current', 'high', 'critical'])
+shwtemp = namedtuple("shwtemp", ["label", "current", "high", "critical"])
 # psutil.sensors_battery()
-sbattery = namedtuple('sbattery', ['percent', 'secsleft', 'power_plugged'])
+sbattery = namedtuple("sbattery", ["percent", "secsleft", "power_plugged"])
 # psutil.sensors_fans()
-sfan = namedtuple('sfan', ['label', 'current'])
+sfan = namedtuple("sfan", ["label", "current"])
 
 # --- for Process methods
 
 # psutil.Process.cpu_times()
-pcputimes = namedtuple('pcputimes',
-                       ['user', 'system', 'children_user', 'children_system'])
+pcputimes = namedtuple(
+    "pcputimes", ["user", "system", "children_user", "children_system"]
+)
 # psutil.Process.open_files()
-popenfile = namedtuple('popenfile', ['path', 'fd'])
+popenfile = namedtuple("popenfile", ["path", "fd"])
 # psutil.Process.threads()
-pthread = namedtuple('pthread', ['id', 'user_time', 'system_time'])
+pthread = namedtuple("pthread", ["id", "user_time", "system_time"])
 # psutil.Process.uids()
-puids = namedtuple('puids', ['real', 'effective', 'saved'])
+puids = namedtuple("puids", ["real", "effective", "saved"])
 # psutil.Process.gids()
-pgids = namedtuple('pgids', ['real', 'effective', 'saved'])
+pgids = namedtuple("pgids", ["real", "effective", "saved"])
 # psutil.Process.io_counters()
-pio = namedtuple('pio', ['read_count', 'write_count',
-                         'read_bytes', 'write_bytes'])
+pio = namedtuple("pio", ["read_count", "write_count", "read_bytes", "write_bytes"])
 # psutil.Process.ionice()
-pionice = namedtuple('pionice', ['ioclass', 'value'])
+pionice = namedtuple("pionice", ["ioclass", "value"])
 # psutil.Process.ctx_switches()
-pctxsw = namedtuple('pctxsw', ['voluntary', 'involuntary'])
+pctxsw = namedtuple("pctxsw", ["voluntary", "involuntary"])
 # psutil.Process.connections()
-pconn = namedtuple('pconn', ['fd', 'family', 'type', 'laddr', 'raddr',
-                             'status'])
+pconn = namedtuple("pconn", ["fd", "family", "type", "laddr", "raddr", "status"])
 
 # psutil.connections() and psutil.Process.connections()
-addr = namedtuple('addr', ['ip', 'port'])
+addr = namedtuple("addr", ["ip", "port"])
 
 
 # ===================================================================
@@ -252,15 +326,14 @@ conn_tmap = {
 }
 
 if AF_INET6 is not None:
-    conn_tmap.update({
-        "tcp6": ([AF_INET6], [SOCK_STREAM]),
-        "udp6": ([AF_INET6], [SOCK_DGRAM]),
-    })
+    conn_tmap.update(
+        {"tcp6": ([AF_INET6], [SOCK_STREAM]), "udp6": ([AF_INET6], [SOCK_DGRAM]),}
+    )
 
 if AF_UNIX is not None:
-    conn_tmap.update({
-        "unix": ([AF_UNIX], [SOCK_STREAM, SOCK_DGRAM]),
-    })
+    conn_tmap.update(
+        {"unix": ([AF_UNIX], [SOCK_STREAM, SOCK_DGRAM]),}
+    )
 
 
 # =====================================================================
@@ -272,7 +345,8 @@ class Error(Exception):
     """Base exception class. All other psutil exceptions inherit
     from this one.
     """
-    __module__ = 'psutil'
+
+    __module__ = "psutil"
 
     def __init__(self, msg=""):
         Exception.__init__(self, msg)
@@ -289,7 +363,8 @@ class NoSuchProcess(Error):
     """Exception raised when a process with a certain PID doesn't
     or no longer exists.
     """
-    __module__ = 'psutil'
+
+    __module__ = "psutil"
 
     def __init__(self, pid, name=None, msg=None):
         Error.__init__(self, msg)
@@ -304,7 +379,7 @@ class NoSuchProcess(Error):
             self.msg = "process no longer exists " + details
 
     def __path__(self):
-        return 'xxx'
+        return "xxx"
 
 
 class ZombieProcess(NoSuchProcess):
@@ -314,7 +389,8 @@ class ZombieProcess(NoSuchProcess):
     On Linux all zombie processes are querable (hence this is never
     raised). Windows doesn't have zombie processes.
     """
-    __module__ = 'psutil'
+
+    __module__ = "psutil"
 
     def __init__(self, pid, name=None, ppid=None, msg=None):
         NoSuchProcess.__init__(self, msg)
@@ -334,7 +410,8 @@ class ZombieProcess(NoSuchProcess):
 
 class AccessDenied(Error):
     """Exception raised when permission to perform an action is denied."""
-    __module__ = 'psutil'
+
+    __module__ = "psutil"
 
     def __init__(self, pid=None, name=None, msg=None):
         Error.__init__(self, msg)
@@ -344,7 +421,7 @@ class AccessDenied(Error):
         if msg is None:
             if (pid is not None) and (name is not None):
                 self.msg = "(pid=%s, name=%s)" % (pid, repr(name))
-            elif (pid is not None):
+            elif pid is not None:
                 self.msg = "(pid=%s)" % self.pid
             else:
                 self.msg = ""
@@ -354,7 +431,8 @@ class TimeoutExpired(Error):
     """Raised on Process.wait(timeout) if timeout expires and process
     is still alive.
     """
-    __module__ = 'psutil'
+
+    __module__ = "psutil"
 
     def __init__(self, seconds, pid=None, name=None):
         Error.__init__(self, "timeout after %s seconds" % seconds)
@@ -363,7 +441,7 @@ class TimeoutExpired(Error):
         self.name = name
         if (pid is not None) and (name is not None):
             self.msg += " (pid=%s, name=%s)" % (pid, repr(name))
-        elif (pid is not None):
+        elif pid is not None:
             self.msg += " (pid=%s)" % self.pid
 
 
@@ -398,6 +476,7 @@ def memoize(fun):
     >>> foo.cache_clear()
     >>>
     """
+
     @functools.wraps(fun)
     def wrapper(*args, **kwargs):
         key = (args, frozenset(sorted(kwargs.items())))
@@ -442,6 +521,7 @@ def memoize_when_activated(fun):
     >>> foo()
     >>>
     """
+
     @functools.wraps(fun)
     def wrapper(self):
         try:
@@ -535,7 +615,7 @@ def parse_environ_block(data):
         equal_pos = data.find("=", pos, next_pos)
         if equal_pos > pos:
             key = data[pos:equal_pos]
-            value = data[equal_pos + 1:next_pos]
+            value = data[equal_pos + 1 : next_pos]
             # Windows expects environment variables to be uppercase only
             if WINDOWS_:
                 key = key.upper()
@@ -594,9 +674,12 @@ def deprecated_method(replacement):
     """A decorator which can be used to mark a method as deprecated
     'replcement' is the method name which will be called instead.
     """
+
     def outer(fun):
         msg = "%s() is deprecated and will be removed; use %s() instead" % (
-            fun.__name__, replacement)
+            fun.__name__,
+            replacement,
+        )
         if fun.__doc__ is None:
             fun.__doc__ = msg
 
@@ -604,7 +687,9 @@ def deprecated_method(replacement):
         def inner(self, *args, **kwargs):
             warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
             return getattr(self, replacement)(*args, **kwargs)
+
         return inner
+
     return outer
 
 
@@ -722,8 +807,8 @@ def open_text(fname, **kwargs):
         # See:
         # https://github.com/giampaolo/psutil/issues/675
         # https://github.com/giampaolo/psutil/pull/733
-        kwargs.setdefault('encoding', ENCODING)
-        kwargs.setdefault('errors', ENCODING_ERRS)
+        kwargs.setdefault("encoding", ENCODING)
+        kwargs.setdefault("errors", ENCODING_ERRS)
     return open(fname, "rt", **kwargs)
 
 
@@ -736,7 +821,7 @@ def bytes2human(n, format="%(value).1f%(symbol)s"):
     >>> bytes2human(100001221)
     '95.4M'
     """
-    symbols = ('B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
+    symbols = ("B", "K", "M", "G", "T", "P", "E", "Z", "Y")
     prefix = {}
     for i, s in enumerate(symbols[1:]):
         prefix[s] = 1 << (i + 1) * 10
@@ -749,13 +834,17 @@ def bytes2human(n, format="%(value).1f%(symbol)s"):
 
 def get_procfs_path():
     """Return updated psutil.PROCFS_PATH constant."""
-    return sys.modules['psutil'].PROCFS_PATH
+    return sys.modules["psutil"].PROCFS_PATH
 
 
 if PY3:
+
     def decode(s):
         return s.decode(encoding=ENCODING, errors=ENCODING_ERRS)
+
+
 else:
+
     def decode(s):
         return s
 
@@ -767,10 +856,11 @@ else:
 
 @memoize
 def term_supports_colors(file=sys.stdout):
-    if os.name == 'nt':
+    if os.name == "nt":
         return True
     try:
         import curses
+
         assert file.isatty()
         curses.setupterm()
         assert curses.tigetnum("colors") > 0
@@ -785,17 +875,16 @@ def hilite(s, color="green", bold=False):
     if not term_supports_colors():
         return s
     attr = []
-    colors = dict(green='32', red='91', brown='33')
-    colors[None] = '29'
+    colors = dict(green="32", red="91", brown="33")
+    colors[None] = "29"
     try:
         color = colors[color]
     except KeyError:
-        raise ValueError("invalid color %r; choose between %s" % (
-            list(colors.keys())))
+        raise ValueError("invalid color %r; choose between %s" % (list(colors.keys())))
     attr.append(color)
     if bold:
-        attr.append('1')
-    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+        attr.append("1")
+    return "\x1b[%sm%s\x1b[0m" % (";".join(attr), s)
 
 
 def print_color(s, color="green", bold=False, file=sys.stdout):
@@ -809,16 +898,16 @@ def print_color(s, color="green", bold=False, file=sys.stdout):
 
         DEFAULT_COLOR = 7
         GetStdHandle = ctypes.windll.Kernel32.GetStdHandle
-        SetConsoleTextAttribute = \
-            ctypes.windll.Kernel32.SetConsoleTextAttribute
+        SetConsoleTextAttribute = ctypes.windll.Kernel32.SetConsoleTextAttribute
 
         colors = dict(green=2, red=4, brown=6)
         colors[None] = DEFAULT_COLOR
         try:
             color = colors[color]
         except KeyError:
-            raise ValueError("invalid color %r; choose between %r" % (
-                color, list(colors.keys())))
+            raise ValueError(
+                "invalid color %r; choose between %r" % (color, list(colors.keys()))
+            )
         if bold and color <= 7:
             color += 8
 
@@ -832,15 +921,18 @@ def print_color(s, color="green", bold=False, file=sys.stdout):
             SetConsoleTextAttribute(handle, DEFAULT_COLOR)
 
 
-if bool(os.getenv('PSUTIL_DEBUG', 0)):
+if bool(os.getenv("PSUTIL_DEBUG", 0)):
     import inspect
 
     def debug(msg):
         """If PSUTIL_DEBUG env var is set, print a debug message to stderr."""
         fname, lineno, func_name, lines, index = inspect.getframeinfo(
-            inspect.currentframe().f_back)
-        print("psutil-debug [%s:%s]> %s" % (fname, lineno, msg),
-              file=sys.stderr)
+            inspect.currentframe().f_back
+        )
+        print("psutil-debug [%s:%s]> %s" % (fname, lineno, msg), file=sys.stderr)
+
+
 else:
+
     def debug(msg):
         pass

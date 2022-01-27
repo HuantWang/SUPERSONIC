@@ -25,8 +25,11 @@ def on_episode_step(info):
 def on_episode_end(info):
     episode = info["episode"]
     pole_angle = np.mean(episode.user_data["pole_angles"])
-    print("episode {} ended with length {} and pole angles {}".format(
-        episode.episode_id, episode.length, pole_angle))
+    print(
+        "episode {} ended with length {} and pole angles {}".format(
+            episode.episode_id, episode.length, pole_angle
+        )
+    )
     episode.custom_metrics["pole_angle"] = pole_angle
     episode.hist_data["pole_angles"] = episode.user_data["pole_angles"]
 
@@ -36,8 +39,11 @@ def on_sample_end(info):
 
 
 def on_train_result(info):
-    print("trainer.train() result: {} -> {} episodes".format(
-        info["trainer"], info["result"]["episodes_this_iter"]))
+    print(
+        "trainer.train() result: {} -> {} episodes".format(
+            info["trainer"], info["result"]["episodes_this_iter"]
+        )
+    )
     # you can mutate the result dict to add new fields to return
     info["result"]["callback_ok"] = True
 
@@ -59,9 +65,7 @@ if __name__ == "__main__":
     ray.init()
     trials = tune.run(
         "PG",
-        stop={
-            "training_iteration": args.stop_iters,
-        },
+        stop={"training_iteration": args.stop_iters,},
         config={
             "env": "CartPole-v0",
             "callbacks": {
@@ -74,7 +78,8 @@ if __name__ == "__main__":
             },
             "framework": "tf",
         },
-        return_trials=True)
+        return_trials=True,
+    )
 
     # verify custom metrics for integration tests
     custom_metrics = trials[0].last_result["custom_metrics"]

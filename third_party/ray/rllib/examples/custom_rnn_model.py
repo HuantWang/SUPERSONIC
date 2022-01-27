@@ -26,26 +26,20 @@ if __name__ == "__main__":
 
     ray.init(num_cpus=args.num_cpus or None)
 
-    ModelCatalog.register_custom_model(
-        "rnn", TorchRNNModel if args.torch else RNNModel)
+    ModelCatalog.register_custom_model("rnn", TorchRNNModel if args.torch else RNNModel)
     register_env("RepeatAfterMeEnv", lambda c: RepeatAfterMeEnv(c))
     register_env("RepeatInitialObsEnv", lambda _: RepeatInitialObsEnv())
 
     config = {
         "env": args.env,
-        "env_config": {
-            "repeat_delay": 2,
-        },
+        "env_config": {"repeat_delay": 2,},
         "gamma": 0.9,
         "num_workers": 0,
         "num_envs_per_worker": 20,
         "entropy_coeff": 0.001,
         "num_sgd_iter": 5,
         "vf_loss_coeff": 1e-5,
-        "model": {
-            "custom_model": "rnn",
-            "max_seq_len": 20,
-        },
+        "model": {"custom_model": "rnn", "max_seq_len": 20,},
         "framework": "torch" if args.torch else "tf",
     }
 
