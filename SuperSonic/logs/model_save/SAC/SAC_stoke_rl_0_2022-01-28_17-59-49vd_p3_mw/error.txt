@@ -1,4 +1,4 @@
-Failure # 1 (occurred at 2022-01-28_07-10-11)
+Failure # 1 (occurred at 2022-01-28_17-59-53)
 Traceback (most recent call last):
   File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 485, in _process_trial
     result = self.trial_executor.fetch_result(trial)
@@ -6,7 +6,7 @@ Traceback (most recent call last):
     result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
   File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1548, in get
     raise value.as_instanceof_cause()
-ray.exceptions.RayTaskError(ValueError): [36mray::DQN.train()[39m (pid=61178, ip=192.168.188.130)
+ray.exceptions.RayTaskError(TypeError): [36mray::SAC.train()[39m (pid=77979, ip=192.168.188.130)
   File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
   File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
   File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 508, in train
@@ -49,15 +49,17 @@ ray.exceptions.RayTaskError(ValueError): [36mray::DQN.train()[39m (pid=61178, 
     batches = [self.get_data()]
   File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 178, in get_data
     item = next(self.rollout_provider)
-  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 522, in _env_runner
-    active_envs, to_eval, outputs = _process_observations(
-  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 718, in _process_observations
-    prep_obs = _get_or_raise(preprocessors, policy_id).transform(raw_obs)
-  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 241, in transform
-    self.write(observation, array, 0)
-  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 253, in write
-    p.write(o, array, offset)
-  File "/home/huanting/SuperSonic/third_party/ray/rllib/models/preprocessors.py", line 177, in write
-    array[offset : offset + self._size] = np.array(observation, copy=False).ravel()
-ValueError: could not convert string to float: ''
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 572, in _env_runner
+    base_env.send_actions(actions_to_send)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/env/base_env.py", line 329, in send_actions
+    self.vector_env.vector_step(action_vector)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/env/vector_env.py", line 136, in vector_step
+    obs, r, done, info = self.envs[i].step(actions[i])
+  File "/home/huanting/SuperSonic/SuperSonic/utils/environments/stoke_rl_env.py", line 88, in step
+    obs, rew, done, info = self.env.step(action, state_code, state_reward)
+  File "/home/huanting/SuperSonic/third_party/compiler_gym/envs/optimization/Stoke.py", line 139, in step
+    rew = self.get_reward(reward,self.reward_function)  # update reward
+  File "/home/huanting/SuperSonic/third_party/compiler_gym/envs/optimization/Stoke.py", line 101, in get_reward
+    reward = reward_function().get_reward(reward,reward_function=reward_function
+TypeError: 'float' object is not callable
 

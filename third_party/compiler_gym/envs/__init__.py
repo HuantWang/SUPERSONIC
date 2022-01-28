@@ -6,11 +6,11 @@ from compiler_gym.envs.compiler_env import CompilerEnv
 from compiler_gym.envs.llvm.llvm_env import LlvmEnv
 
 # from compiler_gym.envs.Optimization.Stoke import StokeEnv
-from compiler_gym.envs.Optimization.Halide import HalideEnv
-from compiler_gym.envs.Optimization.Tvm import TvmEnv
-from compiler_gym.envs.Optimization.Bandit_Tvm import BanditTvmEnv
-from compiler_gym.envs.Optimization.Bandit_Halide import BanditHalideEnv
-from compiler_gym.envs.Optimization.Bandit_CSR import BanditCSREnv
+from compiler_gym.envs.optimization.Halide import HalideEnv
+from compiler_gym.envs.optimization.Tvm import TvmEnv
+from compiler_gym.envs.optimization.Bandit_Tvm import BanditTvmEnv
+from compiler_gym.envs.optimization.Bandit_Halide import BanditHalideEnv
+from compiler_gym.envs.optimization.Bandit_CSR import BanditCSREnv
 from compiler_gym.util.registration import COMPILER_GYM_ENVS
 
 __all__ = [

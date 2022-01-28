@@ -1,10 +1,11 @@
 # Configuration file for the Sphinx documentation builder.
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath('/home/huanting/SuperSonic/'))
 # -- Project information
-
-project = "Lumache"
-copyright = "2021, Graziella"
-author = "Graziella"
+project = "SuperSonic"
+copyright = "University of Leeds, Northwest University"
+author = "University of Leeds, Northwest University"
 
 release = "0.1"
 version = "0.1.0"
@@ -12,11 +13,18 @@ version = "0.1.0"
 # -- General configuration
 
 extensions = [
-    "sphinx.ext.duration",
-    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx_rtd_theme",
+    "sphinx.ext.autosectionlabel",
+    "sphinxemoji.sphinxemoji",
 ]
 
 intersphinx_mapping = {

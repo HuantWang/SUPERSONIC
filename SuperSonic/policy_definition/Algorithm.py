@@ -2,16 +2,8 @@ import ray
 from ray.rllib.models.catalog import ModelCatalog
 from ray import tune
 from ray.tune.logger import TBXLogger, CSVLogger, JsonLogger
+import subprocess
 import third_party.contrib.alpha_zero.models.custom_torch_models
-
-# def RunStoke(task_config):
-#     import subprocess
-#     #print(task_config.get('stoke_path'))
-#     self.child = subprocess.Popen(
-#         f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
-#         shell=True,
-#     )
-
 
 class RLAlgorithms:
     # cleanpid("50055")
@@ -30,16 +22,6 @@ class RLAlgorithms:
         self.num_sgd_iter = 20
 
         # ray.init(num_cpus=self.ray_num_cpus, ignore_reinit_error=True)
-
-    """
-    def RunStoke(task_config):
-        import subprocess
-            #print(task_config.get('stoke_path'))
-        self.child = subprocess.Popen(
-            f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
-            shell=True,
-        )
-    """
 
     def MCTS(self, task_config, environment_path):
 
@@ -67,34 +49,24 @@ class RLAlgorithms:
         print(f"init {task_config}")
         self.local_dir = task_config.get("local_dir")
 
-        import time
-
         if task_config.get("experiment") == "stoke":
-            import subprocess
-
-            print(task_config.get("stoke_path"))
             try:
                 self.child = subprocess.Popen(
                     f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                     shell=True,
                 )
-
             except:
                 print("subprocess error")
 
-        # sudo python run_synch.py "/home/huanting/SuperSonic/tasks/stoke/example/p04" "/home/huanting/SuperSonic/tasks/stoke/example/record/finish.txt"
         tune.run(
             "contrib/MCTS",
             checkpoint_freq=1,
             stop=task_config.get("stop"),
-            # stop={"time_total_s": 80},
-            # stop={"training_iteration": self.training_iteration},
             max_failures=0,
             reuse_actors=True,
             checkpoint_at_end=True,
             local_dir=self.local_dir,
             config={
-                # "env": tasks.src.opt_test.MCTS.environments.stoke_rl_env.stoke_rl,
                 "env": environment_path,
                 "env_config": task_config,
                 "num_workers": self.num_workers,
@@ -118,13 +90,8 @@ class RLAlgorithms:
         self.vf_clip_param = 10.0
         self.entropy_coeff = 0.01
         self.model = {"fcnet_hiddens": [128, 128]}
-
-        print(environment_path)
-
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
-            import subprocess
-
             self.child = subprocess.Popen(
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
@@ -133,17 +100,13 @@ class RLAlgorithms:
         tune.run(
             "PPO",  # 内置算法PPO
             checkpoint_freq=1,
-            # name="neurovectorizer_train",  # 实验名称
-            # stop = task_config.get('stop'),
             stop={"training_iteration": self.training_iteration},
             max_failures=0,
             reuse_actors=True,
             checkpoint_at_end=True,
             local_dir=self.local_dir,
-            # scheduler=MedianStoppingRule(grace_period=10.0),
             config={
                 "env": environment_path,
-                # "env": tasks.src.opt_test.MCTS.environments.halide_env.halide_rl,
                 "env_config": task_config,
                 "lambda": self.lamda,
                 "kl_coeff": self.kl_coeff,
@@ -156,22 +119,14 @@ class RLAlgorithms:
                 "num_workers": self.num_workers,
                 "rollout_fragment_length": self.rollout_fragment_length,
                 "model": self.model,
-            },  # 用于生成调优变量的特定算法配置
+            },
             loggers=[TBXLogger],
         )
         ray.shutdown(exiting_interpreter=False)
 
     def DQN(self, task_config, environment_path):
-        # TODO: I cant limite the timesteps in one iteration, now its 1000. I dont know how to reduce it
-        # self.lamda = 0.95
-        # self.kl_coeff = 0.2
-        # self.vf_clip_param = 10.0
-        # self.entropy_coeff = 0.01
-        self.model = {"fcnet_hiddens": [128, 128]}
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
-            import subprocess
-
             self.child = subprocess.Popen(
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
@@ -179,13 +134,11 @@ class RLAlgorithms:
         tune.run(
             "DQN",
             checkpoint_freq=1,
-            # name="neurovectorizer_train",  # 实验名称
             stop={"training_iteration": self.training_iteration},
             max_failures=0,
             reuse_actors=True,
             checkpoint_at_end=True,
             local_dir=self.local_dir,
-            # scheduler=MedianStoppingRule(grace_period=10.0),
             config={
                 "env": environment_path,
                 "env_config": task_config,
@@ -207,31 +160,22 @@ class RLAlgorithms:
                 "before_learn_on_batch": None,
                 "training_intensity": None,
                 "worker_side_prioritization": False,
-                # "num_envs_per_worker" : 10,
                 "lr": self.lr,
                 "train_batch_size": 10,
                 "num_workers": self.num_workers,
                 "rollout_fragment_length": 10,
-                # "training_intensity" : 2,
                 "model": self.model,
                 "timesteps_per_iteration": 10,
                 "learning_starts": 10,
                 "normalize_actions": False,
-            },  # 用于生成调优变量的特定算法配置
+            },
             loggers=[TBXLogger],
         )
         ray.shutdown(exiting_interpreter=False)
 
     def QLearning(self, task_config, environment_path):
-        self.lamda = 0.95
-        self.kl_coeff = 0.2
-        self.vf_clip_param = 10.0
-        self.entropy_coeff = 0.01
-        self.model = {"fcnet_hiddens": [128, 128]}
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
-            import subprocess
-
             self.child = subprocess.Popen(
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
@@ -239,37 +183,22 @@ class RLAlgorithms:
         tune.run(
             "SAC",
             checkpoint_freq=1,
-            # name="neurovectorizer_train",  # 实验名称
             stop={"training_iteration": self.training_iteration},
             max_failures=0,
             reuse_actors=True,
             checkpoint_at_end=True,
             local_dir=self.local_dir,
-            # scheduler=MedianStoppingRule(grace_period=10.0),
             config={
                 "env": environment_path,
                 "env_config": task_config,
-                # 'lambda': self.lamda,
-                # 'kl_coeff': self.kl_coeff,
-                # 'vf_clip_param': self.vf_clip_param,
-                # 'entropy_coeff': self.entropy_coeff,
-                # 'clip_rewards': False,
-                # 'num_envs_per_worker': 1,
-                # 'batch_mode': 'truncate_episodes',
-                # 'observation_filter': 'NoFilter',
-                # 'vf_share_layers': 'true',
-                # You should override this to point to an offline dataset.
-                # 'lr': self.lr,
                 "train_batch_size": self.train_batch_size,
-                # 'sgd_minibatch_size': self.sgd_minibatch_size,
-                # 'num_sgd_iter': self.num_sgd_iter,
                 "num_workers": self.num_workers,
                 "rollout_fragment_length": self.rollout_fragment_length,
                 "timesteps_per_iteration": 1,
                 "learning_starts": 1,
-                "normalize_actions": False
+                "normalize_actions": False,
                 # "model": self.model,
-            },  # 用于生成调优变量的特定算法配置
+            },
             loggers=[TBXLogger],
         )
         ray.shutdown(exiting_interpreter=False)

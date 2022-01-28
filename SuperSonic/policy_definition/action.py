@@ -1,6 +1,5 @@
 import numpy as np
 from gym import logger, spaces
-from gym.spaces import Box, Dict, Discrete
 
 
 class action_functions:
@@ -11,8 +10,6 @@ class action_functions:
         self.observation_space = spaces.Box(
             low=obsv_low, high=obsv_high, shape=(obsv_size,), dtype=np.int32
         )
-        # print(self.action_space)
-        # print(self.observation_space)
         return self.action_space, self.observation_space
 
         # if method == "transform":

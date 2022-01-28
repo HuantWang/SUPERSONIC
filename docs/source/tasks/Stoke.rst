@@ -1,58 +1,23 @@
-compiler_gym
-============
+Tutorial.Stoke.Env_register
+=====================
 
-.. contents::
-    :local:
+Stoke environment uses a :class:`StokeEnv
+<third_party.compiler_gym.envs.optimization.StokeEnv>` to register a base environment. Policy search module uses A
+:class:`BanditStokeEnv <third_party.compiler_gym.envs.optimization.BanditStokeEnv>` to register a base environment.
 
-.. currentmodule:: compiler_gym
+.. contents:: Stoke Environment Classes:
+  :local:
 
+.. currentmodule:: compiler_gym.envs.optimization
 
-CompilerEnvState
-----------------
+StokeEnv
+-------
+.. autoclass:: StokeEnv
+  :members:
 
-.. autoclass:: CompilerEnvState
-   :members:
-
-.. autoclass:: CompilerEnvStateWriter
-   :members:
-
-   .. automethod:: __init__
-
-.. autoclass:: CompilerEnvStateReader
-   :members:
-
-   .. automethod:: __init__
-
-   .. automethod:: __iter__
+BanditStokeEnv
+-------
+.. autoclass:: BanditStokeEnv
+  :members:
 
 
-Validation
-----------
-
-.. autoclass:: ValidationResult
-   :members:
-
-.. autoclass:: ValidationError
-   :members:
-
-.. autofunction:: validate_states
-
-Filesystem Paths
-----------------
-
-.. autofunction:: cache_path
-
-.. autofunction:: site_data_path
-
-.. autofunction:: transient_cache_path
-
-.. autofunction:: download
-
-Debugging
----------
-
-.. autofunction:: get_debug_level
-
-.. autofunction:: get_logging_level
-
-.. autofunction:: set_debug_level

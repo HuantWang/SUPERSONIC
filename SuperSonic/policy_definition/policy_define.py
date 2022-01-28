@@ -3,11 +3,6 @@ import os
 import numpy as np
 import sklearn.model_selection
 
-# from compiler_gym.mdp_search.observation import observation_function
-# from compiler_gym.mdp_search.reward import reward_function
-# from compiler_gym.mdp_search.Algorithm import RLAlgorithms
-# from compiler_gym.mdp_search.action import action_functions
-
 
 class SuperOptimizer:
     def __init__(
@@ -32,7 +27,6 @@ class SuperOptimizer:
             "RewList": self.RewardFunctions,
             "AlgList": self.RLAlgorithms,
         }
-
         self.policy_all = [
             dict(zip(self.policy, v)) for v in product(*self.policy.values())
         ]
@@ -41,7 +35,6 @@ class SuperOptimizer:
 
     def cross_valid(self,):
         data_list = []
-
         for root, dirs, files in os.walk(self.datapath):
             if files == []:
                 for i in dirs:
@@ -62,6 +55,3 @@ class SuperOptimizer:
             TestDataset = data_list[test]
             Dataset = [TrainDataset, TestDataset]
             return Dataset
-
-
-# SuperOptimizer().cross_valid()

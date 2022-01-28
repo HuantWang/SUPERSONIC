@@ -1,8 +1,8 @@
 {
   "checkpoints": [
     {
-      "trainable_name": "DQN",
-      "trial_id": "45147_00000",
+      "trainable_name": "SAC",
+      "trial_id": "07e5b_00000",
       "config": {
         "env": {
           "_type": "CLOUDPICKLE_FALLBACK",
@@ -16,48 +16,21 @@
             "time_total_s": 50
           },
           "stoke_path": "/home/huanting/SuperSonic/tasks/stoke/example/p04",
-          "state_function": "Actionhistory",
+          "state_function": "Doc2vec",
           "action_function": "init",
           "reward_function": "weight",
-          "algorithm": "DQN",
+          "algorithm": "QLearning",
           "experiment": "stoke",
           "local_dir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
         },
-        "num_atoms": 1,
-        "v_min": -10.0,
-        "v_max": 10.0,
-        "noisy": false,
-        "sigma0": 0.5,
-        "dueling": true,
-        "hiddens": [
-          256
-        ],
-        "double_q": true,
-        "n_step": 1,
-        "prioritized_replay": true,
-        "prioritized_replay_alpha": 0.6,
-        "prioritized_replay_beta": 0.4,
-        "final_prioritized_replay_beta": 0.4,
-        "prioritized_replay_beta_annealing_timesteps": 200,
-        "prioritized_replay_eps": 1e-06,
-        "before_learn_on_batch": null,
-        "training_intensity": null,
-        "worker_side_prioritization": false,
-        "lr": 0.0001,
-        "train_batch_size": 10,
+        "train_batch_size": 50,
         "num_workers": 0,
         "rollout_fragment_length": 10,
-        "model": {
-          "fcnet_hiddens": [
-            128,
-            128
-          ]
-        },
-        "timesteps_per_iteration": 10,
-        "learning_starts": 10,
+        "timesteps_per_iteration": 1,
+        "learning_starts": 1,
         "normalize_actions": false
       },
-      "local_dir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN",
+      "local_dir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/SAC",
       "evaluated_params": {},
       "experiment_tag": "0",
       "location": {
@@ -93,8 +66,8 @@
       "metric_n_steps": {},
       "export_formats": [],
       "status": "ERROR",
-      "start_time": 1643325008.10052,
-      "logdir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/DQN_stoke_rl_0_2022-01-28_07-10-08i1h6v47z",
+      "start_time": 1643363989.697646,
+      "logdir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/SAC/SAC_stoke_rl_0_2022-01-28_17-59-49vd_p3_mw",
       "runner": null,
       "result_logger": null,
       "last_debug": 0,
@@ -139,22 +112,22 @@
     "_server_port": 4321,
     "_cached_trial_decisions": {},
     "_should_stop_experiment": false,
-    "_local_checkpoint_dir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN",
+    "_local_checkpoint_dir": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/SAC",
     "_remote_checkpoint_dir": null,
     "_stopper": {
       "_type": "CLOUDPICKLE_FALLBACK",
       "value": "80059527000000000000008c107261792e74756e652e73746f70706572948c0b4e6f6f7053746f707065729493942981942e"
     },
     "_resumed": false,
-    "_start_time": 1643325008.0865586,
-    "_last_checkpoint_time": 1643325011.373202,
+    "_start_time": 1643363989.6416733,
+    "_last_checkpoint_time": 1643363993.1859674,
     "_checkpoint_period": 10,
-    "_session_str": "2022-01-28_07-10-08",
-    "checkpoint_file": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/DQN/experiment_state-2022-01-28_07-10-08.json",
+    "_session_str": "2022-01-28_17-59-49",
+    "checkpoint_file": "/home/huanting/SuperSonic/SuperSonic/logs/model_save/SAC/experiment_state-2022-01-28_17-59-49.json",
     "launch_web_server": false
   },
   "stats": {
-    "start_time": 1643325008.0865586,
-    "timestamp": 1643325011.373202
+    "start_time": 1643363989.6416733,
+    "timestamp": 1643363993.1859674
   }
 }
