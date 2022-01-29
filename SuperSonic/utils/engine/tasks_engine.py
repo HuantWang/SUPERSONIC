@@ -1,16 +1,56 @@
-"""Example of using training on Halide."""
-
-
-import SuperSonic.utils.environments.halide_env
-import SuperSonic.utils.environments.stoke_rl_env
-import SuperSonic.utils.environments.CSR_mcts
-import subprocess
+import SuperSonic.utils.environments.Halide_env
+import SuperSonic.utils.environments.stoke_env
+import SuperSonic.utils.environments.CSR_env
 import sqlite3
 import os
-from SuperSonic.policy_definition.Algorithm import *
 import re
 import time
+from ray.tune import Stopper
+from SuperSonic.policy_definition.Algorithm import *
 
+class TimeStopper(Stopper):
+    def __init__(self, deadline):
+        self._start = time.time()
+        self._deadline = deadline  # set time
+
+    def __call__(self, trial_id, result):
+        return False
+
+    def stop_all(self):
+        return time.time() - self._start > self._deadline
+
+class CustomStopper(Stopper):
+    def __init__(self, obs_file):
+        self.obs_file = obs_file
+        print("enter stop")
+        self.should_stop = False
+        self._start = time.time()
+        self._deadline = 80
+
+    def __call__(self, trial_id, result):
+        # if not self.should_stop and time.time() - self._start > self.deadline:
+        if not self.should_stop and os.path.exists(self.obs_file):
+            os.remove(self.obs_file)
+            with os.popen(f'netstat -nutlp | grep  "50055"') as r:
+                result = r.read()
+            PID = []
+            for line in result.split("\n"):
+                if r"/" in line:
+                    PID.extend(re.findall(r".*?(\d+)\/", line))
+            PID = list(set(PID))
+            for pid in PID:
+                try:
+                    os.system(f"kill -9 {pid}")
+                except Exception as e:
+                    print(e)
+
+            self.should_stop = True
+
+        return self.should_stop
+
+    def stop_all(self):
+        """Returns whether to stop trials and prevent new ones from starting."""
+        return self.should_stop
 
 class Halide:
     def __init__(self, policy):
@@ -89,48 +129,20 @@ class Halide:
         Halide.startserve(self)
         Halide.run(self)
 
-
-# add by zc
-
-from ray.tune import Stopper
-
-
-class CustomStopper(Stopper):
-    def __init__(self, obs_file):
-        self.obs_file = obs_file
-        print("enter stop")
-        self.should_stop = False
-        self._start = time.time()
-        self._deadline = 80
-
-    def __call__(self, trial_id, result):
-        # if not self.should_stop and time.time() - self._start > self.deadline:
-        if not self.should_stop and os.path.exists(self.obs_file):
-            os.remove(self.obs_file)
-            with os.popen(f'netstat -nutlp | grep  "50055"') as r:
-                result = r.read()
-            PID = []
-            for line in result.split("\n"):
-                if r"/" in line:
-                    PID.extend(re.findall(r".*?(\d+)\/", line))
-            PID = list(set(PID))
-            for pid in PID:
-                try:
-                    os.system(f"kill -9 {pid}")
-                except Exception as e:
-                    print(e)
-
-            self.should_stop = True
-
-        return self.should_stop
-
-    def stop_all(self):
-        """Returns whether to stop trials and prevent new ones from starting."""
-        return self.should_stop
-
-
 class Stoke:
+    """A :class:
+         A interface to run Stoke.
+         To apply a tuned RL, SuperSonic creates a session to
+         apply a standard RL loop to optimize the input program
+         by using the chosen RL exploration algorithms to select an action for a given state.
+    """
+
     def __init__(self, policy):
+        """ Defines the reinforcement leaning environment. Initialise with an environment and construct a database.
+
+        :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
+        methods.
+        """
         # database
         conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
@@ -144,14 +156,11 @@ class Stoke:
                            REWARD        FLOAT  NOT NULL,
                            PRIMARY KEY ('TIME'));"""
             )
-
             print("Table created successfully")
         except:
             pass
-
         conn.commit()
         conn.close()
-        # print("dbl success")
 
         # init parameter
 
@@ -162,7 +171,7 @@ class Stoke:
             "/home/huanting/SuperSonic/tasks/stoke/example/record/finish.txt"
         )
         self.stoke_path = "/home/huanting/SuperSonic/tasks/stoke/example/p04"
-        self.environment_path = SuperSonic.utils.environments.stoke_rl_env.stoke_rl
+        self.environment_path = SuperSonic.utils.environments.stoke_env.stoke_rl
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
@@ -186,29 +195,30 @@ class Stoke:
             "experiment": self.experiment,
             "local_dir": self.local_dir,
         }
-        # self.environment_path = "tasks.src.opt_test.MCTS.environments.halide_env.HalideEnv_PPO"
 
     def startclient(self):
+        """ Start client, to start environment and measurement engine (For a given optimization option,
+        the measurement engine invokes the user-supplied run function to compile and execute the program
+         in the target environment.)
+        """
         os.system(f"rm {self.obs_file}")  # clean the observation file
         self.RLAlgo = RLAlgorithms(self.task_config)
-        # print(f"{halide_path}")
         print(f"{self.obs_file}")
         self.child = subprocess.Popen(
             f"cd {self.stoke_path} && python run_synch.py {self.stoke_path} {self.obs_file}",
             shell=True,
         )
-
         print("Child Finished")
-        # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
+        """ Database connection"""
         conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
+        """ To start RL agent with specific policy strategy and parameters"""
         if os.path.exists(self.obs_file):
             os.system(f"rm {self.obs_file}")
-        # self.RLAlgo.Algorithms(self.algorithm,self.task_config, self.environment_path)
         try:
             RLAlgorithms().Algorithms(
                 self.algorithm, self.task_config, self.environment_path
@@ -219,22 +229,7 @@ class Stoke:
 
     def main(self):
         Stoke.sql(self)
-        # Stoke.startserve(self)
         Stoke.run(self)
-
-
-# add by zc for csr
-class TimeStopper(Stopper):
-    def __init__(self, deadline):
-        self._start = time.time()
-        self._deadline = deadline  # set time
-
-    def __call__(self, trial_id, result):
-        return False
-
-    def stop_all(self):
-        return time.time() - self._start > self._deadline
-
 
 class CSR:
     def __init__(self, policy):
@@ -277,7 +272,7 @@ class CSR:
         self.log_path = "/home/huanting/SuperSonic/tasks/CSR/result"
         self.pass_path = "/home/huanting/SuperSonic/tasks/CSR/pass"
         self.deadline = 20
-        self.environment_path = SuperSonic.utils.environments.CSR_mcts.csr_rl
+        self.environment_path = SuperSonic.utils.environments.CSR_env.csr_rl
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
@@ -324,6 +319,24 @@ class CSR:
         # CSR.startserve(self)
         CSR.run(self)
 
+class TaskEngine:
+    """A :class: An interface to run specific Task environment and agent.
+
+    :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
+        methods.
+    :param tasks_name: The task developer intend to optimize.
+        """
+    def __init__(self, policy, tasks_name="Stoke"):
+        self.tasks=tasks_name
+        self.policy = policy
+
+    def run(self,policy):
+        if self.tasks=="Stoke":
+            Stoke(policy).main()
+        if self.tasks=="Halide":
+            Halide(policy).main()
+        if self.tasks=="CSR":
+            CSR(policy).main()
 
 # if __name__ == "__main__":
 #     '''
@@ -342,7 +355,6 @@ class CSR:
 #     #Halide.run()
 #    '''
 #     #stoke
-#
 #     print("start stoke")
 #     policy = {
 #         "StatList": "Actionhistory",

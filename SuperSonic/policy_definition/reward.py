@@ -10,7 +10,7 @@ class reward_function:
         """Construct and initialize reward-transition method of different tasks."""
         self.rew_fun = "tanh"
 
-    def get_reward(self, input, baseline=1, weight=1, reward_function="usr_define"):
+    def get_rew(self, input, baseline=1, weight=1, reward_function="usr_define"):
         """Get reward with specific reward functions
 
                 :param input: Input, usually as input of an transition function, e.g. runtime, speedup and hamming distance.
@@ -18,7 +18,6 @@ class reward_function:
                 :param weight: Using weight parameter to set how important of specific action.
                 :param reward_function: reward functions, reward-transition method.
                 """
-        global reward
         self.baseline = (
             baseline
         )
@@ -37,7 +36,7 @@ class reward_function:
                 reward = 0
             else:
                 reward = 1
-            return reward, self.baseline
+
 
         if reward_function == "weight":
             if self.current < self.baseline:
@@ -46,7 +45,7 @@ class reward_function:
                 reward = exec_diff * weight
             else:
                 reward = 0.0
-            return reward, self.baseline
 
         else:
-            return reward, self.baseline
+            return reward
+

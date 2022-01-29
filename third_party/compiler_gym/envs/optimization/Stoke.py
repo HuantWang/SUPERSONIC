@@ -65,7 +65,7 @@ class StokeEnv(gym.Env):
     def __init__(
         self, state_function, action_function, reward_function
     ):
-        """ Defines the reinforcement leaning environment. Modify to match different task shape.
+        """ Defines the reinforcement leaning environment. Initialise with an environment.
 
         :param state_function:  a state function that can summarize the program after each action as a
                                 finite feature vector.
@@ -92,14 +92,14 @@ class StokeEnv(gym.Env):
         self.state = None
         self.tstart = time.time()
 
-    def get_reward(self,reward_function, reward):
+    def get_reward(self,reward,reward_func):
         """ Calculate reward with method "reward_function".
 
             :param action: What will agent do in next step.
             :param reward: Describe how the agent "ought" to behave.
             :return: return a reward score after calculating.
         """
-        reward = reward_function().get_reward(reward,reward_function=reward_function
+        reward = reward_function().get_rew(reward,reward_function
         )
         return reward
 

@@ -16,6 +16,8 @@ for applying reinforcement learning to compiler optimizations.
    :caption: Python API Reference
 
    supersonic/TaskDefinition
+   supersonic/policy_search
+   supersonic/utils
 
 .. toctree::
    :maxdepth: 3

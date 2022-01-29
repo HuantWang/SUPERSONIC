@@ -166,6 +166,7 @@ class RLAlgorithms:
         :param environment_path: The environment_path, tasks' environment path that RL agent called.
 
         """
+        self.model = {"fcnet_hiddens": [128, 128]}
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
             self.child = subprocess.Popen(
