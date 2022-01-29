@@ -5,6 +5,13 @@ import sklearn.model_selection
 
 
 class SuperOptimizer:
+    """:class:
+    SuperOptimizer includes candidate functions (or models) for representing the environment state,
+    objective functions for computing the reward, and the set of possible actions that can be taken from a given
+    state.
+    The compiler developer first defines the optimization problem by creating an RL policy interface.
+    The definition includes a list of client RL components for the meta-optimizer to search over.
+                """
     def __init__(
         self,
         StateFunctions=["Word2vec", "Doc2vec", "Bert"],
@@ -13,6 +20,17 @@ class SuperOptimizer:
         ActionFunctions=["init"],
         datapath="",
     ):
+        """Construct and initialize the parameters of policy definition.
+
+        :param StateFunctions: State functions, The SuperSonic RL components include pre-trained observation functions, such as
+    Word2Vec and Doc2Vec.
+        :param RewardFunctions: Reward functions, It provides candidate reward functions like RelativeMeasure and tanh to compute
+    the reward based on the metric given by the measurement interface.
+        :param RLAlgorithms: RL algorithms, SuperSonic currently supports 23 RL algorithms from RLLib, covering a wide range of established RL algorithms.
+        :param ActionFunctions: Action functions, define a discrete set of actions or transformations that can be applied
+to a program, such as passes in a compiler.
+        :param datapath: The benchmarks' save path.
+                        """
         self.StateFunctions = StateFunctions
         self.RewardFunctions = RewardFunctions
         self.RLAlgorithms = RLAlgorithms
@@ -20,6 +38,14 @@ class SuperOptimizer:
         self.datapath = datapath
 
     def PolicyDefined(self):
+        """Each of the components can be chosen from
+        a pool of SuperSonic built-in candidate methods, and the
+        combination of these components can result in a large policy
+        search space.
+
+        :return policy_all: All policy strategies.
+        :return policy_amount: A list includes index for each policy strategy.
+        """
         global policy
         self.policy = {
             "StatList": self.StateFunctions,
@@ -34,6 +60,7 @@ class SuperOptimizer:
         return self.policy_all, self.policy_amount
 
     def cross_valid(self,):
+        """ split dataset to train/valid set, default using 3-fold cross validation """
         data_list = []
         for root, dirs, files in os.walk(self.datapath):
             if files == []:

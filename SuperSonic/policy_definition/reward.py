@@ -1,10 +1,23 @@
 import numpy as np
 
 class reward_function:
+    """:class:
+    A reward function that reports the quality of the actions taken so far.
+    It provides candidate reward functions like RelativeMeasure and tanh to compute
+    the reward based on the metric given by the measurement interface.
+    """
     def __init__(self):
+        """Construct and initialize reward-transition method of different tasks."""
         self.rew_fun = "tanh"
 
     def get_reward(self, input, baseline=1, weight=1, reward_function="usr_define"):
+        """Get reward with specific reward functions
+
+                :param input: Input, usually as input of an transition function, e.g. runtime, speedup and hamming distance.
+                :param baseline: Using baseline to calculate speedup etc.
+                :param weight: Using weight parameter to set how important of specific action.
+                :param reward_function: reward functions, reward-transition method.
+                """
         global reward
         self.baseline = (
             baseline

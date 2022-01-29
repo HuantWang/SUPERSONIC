@@ -6,11 +6,17 @@ import subprocess
 import third_party.contrib.alpha_zero.models.custom_torch_models
 
 class RLAlgorithms:
+    """:class:
+            SuperSonic currently supports 23 RL algorithms from RLLib, covering a wide range of established RL algorithms.
+
+            """
     # cleanpid("50055")
     # if ray.is_initialized():
     #    ray.shutdown()
 
     def __init__(self):
+        """Construct and initialize the RL algorithm parameters.
+                """
         self.local_dir = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
         self.num_workers = 0
         self.training_iteration = 5
@@ -23,8 +29,20 @@ class RLAlgorithms:
 
         # ray.init(num_cpus=self.ray_num_cpus, ignore_reinit_error=True)
 
-    def MCTS(self, task_config, environment_path):
 
+    def MCTS(self, task_config, environment_path):
+        """
+        MCTS, An interface to start RL agent with MCTS algorithm.
+        MCTS is an RL agent originally designed for two-player games.
+        This version adapts it to handle single player games. The code can
+        be sscaled to any number of workers. It also implements the ranked
+        rewards (R2) strategy to enable self-play even in the one-player setting.
+        The code is mainly purposed to be used for combinatorial optimization.
+
+        :param task_config: The task_config, parameters passed to RL agent.
+        :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+        """
         self.mcts_config = {
             "puct_coefficient": 1.5,
             "num_simulations": 5,
@@ -83,8 +101,21 @@ class RLAlgorithms:
         )
 
         ray.shutdown(exiting_interpreter=False)
+        """
+        Construct and initialize a CompilerGym service environment.
+        
+        """
 
     def PPO(self, task_config, environment_path):
+        """
+                 PPO, An interface to start RL agent with PPO algorithm.
+                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.
+                 Paper （https://arxiv.org/abs/1707.06347）
+
+                :param task_config: The task_config, parameters passed to RL agent.
+                :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+                """
         self.lamda = 0.95
         self.kl_coeff = 0.2
         self.vf_clip_param = 10.0
@@ -125,6 +156,16 @@ class RLAlgorithms:
         ray.shutdown(exiting_interpreter=False)
 
     def DQN(self, task_config, environment_path):
+        """
+         DQN, An interface to start RL agent with DQN algorithm.
+         A deep learning model to successfully learn control policies directly from high-dimensional sensory
+         input using reinforcement learning. The model is a convolutional neural network, trained with a
+         variant of Q-learning, whose input is raw pixels and whose output is a value function estimating future rewards.
+
+        :param task_config: The task_config, parameters passed to RL agent.
+        :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+        """
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
             self.child = subprocess.Popen(
@@ -174,6 +215,15 @@ class RLAlgorithms:
         ray.shutdown(exiting_interpreter=False)
 
     def QLearning(self, task_config, environment_path):
+        """
+         Q-networks, An interface to start RL agent with Q-networks algorithm.
+         Use two Q-networks (instead of one) for action-value estimation.
+         Each Q-network will have its own target network.
+
+        :param task_config: The task_config, parameters passed to RL agent.
+        :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+        """
         self.local_dir = task_config.get("local_dir")
         if task_config.get("experiment") == "stoke":
             self.child = subprocess.Popen(
@@ -204,6 +254,14 @@ class RLAlgorithms:
         ray.shutdown(exiting_interpreter=False)
 
     def Algorithms(self, policy_algorithm, task_config, environment_path):
+        """
+        Algorithms, using to call different RL algorithms
+
+        :param policy_algorithm:
+        :param task_config: The task_config, parameters passed to RL agent.
+        :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+        """
         if policy_algorithm == "MCTS":
             RLAlgorithms().MCTS(task_config, environment_path)
         if policy_algorithm == "PPO":

@@ -1,7 +1,8 @@
 # Configuration file for the Sphinx documentation builder.
 import os
 import sys
-sys.path.insert(0, os.path.abspath('/home/huanting/SuperSonic/'))
+sys.path.insert(0, os.path.abspath('../../SuperSonic'))
+
 # -- Project information
 project = "SuperSonic"
 copyright = "University of Leeds, Northwest University"

@@ -15,9 +15,7 @@ for applying reinforcement learning to compiler optimizations.
    :maxdepth: 3
    :caption: Python API Reference
 
-   supersonic/service
-   supersonic/PolSear_MTL
-   supersonic/utils
+   supersonic/TaskDefinition
 
 .. toctree::
    :maxdepth: 3
@@ -26,7 +24,7 @@ for applying reinforcement learning to compiler optimizations.
    tasks/Stoke
    tasks/Halide
    tasks/TVM
-   tasks/CodeSizeReduction
+   tasks/CSR
 
 Indices and tables
 ==================

@@ -1,85 +1,47 @@
-SuperSonic.PolicySearch
+SuperSonic.TasksDefinition
 =====================
 
-An instance of a CompilerGym environment uses a :class:`Benchmark
-<compiler_gym.datasets.Benchmark>` as the program being optimized. A
-:class:`Dataset <compiler_gym.datasets.Dataset>` is collection of benchmarks
-that can be installed and made available for use.
+SuperSonic uses
+A :class:`SuperOptimizer<SuperSonic.policy_definition.policy_define.SuperOptimizer>` to define policy strategies.
+A :class:`RLAlgorithms<SuperSonic.policy_definition.Algorithm.RLAlgorithms>` to support RL algorithms.
+A :class:`action_functions<SuperSonic.policy_definition.action.action_functions>` to support usr-defined action transition functions.
+A :class:`observation_function<SuperSonic.policy_definition.observation.observation_function>` to support observation transition functions.
+A :class:`reward_function<SuperSonic.policy_definition.reward.reward_function>` to support reward transition functions.
 
-.. contents::
+
+.. contents:: SuperSonic Tasks definition Classes:
   :local:
 
-.. currentmodule:: compiler_gym.datasets
 
 
-Benchmark
----------
-
-.. autoclass:: Benchmark
-  :members:
-
-.. autoclass:: BenchmarkSource
-  :members:
-
-.. autoclass:: BenchmarkInitError
-
-Dataset
+SuperOptimizer
 -------
-
-.. autoclass:: Dataset
- :members:
-
- .. automethod:: __init__
-
- .. automethod:: __len__
-
- .. automethod:: __getitem__
-
- .. automethod:: __iter__
-
-.. autoclass:: DatasetInitError
-
-FilesDataset
--------------
-
-.. autoclass:: FilesDataset
+.. currentmodule:: SuperSonic.policy_definition.policy_define
+.. autoclass:: SuperOptimizer
   :members:
 
-  .. automethod:: __init__
-
-
-TarDataset
-----------
-
-.. autoclass:: TarDataset
+RLAlgorithms
+-------
+.. currentmodule:: SuperSonic.policy_definition.Algorithm
+.. autoclass:: RLAlgorithms
   :members:
 
-  .. automethod:: __init__
-
-
-TarDatasetWithManifest
-----------------------
-
-.. autoclass:: TarDatasetWithManifest
+action_functions
+-------
+.. currentmodule:: SuperSonic.policy_definition.action
+.. autoclass:: action_functions
   :members:
 
-  .. automethod:: __init__
-
-
-Datasets
---------
-
- .. autoclass:: Datasets
+observation_function
+-------
+.. currentmodule:: SuperSonic.policy_definition.observation
+.. autoclass:: observation_function
   :members:
 
-  .. automethod:: __len__
+reward_function
+-------
+.. currentmodule:: SuperSonic.policy_definition.reward
+.. autoclass:: reward_function
+  :members:
 
-  .. automethod:: __getitem__
 
-  .. automethod:: __setitem__
-
-  .. automethod:: __delitem__
-
-  .. automethod:: __contains__
-
-  .. automethod:: __iter__
