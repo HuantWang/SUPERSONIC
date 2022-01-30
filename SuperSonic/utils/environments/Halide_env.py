@@ -8,17 +8,53 @@ import os
 
 
 class halide_rl:
-    """
-    Wrapper for gym CartPole environment where the reward
-    is accumulated to the end
-    """
+    """A :class:
+            Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages.
+            This task builds upon Halide version 10. Our evaluation uses ten Halide applications that have been heavily tested on the Halide
+            compiler. We measure the execution time of each benchmark when processing three image datasets provided by the Halide benchmark suite.
+            The benchmarks are optimized to run on a multi-core CPU.
+
+        Source:
+            This environment corresponds to the version of the Halide. (https://github.com/halide/Halide)
+            paper link: https://people.csail.mit.edu/jrk/halide-pldi13.pdf
+
+        Observation:
+            Type: Box(100)
+            Pipeline’s schedule will be convert to vectors by different embedding approaches,
+            e.g. Word2vec, Doc2vec, CodeBert ...
+
+        Actions:
+            Type: Discrete(4)
+            Num      Action      Description
+            0        adding      Adds an optimization to the stage.
+            1        removing    Removes an optimization to the stage.
+            2        decreasing  Decreases the value (by one) of an enabled parameterized option.
+            3        increasing  Increases the value (by one) of an enabled parameterized option.
+
+
+        Reward:
+            In all cases, lower cost is better. We measure the execution time of each benchmark when processing three image
+            datasets provided by the Halide benchmark suite.
+
+        Starting State:
+            All observations are assigned a uniform random value in [-1..1]
+
+        """
 
     def init_from_env_config(self, env_config):
+        """ Defines the reinforcement leaning environment. Initialise with an environment.
+
+                    :param env_config: including  "state_function", "action_function", "reward_function", "observation_space"
+                """
         self.inference_mode = env_config.get("inference_mode", False)
         if self.inference_mode:
             self.improvements = []
 
     def __init__(self, env_config):
+        """ Defines the reinforcement leaning environment. Initialise with an environment.
+
+                    :param env_config: including  "state_function", "action_function", "reward_function", "observation_space"
+                """
         self.init_from_env_config(env_config)
         # for grpc
         # channel = grpc.insecure_channel(env_config.get("target"))
@@ -53,6 +89,8 @@ class halide_rl:
         # self.doc2vecmodel = Doc2Vec.load(env_config.get("embedding"))
 
     def reset(self):
+        """ reset the RL environment.
+                        """
         self.running_reward = 0
         return {
             "obs": self.env.reset(),
@@ -60,6 +98,14 @@ class halide_rl:
         }
 
     def step(self, action):
+        """Take a step.
+
+            :param action: An action, or a sequence of actions. When multiple
+                    actions are provided the observation and reward are returned after
+                    running all of the actions.
+
+            :return: A tuple of observation, observation_mask, score, done, and info.
+        """
         # self.num = self.num+1
         # print ("self.num :",self.num)
         obs, rew, done, info = self.env.step(action)
@@ -76,6 +122,11 @@ class halide_rl:
         )
 
     def set_state(self, state):
+        """ Set policy to specific state and action mask.
+
+        :param state: Current reward and environments
+        :return
+        """
         self.running_reward = state[1]
         self.env = deepcopy(state[0])
         print("self.env.unwrapped.state", self.env.unwrapped.state)
@@ -83,4 +134,8 @@ class halide_rl:
         return {"obs": obs, "action_mask": np.array([1] * self.env.action_space.n)}
 
     def get_state(self):
+        """Returns actor state.
+
+        :return: current environment and reward
+        """
         return deepcopy(self.env), self.running_reward

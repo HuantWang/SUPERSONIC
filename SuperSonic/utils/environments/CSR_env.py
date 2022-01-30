@@ -7,17 +7,53 @@ import sqlite3
 
 
 class csr_rl:
-    """
-    Wrapper for gym MCTS environment where the reward
-    is accumulated to the end
-    """
+    """A :class:
+            This task is concerned with determining the LLVM passes and their order to minimize the code size.
+            Following the setup of CompilerGym, we compute the code size reduction by measuring the ratio of
+            LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.
+            This metric is platform-independent and deterministic.
 
-    # def init_from_env_config(self,env_config):
-    #     self.inference_mode = env_config.get("inference_mode", False)
-    #     if self.inference_mode:
-    #         self.improvements = []
+        Source:
+            This environment is following the setup of CompilerGym(https://github.com/facebookresearch/CompilerGym).
+
+
+        Observation:
+            Type: Box(0, 9223372036854775807, (56,), int64)
+            The Autophase observation space is a 56-dimension integer feature vector summarizing the static LLVM-IR representation.
+            It is described in 'AutoPhase: Juggling HLS phase orderings in random forests with deep reinforcement learning'.
+            paper link: https://proceedings.mlsys.org/paper/2020/file/4e732ced3463d06de0ca9a15b6153677-Paper.pdf
+
+
+        Actions:
+            Type: Discrete(123)
+            Num      Action                         Description
+            0        -add-discriminators            Add DWARF path discriminators.
+            1        -adce                          Aggressive Dead Code Elimination.
+            2        -aggressive-instcombine        Combine pattern based expressions.
+            3        -alignment-from-assumptions    Replaces an instruction's opcode with a new one that takes operands of the same type.
+            4        -always-inline                 Inliner for always_inline functions.
+            ... ...
+
+            120      -strip                         Strip all symbols from a module.
+            121      -tailcallelim                  Tail Call Elimination.
+            122      -mergereturn                   Unify function exit nodes.
+
+
+        Reward:
+            In all cases, lower code size is better. We compute the code size reduction by measuring the ratio of
+            LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.
+
+        Starting State:
+            All observations are assigned a uniform random value in [-1..1]
+
+        """
+
 
     def __init__(self, env_config):
+        """ Defines the reinforcement leaning environment. Initialise with an environment.
+
+                    :param env_config: including  "state_function", "action_function", "reward_function", "observation_space"
+                """
         # self.init_from_env_config(env_config)
         self.benchmarks = env_config.get("benchmark")
         self.log_path = env_config.get("log_path")
@@ -58,6 +94,8 @@ class csr_rl:
         print(f"seed:{self.seeds}")
 
     def reset(self):
+        """ reset the RL environment.
+                        """
         self.running_reward = 0
         self.episode_reward = 0
         return {
@@ -66,7 +104,14 @@ class csr_rl:
         }
 
     def step(self, action):
+        """Take a step.
 
+        :param action: An action, or a sequence of actions. When multiple
+                actions are provided the observation and reward are returned after
+                running all of the actions.
+
+        :return: A tuple of observation, observation_mask, score, done, and info.
+        """
         used_time = time.time() - self.time
         benchmarks = self.benchmarks.split("/")[-1]
         with open(f"{self.pass_path}/{benchmarks}_pass.txt", "a+") as f:
@@ -140,6 +185,11 @@ class csr_rl:
         )
 
     def set_state(self, state):
+        """ Set policy to specific state and action mask.
+
+        :param state: Current reward and environments
+        :return: state and action mask
+        """
         self.running_reward = state[1]
         self.env = state[0].fork()
         obs = self.env.observation["Autophase"]
@@ -149,5 +199,9 @@ class csr_rl:
         }
 
     def get_state(self):
+        """Returns actor state.
+
+        :return: current environment and reward
+        """
         env_1 = self.env.fork()
         return env_1, self.running_reward

@@ -84,7 +84,7 @@ class BanditStokeEnv(gym.Env):
 
         print(f"exist_policy:{exist_policy}")
 
-        start_engine.run(exist_policy,tasks_name).main()
+        start_engine.Stoke(exist_policy).main()
 
         # load loss from json
 

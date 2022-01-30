@@ -9,18 +9,35 @@ from ray.tune import Stopper
 from SuperSonic.policy_definition.Algorithm import *
 
 class TimeStopper(Stopper):
+    """A :class: An interface for implementing a Tune experiment stopper.
+
+        """
     def __init__(self, deadline):
+        """Create the TimeStopper object.
+                Stops the entire experiment when the time has past deadline
+                """
         self._start = time.time()
         self._deadline = deadline  # set time
 
     def __call__(self, trial_id, result):
+        """Returns true if the trial should be terminated given the result."""
+
         return False
 
     def stop_all(self):
+        """Returns true if the experiment should be terminated."""
+
         return time.time() - self._start > self._deadline
 
 class CustomStopper(Stopper):
+    """A :class: An interface for user customization implementing a Tune experiment stopper.
+
+        """
     def __init__(self, obs_file):
+        """Create the TimeStopper object.
+        Stops the entire experiment when the time has past deadline
+        :param obs_file: the shared file location.
+        """
         self.obs_file = obs_file
         print("enter stop")
         self.should_stop = False
@@ -28,6 +45,8 @@ class CustomStopper(Stopper):
         self._deadline = 80
 
     def __call__(self, trial_id, result):
+        """Returns true if the trial should be terminated given the result."""
+
         # if not self.should_stop and time.time() - self._start > self.deadline:
         if not self.should_stop and os.path.exists(self.obs_file):
             os.remove(self.obs_file)
@@ -53,10 +72,20 @@ class CustomStopper(Stopper):
         return self.should_stop
 
 class Halide:
+    """A :class:
+             A interface to run Halide.
+             To apply a tuned RL, SuperSonic creates a session to
+             apply a standard RL loop to optimize the input program
+             by using the chosen RL exploration algorithms to select an action for a given state.
+        """
     def __init__(self, policy):
+        """ Defines the reinforcement leaning environment. Initialise with an environment and construct a database.
+
+                :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
+                methods.
+                """
         conn = sqlite3.connect("supersonic.db")
         c = conn.cursor()
-        # result,action history,reward,execution outputs
         try:
             c.execute(
                 """CREATE TABLE HALIDE
@@ -74,7 +103,6 @@ class Halide:
 
         conn.commit()
         conn.close()
-        # print("dbl success")
         print("halide halide halide")
 
         self.algorithm_id = 11
@@ -105,21 +133,24 @@ class Halide:
             "algorithm": self.algorithm,
             "local_dir": self.local_dir,
         }
-        # self.environment_path = "tasks.src.opt_test.MCTS.environments.halide_env.HalideEnv_PPO"
 
     def startserve(self):
-        # print(f"{halide_path}")
+        """ Start server, to start environment and measurement engine (For a given schedulingtemplate,
+        the measurement engine invokes the user-supplied run function to compile and execute the program
+        in the target environment.)
+        """
         self.child = subprocess.Popen(
             f"cd {self.halide_path} && ./grpc-halide", shell=True,
         )
-        # print("Child Finished")
         print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
+        """ Database connection"""
         conn = sqlite3.connect("halide.db")
         print("Opened database successfully")
 
     def run(self):
+        """ To start RL agent with specific policy strategy and parameters"""
         RLAlgorithms().Algorithms(
             self.algorithm, self.task_config, self.environment_path
         )
@@ -233,12 +264,15 @@ class Stoke:
 
 class CSR:
     def __init__(self, policy):
+        """A :class:
+                 A interface to run CSR.
+                 To apply a tuned RL, SuperSonic creates a session to apply a standard RL loop to minimize the code size
+                 by using the chosen RL exploration algorithms to determines which pass to be added into or removed from
+                 the current compiler pass sequence.
+                """
         # database
-        print(policy)
-
         conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
-        # result,action history,reward,execution outputs
         try:
             c.execute(
                 """CREATE TABLE CSR
@@ -301,11 +335,12 @@ class CSR:
         pass
 
     def sql(self):
+        """ Database connection"""
         conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
-
+        """ To start RL agent with specific policy strategy and parameters"""
         RLAlgorithms().Algorithms(
             self.algorithm, self.task_config, self.environment_path
         )
@@ -322,11 +357,14 @@ class CSR:
 class TaskEngine:
     """A :class: An interface to run specific Task environment and agent.
 
-    :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
-        methods.
-    :param tasks_name: The task developer intend to optimize.
-        """
+            """
     def __init__(self, policy, tasks_name="Stoke"):
+        """An interface to start environment and agent.
+
+        :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
+            methods.
+        :param tasks_name: The task developer intend to optimize.
+            """
         self.tasks=tasks_name
         self.policy = policy
 

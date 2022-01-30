@@ -1,23 +1,21 @@
-// 生成python头文件的命令
 // python -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. schedule.proto
-// 生成c++头文件的命令 服务类和消息类
 // protoc -I ./ --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` schedule.proto
 // protoc -I ./ --cpp_out=. schedule.proto
 
 syntax = "proto3";
 
 service ScheduleService {
-  // halide方法
+  // halide function
   rpc init (ScheduleInitRequest) returns (ScheduleInitResponse) {}
   rpc step (ScheduleStepRequest) returns (ScheduleStepResponse) {}
   rpc reset (ScheduleResetRequest) returns (ScheduleResetResponse) {}
   rpc render (ScheduleRenderRequest) returns (ScheduleRenderResponse) {}
   rpc close (ScheduleCloseRequest) returns (ScheduleCloseResponse) {}
 
-  // tvm方法
+  // tvm function
   rpc GetTvm (TvmRequest) returns (TvmResponse){}
 
-  // stoke方法
+  // stoke function
   rpc GetStokeMsg (MsgStokeRequest) returns (MsgStokeResponse){}
 }
 
@@ -75,15 +73,14 @@ message OperationResponse {
   repeated int32 elem_id = 1;
 }
 
-// tvm的请求和响应定义
+// Response and Request - Tvm - service
 
-// 强化学习端向tvm请求, 给action, 然后得到服务端state, reward, maxLen的值
-message TvmRequest { 
+message TvmRequest {
 	int32 action = 1;
 }
- 
-// 回应的结果 service
-message TvmResponse { 
+
+// Response - service
+message TvmResponse {
 	string state = 1;
 	double reward = 2;
 	int32 maxLen = 3;
