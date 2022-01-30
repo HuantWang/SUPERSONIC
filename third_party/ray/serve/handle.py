@@ -28,19 +28,20 @@ class RayServeHandle:
     """
 
     def __init__(
-        self,
-        router_handle,
-        endpoint_name,
-        relative_slo_ms=None,
-        absolute_slo_ms=None,
-        method_name=None,
-        shard_key=None,
+            self,
+            router_handle,
+            endpoint_name,
+            relative_slo_ms=None,
+            absolute_slo_ms=None,
+            method_name=None,
+            shard_key=None,
     ):
         self.router_handle = router_handle
         self.endpoint_name = endpoint_name
         assert relative_slo_ms is None or absolute_slo_ms is None, (
-            "Can't specify both " "relative and absolute " "slo's together!"
-        )
+            "Can't specify both "
+            "relative and absolute "
+            "slo's together!")
         self.relative_slo_ms = self._check_slo_ms(relative_slo_ms)
         self.absolute_slo_ms = self._check_slo_ms(absolute_slo_ms)
         self.method_name = method_name
@@ -52,8 +53,8 @@ class RayServeHandle:
                 slo_value = float(slo_value)
                 if slo_value < 0:
                     raise ValueError(
-                        "Request SLO must be positive, it is {}".format(slo_value)
-                    )
+                        "Request SLO must be positive, it is {}".format(
+                            slo_value))
                 return slo_value
             except ValueError as e:
                 raise RayServeException(str(e))
@@ -62,8 +63,7 @@ class RayServeHandle:
     def remote(self, *args, **kwargs):
         if len(args) != 0:
             raise RayServeException(
-                "handle.remote must be invoked with keyword arguments."
-            )
+                "handle.remote must be invoked with keyword arguments.")
 
         method_name = self.method_name
         if method_name is None:
@@ -78,21 +78,21 @@ class RayServeHandle:
             call_method=method_name,
             shard_key=self.shard_key,
         )
-        return self.router_handle.enqueue_request.remote(request_in_object, **kwargs)
+        return self.router_handle.enqueue_request.remote(
+            request_in_object, **kwargs)
 
-    def options(
-        self,
-        method_name=None,
-        shard_key=None,
-        relative_slo_ms=None,
-        absolute_slo_ms=None,
-    ):
+    def options(self,
+                method_name=None,
+                shard_key=None,
+                relative_slo_ms=None,
+                absolute_slo_ms=None):
         # If both the slo's are None then then we use a high default
         # value so other queries can be prioritize and put in front of these
         # queries.
-        assert not all([absolute_slo_ms, relative_slo_ms]), (
-            "Can't specify both " "relative and absolute " "slo's together!"
-        )
+        assert not all([absolute_slo_ms, relative_slo_ms
+                        ]), ("Can't specify both "
+                             "relative and absolute "
+                             "slo's together!")
 
         # Don't override existing method
         if method_name is None and self.method_name is not None:
@@ -112,7 +112,8 @@ class RayServeHandle:
 
     def get_traffic_policy(self):
         master_actor = serve.api._get_master_actor()
-        return ray.get(master_actor.get_traffic_policy.remote(self.endpoint_name))
+        return ray.get(
+            master_actor.get_traffic_policy.remote(self.endpoint_name))
 
     def __repr__(self):
         return """
@@ -121,5 +122,6 @@ RayServeHandle(
     Traffic={traffic_policy}
 )
 """.format(
-            endpoint_name=self.endpoint_name, traffic_policy=self.get_traffic_policy(),
+            endpoint_name=self.endpoint_name,
+            traffic_policy=self.get_traffic_policy(),
         )

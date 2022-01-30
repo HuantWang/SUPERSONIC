@@ -8,7 +8,7 @@ from ray.rllib.utils.annotations import override, PublicAPI
 from ray.rllib.utils.spaces.repeated import Repeated
 
 ATARI_OBS_SHAPE = (210, 160, 3)
-ATARI_RAM_OBS_SHAPE = (128,)
+ATARI_RAM_OBS_SHAPE = (128, )
 VALIDATION_INTERVAL = 100
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,6 @@ class Preprocessor:
         self._obs_space = obs_space
         if not options:
             from ray.rllib.models.catalog import MODEL_DEFAULTS
-
             self._options = MODEL_DEFAULTS.copy()
         else:
             self._options = options
@@ -48,28 +47,23 @@ class Preprocessor:
 
     def write(self, observation, array, offset):
         """Alternative to transform for more efficient flattening."""
-        array[offset : offset + self._size] = self.transform(observation)
+        array[offset:offset + self._size] = self.transform(observation)
 
     def check_shape(self, observation):
         """Checks the shape of the given observation."""
         if self._i % VALIDATION_INTERVAL == 0:
             if type(observation) is list and isinstance(
-                self._obs_space, gym.spaces.Box
-            ):
+                    self._obs_space, gym.spaces.Box):
                 observation = np.array(observation)
             try:
                 if not self._obs_space.contains(observation):
                     raise ValueError(
                         "Observation outside expected value range",
-                        self._obs_space,
-                        observation,
-                    )
+                        self._obs_space, observation)
             except AttributeError:
                 raise ValueError(
                     "Observation for a Box/MultiBinary/MultiDiscrete space "
-                    "should be an np.array, not a Python list.",
-                    observation,
-                )
+                    "should be an np.array, not a Python list.", observation)
         self._i += 1
 
     @property
@@ -80,14 +74,12 @@ class Preprocessor:
     @property
     @PublicAPI
     def observation_space(self):
-        obs_space = gym.spaces.Box(-1.0, 1.0, self.shape, dtype=np.float32)
+        obs_space = gym.spaces.Box(-1., 1., self.shape, dtype=np.float32)
         # Stash the unwrapped space so that we can unwrap dict and tuple spaces
         # automatically in model.py
-        if (
-            isinstance(self, TupleFlatteningPreprocessor)
-            or isinstance(self, DictFlatteningPreprocessor)
-            or isinstance(self, RepeatedValuesPreprocessor)
-        ):
+        if (isinstance(self, TupleFlatteningPreprocessor)
+                or isinstance(self, DictFlatteningPreprocessor)
+                or isinstance(self, RepeatedValuesPreprocessor)):
             obs_space.original_space = self._obs_space
         return obs_space
 
@@ -137,7 +129,7 @@ class GenericPixelPreprocessor(Preprocessor):
 class AtariRamPreprocessor(Preprocessor):
     @override(Preprocessor)
     def _init_shape(self, obs_space, options):
-        return (128,)
+        return (128, )
 
     @override(Preprocessor)
     def transform(self, observation):
@@ -148,7 +140,7 @@ class AtariRamPreprocessor(Preprocessor):
 class OneHotPreprocessor(Preprocessor):
     @override(Preprocessor)
     def _init_shape(self, obs_space, options):
-        return (self._obs_space.n,)
+        return (self._obs_space.n, )
 
     @override(Preprocessor)
     def transform(self, observation):
@@ -174,7 +166,8 @@ class NoPreprocessor(Preprocessor):
 
     @override(Preprocessor)
     def write(self, observation, array, offset):
-        array[offset : offset + self._size] = np.array(observation, copy=False).ravel()
+        array[offset:offset + self._size] = np.array(
+            observation, copy=False).ravel()
 
     @property
     @override(Preprocessor)
@@ -199,7 +192,7 @@ class TupleFlatteningPreprocessor(Preprocessor):
             preprocessor = get_preprocessor(space)(space, self._options)
             self.preprocessors.append(preprocessor)
             size += preprocessor.size
-        return (size,)
+        return (size, )
 
     @override(Preprocessor)
     def transform(self, observation):
@@ -232,7 +225,7 @@ class DictFlatteningPreprocessor(Preprocessor):
             preprocessor = get_preprocessor(space)(space, self._options)
             self.preprocessors.append(preprocessor)
             size += preprocessor.size
-        return (size,)
+        return (size, )
 
     @override(Preprocessor)
     def transform(self, observation):
@@ -245,10 +238,8 @@ class DictFlatteningPreprocessor(Preprocessor):
     def write(self, observation, array, offset):
         if not isinstance(observation, OrderedDict):
             observation = OrderedDict(sorted(observation.items()))
-        assert len(observation) == len(self.preprocessors), (
-            len(observation),
-            len(self.preprocessors),
-        )
+        assert len(observation) == len(self.preprocessors), \
+            (len(observation), len(self.preprocessors))
         for o, p in zip(observation.values(), self.preprocessors):
             p.write(o, array, offset)
             offset += p.size
@@ -261,12 +252,11 @@ class RepeatedValuesPreprocessor(Preprocessor):
     def _init_shape(self, obs_space, options):
         assert isinstance(self._obs_space, Repeated)
         child_space = obs_space.child_space
-        self.child_preprocessor = get_preprocessor(child_space)(
-            child_space, self._options
-        )
+        self.child_preprocessor = get_preprocessor(child_space)(child_space,
+                                                                self._options)
         # The first slot encodes the list length.
         size = 1 + self.child_preprocessor.size * obs_space.max_len
-        return (size,)
+        return (size, )
 
     @override(Preprocessor)
     def transform(self, observation):
@@ -282,15 +272,11 @@ class RepeatedValuesPreprocessor(Preprocessor):
     @override(Preprocessor)
     def write(self, observation, array, offset):
         if not isinstance(observation, list):
-            raise ValueError(
-                "Input for {} must be list type, got {}".format(self, observation)
-            )
+            raise ValueError("Input for {} must be list type, got {}".format(
+                self, observation))
         elif len(observation) > self._obs_space.max_len:
-            raise ValueError(
-                "Input {} exceeds max len of space {}".format(
-                    observation, self._obs_space.max_len
-                )
-            )
+            raise ValueError("Input {} exceeds max len of space {}".format(
+                observation, self._obs_space.max_len))
         # The first slot encodes the list length.
         array[offset] = len(observation)
         for i, elem in enumerate(observation):

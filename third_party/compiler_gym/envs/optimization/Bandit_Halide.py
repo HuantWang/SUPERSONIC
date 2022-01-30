@@ -16,21 +16,27 @@ import sqlite3
 
 
 class BanditHalideEnv(gym.Env):
-    """
-               Bandit environment base to allow agents to interact with the class n-armed bandit
-               in different variations
-               p_dist:
-                   A list of probabilities of the likelihood that a particular bandit will pay out
-               r_dist:
-                   A list of either rewards (if number) or means and standard deviations (if list)
-                   of the payout that bandit has
-               info:
-                   Info about the environment that the agents is not supposed to know. For instance,
-                   info can releal the index of the optimal arm, or the value of prior parameter.
-                   Can be useful to evaluate the agent's perfomance
-               """
+    """A :class:
+            we formulate RL component search as a multi-armed bandit (MAB) problem.
+        Observation:
+            Type: Box(20)
+            By default, the meta-optimizer runs each client RL for past few exploration
+        steps during a trial to allow it to converge before taking the
+        observation. We use the 20 most recently chosen policy architectures as the state.
+        Actions:
+            Type: Discrete(n)
+            Given a budget of 𝑛 candidate RL component configurations (or slot machines)
+        Reward:
+            We then use the most frequently chosen policy architecture as the outcome of policy search.
+
+
+        """
 
     def __init__(self, policy, data):
+        """Initialise with an environment.
+                :param policy: The candidate policy list.
+                :param data: The program that programer intend to optimize.
+                """
         self.info = {}
         self.all_policy, self.n_bandits = policy[0], policy[1]
         self.dataset = data
@@ -50,6 +56,7 @@ class BanditHalideEnv(gym.Env):
         return [seed]
 
     def get_observation(self, action):
+        """ feedback the observation."""
         # print("actionspace",self.action_space)
         # print("action",action)
         if len(self.actions) < self.obsv_size:
@@ -63,9 +70,9 @@ class BanditHalideEnv(gym.Env):
         return self.observation
 
     def generate_reward(self, action):
-
+        """ feedback the reward."""
         # the path to save execution performance
-        DocSave = "/home/SuperSonic/tasks/src/opt_test/MCTS/examples/model_save_Halide"
+        DocSave = "../../SuperSonic/logs/model_save"
         name = "result.json"
 
         # Delete dir
@@ -100,7 +107,7 @@ class BanditHalideEnv(gym.Env):
         # result['total_loss'].append(total_loss)
 
         conn = sqlite3.connect(
-            "/home/SuperSonic/tasks/src/opt_test/MCTS/examples/supersonic.db"
+            "../../SuperSonic/SQL/supersonic.db"
         )
         c = conn.cursor()
 
@@ -155,7 +162,7 @@ class BanditHalideEnv(gym.Env):
         # result['total_loss'].append(total_loss)
 
         conn = sqlite3.connect(
-            "/home/SuperSonic/tasks/src/opt_test/MCTS/examples/supersonic.db"
+            "../../SuperSonic/SQL/supersonic.db"
         )
         c = conn.cursor()
 
@@ -178,6 +185,17 @@ class BanditHalideEnv(gym.Env):
         return reward
 
     def step(self, action):
+        """Take a step.
+
+                :param action: An action, or a sequence of actions. When multiple
+                    actions are provided the observation and reward are returned after
+                    running all of the actions.
+
+                :return: A tuple of observation, reward, done, and info. Observation and
+                    reward are None if default observation/reward is not set. If done is
+                    True, observation and reward may also be None (e.g. because the
+                    service failed).
+            """
         assert self.action_space.contains(action)
         self.num = self.num + 1
         self.actions.append(action)
@@ -198,6 +216,8 @@ class BanditHalideEnv(gym.Env):
         return [0], reward, done, self.info  #
 
     def reset(self):
+        """ reset the RL environment.
+                        """
         return np.random.rand(20)  #
 
     def render(self, mode="human", close=False):

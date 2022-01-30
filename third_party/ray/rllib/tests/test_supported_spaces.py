@@ -14,29 +14,37 @@ from ray.rllib.utils.test_utils import framework_iterator
 
 ACTION_SPACES_TO_TEST = {
     "discrete": Discrete(5),
-    "vector": Box(-1.0, 1.0, (5,), dtype=np.float32),
-    "vector2": Box(-1.0, 1.0, (5, 5,), dtype=np.float32),
+    "vector": Box(-1.0, 1.0, (5, ), dtype=np.float32),
+    "vector2": Box(-1.0, 1.0, (
+        5,
+        5,
+    ), dtype=np.float32),
     "multidiscrete": MultiDiscrete([1, 2, 3, 4]),
-    "tuple": Tuple([Discrete(2), Discrete(3), Box(-1.0, 1.0, (5,), dtype=np.float32)]),
-    "dict": Dict(
-        {
-            "action_choice": Discrete(3),
-            "parameters": Box(-1.0, 1.0, (1,), dtype=np.float32),
-            "yet_another_nested_dict": Dict({"a": Tuple([Discrete(2), Discrete(3)])}),
-        }
-    ),
+    "tuple": Tuple(
+        [Discrete(2),
+         Discrete(3),
+         Box(-1.0, 1.0, (5, ), dtype=np.float32)]),
+    "dict": Dict({
+        "action_choice": Discrete(3),
+        "parameters": Box(-1.0, 1.0, (1, ), dtype=np.float32),
+        "yet_another_nested_dict": Dict({
+            "a": Tuple([Discrete(2), Discrete(3)])
+        })
+    }),
 }
 
 OBSERVATION_SPACES_TO_TEST = {
     "discrete": Discrete(5),
-    "vector": Box(-1.0, 1.0, (5,), dtype=np.float32),
+    "vector": Box(-1.0, 1.0, (5, ), dtype=np.float32),
     "vector2": Box(-1.0, 1.0, (5, 5), dtype=np.float32),
     "image": Box(-1.0, 1.0, (84, 84, 1), dtype=np.float32),
     "atari": Box(-1.0, 1.0, (210, 160, 3), dtype=np.float32),
-    "tuple": Tuple([Discrete(10), Box(-1.0, 1.0, (5,), dtype=np.float32)]),
-    "dict": Dict(
-        {"task": Discrete(10), "position": Box(-1.0, 1.0, (5,), dtype=np.float32),}
-    ),
+    "tuple": Tuple([Discrete(10),
+                    Box(-1.0, 1.0, (5, ), dtype=np.float32)]),
+    "dict": Dict({
+        "task": Discrete(10),
+        "position": Box(-1.0, 1.0, (5, ), dtype=np.float32),
+    }),
 }
 
 
@@ -47,11 +55,8 @@ def check_support(alg, config, train=True, check_bounds=False, tfe=False):
         fw = config["framework"]
         action_space = ACTION_SPACES_TO_TEST[a_name]
         obs_space = OBSERVATION_SPACES_TO_TEST[o_name]
-        print(
-            "=== Testing {} (fw={}) A={} S={} ===".format(
-                alg, fw, action_space, obs_space
-            )
-        )
+        print("=== Testing {} (fw={}) A={} S={} ===".format(
+            alg, fw, action_space, obs_space))
         config.update(
             dict(
                 env_config=dict(
@@ -59,10 +64,7 @@ def check_support(alg, config, train=True, check_bounds=False, tfe=False):
                     observation_space=obs_space,
                     reward_space=Box(1.0, 1.0, shape=(), dtype=np.float32),
                     p_done=1.0,
-                    check_action_bounds=check_bounds,
-                )
-            )
-        )
+                    check_action_bounds=check_bounds)))
         stat = "ok"
         a = None
         try:
@@ -72,7 +74,8 @@ def check_support(alg, config, train=True, check_bounds=False, tfe=False):
             if alg not in ["DDPG", "ES", "ARS", "SAC"]:
                 if o_name in ["atari", "image"]:
                     if fw == "torch":
-                        assert isinstance(a.get_policy().model, TorchVisionNetV2)
+                        assert isinstance(a.get_policy().model,
+                                          TorchVisionNetV2)
                     else:
                         assert isinstance(a.get_policy().model, VisionNetV2)
                 elif o_name in ["vector", "vector2"]:
@@ -95,7 +98,7 @@ def check_support(alg, config, train=True, check_bounds=False, tfe=False):
 
     frameworks = ("tf", "torch")
     if tfe:
-        frameworks += ("tfe",)
+        frameworks += ("tfe", )
     for _ in framework_iterator(config, frameworks=frameworks):
         # Check all action spaces (using a discrete obs-space).
         for a_name, action_space in ACTION_SPACES_TO_TEST.items():
@@ -125,26 +128,24 @@ class TestSupportedSpaces(unittest.TestCase):
 
     def test_ars(self):
         check_support(
-            "ARS",
-            {
+            "ARS", {
                 "num_workers": 1,
                 "noise_size": 1500000,
                 "num_rollouts": 1,
-                "rollouts_used": 1,
-            },
-        )
+                "rollouts_used": 1
+            })
 
     def test_ddpg(self):
         check_support(
-            "DDPG",
-            {
-                "exploration_config": {"ou_base_scale": 100.0},
+            "DDPG", {
+                "exploration_config": {
+                    "ou_base_scale": 100.0
+                },
                 "timesteps_per_iteration": 1,
                 "buffer_size": 1000,
                 "use_state_preprocessor": True,
             },
-            check_bounds=True,
-        )
+            check_bounds=True)
 
     def test_dqn(self):
         config = {"timesteps_per_iteration": 1, "buffer_size": 1000}
@@ -152,14 +153,12 @@ class TestSupportedSpaces(unittest.TestCase):
 
     def test_es(self):
         check_support(
-            "ES",
-            {
+            "ES", {
                 "num_workers": 1,
                 "noise_size": 1500000,
                 "episodes_per_batch": 1,
-                "train_batch_size": 1,
-            },
-        )
+                "train_batch_size": 1
+            })
 
     def test_impala(self):
         check_support("IMPALA", {"num_gpus": 0})
@@ -191,7 +190,7 @@ if __name__ == "__main__":
             "discrete": Discrete(5),
         }
         OBSERVATION_SPACES_TO_TEST = {
-            "vector": Box(0.0, 1.0, (5,), dtype=np.float32),
+            "vector": Box(0.0, 1.0, (5, ), dtype=np.float32),
             "atari": Box(0.0, 1.0, (210, 160, 3), dtype=np.float32),
         }
 

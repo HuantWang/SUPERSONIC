@@ -11,26 +11,24 @@ torch, _ = try_import_torch()
 
 
 @DeveloperAPI
-def build_torch_policy(
-    name,
-    *,
-    loss_fn,
-    get_default_config=None,
-    stats_fn=None,
-    postprocess_fn=None,
-    extra_action_out_fn=None,
-    extra_grad_process_fn=None,
-    optimizer_fn=None,
-    before_init=None,
-    after_init=None,
-    action_sampler_fn=None,
-    action_distribution_fn=None,
-    make_model=None,
-    make_model_and_action_dist=None,
-    apply_gradients_fn=None,
-    mixins=None,
-    get_batch_divisibility_req=None
-):
+def build_torch_policy(name,
+                       *,
+                       loss_fn,
+                       get_default_config=None,
+                       stats_fn=None,
+                       postprocess_fn=None,
+                       extra_action_out_fn=None,
+                       extra_grad_process_fn=None,
+                       optimizer_fn=None,
+                       before_init=None,
+                       after_init=None,
+                       action_sampler_fn=None,
+                       action_distribution_fn=None,
+                       make_model=None,
+                       make_model_and_action_dist=None,
+                       apply_gradients_fn=None,
+                       mixins=None,
+                       get_batch_divisibility_req=None):
     """Helper function for creating a torch policy class at runtime.
 
     Arguments:
@@ -104,31 +102,26 @@ def build_torch_policy(
                 assert make_model_and_action_dist is None
                 self.model = make_model(self, obs_space, action_space, config)
                 dist_class, _ = ModelCatalog.get_action_dist(
-                    action_space, self.config["model"], framework="torch"
-                )
+                    action_space, self.config["model"], framework="torch")
             # Model and action dist class are customized.
             elif make_model_and_action_dist:
                 self.model, dist_class = make_model_and_action_dist(
-                    self, obs_space, action_space, config
-                )
+                    self, obs_space, action_space, config)
             # Use default model and default action dist.
             else:
                 dist_class, logit_dim = ModelCatalog.get_action_dist(
-                    action_space, self.config["model"], framework="torch"
-                )
+                    action_space, self.config["model"], framework="torch")
                 self.model = ModelCatalog.get_model_v2(
                     obs_space=obs_space,
                     action_space=action_space,
                     num_outputs=logit_dim,
                     model_config=self.config["model"],
                     framework="torch",
-                    **self.config["model"].get("custom_model_config", {})
-                )
+                    **self.config["model"].get("custom_model_config", {}))
 
             # Make sure, we passed in a correct Model factory.
-            assert isinstance(
-                self.model, TorchModelV2
-            ), "ERROR: Generated Model must be a TorchModelV2 object!"
+            assert isinstance(self.model, TorchModelV2), \
+                "ERROR: Generated Model must be a TorchModelV2 object!"
 
             TorchPolicy.__init__(
                 self,
@@ -148,22 +141,20 @@ def build_torch_policy(
                 after_init(self, obs_space, action_space, config)
 
         @override(Policy)
-        def postprocess_trajectory(
-            self, sample_batch, other_agent_batches=None, episode=None
-        ):
+        def postprocess_trajectory(self,
+                                   sample_batch,
+                                   other_agent_batches=None,
+                                   episode=None):
             # Do all post-processing always with no_grad().
             # Not using this here will introduce a memory leak (issue #6962).
             with torch.no_grad():
                 # Call super's postprocess_trajectory first.
                 sample_batch = super().postprocess_trajectory(
                     convert_to_non_torch_type(sample_batch),
-                    convert_to_non_torch_type(other_agent_batches),
-                    episode,
-                )
+                    convert_to_non_torch_type(other_agent_batches), episode)
                 if postprocess_fn:
-                    return postprocess_fn(
-                        self, sample_batch, other_agent_batches, episode
-                    )
+                    return postprocess_fn(self, sample_batch,
+                                          other_agent_batches, episode)
 
                 return sample_batch
 
@@ -187,16 +178,15 @@ def build_torch_policy(
                 TorchPolicy.apply_gradients(self, gradients)
 
         @override(TorchPolicy)
-        def extra_action_out(self, input_dict, state_batches, model, action_dist):
+        def extra_action_out(self, input_dict, state_batches, model,
+                             action_dist):
             with torch.no_grad():
                 if extra_action_out_fn:
                     stats_dict = extra_action_out_fn(
-                        self, input_dict, state_batches, model, action_dist
-                    )
+                        self, input_dict, state_batches, model, action_dist)
                 else:
                     stats_dict = TorchPolicy.extra_action_out(
-                        self, input_dict, state_batches, model, action_dist
-                    )
+                        self, input_dict, state_batches, model, action_dist)
                 return convert_to_non_torch_type(stats_dict)
 
         @override(TorchPolicy)

@@ -18,10 +18,10 @@ def make_v1_wrapper(legacy_model_cls):
     class ModelV1Wrapper(TFModelV2):
         """Wrapper that allows V1 models to be used as ModelV2."""
 
-        def __init__(self, obs_space, action_space, num_outputs, model_config, name):
-            TFModelV2.__init__(
-                self, obs_space, action_space, num_outputs, model_config, name
-            )
+        def __init__(self, obs_space, action_space, num_outputs, model_config,
+                     name):
+            TFModelV2.__init__(self, obs_space, action_space, num_outputs,
+                               model_config, name)
             self.legacy_model_cls = legacy_model_cls
 
             # Tracks the last v1 model created by the call to forward
@@ -32,7 +32,8 @@ def make_v1_wrapper(legacy_model_cls):
             # wrong.
             if model_config.get("state_shape"):
                 self.initial_state = [
-                    np.zeros(s, np.float32) for s in model_config["state_shape"]
+                    np.zeros(s, np.float32)
+                    for s in model_config["state_shape"]
                 ]
             elif model_config.get("use_lstm"):
                 cell_size = model_config.get("lstm_cell_size", 256)
@@ -59,31 +60,19 @@ def make_v1_wrapper(legacy_model_cls):
                 # create a weight-sharing model copy
                 with tf.variable_scope(self.cur_instance.scope, reuse=True):
                     new_instance = self.legacy_model_cls(
-                        input_dict,
-                        self.obs_space,
-                        self.action_space,
-                        self.num_outputs,
-                        self.model_config,
-                        state,
-                        seq_lens,
-                    )
+                        input_dict, self.obs_space, self.action_space,
+                        self.num_outputs, self.model_config, state, seq_lens)
             else:
                 # create a new model instance
                 with tf.variable_scope(self.name):
-                    prev_update_ops = set(tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+                    prev_update_ops = set(
+                        tf.get_collection(tf.GraphKeys.UPDATE_OPS))
                     new_instance = self.legacy_model_cls(
-                        input_dict,
-                        self.obs_space,
-                        self.action_space,
-                        self.num_outputs,
-                        self.model_config,
-                        state,
-                        seq_lens,
-                    )
+                        input_dict, self.obs_space, self.action_space,
+                        self.num_outputs, self.model_config, state, seq_lens)
                     self._update_ops = list(
-                        set(tf.get_collection(tf.GraphKeys.UPDATE_OPS))
-                        - prev_update_ops
-                    )
+                        set(tf.get_collection(tf.GraphKeys.UPDATE_OPS)) -
+                        prev_update_ops)
             if len(new_instance.state_init) != len(self.get_initial_state()):
                 raise ValueError(
                     "When using a custom recurrent ModelV1 model, you should "
@@ -91,9 +80,7 @@ def make_v1_wrapper(legacy_model_cls):
                     "example, set 'state_shape': [256, 256] for a lstm with "
                     "cell size 256. The guessed state shape was {} which "
                     "appears to be incorrect.".format(
-                        [s.shape[0] for s in self.get_initial_state()]
-                    )
-                )
+                        [s.shape[0] for s in self.get_initial_state()]))
             self.cur_instance = new_instance
             self.variable_scope = new_instance.scope
             return new_instance.outputs, new_instance.state_out
@@ -101,7 +88,8 @@ def make_v1_wrapper(legacy_model_cls):
         @override(TFModelV2)
         def update_ops(self):
             if self._update_ops is None:
-                raise ValueError("Cannot get update ops before wrapped v1 model init")
+                raise ValueError(
+                    "Cannot get update ops before wrapped v1 model init")
             return list(self._update_ops)
 
         @override(TFModelV2)
@@ -129,14 +117,9 @@ def make_v1_wrapper(legacy_model_cls):
                     # Simple case: sharing the feature layer
                     if self.model_config["vf_share_layers"]:
                         return tf.reshape(
-                            linear(
-                                self.cur_instance.last_layer,
-                                1,
-                                "value_function",
-                                normc_initializer(1.0),
-                            ),
-                            [-1],
-                        )
+                            linear(self.cur_instance.last_layer, 1,
+                                   "value_function", normc_initializer(1.0)),
+                            [-1])
 
                     # Create a new separate model with no RNN state, etc.
                     branch_model_config = self.model_config.copy()
@@ -153,8 +136,7 @@ def make_v1_wrapper(legacy_model_cls):
                             "LSTM model that overrides the value_function() "
                             "method. "
                             "NOTE: Your policy- and vf-NNs will use the same "
-                            "shared LSTM!"
-                        )
+                            "shared LSTM!")
                         # Remove original space from obs-space not to trigger
                         # preprocessing (input to vf-NN is already vectorized
                         # LSTM output).
@@ -169,8 +151,7 @@ def make_v1_wrapper(legacy_model_cls):
                         1,
                         branch_model_config,
                         state_in=None,
-                        seq_lens=None,
-                    )
+                        seq_lens=None)
                     return tf.reshape(branch_instance.outputs, [-1])
 
         @override(ModelV2)

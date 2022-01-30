@@ -44,10 +44,11 @@ class MetricsExportClient:
         Return:
             Whether or not the authentication succeed.
         """
-        self.auth_info = api.authentication_request(self.auth_url, self.dashboard_id)
+        self.auth_info = api.authentication_request(self.auth_url,
+                                                    self.dashboard_id)
         self._dashboard_url = "{address}/dashboard/{access_token}".format(
-            address=self.address, access_token=self.auth_info.access_token_dashboard
-        )
+            address=self.address,
+            access_token=self.auth_info.access_token_dashboard)
         self.is_authenticated = True
 
     @property
@@ -59,8 +60,7 @@ class MetricsExportClient:
         # This function should be used only after authentication succeed.
         assert self._dashboard_url is not None, (
             "dashboard url should be obtained by "
-            "`start_exporting_metrics` method first."
-        )
+            "`start_exporting_metrics` method first.")
         return self._dashboard_url
 
     def start_exporting_metrics(self):
@@ -76,10 +76,8 @@ class MetricsExportClient:
             try:
                 self._authenticate()
             except Exception as e:
-                error = (
-                    "Authentication failed with an error: {}\n"
-                    "Traceback: {}".format(e, traceback.format_exc())
-                )
+                error = ("Authentication failed with an error: {}\n"
+                         "Traceback: {}".format(e, traceback.format_exc()))
                 logger.error(error)
                 return False, error
 
@@ -100,9 +98,11 @@ class Exporter(threading.Thread):
         update_frequency(float): Frequency to export metrics.
     """
 
-    def __init__(
-        self, dashboard_id, address, dashboard_controller, update_frequency=1.0
-    ):
+    def __init__(self,
+                 dashboard_id,
+                 address,
+                 dashboard_controller,
+                 update_frequency=1.0):
         assert update_frequency >= 1.0
 
         self.dashboard_id = dashboard_id
@@ -122,36 +122,26 @@ class Exporter(threading.Thread):
     def access_token(self, access_token):
         self._access_token = access_token
 
-    def export(self, ray_config, node_info, raylet_info, tune_info, tune_availability):
+    def export(self, ray_config, node_info, raylet_info, tune_info,
+               tune_availability):
         ingest_response = api.ingest_request(
-            self.export_address,
-            self.access_token,
-            ray_config,
-            node_info,
-            raylet_info,
-            tune_info,
-            tune_availability,
-        )
+            self.export_address, self.access_token, ray_config, node_info,
+            raylet_info, tune_info, tune_availability)
         actions = ingest_response.actions
         self.action_handler.handle_actions(actions)
 
     def run(self):
-        assert (
-            self.access_token is not None
-        ), "Set access token before running an exporter thread."
+        assert self.access_token is not None, (
+            "Set access token before running an exporter thread.")
         while True:
             try:
                 time.sleep(self.update_frequency)
-                self.export(
-                    self.dashboard_controller.get_ray_config(),
-                    self.dashboard_controller.get_node_info(),
-                    self.dashboard_controller.get_raylet_info(),
-                    self.dashboard_controller.tune_info(),
-                    self.dashboard_controller.tune_availability(),
-                )
+                self.export(self.dashboard_controller.get_ray_config(),
+                            self.dashboard_controller.get_node_info(),
+                            self.dashboard_controller.get_raylet_info(),
+                            self.dashboard_controller.tune_info(),
+                            self.dashboard_controller.tune_availability())
             except Exception as e:
-                logger.error(
-                    "Exception occured while exporting metrics: {}.\n"
-                    "Traceback: {}".format(e, traceback.format_exc())
-                )
+                logger.error("Exception occured while exporting metrics: {}.\n"
+                             "Traceback: {}".format(e, traceback.format_exc()))
                 continue

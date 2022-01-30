@@ -10,7 +10,8 @@ class RayInternalKVStore:
     def __init__(self, namespace=None):
         assert ray_kv._internal_kv_initialized()
         if namespace is not None and not isinstance(namespace, str):
-            raise TypeError("namespace must a string, got: {}.".format(type(namespace)))
+            raise TypeError("namespace must a string, got: {}.".format(
+                type(namespace)))
 
         self.namespace = namespace or ""
 

@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 def _try_import_strategy():
     """Late import for Tesnorflow"""
     import tensorflow as tf
-
     return tf.distribute.experimental.MultiWorkerMirroredStrategy
 
 
 class TFRunner:
     """Manages a TensorFlow model for training."""
 
-    def __init__(self, model_creator, data_creator, config=None, verbose=False):
+    def __init__(self, model_creator, data_creator, config=None,
+                 verbose=False):
         """Initializes the runner.
 
         Args:
@@ -54,8 +54,13 @@ class TFRunner:
         """
         assert len(urls) == world_size
         tf_config = {
-            "cluster": {"worker": urls},
-            "task": {"index": world_rank, "type": "worker"},
+            "cluster": {
+                "worker": urls
+            },
+            "task": {
+                "index": world_rank,
+                "type": "worker"
+            }
         }
         os.environ["TF_CONFIG"] = json.dumps(tf_config)
 
@@ -108,11 +113,13 @@ class TFRunner:
             logger.warning("Running a local model to get validation score.")
             self.local_model = self.model_creator(self.config)
             self.local_model.set_weights(self.model.get_weights())
-            results = self.local_model.evaluate(self.test_dataset, **evaluate_config)
+            results = self.local_model.evaluate(self.test_dataset,
+                                                **evaluate_config)
 
         if isinstance(results, list):
             stats = {
-                "validation_" + k: v for k, v in zip(self.model.metrics_names, results)
+                "validation_" + k: v
+                for k, v in zip(self.model.metrics_names, results)
             }
         else:
             stats = {"loss": results}
@@ -124,7 +131,7 @@ class TFRunner:
         return {
             "epoch": self.epoch,
             "weights": self.model.get_weights(),
-            "optimizer_weights": self.model.optimizer.get_weights(),
+            "optimizer_weights": self.model.optimizer.get_weights()
         }
 
     def set_state(self, state):
@@ -135,8 +142,7 @@ class TFRunner:
         self.model.set_weights(state["weights"])
         # This part is due to ray.get() changing scalar np.int64 object to int
         state["optimizer_weights"][0] = np.array(
-            state["optimizer_weights"][0], dtype=np.int64
-        )
+            state["optimizer_weights"][0], dtype=np.int64)
 
         if self.model.optimizer.weights == []:
             self.model._make_train_function()

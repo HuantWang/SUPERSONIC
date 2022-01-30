@@ -58,11 +58,8 @@ class SampleBatch:
             self.data[k] = np.array(v, copy=False)
         if not lengths:
             raise ValueError("Empty sample batch")
-        assert len(set(lengths)) == 1, (
-            "data columns must be same length",
-            self.data,
-            lengths,
-        )
+        assert len(set(lengths)) == 1, ("data columns must be same length",
+                                        self.data, lengths)
         self.count = lengths[0]
 
     @staticmethod
@@ -98,10 +95,8 @@ class SampleBatch:
 
         if self.keys() != other.keys():
             raise ValueError(
-                "SampleBatches to concat must have same columns! {} vs {}".format(
-                    list(self.keys()), list(other.keys())
-                )
-            )
+                "SampleBatches to concat must have same columns! {} vs {}".
+                format(list(self.keys()), list(other.keys())))
         out = {}
         for k in self.keys():
             out[k] = concat_aligned([self[k], other[k]])
@@ -109,7 +104,9 @@ class SampleBatch:
 
     @PublicAPI
     def copy(self):
-        return SampleBatch({k: np.array(v, copy=True) for (k, v) in self.data.items()})
+        return SampleBatch(
+            {k: np.array(v, copy=True)
+             for (k, v) in self.data.items()})
 
     @PublicAPI
     def rows(self):
@@ -225,7 +222,8 @@ class SampleBatch:
                 if bulk:
                     self.data[key] = pack(self.data[key])
                 else:
-                    self.data[key] = np.array([pack(o) for o in self.data[key]])
+                    self.data[key] = np.array(
+                        [pack(o) for o in self.data[key]])
 
     @DeveloperAPI
     def decompress_if_needed(self, columns=frozenset(["obs", "new_obs"])):
@@ -235,7 +233,8 @@ class SampleBatch:
                 if is_compressed(arr):
                     self.data[key] = unpack(arr)
                 elif len(arr) > 0 and is_compressed(arr[0]):
-                    self.data[key] = np.array([unpack(o) for o in self.data[key]])
+                    self.data[key] = np.array(
+                        [unpack(o) for o in self.data[key]])
         return self
 
     def __str__(self):
@@ -308,8 +307,7 @@ class MultiAgentBatch:
             if not isinstance(s, MultiAgentBatch):
                 raise ValueError(
                     "`MultiAgentBatch.concat_samples()` can only concat "
-                    "MultiAgentBatch types, not {}!".format(type(s).__name__)
-                )
+                    "MultiAgentBatch types, not {}!".format(type(s).__name__))
             for policy_id, batch in s.policy_batches.items():
                 policy_batches[policy_id].append(batch)
             total_count += s.count
@@ -326,8 +324,8 @@ class MultiAgentBatch:
             MultiAgentBatch: The copy of self with deep-copied data.
         """
         return MultiAgentBatch(
-            {k: v.copy() for (k, v) in self.policy_batches.items()}, self.count
-        )
+            {k: v.copy()
+             for (k, v) in self.policy_batches.items()}, self.count)
 
     @PublicAPI
     def total(self):
@@ -367,10 +365,8 @@ class MultiAgentBatch:
 
     def __str__(self):
         return "MultiAgentBatch({}, count={})".format(
-            str(self.policy_batches), self.count
-        )
+            str(self.policy_batches), self.count)
 
     def __repr__(self):
         return "MultiAgentBatch({}, count={})".format(
-            str(self.policy_batches), self.count
-        )
+            str(self.policy_batches), self.count)

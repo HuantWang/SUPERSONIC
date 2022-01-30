@@ -8,7 +8,8 @@ from ray.serve.utils import _get_logger
 logger = _get_logger()
 
 
-def make_metric_namedtuple(metric_metadata: MetricMetadata, record: MetricBatch):
+def make_metric_namedtuple(metric_metadata: MetricMetadata,
+                           record: MetricBatch):
     fields = ["name", "type"]
     fields += list(metric_metadata.default_labels.keys())
     fields += list(record.labels.keys())
@@ -18,18 +19,18 @@ def make_metric_namedtuple(metric_metadata: MetricMetadata, record: MetricBatch)
 
     tuple_type = namedtuple(metric_metadata.name, fields)
     return tuple_type(
-        name=metric_metadata.name, type=metric_metadata.type, **merged_labels
-    )
+        name=metric_metadata.name, type=metric_metadata.type, **merged_labels)
 
 
 class ExporterInterface:
-    def export(
-        self, metric_metadata: Dict[str, MetricMetadata], metric_batch: MetricBatch
-    ):
-        raise NotImplementedError("This method should be implemented by subclass.")
+    def export(self, metric_metadata: Dict[str, MetricMetadata],
+               metric_batch: MetricBatch):
+        raise NotImplementedError(
+            "This method should be implemented by subclass.")
 
     def inspect_metrics(self):
-        raise NotImplementedError("This method should be implemented by subclass.")
+        raise NotImplementedError(
+            "This method should be implemented by subclass.")
 
 
 @ray.remote(num_cpus=0)
@@ -50,11 +51,11 @@ class MetricExporterActor:
         # an updated copy of the metadata for each ingest call.
         self.metric_metadata = dict()
 
-        logger.debug(
-            "Initialized with metric exporter of type {}".format(type(self.exporter))
-        )
+        logger.debug("Initialized with metric exporter of type {}".format(
+            type(self.exporter)))
 
-    def ingest(self, metric_metadata: Dict[str, MetricMetadata], batch: MetricBatch):
+    def ingest(self, metric_metadata: Dict[str, MetricMetadata],
+               batch: MetricBatch):
         self.metric_metadata.update(metric_metadata)
         self.exporter.export(self.metric_metadata, batch)
 
@@ -78,7 +79,8 @@ class InMemoryExporter(ExporterInterface):
             elif metadata.type == MetricType.MEASURE:
                 self.latest_measures[metric_key] = record.value
             else:
-                raise RuntimeError("Unrecognized metric type {}".format(metadata.type))
+                raise RuntimeError("Unrecognized metric type {}".format(
+                    metadata.type))
 
     def inspect_metrics(self):
         items = []
@@ -93,11 +95,11 @@ class InMemoryExporter(ExporterInterface):
 class PrometheusExporter(ExporterInterface):
     def __init__(self):
         super().__init__()
-        from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
-
+        from prometheus_client import (CollectorRegistry, Counter, Gauge,
+                                       generate_latest)
         self.metric_type_to_prom_type = {
             MetricType.COUNTER: Counter,
-            MetricType.MEASURE: Gauge,
+            MetricType.MEASURE: Gauge
         }
         self.prom_generate_latest = generate_latest
 
@@ -115,10 +117,12 @@ class PrometheusExporter(ExporterInterface):
     def _process_metric_metadata(self, metric_metadata):
         for name, metric_metadata in metric_metadata.items():
             if name not in self.metrics_cache:
-                constructor = self.metric_type_to_prom_type[metric_metadata.type]
+                constructor = self.metric_type_to_prom_type[
+                    metric_metadata.type]
 
                 default_labels = metric_metadata.default_labels
-                label_names = tuple(default_labels.keys()) + metric_metadata.label_names
+                label_names = tuple(
+                    default_labels.keys()) + metric_metadata.label_names
                 metric_object = constructor(
                     metric_metadata.name,
                     metric_metadata.description,
@@ -126,14 +130,14 @@ class PrometheusExporter(ExporterInterface):
                     registry=self.registry,
                 )
 
-                self.metrics_cache[name] = (metric_object, metric_metadata.type)
+                self.metrics_cache[name] = (metric_object,
+                                            metric_metadata.type)
                 self.default_labels[name] = default_labels
 
     def _process_batch(self, batch):
         for name, labels, value in batch:
-            assert name in self.metrics_cache, "Metrics {} was not registered.".format(
-                name
-            )
+            assert name in self.metrics_cache, (
+                "Metrics {} was not registered.".format(name))
             metric, metric_type = self.metrics_cache[name]
             default_labels = self.default_labels[name]
             merged_labels = {**default_labels, **labels}
@@ -142,4 +146,5 @@ class PrometheusExporter(ExporterInterface):
             elif metric_type == MetricType.MEASURE:
                 metric.labels(**merged_labels).set(value)
             else:
-                raise RuntimeError("Unrecognized metric type {}".format(metric_type))
+                raise RuntimeError(
+                    "Unrecognized metric type {}".format(metric_type))

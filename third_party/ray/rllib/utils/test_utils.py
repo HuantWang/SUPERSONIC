@@ -16,7 +16,9 @@ torch, _ = try_import_torch()
 logger = logging.getLogger(__name__)
 
 
-def framework_iterator(config=None, frameworks=("tf", "tfe", "torch"), session=False):
+def framework_iterator(config=None,
+                       frameworks=("tf", "tfe", "torch"),
+                       session=False):
     """An generator that allows for looping through n frameworks for testing.
 
     Provides the correct config entries ("framework") as well
@@ -42,18 +44,16 @@ def framework_iterator(config=None, frameworks=("tf", "tfe", "torch"), session=F
     for fw in frameworks:
         # Skip non-installed frameworks.
         if fw == "torch" and not torch:
-            logger.warning("framework_iterator skipping torch (not installed)!")
+            logger.warning(
+                "framework_iterator skipping torch (not installed)!")
             continue
         if fw != "torch" and not tf:
-            logger.warning(
-                "framework_iterator skipping {} (tf not " "installed)!".format(fw)
-            )
+            logger.warning("framework_iterator skipping {} (tf not "
+                           "installed)!".format(fw))
             continue
         elif fw == "tfe" and not eager_mode:
-            logger.warning(
-                "framework_iterator skipping eager (could not "
-                "import `eager_mode` from tensorflow.python)!"
-            )
+            logger.warning("framework_iterator skipping eager (could not "
+                           "import `eager_mode` from tensorflow.python)!")
             continue
         assert fw in ["tf", "tfe", "torch", None]
 
@@ -106,45 +106,60 @@ def check(x, y, decimals=5, atol=None, rtol=None, false=False):
     """
     # A dict type.
     if isinstance(x, dict):
-        assert isinstance(y, dict), "ERROR: If x is dict, y needs to be a dict as well!"
+        assert isinstance(y, dict), \
+            "ERROR: If x is dict, y needs to be a dict as well!"
         y_keys = set(x.keys())
         for key, value in x.items():
-            assert key in y, "ERROR: y does not have x's key='{}'! y={}".format(key, y)
-            check(value, y[key], decimals=decimals, atol=atol, rtol=rtol, false=false)
+            assert key in y, \
+                "ERROR: y does not have x's key='{}'! y={}".format(key, y)
+            check(
+                value,
+                y[key],
+                decimals=decimals,
+                atol=atol,
+                rtol=rtol,
+                false=false)
             y_keys.remove(key)
-        assert not y_keys, "ERROR: y contains keys ({}) that are not in x! y={}".format(
-            list(y_keys), y
-        )
+        assert not y_keys, \
+            "ERROR: y contains keys ({}) that are not in x! y={}".\
+            format(list(y_keys), y)
     # A tuple type.
     elif isinstance(x, (tuple, list)):
-        assert isinstance(
-            y, (tuple, list)
-        ), "ERROR: If x is tuple, y needs to be a tuple as well!"
-        assert len(y) == len(
-            x
-        ), "ERROR: y does not have the same length as x ({} vs {})!".format(
-            len(y), len(x)
-        )
+        assert isinstance(y, (tuple, list)),\
+            "ERROR: If x is tuple, y needs to be a tuple as well!"
+        assert len(y) == len(x),\
+            "ERROR: y does not have the same length as x ({} vs {})!".\
+            format(len(y), len(x))
         for i, value in enumerate(x):
-            check(value, y[i], decimals=decimals, atol=atol, rtol=rtol, false=false)
+            check(
+                value,
+                y[i],
+                decimals=decimals,
+                atol=atol,
+                rtol=rtol,
+                false=false)
     # Boolean comparison.
     elif isinstance(x, (np.bool_, bool)):
         if false is True:
-            assert bool(x) is not bool(y), "ERROR: x ({}) is y ({})!".format(x, y)
+            assert bool(x) is not bool(y), \
+                "ERROR: x ({}) is y ({})!".format(x, y)
         else:
-            assert bool(x) is bool(y), "ERROR: x ({}) is not y ({})!".format(x, y)
+            assert bool(x) is bool(y), \
+                "ERROR: x ({}) is not y ({})!".format(x, y)
     # Nones or primitives.
     elif x is None or y is None or isinstance(x, (str, int)):
         if false is True:
             assert x != y, "ERROR: x ({}) is the same as y ({})!".format(x, y)
         else:
-            assert x == y, "ERROR: x ({}) is not the same as y ({})!".format(x, y)
+            assert x == y, \
+                "ERROR: x ({}) is not the same as y ({})!".format(x, y)
     # String comparison.
     elif hasattr(x, "dtype") and x.dtype == np.object:
         try:
             np.testing.assert_array_equal(x, y)
             if false is True:
-                assert False, "ERROR: x ({}) is the same as y ({})!".format(x, y)
+                assert False, \
+                    "ERROR: x ({}) is the same as y ({})!".format(x, y)
         except AssertionError as e:
             if false is False:
                 raise e
@@ -153,10 +168,8 @@ def check(x, y, decimals=5, atol=None, rtol=None, false=False):
         if tf is not None:
             # y should never be a Tensor (y=expected value).
             if isinstance(y, tf.Tensor):
-                raise ValueError(
-                    "`y` (expected value) must not be a Tensor. "
-                    "Use numpy.ndarray instead"
-                )
+                raise ValueError("`y` (expected value) must not be a Tensor. "
+                                 "Use numpy.ndarray instead")
             if isinstance(x, tf.Tensor):
                 # In eager mode, numpyize tensors.
                 if tf.executing_eagerly():
@@ -166,8 +179,12 @@ def check(x, y, decimals=5, atol=None, rtol=None, false=False):
                     with tf.Session() as sess:
                         x = sess.run(x)
                         return check(
-                            x, y, decimals=decimals, atol=atol, rtol=rtol, false=false
-                        )
+                            x,
+                            y,
+                            decimals=decimals,
+                            atol=atol,
+                            rtol=rtol,
+                            false=false)
         if torch is not None:
             if isinstance(x, torch.Tensor):
                 x = x.detach().numpy()
@@ -188,7 +205,8 @@ def check(x, y, decimals=5, atol=None, rtol=None, false=False):
             else:
                 # If false is set -> raise error (not expected to be equal).
                 if false is True:
-                    assert False, "ERROR: x ({}) is the same as y ({})!".format(x, y)
+                    assert False, \
+                        "ERROR: x ({}) is the same as y ({})!".format(x, y)
 
         # Using atol/rtol.
         else:
@@ -204,7 +222,8 @@ def check(x, y, decimals=5, atol=None, rtol=None, false=False):
                     raise e
             else:
                 if false is True:
-                    assert False, "ERROR: x ({}) is the same as y ({})!".format(x, y)
+                    assert False, \
+                        "ERROR: x ({}) is the same as y ({})!".format(x, y)
 
 
 def check_learning_achieved(tune_results, min_reward):
@@ -225,9 +244,9 @@ def check_learning_achieved(tune_results, min_reward):
     print("ok")
 
 
-def check_compute_action(
-    trainer, include_state=False, include_prev_action_reward=False
-):
+def check_compute_action(trainer,
+                         include_state=False,
+                         include_prev_action_reward=False):
     """Tests different combinations of arguments for trainer.compute_action.
 
     Args:
@@ -251,7 +270,8 @@ def check_compute_action(
             state_in = None
             if include_state:
                 state_in = pol.model.get_initial_state()
-            action_in = action_space.sample() if include_prev_action_reward else None
+            action_in = action_space.sample() \
+                if include_prev_action_reward else None
             reward_in = 1.0 if include_prev_action_reward else None
             out = trainer.compute_action(
                 obs,
@@ -259,8 +279,7 @@ def check_compute_action(
                 prev_action=action_in,
                 prev_reward=reward_in,
                 explore=explore,
-                full_fetch=full_fetch,
-            )
+                full_fetch=full_fetch)
 
             state_out = None
             if state_in or full_fetch:
@@ -272,5 +291,4 @@ def check_compute_action(
             if not action_space.contains(action):
                 raise ValueError(
                     "Returned action ({}) of trainer {} not in Env's "
-                    "action_space ({})!".format(action, trainer, action_space)
-                )
+                    "action_space ({})!".format(action, trainer, action_space))

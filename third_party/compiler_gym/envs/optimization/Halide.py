@@ -39,50 +39,37 @@ f = None
 
 
 class HalideEnv(gym.Env):
-    """
-    Description:
-        A pole is attached by an un-actuated joint to a cart, which moves along
-        a frictionless track. The pendulum starts upright, and the goal is to
-        prevent it from falling over by increasing and reducing the cart's
-        velocity.
+    """A :class:
+        Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages.
+        This task builds upon Halide version 10. Our evaluation uses ten Halide applications that have been heavily tested on the Halide
+        compiler. We measure the execution time of each benchmark when processing three image datasets provided by the Halide benchmark suite.
+        The benchmarks are optimized to run on a multi-core CPU.
 
     Source:
-        This environment corresponds to the version of the cart-pole problem
-        described by Barto, Sutton, and Anderson
+        This environment corresponds to the version of the Halide. (https://github.com/halide/Halide)
+        paper link: https://people.csail.mit.edu/jrk/halide-pldi13.pdf
 
     Observation:
-        Type: Box(4)
-        Num     Observation               Min                     Max
-        0       Cart Position             -4.8                    4.8
-        1       Cart Velocity             -Inf                    Inf
-        2       Pole Angle                -0.418 rad (-24 deg)    0.418 rad (24 deg)
-        3       Pole Angular Velocity     -Inf                    Inf
+        Type: Box(100)
+        Pipeline’s schedule will be convert to vectors by different embedding approaches,
+        e.g. Word2vec, Doc2vec, CodeBert ...
 
     Actions:
-        Type: Discrete(2)
-        Num   Action
-        0     Push cart to the left
-        1     Push cart to the right
+        Type: Discrete(4)
+        Num      Action      Description
+        0        adding      Adds an optimization to the stage.
+        1        removing    Removes an optimization to the stage.
+        2        decreasing  Decreases the value (by one) of an enabled parameterized option.
+        3        increasing  Increases the value (by one) of an enabled parameterized option.
 
-        Note: The amount the velocity that is reduced or increased is not
-        fixed; it depends on the angle the pole is pointing. This is because
-        the center of gravity of the pole increases the amount of energy needed
-        to move the cart underneath it
 
     Reward:
-        Reward is 1 for every step taken, including the termination step
+        In all cases, lower cost is better. We measure the execution time of each benchmark when processing three image
+        datasets provided by the Halide benchmark suite.
 
     Starting State:
-        All observations are assigned a uniform random value in [-0.05..0.05]
+        All observations are assigned a uniform random value in [-1..1]
 
-    Episode Termination:
-        Pole Angle is more than 12 degrees.
-        Cart Position is more than 2.4 (center of the cart reaches the edge of
-        the display).
-        Episode length is greater than 200.
-        Solved Requirements:
-        Considered solved when the average return is greater than or equal to
-        195.0 over 100 consecutive trials.
     """
 
     def __init__(
@@ -95,9 +82,17 @@ class HalideEnv(gym.Env):
         action_function,
         reward_function,
     ):  # get
-        """ Defines the reinforcement leaning environment.
-        Modify to match different task shape.
+        """ Defines the reinforcement leaning environment. Initialise with an environment.
 
+        :param algorithm_id: Encoding of halide benchmark.
+        :param input_image: The image datasets to measure halide benchmark.
+        :param max_stage_directive:  Max scheduling directives that will be applied to the pipeline stages.
+        :param log_path:The path to save result.
+        :param state_function:  a state function that can summarize the program after each action as a
+                                finite feature vector.
+        :param action_function: an action function that can discrete set of actions or transformations that can be applied
+                                to a program, such as passes in a compiler
+        :param reward_function: a reward function that reports the quality of the actions taken so far.
         """
 
         channel = grpc.insecure_channel("localhost:50051")
@@ -171,6 +166,11 @@ class HalideEnv(gym.Env):
         self.tstart = time.time()
 
     def get_reward(self, action):
+        """ Calculate reward with method "reward_function".
+
+                    :param action: What will agent do in next step.
+                    :return: return a reward score after calculating.
+                """
         reward, self.min_exec_time_sec = reward_function().get_reward(
             self.response.exec_time_sec,
             self.min_exec_time_sec,
@@ -186,6 +186,9 @@ class HalideEnv(gym.Env):
         # return 0.0
 
     def get_map(self, request):
+        """ encode the schedule as observation.
+                    :param request: This is requset from grpc.
+                """
         # collect the map number of self.map
         p = self.map_count * len(self.response.op.elem_id)
         for i, id in enumerate(self.response.op.elem_id):
@@ -197,6 +200,12 @@ class HalideEnv(gym.Env):
         # return observation
 
     def get_obs(self, reward, done, error):
+        """ feedback the observation with method "observation_function".
+
+                    :param reward:A reward, to describe how the agent "ought" to behave.
+                    :param done: The RL engine's state,ture or false.
+                    :return: A tuple of observation, observation_mask, score, done, and info.
+                """
         ek = "best_exec"
         sk = "best_schedule"
         info = {ek: self.min_exec_time_sec, sk: "n/a"}
@@ -270,6 +279,16 @@ class HalideEnv(gym.Env):
         return np.array(self.state), reward, done, info
 
     def step(self, action):  # get
+        """Take a step.
+
+                    :param action: An action, or a sequence of actions. When multiple
+                            actions are provided the observation and reward are returned after
+                            running all of the actions.
+                    :return: A tuple of observation, reward, done, and info. Observation and
+                            reward are None if default observation/reward is not set. If done is
+                            True, observation and reward may also be None (e.g. because the
+                            service failed).
+                """
         self.actions.append(action)
         assert self.action_space.contains(action), "%r (%s) invalid" % (
             action,
@@ -296,6 +315,8 @@ class HalideEnv(gym.Env):
         return self.get_obs(self.get_reward(action), False, False)
 
     def reset(self):  # get
+        """ reset the RL environment.
+                """
         request = schedule_pb2.ScheduleResetRequest()
         response = stuball.reset(request)
 
@@ -318,7 +339,8 @@ class HalideEnv(gym.Env):
         return np.array(self.map)
 
     def render(self, mode="human"):  # get
-
+        """ record the schedule.
+                """
         request = schedule_pb2.ScheduleRenderRequest()
         response = stuball.render(request)
 
@@ -329,7 +351,8 @@ class HalideEnv(gym.Env):
         return out.getvalue()
 
     def close(self):  # get
-
+        """ close grpc connection.
+                """
         request = schedule_pb2.ScheduleCloseRequest()
         response = self.stub.close(request)
 

@@ -15,10 +15,8 @@ import argparse
 
 from ray import tune
 from ray.rllib.agents.callbacks import DefaultCallbacks
-from ray.rllib.examples.models.centralized_critic_models import (
-    YetAnotherCentralizedCriticModel,
-    YetAnotherTorchCentralizedCriticModel,
-)
+from ray.rllib.examples.models.centralized_critic_models import \
+    YetAnotherCentralizedCriticModel, YetAnotherTorchCentralizedCriticModel
 from ray.rllib.examples.env.two_step_game import TwoStepGame
 from ray.rllib.models import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
@@ -35,26 +33,19 @@ parser.add_argument("--stop-reward", type=float, default=7.99)
 class FillInActions(DefaultCallbacks):
     """Fills in the opponent actions info in the training batches."""
 
-    def on_postprocess_trajectory(
-        self,
-        worker,
-        episode,
-        agent_id,
-        policy_id,
-        policies,
-        postprocessed_batch,
-        original_batches,
-        **kwargs
-    ):
+    def on_postprocess_trajectory(self, worker, episode, agent_id, policy_id,
+                                  policies, postprocessed_batch,
+                                  original_batches, **kwargs):
         to_update = postprocessed_batch[SampleBatch.CUR_OBS]
         other_id = 1 if agent_id == 0 else 0
         action_encoder = ModelCatalog.get_preprocessor_for_space(Discrete(2))
 
         # set the opponent actions into the observation
         _, opponent_batch = original_batches[other_id]
-        opponent_actions = np.array(
-            [action_encoder.transform(a) for a in opponent_batch[SampleBatch.ACTIONS]]
-        )
+        opponent_actions = np.array([
+            action_encoder.transform(a)
+            for a in opponent_batch[SampleBatch.ACTIONS]
+        ])
         to_update[:, -2:] = opponent_actions
 
 
@@ -80,22 +71,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ModelCatalog.register_custom_model(
-        "cc_model",
-        YetAnotherTorchCentralizedCriticModel
-        if args.torch
-        else YetAnotherCentralizedCriticModel,
-    )
+        "cc_model", YetAnotherTorchCentralizedCriticModel
+        if args.torch else YetAnotherCentralizedCriticModel)
 
     action_space = Discrete(2)
-    observer_space = Dict(
-        {
-            "own_obs": Discrete(6),
-            # These two fields are filled in by the CentralCriticObserver, and are
-            # not used for inference, only for training.
-            "opponent_obs": Discrete(6),
-            "opponent_action": Discrete(2),
-        }
-    )
+    observer_space = Dict({
+        "own_obs": Discrete(6),
+        # These two fields are filled in by the CentralCriticObserver, and are
+        # not used for inference, only for training.
+        "opponent_obs": Discrete(6),
+        "opponent_action": Discrete(2),
+    })
 
     config = {
         "env": TwoStepGame,
@@ -110,7 +96,9 @@ if __name__ == "__main__":
             "policy_mapping_fn": lambda x: "pol1" if x == 0 else "pol2",
             "observation_fn": central_critic_observer,
         },
-        "model": {"custom_model": "cc_model",},
+        "model": {
+            "custom_model": "cc_model",
+        },
         "framework": "torch" if args.torch else "tf",
     }
 

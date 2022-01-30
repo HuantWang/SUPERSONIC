@@ -16,18 +16,10 @@ import uuid
 
 import ray
 from ray.tune.logger import UnifiedLogger
-from ray.tune.result import (
-    DEFAULT_RESULTS_DIR,
-    TIME_THIS_ITER_S,
-    TIMESTEPS_THIS_ITER,
-    DONE,
-    TIMESTEPS_TOTAL,
-    EPISODES_THIS_ITER,
-    EPISODES_TOTAL,
-    TRAINING_ITERATION,
-    RESULT_DUPLICATE,
-    TRIAL_INFO,
-)
+from ray.tune.result import (DEFAULT_RESULTS_DIR, TIME_THIS_ITER_S,
+                             TIMESTEPS_THIS_ITER, DONE, TIMESTEPS_TOTAL,
+                             EPISODES_THIS_ITER, EPISODES_TOTAL,
+                             TRAINING_ITERATION, RESULT_DUPLICATE, TRIAL_INFO)
 from ray.tune.utils import UtilMonitor
 
 logger = logging.getLogger(__name__)
@@ -49,7 +41,10 @@ class TrainableUtil:
         # Use normpath so that a directory path isn't mapped to empty string.
         name = os.path.basename(os.path.normpath(checkpoint_path))
         name += os.path.sep if os.path.isdir(checkpoint_path) else ""
-        data_dict = pickle.dumps({"checkpoint_name": name, "data": data,})
+        data_dict = pickle.dumps({
+            "checkpoint_name": name,
+            "data": data,
+        })
         return data_dict
 
     @staticmethod
@@ -70,9 +65,8 @@ class TrainableUtil:
                 break
             checkpoint_dir = os.path.dirname(checkpoint_dir)
         else:
-            raise FileNotFoundError(
-                "Checkpoint directory not found for {}".format(checkpoint_path)
-            )
+            raise FileNotFoundError("Checkpoint directory not found for {}"
+                                    .format(checkpoint_path))
         return checkpoint_dir
 
     @staticmethod
@@ -92,23 +86,24 @@ class TrainableUtil:
         Raises:
             FileNotFoundError if the directory is not found.
         """
-        marker_paths = glob.glob(os.path.join(logdir, "checkpoint_*/.is_checkpoint"))
+        marker_paths = glob.glob(
+            os.path.join(logdir, "checkpoint_*/.is_checkpoint"))
         iter_chkpt_pairs = []
         for marker_path in marker_paths:
             chkpt_dir = os.path.dirname(marker_path)
-            metadata_file = glob.glob(os.path.join(chkpt_dir, "*.tune_metadata"))
+            metadata_file = glob.glob(
+                os.path.join(chkpt_dir, "*.tune_metadata"))
             if len(metadata_file) != 1:
                 raise ValueError(
-                    "{} has zero or more than one tune_metadata.".format(chkpt_dir)
-                )
+                    "{} has zero or more than one tune_metadata.".format(
+                        chkpt_dir))
 
-            chkpt_path = metadata_file[0][: -len(".tune_metadata")]
-            chkpt_iter = int(chkpt_dir[chkpt_dir.rfind("_") + 1 :])
+            chkpt_path = metadata_file[0][:-len(".tune_metadata")]
+            chkpt_iter = int(chkpt_dir[chkpt_dir.rfind("_") + 1:])
             iter_chkpt_pairs.append([chkpt_iter, chkpt_path])
 
         chkpt_df = pd.DataFrame(
-            iter_chkpt_pairs, columns=["training_iteration", "chkpt_path"]
-        )
+            iter_chkpt_pairs, columns=["training_iteration", "chkpt_path"])
         return chkpt_df
 
 
@@ -162,9 +157,9 @@ class Trainable:
             logdir_prefix = datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
             ray.utils.try_to_create_directory(DEFAULT_RESULTS_DIR)
             self._logdir = tempfile.mkdtemp(
-                prefix=logdir_prefix, dir=DEFAULT_RESULTS_DIR
-            )
-            self._result_logger = UnifiedLogger(self.config, self._logdir, loggers=None)
+                prefix=logdir_prefix, dir=DEFAULT_RESULTS_DIR)
+            self._result_logger = UnifiedLogger(
+                self.config, self._logdir, loggers=None)
 
         self._iteration = 0
         self._time_total = 0.0
@@ -180,12 +175,10 @@ class Trainable:
         self._setup(copy.deepcopy(self.config))
         setup_time = time.time() - start_time
         if setup_time > SETUP_TIME_THRESHOLD:
-            logger.info(
-                "_setup took {:.3f} seconds. If your trainable is "
-                "slow to initialize, consider setting "
-                "reuse_actors=True to reduce actor creation "
-                "overheads.".format(setup_time)
-            )
+            logger.info("_setup took {:.3f} seconds. If your trainable is "
+                        "slow to initialize, consider setting "
+                        "reuse_actors=True to reduce actor creation "
+                        "overheads.".format(setup_time))
         self._local_ip = self.get_current_ip()
         log_sys_usage = self.config.get("log_sys_usage", False)
         self._monitor = UtilMonitor(start=log_sys_usage)
@@ -321,8 +314,7 @@ class Trainable:
             config=self.config,
             time_since_restore=self._time_since_restore,
             timesteps_since_restore=self._timesteps_since_restore,
-            iterations_since_restore=self._iterations_since_restore,
-        )
+            iterations_since_restore=self._iterations_since_restore)
 
         monitor_data = self._monitor.get_data()
         if monitor_data:
@@ -344,9 +336,8 @@ class Trainable:
         Returns:
             str: Checkpoint path or prefix that may be passed to restore().
         """
-        checkpoint_dir = os.path.join(
-            checkpoint_dir or self.logdir, "checkpoint_{}".format(self._iteration)
-        )
+        checkpoint_dir = os.path.join(checkpoint_dir or self.logdir,
+                                      "checkpoint_{}".format(self._iteration))
         TrainableUtil.make_checkpoint_dir(checkpoint_dir)
         checkpoint = self._save(checkpoint_dir)
         saved_as_dict = False
@@ -354,8 +345,8 @@ class Trainable:
             if not checkpoint.startswith(checkpoint_dir):
                 raise ValueError(
                     "The returned checkpoint path must be within the "
-                    "given checkpoint dir {}: {}".format(checkpoint_dir, checkpoint)
-                )
+                    "given checkpoint dir {}: {}".format(
+                        checkpoint_dir, checkpoint))
             checkpoint_path = checkpoint
             if os.path.isdir(checkpoint_path):
                 # Add trailing slash to prevent tune metadata from
@@ -367,24 +358,19 @@ class Trainable:
             with open(checkpoint_path, "wb") as f:
                 pickle.dump(checkpoint, f)
         else:
-            raise ValueError(
-                "Returned unexpected type {}. "
-                "Expected str or dict.".format(type(checkpoint))
-            )
+            raise ValueError("Returned unexpected type {}. "
+                             "Expected str or dict.".format(type(checkpoint)))
 
         with open(checkpoint_path + ".tune_metadata", "wb") as f:
-            pickle.dump(
-                {
-                    "experiment_id": self._experiment_id,
-                    "iteration": self._iteration,
-                    "timesteps_total": self._timesteps_total,
-                    "time_total": self._time_total,
-                    "episodes_total": self._episodes_total,
-                    "saved_as_dict": saved_as_dict,
-                    "ray_version": ray.__version__,
-                },
-                f,
-            )
+            pickle.dump({
+                "experiment_id": self._experiment_id,
+                "iteration": self._iteration,
+                "timesteps_total": self._timesteps_total,
+                "time_total": self._time_total,
+                "episodes_total": self._episodes_total,
+                "saved_as_dict": saved_as_dict,
+                "ray_version": ray.__version__,
+            }, f)
         return checkpoint_path
 
     def save_to_object(self):
@@ -433,9 +419,8 @@ class Trainable:
         self._timesteps_since_restore = 0
         self._iterations_since_restore = 0
         self._restored = True
-        logger.info(
-            "Restored on %s from checkpoint: %s", self.get_current_ip(), checkpoint_path
-        )
+        logger.info("Restored on %s from checkpoint: %s",
+                    self.get_current_ip(), checkpoint_path)
         state = {
             "_iteration": self._iteration,
             "_timesteps_total": self._timesteps_total,

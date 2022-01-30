@@ -98,18 +98,13 @@ class ImportThread:
     def _get_import_info_for_collision_detection(self, key):
         """Retrieve the collision identifier, type, and name of the import."""
         if key.startswith(b"RemoteFunction"):
-            collision_identifier, function_name = self.redis_client.hmget(
-                key, ["collision_identifier", "function_name"]
-            )
-            return (
-                collision_identifier,
-                ray.utils.decode(function_name),
-                "remote function",
-            )
+            collision_identifier, function_name = (self.redis_client.hmget(
+                key, ["collision_identifier", "function_name"]))
+            return (collision_identifier, ray.utils.decode(function_name),
+                    "remote function")
         elif key.startswith(b"ActorClass"):
             collision_identifier, class_name = self.redis_client.hmget(
-                key, ["collision_identifier", "class_name"]
-            )
+                key, ["collision_identifier", "class_name"])
             return collision_identifier, ray.utils.decode(class_name), "actor"
 
     def _process_key(self, key):
@@ -121,17 +116,13 @@ class ImportThread:
             # of many times. TODO(rkn): We may want to push this to the driver
             # through Redis so that it can be displayed in the dashboard more
             # easily.
-            if key.startswith(b"RemoteFunction") or key.startswith(b"ActorClass"):
-                (
-                    collision_identifier,
-                    name,
-                    import_type,
-                ) = self._get_import_info_for_collision_detection(key)
+            if (key.startswith(b"RemoteFunction")
+                    or key.startswith(b"ActorClass")):
+                collision_identifier, name, import_type = (
+                    self._get_import_info_for_collision_detection(key))
                 self.imported_collision_identifiers[collision_identifier] += 1
-                if (
-                    self.imported_collision_identifiers[collision_identifier]
-                    == ray_constants.DUPLICATE_REMOTE_FUNCTION_THRESHOLD
-                ):
+                if (self.imported_collision_identifiers[collision_identifier]
+                        == ray_constants.DUPLICATE_REMOTE_FUNCTION_THRESHOLD):
                     logger.warning(
                         "The %s '%s' has been exported %s times. It's "
                         "possible that this warning is accidental, but this "
@@ -141,19 +132,13 @@ class ImportThread:
                         "performance issue and can be resolved by defining "
                         "the remote function on the driver instead. See "
                         "https://github.com/ray-project/ray/issues/6240 for "
-                        "more discussion.",
-                        import_type,
-                        name,
-                        ray_constants.DUPLICATE_REMOTE_FUNCTION_THRESHOLD,
-                    )
+                        "more discussion.", import_type, name,
+                        ray_constants.DUPLICATE_REMOTE_FUNCTION_THRESHOLD)
 
         if key.startswith(b"RemoteFunction"):
             with profiling.profile("register_remote_function"):
-                (
-                    self.worker.function_actor_manager.fetch_and_register_remote_function(
-                        key
-                    )
-                )
+                (self.worker.function_actor_manager.
+                 fetch_and_register_remote_function(key))
         elif key.startswith(b"FunctionsToRun"):
             with profiling.profile("fetch_and_run_function"):
                 self.fetch_and_execute_function_to_run(key)
@@ -169,15 +154,13 @@ class ImportThread:
 
     def fetch_and_execute_function_to_run(self, key):
         """Run on arbitrary function on the worker."""
-        (job_id, serialized_function, run_on_other_drivers) = self.redis_client.hmget(
-            key, ["job_id", "function", "run_on_other_drivers"]
-        )
+        (job_id, serialized_function,
+         run_on_other_drivers) = self.redis_client.hmget(
+             key, ["job_id", "function", "run_on_other_drivers"])
 
-        if (
-            utils.decode(run_on_other_drivers) == "False"
-            and self.worker.mode == ray.SCRIPT_MODE
-            and job_id != self.worker.current_job_id.binary()
-        ):
+        if (utils.decode(run_on_other_drivers) == "False"
+                and self.worker.mode == ray.SCRIPT_MODE
+                and job_id != self.worker.current_job_id.binary()):
             return
 
         try:
@@ -197,5 +180,4 @@ class ImportThread:
                 self.worker,
                 ray_constants.FUNCTION_TO_RUN_PUSH_ERROR,
                 traceback_str,
-                job_id=ray.JobID(job_id),
-            )
+                job_id=ray.JobID(job_id))

@@ -18,11 +18,10 @@ import argparse
 
 import ray
 from ray import tune
-from ray.rllib.examples.env.parametric_actions_cartpole import ParametricActionsCartPole
-from ray.rllib.examples.models.parametric_actions_model import (
-    ParametricActionsModel,
-    TorchParametricActionsModel,
-)
+from ray.rllib.examples.env.parametric_actions_cartpole import \
+    ParametricActionsCartPole
+from ray.rllib.examples.models.parametric_actions_model import \
+    ParametricActionsModel, TorchParametricActionsModel
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.registry import register_env
@@ -41,9 +40,8 @@ if __name__ == "__main__":
 
     register_env("pa_cartpole", lambda _: ParametricActionsCartPole(10))
     ModelCatalog.register_custom_model(
-        "pa_model",
-        TorchParametricActionsModel if args.torch else ParametricActionsModel,
-    )
+        "pa_model", TorchParametricActionsModel
+        if args.torch else ParametricActionsModel)
 
     if args.run == "DQN":
         cfg = {
@@ -57,15 +55,14 @@ if __name__ == "__main__":
     else:
         cfg = {}
 
-    config = dict(
-        {
-            "env": "pa_cartpole",
-            "model": {"custom_model": "pa_model",},
-            "num_workers": 0,
-            "framework": "torch" if args.torch else "tf",
+    config = dict({
+        "env": "pa_cartpole",
+        "model": {
+            "custom_model": "pa_model",
         },
-        **cfg
-    )
+        "num_workers": 0,
+        "framework": "torch" if args.torch else "tf",
+    }, **cfg)
 
     stop = {
         "training_iteration": args.stop_iters,

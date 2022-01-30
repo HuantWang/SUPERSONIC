@@ -31,22 +31,20 @@ except ImportError:
 class TorchRunner:
     """Manages a PyTorch model for training."""
 
-    def __init__(
-        self,
-        model_creator,
-        data_creator,
-        optimizer_creator,
-        loss_creator=None,
-        scheduler_creator=None,
-        training_operator_cls=None,
-        config=None,
-        use_gpu=False,
-        serialize_data_creation=True,
-        use_fp16=False,
-        use_tqdm=False,
-        apex_args=None,
-        scheduler_step_freq=None,
-    ):
+    def __init__(self,
+                 model_creator,
+                 data_creator,
+                 optimizer_creator,
+                 loss_creator=None,
+                 scheduler_creator=None,
+                 training_operator_cls=None,
+                 config=None,
+                 use_gpu=False,
+                 serialize_data_creation=True,
+                 use_fp16=False,
+                 use_tqdm=False,
+                 apex_args=None,
+                 scheduler_step_freq=None):
         self.model_creator = model_creator
         self.optimizer_creator = optimizer_creator
         self.loss_creator = loss_creator
@@ -72,8 +70,7 @@ class TorchRunner:
         if use_fp16 and not amp:
             raise ImportError(
                 "Please install apex from "
-                "https://www.github.com/nvidia/apex to use fp16 training."
-            )
+                "https://www.github.com/nvidia/apex to use fp16 training.")
         self.scheduler_step_freq = scheduler_step_freq
 
     def _validate_loaders(self, loaders):
@@ -85,8 +82,7 @@ class TorchRunner:
                 return loaders
             else:
                 raise ValueError(
-                    "Number of loaders must be <= 2. Got {}".format(loaders)
-                )
+                    "Number of loaders must be <= 2. Got {}".format(loaders))
         # No great way of checking type otherwise
         return loaders, None
 
@@ -95,7 +91,8 @@ class TorchRunner:
         loaders = None
         if self.serialize_data_creation:
             logger.debug("Serializing the dataloading process.")
-            with FileLock(os.path.join(tempfile.gettempdir(), ".raydata.lock")):
+            with FileLock(
+                    os.path.join(tempfile.gettempdir(), ".raydata.lock")):
                 loaders = self.data_creator(self.config)
         else:
             loaders = self.data_creator(self.config)
@@ -108,8 +105,7 @@ class TorchRunner:
             return
         logger.debug("Creating loss.")
         if inspect.isclass(self.loss_creator) and issubclass(
-            self.loss_creator, torch.nn.modules.loss._Loss
-        ):
+                self.loss_creator, torch.nn.modules.loss._Loss):
             self.criterion = self.loss_creator()
         else:
             self.criterion = self.loss_creator(self.config)
@@ -122,7 +118,8 @@ class TorchRunner:
         # Learning rate schedules are optional.
         if not self.scheduler_creator:
             return
-        self.schedulers = self.scheduler_creator(self.given_optimizers, self.config)
+        self.schedulers = self.scheduler_creator(self.given_optimizers,
+                                                 self.config)
 
         if not isinstance(self.schedulers, Iterable):
             self.schedulers = [self.schedulers]
@@ -131,8 +128,7 @@ class TorchRunner:
         """Sets up the model for fp16 training via apex if available."""
         if self.use_fp16 and amp:
             self.models, self.optimizers = amp.initialize(
-                self.models, self.optimizers, **self.apex_args
-            )
+                self.models, self.optimizers, **self.apex_args)
 
     def setup(self):
         """Merges setup_components and setup_operator in one call."""
@@ -149,14 +145,14 @@ class TorchRunner:
         self.models = self.model_creator(self.config)
         if not isinstance(self.models, Iterable):
             self.models = [self.models]
-        assert all(
-            isinstance(model, nn.Module) for model in self.models
-        ), "All models must be PyTorch models: {}.".format(self.models)
+        assert all(isinstance(model, nn.Module) for model in self.models), (
+            "All models must be PyTorch models: {}.".format(self.models))
         if self.use_gpu and torch.cuda.is_available():
             self.models = [model.cuda() for model in self.models]
 
         logger.debug("Creating optimizer.")
-        self.optimizers = self.optimizer_creator(self.given_models, self.config)
+        self.optimizers = self.optimizer_creator(self.given_models,
+                                                 self.config)
         if not isinstance(self.optimizers, Iterable):
             self.optimizers = [self.optimizers]
 
@@ -177,8 +173,7 @@ class TorchRunner:
             schedulers=self.schedulers,
             use_gpu=self.use_gpu,
             use_fp16=self.use_fp16,
-            use_tqdm=self.use_tqdm,
-        )
+            use_tqdm=self.use_tqdm)
 
     def get_node_ip(self):
         """Returns the IP address of the current node."""
@@ -188,19 +183,21 @@ class TorchRunner:
         """Finds a free port on the current node."""
         return utils.find_free_port()
 
-    def train_epoch(self, num_steps=None, profile=False, info=None, iterator=None):
+    def train_epoch(self,
+                    num_steps=None,
+                    profile=False,
+                    info=None,
+                    iterator=None):
         """Runs a training epoch and updates the model parameters."""
         logger.debug("Begin Training Step {}".format(self.epochs + 1))
         info = info or {}
         self._toggle_profiling(profile=profile)
 
-        info.update(
-            {
-                NUM_STEPS: num_steps,
-                USE_FP16: self.use_fp16,
-                SCHEDULER_STEP: self.scheduler_step_freq,
-            }
-        )
+        info.update({
+            NUM_STEPS: num_steps,
+            USE_FP16: self.use_fp16,
+            SCHEDULER_STEP: self.scheduler_step_freq
+        })
         with self.timers.record("train_epoch"):
             if iterator is None:
                 iterator = iter(self.train_loader)
@@ -233,8 +230,10 @@ class TorchRunner:
         with self.timers.record("validation"):
             iterator = self.validation_loader
             if num_steps:
-                iterator = itertools.islice(iter(self.validation_loader), num_steps)
-            validation_stats = self.training_operator.validate(iterator, info=info)
+                iterator = itertools.islice(
+                    iter(self.validation_loader), num_steps)
+            validation_stats = self.training_operator.validate(
+                iterator, info=info)
         if profile:
             validation_stats.update(profile=self.timers.stats())
         return validation_stats
@@ -254,16 +253,14 @@ class TorchRunner:
             "epoch": self.epochs,
             "operator": self.training_operator.state_dict(),
             "models": [model.state_dict() for model in self.models],
-            "optimizers": [opt.state_dict() for opt in self.optimizers],
+            "optimizers": [opt.state_dict() for opt in self.optimizers]
         }
         if self.schedulers:
-            state.update(
-                {
-                    "schedulers": [
-                        scheduler.state_dict() for scheduler in self.schedulers
-                    ]
-                }
-            )
+            state.update({
+                "schedulers": [
+                    scheduler.state_dict() for scheduler in self.schedulers
+                ]
+            })
         # Check if fp16 is True and if NVIDIA Apex is imported.
         if self.use_fp16 and amp:
             state.update({"amp": amp.state_dict()})
@@ -276,7 +273,8 @@ class TorchRunner:
         for optimizer, state_dict in zip(self.optimizers, state["optimizers"]):
             optimizer.load_state_dict(state_dict)
         if self.schedulers:
-            for scheduler, state_dict in zip(self.schedulers, state["schedulers"]):
+            for scheduler, state_dict in zip(self.schedulers,
+                                             state["schedulers"]):
                 scheduler.load_state_dict(state_dict)
 
         if self.use_fp16 and "amp" in state and amp:

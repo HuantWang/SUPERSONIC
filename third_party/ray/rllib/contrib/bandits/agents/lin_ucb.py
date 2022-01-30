@@ -30,5 +30,4 @@ UCB_CONFIG = with_common_config({
 # yapf: enable
 
 LinUCBTrainer = build_trainer(
-    name="LinUCB", default_config=UCB_CONFIG, default_policy=BanditPolicy
-)
+    name="LinUCB", default_config=UCB_CONFIG, default_policy=BanditPolicy)

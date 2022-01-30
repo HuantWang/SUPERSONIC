@@ -75,9 +75,8 @@ thisproc = psutil.Process()
 
 
 def skip_if_linux():
-    return unittest.skipIf(
-        LINUX and SKIP_PYTHON_IMPL, "worthless on LINUX (pure python)"
-    )
+    return unittest.skipIf(LINUX and SKIP_PYTHON_IMPL,
+                           "worthless on LINUX (pure python)")
 
 
 @unittest.skipIf(PYPY, "unreliable on PYPY")
@@ -86,7 +85,6 @@ class TestMemLeak(unittest.TestCase):
     produces a failure if process memory usage keeps increasing
     between calls or over time.
     """
-
     tolerance = MEMORY_TOLERANCE
     loops = LOOPS
     retry_for = RETRY_FOR
@@ -96,16 +94,15 @@ class TestMemLeak(unittest.TestCase):
 
     def execute(self, fun, *args, **kwargs):
         """Test a callable."""
-
         def call_many_times():
             for x in xrange(loops):
                 self._call(fun, *args, **kwargs)
             del x
             gc.collect()
 
-        tolerance = kwargs.pop("tolerance_", None) or self.tolerance
-        loops = kwargs.pop("loops_", None) or self.loops
-        retry_for = kwargs.pop("retry_for_", None) or self.retry_for
+        tolerance = kwargs.pop('tolerance_', None) or self.tolerance
+        loops = kwargs.pop('loops_', None) or self.loops
+        retry_for = kwargs.pop('retry_for_', None) or self.retry_for
 
         # warm up
         for x in range(10):
@@ -150,19 +147,14 @@ class TestMemLeak(unittest.TestCase):
                 msg = "+%s after %s calls, +%s after another %s calls, "
                 msg += "+%s extra proc mem"
                 msg = msg % (
-                    bytes2human(diff1),
-                    loops,
-                    bytes2human(diff2),
-                    ncalls,
-                    extra_proc_mem,
-                )
+                    bytes2human(diff1), loops, bytes2human(diff2), ncalls,
+                    extra_proc_mem)
                 self.fail(msg)
 
     def execute_w_exc(self, exc, fun, *args, **kwargs):
         """Convenience function which tests a callable raising
         an exception.
         """
-
         def call():
             self.assertRaises(exc, fun, *args, **kwargs)
 
@@ -193,31 +185,13 @@ class TestProcessObjectLeaks(TestMemLeak):
     proc = thisproc
 
     def test_coverage(self):
-        skip = set(
-            (
-                "pid",
-                "as_dict",
-                "children",
-                "cpu_affinity",
-                "cpu_percent",
-                "ionice",
-                "is_running",
-                "kill",
-                "memory_info_ex",
-                "memory_percent",
-                "nice",
-                "oneshot",
-                "parent",
-                "parents",
-                "rlimit",
-                "send_signal",
-                "suspend",
-                "terminate",
-                "wait",
-            )
-        )
+        skip = set((
+            "pid", "as_dict", "children", "cpu_affinity", "cpu_percent",
+            "ionice", "is_running", "kill", "memory_info_ex", "memory_percent",
+            "nice", "oneshot", "parent", "parents", "rlimit", "send_signal",
+            "suspend", "terminate", "wait"))
         for name in dir(psutil.Process):
-            if name.startswith("_"):
+            if name.startswith('_'):
                 continue
             if name in skip:
                 continue
@@ -332,7 +306,8 @@ class TestProcessObjectLeaks(TestMemLeak):
     def test_terminal(self):
         self.execute(self.proc.terminal)
 
-    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL, "worthless on POSIX (pure python)")
+    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL,
+                     "worthless on POSIX (pure python)")
     def test_resume(self):
         self.execute(self.proc.resume)
 
@@ -354,7 +329,7 @@ class TestProcessObjectLeaks(TestMemLeak):
     @skip_if_linux()
     def test_open_files(self):
         safe_rmpath(TESTFN)  # needed after UNIX socket test has run
-        with open(TESTFN, "w"):
+        with open(TESTFN, 'w'):
             self.execute(self.proc.open_files)
 
     @unittest.skipIf(not HAS_MEMORY_MAPS, "not supported")
@@ -383,7 +358,7 @@ class TestProcessObjectLeaks(TestMemLeak):
         # 'pfiles' cmd  output; we don't want that part of the code to
         # be executed.
         with create_sockets():
-            kind = "inet" if SUNOS else "all"
+            kind = 'inet' if SUNOS else 'all'
             self.execute(self.proc.connections, kind)
 
     @unittest.skipIf(not HAS_ENVIRON, "not supported")
@@ -397,6 +372,7 @@ class TestProcessObjectLeaks(TestMemLeak):
 
 @unittest.skipIf(not WINDOWS, "WINDOWS only")
 class TestProcessDualImplementation(TestMemLeak):
+
     def test_cmdline_peb_true(self):
         self.execute(cext.proc_cmdline, os.getpid(), use_peb=True)
 
@@ -467,17 +443,9 @@ class TestModuleFunctionsLeaks(TestMemLeak):
     """Test leaks of psutil module functions."""
 
     def test_coverage(self):
-        skip = set(
-            (
-                "version_info",
-                "__version__",
-                "process_iter",
-                "wait_procs",
-                "cpu_percent",
-                "cpu_times_percent",
-                "cpu_count",
-            )
-        )
+        skip = set((
+            "version_info", "__version__", "process_iter", "wait_procs",
+            "cpu_percent", "cpu_times_percent", "cpu_count"))
         for name in psutil.__all__:
             if not name.islower():
                 continue
@@ -526,23 +494,23 @@ class TestModuleFunctionsLeaks(TestMemLeak):
     def test_swap_memory(self):
         self.execute(psutil.swap_memory)
 
-    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL, "worthless on POSIX (pure python)")
+    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL,
+                     "worthless on POSIX (pure python)")
     def test_pid_exists(self):
         self.execute(psutil.pid_exists, os.getpid())
 
     # --- disk
 
-    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL, "worthless on POSIX (pure python)")
+    @unittest.skipIf(POSIX and SKIP_PYTHON_IMPL,
+                     "worthless on POSIX (pure python)")
     def test_disk_usage(self):
-        self.execute(psutil.disk_usage, ".")
+        self.execute(psutil.disk_usage, '.')
 
     def test_disk_partitions(self):
         self.execute(psutil.disk_partitions)
 
-    @unittest.skipIf(
-        LINUX and not os.path.exists("/proc/diskstats"),
-        "/proc/diskstats not available on this Linux version",
-    )
+    @unittest.skipIf(LINUX and not os.path.exists('/proc/diskstats'),
+                     '/proc/diskstats not available on this Linux version')
     @skip_if_linux()
     def test_disk_io_counters(self):
         self.execute(psutil.disk_io_counters, nowrap=False)
@@ -558,7 +526,7 @@ class TestModuleFunctionsLeaks(TestMemLeak):
     @unittest.skipIf(TRAVIS and MACOS, "false positive on TRAVIS + MACOS")
     @unittest.skipIf(CIRRUS and FREEBSD, "false positive on CIRRUS + FREEBSD")
     @skip_if_linux()
-    @unittest.skipIf(not HAS_NET_IO_COUNTERS, "not supported")
+    @unittest.skipIf(not HAS_NET_IO_COUNTERS, 'not supported')
     def test_net_io_counters(self):
         self.execute(psutil.net_io_counters, nowrap=False)
 
@@ -570,7 +538,8 @@ class TestModuleFunctionsLeaks(TestMemLeak):
 
     def test_net_if_addrs(self):
         # Note: verified that on Windows this was a false positive.
-        self.execute(psutil.net_if_addrs, tolerance_=80 * 1024 if WINDOWS else None)
+        self.execute(psutil.net_if_addrs,
+                     tolerance_=80 * 1024 if WINDOWS else None)
 
     @unittest.skipIf(TRAVIS, "EPERM on travis")
     def test_net_if_stats(self):
@@ -626,7 +595,6 @@ class TestModuleFunctionsLeaks(TestMemLeak):
             self.execute(cext.winservice_query_descr, name)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from psutil.tests.runner import run
-
     run(__file__)

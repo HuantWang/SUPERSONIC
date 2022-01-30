@@ -26,23 +26,15 @@ except ImportError:
 
 from test import support
 from test.support import (
-    TestFailed,
-    TESTFN,
-    run_with_locale,
-    no_tracing,
-    _2G,
-    _4G,
-    bigmemtest,
-    reap_threads,
-    forget,
-)
+    TestFailed, TESTFN, run_with_locale, no_tracing,
+    _2G, _4G, bigmemtest, reap_threads, forget,
+    )
 
 import pickle5 as pickle
 from pickle5 import pickletools, bytes_types
 
-requires_32b = unittest.skipUnless(
-    sys.maxsize < 2 ** 32, "test is only meaningful on 32-bit builds"
-)
+requires_32b = unittest.skipUnless(sys.maxsize < 2**32,
+                                   "test is only meaningful on 32-bit builds")
 
 # Tests that try a number of pickle protocols should have a
 #     for proto in protocols:
@@ -56,7 +48,6 @@ def opcode_in_pickle(code, pickle):
         if op.code == code.decode("latin-1"):
             return True
     return False
-
 
 # Return the number of times opcode code appears in pickle.
 def count_opcode(code, pickle):
@@ -85,7 +76,6 @@ class MinimalIO(object):
     """
     A file-like object that doesn't support readinto().
     """
-
     def __init__(self, *args):
         self._bio = io.BytesIO(*args)
         self.getvalue = self._bio.getvalue
@@ -103,7 +93,6 @@ class MinimalIO(object):
 #         fiddle w/ the extension registry's stuff for extension_code
 #     finally:
 #         e.restore()
-
 
 class ExtensionSaver:
     # Remember current registration for code (if any), and remove it (if
@@ -126,25 +115,20 @@ class ExtensionSaver:
         if pair is not None:
             copyreg.add_extension(pair[0], pair[1], code)
 
-
 class C:
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
-
 
 class D(C):
     def __init__(self, arg):
         pass
 
-
 class E(C):
     def __getinitargs__(self):
         return ()
 
-
 class H(object):
     pass
-
 
 # Hashable mutable key
 class K(object):
@@ -155,9 +139,7 @@ class K(object):
         # Shouldn't support the recursion itself
         return K, (self.value,)
 
-
 import __main__
-
 __main__.C = C
 C.__module__ = "__main__"
 __main__.D = D
@@ -169,13 +151,12 @@ H.__module__ = "__main__"
 __main__.K = K
 K.__module__ = "__main__"
 
-
 class myint(int):
     def __init__(self, x):
         self.str = str(x)
 
-
 class initarg(C):
+
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -183,22 +164,19 @@ class initarg(C):
     def __getinitargs__(self):
         return self.a, self.b
 
-
 class metaclass(type):
     pass
-
 
 class use_metaclass(object, metaclass=metaclass):
     pass
 
-
 class pickling_metaclass(type):
     def __eq__(self, other):
-        return type(self) == type(other) and self.reduce_args == other.reduce_args
+        return (type(self) == type(other) and
+                self.reduce_args == other.reduce_args)
 
     def __reduce__(self):
         return (create_dynamic_class, self.reduce_args)
-
 
 def create_dynamic_class(name, bases):
     result = pickling_metaclass(name, bases, dict())
@@ -294,13 +272,11 @@ if _testbuffer is not None:
         def __eq__(self, other):
             if not isinstance(other, PicklableNDArray):
                 return NotImplemented
-            return (
-                other.array.format == self.array.format
-                and other.array.shape == self.array.shape
-                and other.array.strides == self.array.strides
-                and other.array.readonly == self.array.readonly
-                and other.array.tobytes() == self.array.tobytes()
-            )
+            return (other.array.format == self.array.format and
+                    other.array.shape == self.array.shape and
+                    other.array.strides == self.array.strides and
+                    other.array.readonly == self.array.readonly and
+                    other.array.tobytes() == self.array.tobytes())
 
         def __ne__(self, other):
             if not isinstance(other, PicklableNDArray):
@@ -308,28 +284,28 @@ if _testbuffer is not None:
             return not (self == other)
 
         def __repr__(self):
-            return "{}(shape={}, strides={}, bytes={})".format(
-                type(self), self.array.shape, self.array.strides, self.array.tobytes()
-            )
+            return ("{}(shape={}, strides={}, bytes={})".format(
+                type(self), self.array.shape, self.array.strides,
+                self.array.tobytes()))
 
         def __reduce_ex__(self, protocol):
             if not self.array.contiguous:
-                raise NotImplementedError(
-                    "Reconstructing a non-contiguous " "ndarray does not seem possible"
-                )
-            ndarray_kwargs = {
-                "shape": self.array.shape,
-                "strides": self.array.strides,
-                "format": self.array.format,
-                "flags": (0 if self.readonly else _testbuffer.ND_WRITABLE),
-            }
+                raise NotImplementedError("Reconstructing a non-contiguous "
+                                          "ndarray does not seem possible")
+            ndarray_kwargs = {"shape": self.array.shape,
+                              "strides": self.array.strides,
+                              "format": self.array.format,
+                              "flags": (0 if self.readonly
+                                        else _testbuffer.ND_WRITABLE)}
             pb = pickle.PickleBuffer(self.array)
             if protocol >= 5:
-                return (type(self)._reconstruct, (pb, ndarray_kwargs))
+                return (type(self)._reconstruct,
+                        (pb, ndarray_kwargs))
             else:
                 # Need to serialize the bytes in physical order
                 with pb.raw() as m:
-                    return (type(self)._reconstruct, (m.tobytes(), ndarray_kwargs))
+                    return (type(self)._reconstruct,
+                            (m.tobytes(), ndarray_kwargs))
 
         @classmethod
         def _reconstruct(cls, obj, kwargs):
@@ -344,22 +320,22 @@ if _testbuffer is not None:
 # the object returned by create_data().
 
 DATA0 = (
-    b"(lp0\nL0L\naL1L\naF2.0\n"
-    b"ac__builtin__\ncomple"
-    b"x\np1\n(F3.0\nF0.0\ntp2\n"
-    b"Rp3\naL1L\naL-1L\naL255"
-    b"L\naL-255L\naL-256L\naL"
-    b"65535L\naL-65535L\naL-"
-    b"65536L\naL2147483647L"
-    b"\naL-2147483647L\naL-2"
-    b"147483648L\na(Vabc\np4"
-    b"\ng4\nccopy_reg\n_recon"
-    b"structor\np5\n(c__main"
-    b"__\nC\np6\nc__builtin__"
-    b"\nobject\np7\nNtp8\nRp9\n"
-    b"(dp10\nVfoo\np11\nL1L\ns"
-    b"Vbar\np12\nL2L\nsbg9\ntp"
-    b"13\nag13\naL5L\na."
+    b'(lp0\nL0L\naL1L\naF2.0\n'
+    b'ac__builtin__\ncomple'
+    b'x\np1\n(F3.0\nF0.0\ntp2\n'
+    b'Rp3\naL1L\naL-1L\naL255'
+    b'L\naL-255L\naL-256L\naL'
+    b'65535L\naL-65535L\naL-'
+    b'65536L\naL2147483647L'
+    b'\naL-2147483647L\naL-2'
+    b'147483648L\na(Vabc\np4'
+    b'\ng4\nccopy_reg\n_recon'
+    b'structor\np5\n(c__main'
+    b'__\nC\np6\nc__builtin__'
+    b'\nobject\np7\nNtp8\nRp9\n'
+    b'(dp10\nVfoo\np11\nL1L\ns'
+    b'Vbar\np12\nL2L\nsbg9\ntp'
+    b'13\nag13\naL5L\na.'
 )
 
 # Disassembly of DATA0
@@ -446,18 +422,18 @@ highest protocol among opcodes = 0
 """
 
 DATA1 = (
-    b"]q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c__"
-    b"builtin__\ncomplex\nq\x01"
-    b"(G@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00t"
-    b"q\x02Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xffJ"
-    b"\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff\xff"
-    b"\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00ab"
-    b"cq\x04h\x04ccopy_reg\n_reco"
-    b"nstructor\nq\x05(c__main"
-    b"__\nC\nq\x06c__builtin__\n"
-    b"object\nq\x07Ntq\x08Rq\t}q\n("
-    b"X\x03\x00\x00\x00fooq\x0bK\x01X\x03\x00\x00\x00bar"
-    b"q\x0cK\x02ubh\ttq\rh\rK\x05e."
+    b']q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c__'
+    b'builtin__\ncomplex\nq\x01'
+    b'(G@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00t'
+    b'q\x02Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xffJ'
+    b'\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff\xff'
+    b'\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00ab'
+    b'cq\x04h\x04ccopy_reg\n_reco'
+    b'nstructor\nq\x05(c__main'
+    b'__\nC\nq\x06c__builtin__\n'
+    b'object\nq\x07Ntq\x08Rq\t}q\n('
+    b'X\x03\x00\x00\x00fooq\x0bK\x01X\x03\x00\x00\x00bar'
+    b'q\x0cK\x02ubh\ttq\rh\rK\x05e.'
 )
 
 # Disassembly of DATA1
@@ -526,16 +502,16 @@ highest protocol among opcodes = 1
 """
 
 DATA2 = (
-    b"\x80\x02]q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c"
-    b"__builtin__\ncomplex\n"
-    b"q\x01G@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00"
-    b"\x86q\x02Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xff"
-    b"J\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff"
-    b"\xff\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00a"
-    b"bcq\x04h\x04c__main__\nC\nq\x05"
-    b")\x81q\x06}q\x07(X\x03\x00\x00\x00fooq\x08K\x01"
-    b"X\x03\x00\x00\x00barq\tK\x02ubh\x06tq\nh"
-    b"\nK\x05e."
+    b'\x80\x02]q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c'
+    b'__builtin__\ncomplex\n'
+    b'q\x01G@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00'
+    b'\x86q\x02Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xff'
+    b'J\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff'
+    b'\xff\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00a'
+    b'bcq\x04h\x04c__main__\nC\nq\x05'
+    b')\x81q\x06}q\x07(X\x03\x00\x00\x00fooq\x08K\x01'
+    b'X\x03\x00\x00\x00barq\tK\x02ubh\x06tq\nh'
+    b'\nK\x05e.'
 )
 
 # Disassembly of DATA2
@@ -597,16 +573,16 @@ highest protocol among opcodes = 2
 """
 
 DATA3 = (
-    b"\x80\x03]q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c"
-    b"builtins\ncomplex\nq\x01G"
-    b"@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00\x86q\x02"
-    b"Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xffJ\x00\xff"
-    b"\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff\xff\xff\x7f"
-    b"J\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00abcq"
-    b"\x04h\x04c__main__\nC\nq\x05)\x81q"
-    b"\x06}q\x07(X\x03\x00\x00\x00barq\x08K\x02X\x03\x00"
-    b"\x00\x00fooq\tK\x01ubh\x06tq\nh\nK\x05"
-    b"e."
+    b'\x80\x03]q\x00(K\x00K\x01G@\x00\x00\x00\x00\x00\x00\x00c'
+    b'builtins\ncomplex\nq\x01G'
+    b'@\x08\x00\x00\x00\x00\x00\x00G\x00\x00\x00\x00\x00\x00\x00\x00\x86q\x02'
+    b'Rq\x03K\x01J\xff\xff\xff\xffK\xffJ\x01\xff\xff\xffJ\x00\xff'
+    b'\xff\xffM\xff\xffJ\x01\x00\xff\xffJ\x00\x00\xff\xffJ\xff\xff\xff\x7f'
+    b'J\x01\x00\x00\x80J\x00\x00\x00\x80(X\x03\x00\x00\x00abcq'
+    b'\x04h\x04c__main__\nC\nq\x05)\x81q'
+    b'\x06}q\x07(X\x03\x00\x00\x00barq\x08K\x02X\x03\x00'
+    b'\x00\x00fooq\tK\x01ubh\x06tq\nh\nK\x05'
+    b'e.'
 )
 
 # Disassembly of DATA3
@@ -668,15 +644,15 @@ highest protocol among opcodes = 2
 """
 
 DATA4 = (
-    b"\x80\x04\x95\xa8\x00\x00\x00\x00\x00\x00\x00]\x94(K\x00K\x01G@"
-    b"\x00\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07"
-    b"complex\x94\x93\x94G@\x08\x00\x00\x00\x00\x00\x00G"
-    b"\x00\x00\x00\x00\x00\x00\x00\x00\x86\x94R\x94K\x01J\xff\xff\xff\xffK"
-    b"\xffJ\x01\xff\xff\xffJ\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ"
-    b"\x00\x00\xff\xffJ\xff\xff\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80("
-    b"\x8c\x03abc\x94h\x06\x8c\x08__main__\x94\x8c"
-    b"\x01C\x94\x93\x94)\x81\x94}\x94(\x8c\x03bar\x94K\x02\x8c"
-    b"\x03foo\x94K\x01ubh\nt\x94h\x0eK\x05e."
+    b'\x80\x04\x95\xa8\x00\x00\x00\x00\x00\x00\x00]\x94(K\x00K\x01G@'
+    b'\x00\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07'
+    b'complex\x94\x93\x94G@\x08\x00\x00\x00\x00\x00\x00G'
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x86\x94R\x94K\x01J\xff\xff\xff\xffK'
+    b'\xffJ\x01\xff\xff\xffJ\x00\xff\xff\xffM\xff\xffJ\x01\x00\xff\xffJ'
+    b'\x00\x00\xff\xffJ\xff\xff\xff\x7fJ\x01\x00\x00\x80J\x00\x00\x00\x80('
+    b'\x8c\x03abc\x94h\x06\x8c\x08__main__\x94\x8c'
+    b'\x01C\x94\x93\x94)\x81\x94}\x94(\x8c\x03bar\x94K\x02\x8c'
+    b'\x03foo\x94K\x01ubh\nt\x94h\x0eK\x05e.'
 )
 
 # Disassembly of DATA4
@@ -747,23 +723,21 @@ highest protocol among opcodes = 4
 """
 
 # set([1,2]) pickled from 2.x with protocol 2
-DATA_SET = b"\x80\x02c__builtin__\nset\nq\x00]q\x01(K\x01K\x02e\x85q\x02Rq\x03."
+DATA_SET = b'\x80\x02c__builtin__\nset\nq\x00]q\x01(K\x01K\x02e\x85q\x02Rq\x03.'
 
 # xrange(5) pickled from 2.x with protocol 2
-DATA_XRANGE = b"\x80\x02c__builtin__\nxrange\nq\x00K\x00K\x05K\x01\x87q\x01Rq\x02."
+DATA_XRANGE = b'\x80\x02c__builtin__\nxrange\nq\x00K\x00K\x05K\x01\x87q\x01Rq\x02.'
 
 # a SimpleCookie() object pickled from 2.x with protocol 2
-DATA_COOKIE = (
-    b"\x80\x02cCookie\nSimpleCookie\nq\x00)\x81q\x01U\x03key"
-    b"q\x02cCookie\nMorsel\nq\x03)\x81q\x04(U\x07commentq\x05U"
-    b"\x00q\x06U\x06domainq\x07h\x06U\x06secureq\x08h\x06U\x07"
-    b"expiresq\th\x06U\x07max-ageq\nh\x06U\x07versionq\x0bh\x06U"
-    b"\x04pathq\x0ch\x06U\x08httponlyq\rh\x06u}q\x0e(U\x0b"
-    b"coded_valueq\x0fU\x05valueq\x10h\x10h\x10h\x02h\x02ubs}q\x11b."
-)
+DATA_COOKIE = (b'\x80\x02cCookie\nSimpleCookie\nq\x00)\x81q\x01U\x03key'
+               b'q\x02cCookie\nMorsel\nq\x03)\x81q\x04(U\x07commentq\x05U'
+               b'\x00q\x06U\x06domainq\x07h\x06U\x06secureq\x08h\x06U\x07'
+               b'expiresq\th\x06U\x07max-ageq\nh\x06U\x07versionq\x0bh\x06U'
+               b'\x04pathq\x0ch\x06U\x08httponlyq\rh\x06u}q\x0e(U\x0b'
+               b'coded_valueq\x0fU\x05valueq\x10h\x10h\x10h\x02h\x02ubs}q\x11b.')
 
 # set([3]) pickled from 2.x with protocol 2
-DATA_SET2 = b"\x80\x02c__builtin__\nset\nq\x00]q\x01K\x03a\x85q\x02Rq\x03."
+DATA_SET2 = b'\x80\x02c__builtin__\nset\nq\x00]q\x01K\x03a\x85q\x02Rq\x03.'
 
 python2_exceptions_without_args = (
     ArithmeticError,
@@ -813,42 +787,29 @@ python2_exceptions_without_args = (
     ZeroDivisionError,
 )
 
-exception_pickle = b"\x80\x02cexceptions\n?\nq\x00)Rq\x01."
+exception_pickle = b'\x80\x02cexceptions\n?\nq\x00)Rq\x01.'
 
 # UnicodeEncodeError object pickled from 2.x with protocol 2
-DATA_UEERR = (
-    b"\x80\x02cexceptions\nUnicodeEncodeError\n"
-    b"q\x00(U\x05asciiq\x01X\x03\x00\x00\x00fooq\x02K\x00K\x01"
-    b"U\x03badq\x03tq\x04Rq\x05."
-)
+DATA_UEERR = (b'\x80\x02cexceptions\nUnicodeEncodeError\n'
+              b'q\x00(U\x05asciiq\x01X\x03\x00\x00\x00fooq\x02K\x00K\x01'
+              b'U\x03badq\x03tq\x04Rq\x05.')
 
 
 def create_data():
     c = C()
     c.foo = 1
     c.bar = 2
-    x = [0, 1, 2.0, 3.0 + 0j]
+    x = [0, 1, 2.0, 3.0+0j]
     # Append some integer test cases at cPickle.c's internal size
     # cutoffs.
-    uint1max = 0xFF
-    uint2max = 0xFFFF
-    int4max = 0x7FFFFFFF
-    x.extend(
-        [
-            1,
-            -1,
-            uint1max,
-            -uint1max,
-            -uint1max - 1,
-            uint2max,
-            -uint2max,
-            -uint2max - 1,
-            int4max,
-            -int4max,
-            -int4max - 1,
-        ]
-    )
-    y = ("abc", "abc", c, c)
+    uint1max = 0xff
+    uint2max = 0xffff
+    int4max = 0x7fffffff
+    x.extend([1, -1,
+              uint1max, -uint1max, -uint1max-1,
+              uint2max, -uint2max, -uint2max-1,
+               int4max,  -int4max,  -int4max-1])
+    y = ('abc', 'abc', c, c)
     x.append(y)
     x.append(y)
     x.append(5)
@@ -867,24 +828,26 @@ class AbstractUnpickleTests(unittest.TestCase):
             msg = "{!r} is not a copy of {!r}".format(obj, objcopy)
         self.assertEqual(obj, objcopy, msg=msg)
         self.assertIs(type(obj), type(objcopy), msg=msg)
-        if hasattr(obj, "__dict__"):
+        if hasattr(obj, '__dict__'):
             self.assertDictEqual(obj.__dict__, objcopy.__dict__, msg=msg)
             self.assertIsNot(obj.__dict__, objcopy.__dict__, msg=msg)
-        if hasattr(obj, "__slots__"):
+        if hasattr(obj, '__slots__'):
             self.assertListEqual(obj.__slots__, objcopy.__slots__, msg=msg)
             for slot in obj.__slots__:
-                self.assertEqual(hasattr(obj, slot), hasattr(objcopy, slot), msg=msg)
                 self.assertEqual(
-                    getattr(obj, slot, None), getattr(objcopy, slot, None), msg=msg
-                )
+                    hasattr(obj, slot), hasattr(objcopy, slot), msg=msg)
+                self.assertEqual(getattr(obj, slot, None),
+                                 getattr(objcopy, slot, None), msg=msg)
 
     def check_unpickling_error(self, errors, data):
-        with self.subTest(data=data), self.assertRaises(errors):
+        with self.subTest(data=data), \
+             self.assertRaises(errors):
             try:
                 self.loads(data)
             except BaseException as exc:
                 if support.verbose > 1:
-                    print("%-32r - %s: %s" % (data, exc.__class__.__name__, exc))
+                    print('%-32r - %s: %s' %
+                          (data, exc.__class__.__name__, exc))
                 raise
 
     def test_load_from_data0(self):
@@ -905,8 +868,8 @@ class AbstractUnpickleTests(unittest.TestCase):
     def test_load_classic_instance(self):
         # See issue5180.  Test loading 2.x pickles that
         # contain an instance of old style class.
-        for X, args in [(C, ()), (D, ("x",)), (E, ())]:
-            xname = X.__name__.encode("ascii")
+        for X, args in [(C, ()), (D, ('x',)), (E, ())]:
+            xname = X.__name__.encode('ascii')
             # Protocol 0 (text mode pickle):
             """
              0: (    MARK
@@ -918,7 +881,10 @@ class AbstractUnpickleTests(unittest.TestCase):
             21: b    BUILD
             22: .    STOP
             """
-            pickle0 = (b"(i__main__\n" b"X\n" b"p0\n" b"(dp1\nb.").replace(b"X", xname)
+            pickle0 = (b"(i__main__\n"
+                       b"X\n"
+                       b"p0\n"
+                       b"(dp1\nb.").replace(b'X', xname)
             self.assert_is_copy(X(*args), self.loads(pickle0))
 
             # Protocol 1 (binary mode pickle)
@@ -933,9 +899,9 @@ class AbstractUnpickleTests(unittest.TestCase):
             21: b    BUILD
             22: .    STOP
             """
-            pickle1 = (b"(c__main__\n" b"X\n" b"q\x00oq\x01}q\x02b.").replace(
-                b"X", xname
-            )
+            pickle1 = (b'(c__main__\n'
+                       b'X\n'
+                       b'q\x00oq\x01}q\x02b.').replace(b'X', xname)
             self.assert_is_copy(X(*args), self.loads(pickle1))
 
             # Protocol 2 (pickle2 = b'\x80\x02' + pickle1)
@@ -951,19 +917,19 @@ class AbstractUnpickleTests(unittest.TestCase):
             23: b    BUILD
             24: .    STOP
             """
-            pickle2 = (b"\x80\x02(c__main__\n" b"X\n" b"q\x00oq\x01}q\x02b.").replace(
-                b"X", xname
-            )
+            pickle2 = (b'\x80\x02(c__main__\n'
+                       b'X\n'
+                       b'q\x00oq\x01}q\x02b.').replace(b'X', xname)
             self.assert_is_copy(X(*args), self.loads(pickle2))
 
     def test_maxint64(self):
         maxint64 = (1 << 63) - 1
-        data = b"I" + str(maxint64).encode("ascii") + b"\n."
+        data = b'I' + str(maxint64).encode("ascii") + b'\n.'
         got = self.loads(data)
         self.assert_is_copy(maxint64, got)
 
         # Try too with a bogus literal.
-        data = b"I" + str(maxint64).encode("ascii") + b"JUNK\n."
+        data = b'I' + str(maxint64).encode("ascii") + b'JUNK\n.'
         self.check_unpickling_error(ValueError, data)
 
     def test_unpickle_from_2x(self):
@@ -980,12 +946,12 @@ class AbstractUnpickleTests(unittest.TestCase):
 
         # Exception objects without arguments pickled from 2.x with protocol 2
         for exc in python2_exceptions_without_args:
-            data = exception_pickle.replace(b"?", exc.__name__.encode("ascii"))
+            data = exception_pickle.replace(b'?', exc.__name__.encode("ascii"))
             loaded = self.loads(data)
             self.assertIs(type(loaded), exc)
 
         # StandardError is mapped to Exception, test that separately
-        loaded = self.loads(exception_pickle.replace(b"?", b"StandardError"))
+        loaded = self.loads(exception_pickle.replace(b'?', b'StandardError'))
         self.assertIs(type(loaded), Exception)
 
         loaded = self.loads(DATA_UEERR)
@@ -998,138 +964,139 @@ class AbstractUnpickleTests(unittest.TestCase):
 
     def test_load_python2_str_as_bytes(self):
         # From Python 2: pickle.dumps('a\x00\xa0', protocol=0)
-        self.assertEqual(
-            self.loads(b"S'a\\x00\\xa0'\n.", encoding="bytes"), b"a\x00\xa0"
-        )
+        self.assertEqual(self.loads(b"S'a\\x00\\xa0'\n.",
+                                    encoding="bytes"), b'a\x00\xa0')
         # From Python 2: pickle.dumps('a\x00\xa0', protocol=1)
-        self.assertEqual(self.loads(b"U\x03a\x00\xa0.", encoding="bytes"), b"a\x00\xa0")
+        self.assertEqual(self.loads(b'U\x03a\x00\xa0.',
+                                    encoding="bytes"), b'a\x00\xa0')
         # From Python 2: pickle.dumps('a\x00\xa0', protocol=2)
-        self.assertEqual(
-            self.loads(b"\x80\x02U\x03a\x00\xa0.", encoding="bytes"), b"a\x00\xa0"
-        )
+        self.assertEqual(self.loads(b'\x80\x02U\x03a\x00\xa0.',
+                                    encoding="bytes"), b'a\x00\xa0')
 
     def test_load_python2_unicode_as_str(self):
         # From Python 2: pickle.dumps(u'π', protocol=0)
-        self.assertEqual(self.loads(b"V\\u03c0\n.", encoding="bytes"), "π")
+        self.assertEqual(self.loads(b'V\\u03c0\n.',
+                                    encoding='bytes'), 'π')
         # From Python 2: pickle.dumps(u'π', protocol=1)
-        self.assertEqual(
-            self.loads(b"X\x02\x00\x00\x00\xcf\x80.", encoding="bytes"), "π"
-        )
+        self.assertEqual(self.loads(b'X\x02\x00\x00\x00\xcf\x80.',
+                                    encoding="bytes"), 'π')
         # From Python 2: pickle.dumps(u'π', protocol=2)
-        self.assertEqual(
-            self.loads(b"\x80\x02X\x02\x00\x00\x00\xcf\x80.", encoding="bytes"), "π"
-        )
+        self.assertEqual(self.loads(b'\x80\x02X\x02\x00\x00\x00\xcf\x80.',
+                                    encoding="bytes"), 'π')
 
     def test_load_long_python2_str_as_bytes(self):
         # From Python 2: pickle.dumps('x' * 300, protocol=1)
-        self.assertEqual(
-            self.loads(
-                pickle.BINSTRING + struct.pack("<I", 300) + b"x" * 300 + pickle.STOP,
-                encoding="bytes",
-            ),
-            b"x" * 300,
-        )
+        self.assertEqual(self.loads(pickle.BINSTRING +
+                                    struct.pack("<I", 300) +
+                                    b'x' * 300 + pickle.STOP,
+                                    encoding='bytes'), b'x' * 300)
 
     def test_constants(self):
-        self.assertIsNone(self.loads(b"N."))
-        self.assertIs(self.loads(b"\x88."), True)
-        self.assertIs(self.loads(b"\x89."), False)
-        self.assertIs(self.loads(b"I01\n."), True)
-        self.assertIs(self.loads(b"I00\n."), False)
+        self.assertIsNone(self.loads(b'N.'))
+        self.assertIs(self.loads(b'\x88.'), True)
+        self.assertIs(self.loads(b'\x89.'), False)
+        self.assertIs(self.loads(b'I01\n.'), True)
+        self.assertIs(self.loads(b'I00\n.'), False)
 
     def test_empty_bytestring(self):
         # issue 11286
-        empty = self.loads(b"\x80\x03U\x00q\x00.", encoding="koi8-r")
-        self.assertEqual(empty, "")
+        empty = self.loads(b'\x80\x03U\x00q\x00.', encoding='koi8-r')
+        self.assertEqual(empty, '')
 
     def test_short_binbytes(self):
-        dumped = b"\x80\x03C\x04\xe2\x82\xac\x00."
-        self.assertEqual(self.loads(dumped), b"\xe2\x82\xac\x00")
+        dumped = b'\x80\x03C\x04\xe2\x82\xac\x00.'
+        self.assertEqual(self.loads(dumped), b'\xe2\x82\xac\x00')
 
     def test_binbytes(self):
-        dumped = b"\x80\x03B\x04\x00\x00\x00\xe2\x82\xac\x00."
-        self.assertEqual(self.loads(dumped), b"\xe2\x82\xac\x00")
+        dumped = b'\x80\x03B\x04\x00\x00\x00\xe2\x82\xac\x00.'
+        self.assertEqual(self.loads(dumped), b'\xe2\x82\xac\x00')
 
     @requires_32b
     def test_negative_32b_binbytes(self):
         # On 32-bit builds, a BINBYTES of 2**31 or more is refused
-        dumped = b"\x80\x03B\xff\xff\xff\xffxyzq\x00."
-        self.check_unpickling_error((pickle.UnpicklingError, OverflowError), dumped)
+        dumped = b'\x80\x03B\xff\xff\xff\xffxyzq\x00.'
+        self.check_unpickling_error((pickle.UnpicklingError, OverflowError),
+                                    dumped)
 
     @requires_32b
     def test_negative_32b_binunicode(self):
         # On 32-bit builds, a BINUNICODE of 2**31 or more is refused
-        dumped = b"\x80\x03X\xff\xff\xff\xffxyzq\x00."
-        self.check_unpickling_error((pickle.UnpicklingError, OverflowError), dumped)
+        dumped = b'\x80\x03X\xff\xff\xff\xffxyzq\x00.'
+        self.check_unpickling_error((pickle.UnpicklingError, OverflowError),
+                                    dumped)
 
     def test_short_binunicode(self):
-        dumped = b"\x80\x04\x8c\x04\xe2\x82\xac\x00."
-        self.assertEqual(self.loads(dumped), "\u20ac\x00")
+        dumped = b'\x80\x04\x8c\x04\xe2\x82\xac\x00.'
+        self.assertEqual(self.loads(dumped), '\u20ac\x00')
 
     def test_misc_get(self):
-        self.check_unpickling_error(KeyError, b"g0\np0")
-        self.assert_is_copy([(100,), (100,)], self.loads(b"((Kdtp0\nh\x00l.))"))
+        self.check_unpickling_error(KeyError, b'g0\np0')
+        self.assert_is_copy([(100,), (100,)],
+                            self.loads(b'((Kdtp0\nh\x00l.))'))
 
     def test_binbytes8(self):
-        dumped = b"\x80\x04\x8e\4\0\0\0\0\0\0\0\xe2\x82\xac\x00."
-        self.assertEqual(self.loads(dumped), b"\xe2\x82\xac\x00")
+        dumped = b'\x80\x04\x8e\4\0\0\0\0\0\0\0\xe2\x82\xac\x00.'
+        self.assertEqual(self.loads(dumped), b'\xe2\x82\xac\x00')
 
     def test_binunicode8(self):
-        dumped = b"\x80\x04\x8d\4\0\0\0\0\0\0\0\xe2\x82\xac\x00."
-        self.assertEqual(self.loads(dumped), "\u20ac\x00")
+        dumped = b'\x80\x04\x8d\4\0\0\0\0\0\0\0\xe2\x82\xac\x00.'
+        self.assertEqual(self.loads(dumped), '\u20ac\x00')
 
     def test_bytearray8(self):
-        dumped = b"\x80\x05\x96\x03\x00\x00\x00\x00\x00\x00\x00xxx."
-        self.assertEqual(self.loads(dumped), bytearray(b"xxx"))
+        dumped = b'\x80\x05\x96\x03\x00\x00\x00\x00\x00\x00\x00xxx.'
+        self.assertEqual(self.loads(dumped), bytearray(b'xxx'))
 
     @requires_32b
     def test_large_32b_binbytes8(self):
-        dumped = b"\x80\x04\x8e\4\0\0\0\1\0\0\0\xe2\x82\xac\x00."
-        self.check_unpickling_error((pickle.UnpicklingError, OverflowError), dumped)
+        dumped = b'\x80\x04\x8e\4\0\0\0\1\0\0\0\xe2\x82\xac\x00.'
+        self.check_unpickling_error((pickle.UnpicklingError, OverflowError),
+                                    dumped)
 
     @requires_32b
     def test_large_32b_bytearray8(self):
-        dumped = b"\x80\x05\x96\4\0\0\0\1\0\0\0\xe2\x82\xac\x00."
-        self.check_unpickling_error((pickle.UnpicklingError, OverflowError), dumped)
+        dumped = b'\x80\x05\x96\4\0\0\0\1\0\0\0\xe2\x82\xac\x00.'
+        self.check_unpickling_error((pickle.UnpicklingError, OverflowError),
+                                    dumped)
 
     @requires_32b
     def test_large_32b_binunicode8(self):
-        dumped = b"\x80\x04\x8d\4\0\0\0\1\0\0\0\xe2\x82\xac\x00."
-        self.check_unpickling_error((pickle.UnpicklingError, OverflowError), dumped)
+        dumped = b'\x80\x04\x8d\4\0\0\0\1\0\0\0\xe2\x82\xac\x00.'
+        self.check_unpickling_error((pickle.UnpicklingError, OverflowError),
+                                    dumped)
 
     def test_get(self):
-        pickled = b"((lp100000\ng100000\nt."
+        pickled = b'((lp100000\ng100000\nt.'
         unpickled = self.loads(pickled)
-        self.assertEqual(unpickled, ([],) * 2)
+        self.assertEqual(unpickled, ([],)*2)
         self.assertIs(unpickled[0], unpickled[1])
 
     def test_binget(self):
-        pickled = b"(]q\xffh\xfft."
+        pickled = b'(]q\xffh\xfft.'
         unpickled = self.loads(pickled)
-        self.assertEqual(unpickled, ([],) * 2)
+        self.assertEqual(unpickled, ([],)*2)
         self.assertIs(unpickled[0], unpickled[1])
 
     def test_long_binget(self):
-        pickled = b"(]r\x00\x00\x01\x00j\x00\x00\x01\x00t."
+        pickled = b'(]r\x00\x00\x01\x00j\x00\x00\x01\x00t.'
         unpickled = self.loads(pickled)
-        self.assertEqual(unpickled, ([],) * 2)
+        self.assertEqual(unpickled, ([],)*2)
         self.assertIs(unpickled[0], unpickled[1])
 
     def test_dup(self):
-        pickled = b"((l2t."
+        pickled = b'((l2t.'
         unpickled = self.loads(pickled)
-        self.assertEqual(unpickled, ([],) * 2)
+        self.assertEqual(unpickled, ([],)*2)
         self.assertIs(unpickled[0], unpickled[1])
 
     def test_negative_put(self):
         # Issue #12847
-        dumped = b"Va\np-1\n."
+        dumped = b'Va\np-1\n.'
         self.check_unpickling_error(ValueError, dumped)
 
     @requires_32b
     def test_negative_32b_binput(self):
         # Issue #12847
-        dumped = b"\x80\x03X\x01\x00\x00\x00ar\xff\xff\xff\xff."
+        dumped = b'\x80\x03X\x01\x00\x00\x00ar\xff\xff\xff\xff.'
         self.check_unpickling_error(ValueError, dumped)
 
     def test_badly_escaped_string(self):
@@ -1137,36 +1104,32 @@ class AbstractUnpickleTests(unittest.TestCase):
 
     def test_badly_quoted_string(self):
         # Issue #17710
-        badpickles = [
-            b"S'\n.",
-            b'S"\n.',
-            b"S' \n.",
-            b'S" \n.',
-            b"S'\"\n.",
-            b"S\"'\n.",
-            b"S' ' \n.",
-            b'S" " \n.',
-            b"S ''\n.",
-            b'S ""\n.',
-            b"S \n.",
-            b"S\n.",
-            b"S.",
-        ]
+        badpickles = [b"S'\n.",
+                      b'S"\n.',
+                      b'S\' \n.',
+                      b'S" \n.',
+                      b'S\'"\n.',
+                      b'S"\'\n.',
+                      b"S' ' \n.",
+                      b'S" " \n.',
+                      b"S ''\n.",
+                      b'S ""\n.',
+                      b'S \n.',
+                      b'S\n.',
+                      b'S.']
         for p in badpickles:
             self.check_unpickling_error(pickle.UnpicklingError, p)
 
     def test_correctly_quoted_string(self):
-        goodpickles = [
-            (b"S''\n.", ""),
-            (b'S""\n.', ""),
-            (b'S"\\n"\n.', "\n"),
-            (b"S'\\n'\n.", "\n"),
-        ]
+        goodpickles = [(b"S''\n.", ''),
+                       (b'S""\n.', ''),
+                       (b'S"\\n"\n.', '\n'),
+                       (b"S'\\n'\n.", '\n')]
         for p, expected in goodpickles:
             self.assertEqual(self.loads(p), expected)
 
     def test_frame_readline(self):
-        pickled = b"\x80\x04\x95\x05\x00\x00\x00\x00\x00\x00\x00I42\n."
+        pickled = b'\x80\x04\x95\x05\x00\x00\x00\x00\x00\x00\x00I42\n.'
         #    0: \x80 PROTO      4
         #    2: \x95 FRAME      5
         #   11: I    INT        42
@@ -1175,210 +1138,211 @@ class AbstractUnpickleTests(unittest.TestCase):
 
     def test_compat_unpickle(self):
         # xrange(1, 7)
-        pickled = b"\x80\x02c__builtin__\nxrange\nK\x01K\x07K\x01\x87R."
+        pickled = b'\x80\x02c__builtin__\nxrange\nK\x01K\x07K\x01\x87R.'
         unpickled = self.loads(pickled)
         self.assertIs(type(unpickled), range)
         self.assertEqual(unpickled, range(1, 7))
         self.assertEqual(list(unpickled), [1, 2, 3, 4, 5, 6])
         # reduce
-        pickled = b"\x80\x02c__builtin__\nreduce\n."
+        pickled = b'\x80\x02c__builtin__\nreduce\n.'
         self.assertIs(self.loads(pickled), functools.reduce)
         # whichdb.whichdb
-        pickled = b"\x80\x02cwhichdb\nwhichdb\n."
+        pickled = b'\x80\x02cwhichdb\nwhichdb\n.'
         self.assertIs(self.loads(pickled), dbm.whichdb)
         # Exception(), StandardError()
-        for name in (b"Exception", b"StandardError"):
-            pickled = b"\x80\x02cexceptions\n" + name + b"\nU\x03ugh\x85R."
+        for name in (b'Exception', b'StandardError'):
+            pickled = (b'\x80\x02cexceptions\n' + name + b'\nU\x03ugh\x85R.')
             unpickled = self.loads(pickled)
             self.assertIs(type(unpickled), Exception)
-            self.assertEqual(str(unpickled), "ugh")
+            self.assertEqual(str(unpickled), 'ugh')
         # UserDict.UserDict({1: 2}), UserDict.IterableUserDict({1: 2})
-        for name in (b"UserDict", b"IterableUserDict"):
-            pickled = b"\x80\x02(cUserDict\n" + name + b"\no}U\x04data}K\x01K\x02ssb."
+        for name in (b'UserDict', b'IterableUserDict'):
+            pickled = (b'\x80\x02(cUserDict\n' + name +
+                       b'\no}U\x04data}K\x01K\x02ssb.')
             unpickled = self.loads(pickled)
             self.assertIs(type(unpickled), collections.UserDict)
             self.assertEqual(unpickled, collections.UserDict({1: 2}))
 
     def test_bad_stack(self):
         badpickles = [
-            b".",  # STOP
-            b"0",  # POP
-            b"1",  # POP_MARK
-            b"2",  # DUP
-            b"(2",
-            b"R",  # REDUCE
-            b")R",
-            b"a",  # APPEND
-            b"Na",
-            b"b",  # BUILD
-            b"Nb",
-            b"d",  # DICT
-            b"e",  # APPENDS
-            b"(e",
-            b"ibuiltins\nlist\n",  # INST
-            b"l",  # LIST
-            b"o",  # OBJ
-            b"(o",
-            b"p1\n",  # PUT
-            b"q\x00",  # BINPUT
-            b"r\x00\x00\x00\x00",  # LONG_BINPUT
-            b"s",  # SETITEM
-            b"Ns",
-            b"NNs",
-            b"t",  # TUPLE
-            b"u",  # SETITEMS
-            b"(u",
-            b"}(Nu",
-            b"\x81",  # NEWOBJ
-            b")\x81",
-            b"\x85",  # TUPLE1
-            b"\x86",  # TUPLE2
-            b"N\x86",
-            b"\x87",  # TUPLE3
-            b"N\x87",
-            b"NN\x87",
-            b"\x90",  # ADDITEMS
-            b"(\x90",
-            b"\x91",  # FROZENSET
-            b"\x92",  # NEWOBJ_EX
-            b")}\x92",
-            b"\x93",  # STACK_GLOBAL
-            b"Vlist\n\x93",
-            b"\x94",  # MEMOIZE
+            b'.',                       # STOP
+            b'0',                       # POP
+            b'1',                       # POP_MARK
+            b'2',                       # DUP
+            b'(2',
+            b'R',                       # REDUCE
+            b')R',
+            b'a',                       # APPEND
+            b'Na',
+            b'b',                       # BUILD
+            b'Nb',
+            b'd',                       # DICT
+            b'e',                       # APPENDS
+            b'(e',
+            b'ibuiltins\nlist\n',       # INST
+            b'l',                       # LIST
+            b'o',                       # OBJ
+            b'(o',
+            b'p1\n',                    # PUT
+            b'q\x00',                   # BINPUT
+            b'r\x00\x00\x00\x00',       # LONG_BINPUT
+            b's',                       # SETITEM
+            b'Ns',
+            b'NNs',
+            b't',                       # TUPLE
+            b'u',                       # SETITEMS
+            b'(u',
+            b'}(Nu',
+            b'\x81',                    # NEWOBJ
+            b')\x81',
+            b'\x85',                    # TUPLE1
+            b'\x86',                    # TUPLE2
+            b'N\x86',
+            b'\x87',                    # TUPLE3
+            b'N\x87',
+            b'NN\x87',
+            b'\x90',                    # ADDITEMS
+            b'(\x90',
+            b'\x91',                    # FROZENSET
+            b'\x92',                    # NEWOBJ_EX
+            b')}\x92',
+            b'\x93',                    # STACK_GLOBAL
+            b'Vlist\n\x93',
+            b'\x94',                    # MEMOIZE
         ]
         for p in badpickles:
             self.check_unpickling_error(self.bad_stack_errors, p)
 
     def test_bad_mark(self):
         badpickles = [
-            b"N(.",  # STOP
-            b"N(2",  # DUP
-            b"cbuiltins\nlist\n)(R",  # REDUCE
-            b"cbuiltins\nlist\n()R",
-            b"]N(a",  # APPEND
-            # BUILD
-            b"cbuiltins\nValueError\n)R}(b",
-            b"cbuiltins\nValueError\n)R(}b",
-            b"(Nd",  # DICT
-            b"N(p1\n",  # PUT
-            b"N(q\x00",  # BINPUT
-            b"N(r\x00\x00\x00\x00",  # LONG_BINPUT
-            b"}NN(s",  # SETITEM
-            b"}N(Ns",
-            b"}(NNs",
-            b"}((u",  # SETITEMS
-            b"cbuiltins\nlist\n)(\x81",  # NEWOBJ
-            b"cbuiltins\nlist\n()\x81",
-            b"N(\x85",  # TUPLE1
-            b"NN(\x86",  # TUPLE2
-            b"N(N\x86",
-            b"NNN(\x87",  # TUPLE3
-            b"NN(N\x87",
-            b"N(NN\x87",
-            b"]((\x90",  # ADDITEMS
-            # NEWOBJ_EX
-            b"cbuiltins\nlist\n)}(\x92",
-            b"cbuiltins\nlist\n)(}\x92",
-            b"cbuiltins\nlist\n()}\x92",
-            # STACK_GLOBAL
-            b"Vbuiltins\n(Vlist\n\x93",
-            b"Vbuiltins\nVlist\n(\x93",
-            b"N(\x94",  # MEMOIZE
+            b'N(.',                     # STOP
+            b'N(2',                     # DUP
+            b'cbuiltins\nlist\n)(R',    # REDUCE
+            b'cbuiltins\nlist\n()R',
+            b']N(a',                    # APPEND
+                                        # BUILD
+            b'cbuiltins\nValueError\n)R}(b',
+            b'cbuiltins\nValueError\n)R(}b',
+            b'(Nd',                     # DICT
+            b'N(p1\n',                  # PUT
+            b'N(q\x00',                 # BINPUT
+            b'N(r\x00\x00\x00\x00',     # LONG_BINPUT
+            b'}NN(s',                   # SETITEM
+            b'}N(Ns',
+            b'}(NNs',
+            b'}((u',                    # SETITEMS
+            b'cbuiltins\nlist\n)(\x81', # NEWOBJ
+            b'cbuiltins\nlist\n()\x81',
+            b'N(\x85',                  # TUPLE1
+            b'NN(\x86',                 # TUPLE2
+            b'N(N\x86',
+            b'NNN(\x87',                # TUPLE3
+            b'NN(N\x87',
+            b'N(NN\x87',
+            b']((\x90',                 # ADDITEMS
+                                        # NEWOBJ_EX
+            b'cbuiltins\nlist\n)}(\x92',
+            b'cbuiltins\nlist\n)(}\x92',
+            b'cbuiltins\nlist\n()}\x92',
+                                        # STACK_GLOBAL
+            b'Vbuiltins\n(Vlist\n\x93',
+            b'Vbuiltins\nVlist\n(\x93',
+            b'N(\x94',                  # MEMOIZE
         ]
         for p in badpickles:
             self.check_unpickling_error(self.bad_stack_errors, p)
 
     def test_truncated_data(self):
-        self.check_unpickling_error(EOFError, b"")
-        self.check_unpickling_error(EOFError, b"N")
+        self.check_unpickling_error(EOFError, b'')
+        self.check_unpickling_error(EOFError, b'N')
         badpickles = [
-            b"B",  # BINBYTES
-            b"B\x03\x00\x00",
-            b"B\x03\x00\x00\x00",
-            b"B\x03\x00\x00\x00ab",
-            b"C",  # SHORT_BINBYTES
-            b"C\x03",
-            b"C\x03ab",
-            b"F",  # FLOAT
-            b"F0.0",
-            b"F0.00",
-            b"G",  # BINFLOAT
-            b"G\x00\x00\x00\x00\x00\x00\x00",
-            b"I",  # INT
-            b"I0",
-            b"J",  # BININT
-            b"J\x00\x00\x00",
-            b"K",  # BININT1
-            b"L",  # LONG
-            b"L0",
-            b"L10",
-            b"L0L",
-            b"L10L",
-            b"M",  # BININT2
-            b"M\x00",
+            b'B',                       # BINBYTES
+            b'B\x03\x00\x00',
+            b'B\x03\x00\x00\x00',
+            b'B\x03\x00\x00\x00ab',
+            b'C',                       # SHORT_BINBYTES
+            b'C\x03',
+            b'C\x03ab',
+            b'F',                       # FLOAT
+            b'F0.0',
+            b'F0.00',
+            b'G',                       # BINFLOAT
+            b'G\x00\x00\x00\x00\x00\x00\x00',
+            b'I',                       # INT
+            b'I0',
+            b'J',                       # BININT
+            b'J\x00\x00\x00',
+            b'K',                       # BININT1
+            b'L',                       # LONG
+            b'L0',
+            b'L10',
+            b'L0L',
+            b'L10L',
+            b'M',                       # BININT2
+            b'M\x00',
             # b'P',                       # PERSID
             # b'Pabc',
-            b"S",  # STRING
+            b'S',                       # STRING
             b"S'abc'",
-            b"T",  # BINSTRING
-            b"T\x03\x00\x00",
-            b"T\x03\x00\x00\x00",
-            b"T\x03\x00\x00\x00ab",
-            b"U",  # SHORT_BINSTRING
-            b"U\x03",
-            b"U\x03ab",
-            b"V",  # UNICODE
-            b"Vabc",
-            b"X",  # BINUNICODE
-            b"X\x03\x00\x00",
-            b"X\x03\x00\x00\x00",
-            b"X\x03\x00\x00\x00ab",
-            b"(c",  # GLOBAL
-            b"(cbuiltins",
-            b"(cbuiltins\n",
-            b"(cbuiltins\nlist",
-            b"Ng",  # GET
-            b"Ng0",
-            b"(i",  # INST
-            b"(ibuiltins",
-            b"(ibuiltins\n",
-            b"(ibuiltins\nlist",
-            b"Nh",  # BINGET
-            b"Nj",  # LONG_BINGET
-            b"Nj\x00\x00\x00",
-            b"Np",  # PUT
-            b"Np0",
-            b"Nq",  # BINPUT
-            b"Nr",  # LONG_BINPUT
-            b"Nr\x00\x00\x00",
-            b"\x80",  # PROTO
-            b"\x82",  # EXT1
-            b"\x83",  # EXT2
-            b"\x84\x01",
-            b"\x84",  # EXT4
-            b"\x84\x01\x00\x00",
-            b"\x8a",  # LONG1
-            b"\x8b",  # LONG4
-            b"\x8b\x00\x00\x00",
-            b"\x8c",  # SHORT_BINUNICODE
-            b"\x8c\x03",
-            b"\x8c\x03ab",
-            b"\x8d",  # BINUNICODE8
-            b"\x8d\x03\x00\x00\x00\x00\x00\x00",
-            b"\x8d\x03\x00\x00\x00\x00\x00\x00\x00",
-            b"\x8d\x03\x00\x00\x00\x00\x00\x00\x00ab",
-            b"\x8e",  # BINBYTES8
-            b"\x8e\x03\x00\x00\x00\x00\x00\x00",
-            b"\x8e\x03\x00\x00\x00\x00\x00\x00\x00",
-            b"\x8e\x03\x00\x00\x00\x00\x00\x00\x00ab",
-            b"\x96",  # BYTEARRAY8
-            b"\x96\x03\x00\x00\x00\x00\x00\x00",
-            b"\x96\x03\x00\x00\x00\x00\x00\x00\x00",
-            b"\x96\x03\x00\x00\x00\x00\x00\x00\x00ab",
-            b"\x95",  # FRAME
-            b"\x95\x02\x00\x00\x00\x00\x00\x00",
-            b"\x95\x02\x00\x00\x00\x00\x00\x00\x00",
-            b"\x95\x02\x00\x00\x00\x00\x00\x00\x00N",
+            b'T',                       # BINSTRING
+            b'T\x03\x00\x00',
+            b'T\x03\x00\x00\x00',
+            b'T\x03\x00\x00\x00ab',
+            b'U',                       # SHORT_BINSTRING
+            b'U\x03',
+            b'U\x03ab',
+            b'V',                       # UNICODE
+            b'Vabc',
+            b'X',                       # BINUNICODE
+            b'X\x03\x00\x00',
+            b'X\x03\x00\x00\x00',
+            b'X\x03\x00\x00\x00ab',
+            b'(c',                      # GLOBAL
+            b'(cbuiltins',
+            b'(cbuiltins\n',
+            b'(cbuiltins\nlist',
+            b'Ng',                      # GET
+            b'Ng0',
+            b'(i',                      # INST
+            b'(ibuiltins',
+            b'(ibuiltins\n',
+            b'(ibuiltins\nlist',
+            b'Nh',                      # BINGET
+            b'Nj',                      # LONG_BINGET
+            b'Nj\x00\x00\x00',
+            b'Np',                      # PUT
+            b'Np0',
+            b'Nq',                      # BINPUT
+            b'Nr',                      # LONG_BINPUT
+            b'Nr\x00\x00\x00',
+            b'\x80',                    # PROTO
+            b'\x82',                    # EXT1
+            b'\x83',                    # EXT2
+            b'\x84\x01',
+            b'\x84',                    # EXT4
+            b'\x84\x01\x00\x00',
+            b'\x8a',                    # LONG1
+            b'\x8b',                    # LONG4
+            b'\x8b\x00\x00\x00',
+            b'\x8c',                    # SHORT_BINUNICODE
+            b'\x8c\x03',
+            b'\x8c\x03ab',
+            b'\x8d',                    # BINUNICODE8
+            b'\x8d\x03\x00\x00\x00\x00\x00\x00',
+            b'\x8d\x03\x00\x00\x00\x00\x00\x00\x00',
+            b'\x8d\x03\x00\x00\x00\x00\x00\x00\x00ab',
+            b'\x8e',                    # BINBYTES8
+            b'\x8e\x03\x00\x00\x00\x00\x00\x00',
+            b'\x8e\x03\x00\x00\x00\x00\x00\x00\x00',
+            b'\x8e\x03\x00\x00\x00\x00\x00\x00\x00ab',
+            b'\x96',                    # BYTEARRAY8
+            b'\x96\x03\x00\x00\x00\x00\x00\x00',
+            b'\x96\x03\x00\x00\x00\x00\x00\x00\x00',
+            b'\x96\x03\x00\x00\x00\x00\x00\x00\x00ab',
+            b'\x95',                    # FRAME
+            b'\x95\x02\x00\x00\x00\x00\x00\x00',
+            b'\x95\x02\x00\x00\x00\x00\x00\x00\x00',
+            b'\x95\x02\x00\x00\x00\x00\x00\x00\x00N',
         ]
         for p in badpickles:
             self.check_unpickling_error(self.truncated_errors, p)
@@ -1386,35 +1350,32 @@ class AbstractUnpickleTests(unittest.TestCase):
     @reap_threads
     def test_unpickle_module_race(self):
         # https://bugs.python.org/issue34572
-        locker_module = dedent(
-            """
+        locker_module = dedent("""
         import threading
         barrier = threading.Barrier(2)
-        """
-        )
-        locking_import_module = dedent(
-            """
+        """)
+        locking_import_module = dedent("""
         import locker
         locker.barrier.wait()
         class ToBeUnpickled(object):
             pass
-        """
-        )
+        """)
 
         os.mkdir(TESTFN)
         self.addCleanup(shutil.rmtree, TESTFN)
         sys.path.insert(0, TESTFN)
         self.addCleanup(sys.path.remove, TESTFN)
         with open(os.path.join(TESTFN, "locker.py"), "wb") as f:
-            f.write(locker_module.encode("utf-8"))
+            f.write(locker_module.encode('utf-8'))
         with open(os.path.join(TESTFN, "locking_import.py"), "wb") as f:
-            f.write(locking_import_module.encode("utf-8"))
+            f.write(locking_import_module.encode('utf-8'))
         self.addCleanup(forget, "locker")
         self.addCleanup(forget, "locking_import")
 
         import locker
 
-        pickle_bytes = b"\x80\x03clocking_import\nToBeUnpickled\nq\x00)\x81q\x01."
+        pickle_bytes = (
+            b'\x80\x03clocking_import\nToBeUnpickled\nq\x00)\x81q\x01.')
 
         # Then try to unpickle two of these simultaneously
         # One of them will cause the module import, and we want it to block
@@ -1423,7 +1384,6 @@ class AbstractUnpickleTests(unittest.TestCase):
         #   - blocks on the import lock for the module, as it should
         results = []
         barrier = threading.Barrier(3)
-
         def t():
             # This ensures the threads have all started
             # presumably barrier release is faster than thread startup
@@ -1443,8 +1403,10 @@ class AbstractUnpickleTests(unittest.TestCase):
         t2.join()
 
         from locking_import import ToBeUnpickled
+        self.assertEqual(
+            [type(x) for x in results],
+            [ToBeUnpickled] * 2)
 
-        self.assertEqual([type(x) for x in results], [ToBeUnpickled] * 2)
 
 
 class AbstractPickleTests(unittest.TestCase):
@@ -1602,7 +1564,7 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_recursive_multi(self):
         l = []
-        d = {1: l}
+        d = {1:l}
         i = C()
         i.attr = d
         l.append(i)
@@ -1658,16 +1620,10 @@ class AbstractPickleTests(unittest.TestCase):
         self.check_recursive_collection_and_inst(MyFrozenSet)
 
     def test_unicode(self):
-        endcases = [
-            "",
-            "<\\u>",
-            "<\\\u1234>",
-            "<\n>",
-            "<\\>",
-            "<\\\U00012345>",
-            # surrogates
-            "<\udc80>",
-        ]
+        endcases = ['', '<\\u>', '<\\\u1234>', '<\n>',
+                    '<\\>', '<\\\U00012345>',
+                    # surrogates
+                    '<\udc80>']
         for proto in protocols:
             for u in endcases:
                 p = self.dumps(u, proto)
@@ -1675,7 +1631,7 @@ class AbstractPickleTests(unittest.TestCase):
                 self.assert_is_copy(u, u2)
 
     def test_unicode_high_plane(self):
-        t = "\U00012345"
+        t = '\U00012345'
         for proto in protocols:
             p = self.dumps(t, proto)
             t2 = self.loads(p)
@@ -1683,7 +1639,7 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_bytes(self):
         for proto in protocols:
-            for s in b"", b"xyz", b"xyz" * 100:
+            for s in b'', b'xyz', b'xyz'*100:
                 p = self.dumps(s, proto)
                 self.assert_is_copy(s, self.loads(p))
             for s in [bytes([i]) for i in range(256)]:
@@ -1695,7 +1651,7 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_bytearray(self):
         for proto in protocols:
-            for s in b"", b"xyz", b"xyz" * 100:
+            for s in b'', b'xyz', b'xyz'*100:
                 b = bytearray(s)
                 p = self.dumps(b, proto)
                 bb = self.loads(p)
@@ -1703,13 +1659,13 @@ class AbstractPickleTests(unittest.TestCase):
                 self.assert_is_copy(b, bb)
                 if proto <= 3:
                     # bytearray is serialized using a global reference
-                    self.assertIn(b"bytearray", p)
+                    self.assertIn(b'bytearray', p)
                     self.assertTrue(opcode_in_pickle(pickle.GLOBAL, p))
                 elif proto == 4:
-                    self.assertIn(b"bytearray", p)
+                    self.assertIn(b'bytearray', p)
                     self.assertTrue(opcode_in_pickle(pickle.STACK_GLOBAL, p))
                 elif proto == 5:
-                    self.assertNotIn(b"bytearray", p)
+                    self.assertNotIn(b'bytearray', p)
                     self.assertTrue(opcode_in_pickle(pickle.BYTEARRAY8, p))
 
     def test_ints(self):
@@ -1725,9 +1681,9 @@ class AbstractPickleTests(unittest.TestCase):
     def test_long(self):
         for proto in protocols:
             # 256 bytes is where LONG4 begins.
-            for nbits in 1, 8, 8 * 254, 8 * 255, 8 * 256, 8 * 257:
+            for nbits in 1, 8, 8*254, 8*255, 8*256, 8*257:
                 nbase = 1 << nbits
-                for npos in nbase - 1, nbase, nbase + 1:
+                for npos in nbase-1, nbase, nbase+1:
                     for n in npos, -npos:
                         pickle = self.dumps(n, proto)
                         got = self.loads(pickle)
@@ -1746,19 +1702,8 @@ class AbstractPickleTests(unittest.TestCase):
             self.assertEqual(n, got)
 
     def test_float(self):
-        test_values = [
-            0.0,
-            4.94e-324,
-            1e-310,
-            7e-308,
-            6.626e-34,
-            0.1,
-            0.5,
-            3.14,
-            263.44582062374053,
-            6.022e23,
-            1e30,
-        ]
+        test_values = [0.0, 4.94e-324, 1e-310, 7e-308, 6.626e-34, 0.1, 0.5,
+                       3.14, 263.44582062374053, 6.022e23, 1e30]
         test_values = test_values + [-x for x in test_values]
         for proto in protocols:
             for value in test_values:
@@ -1766,10 +1711,10 @@ class AbstractPickleTests(unittest.TestCase):
                 got = self.loads(pickle)
                 self.assert_is_copy(value, got)
 
-    @run_with_locale("LC_ALL", "de_DE", "fr_FR")
+    @run_with_locale('LC_ALL', 'de_DE', 'fr_FR')
     def test_float_format(self):
         # make sure that floats are formatted locale independent with proto 0
-        self.assertEqual(self.dumps(1.2, 0)[0:3], b"F1.")
+        self.assertEqual(self.dumps(1.2, 0)[0:3], b'F1.')
 
     def test_reduce(self):
         for proto in protocols:
@@ -1852,7 +1797,7 @@ class AbstractPickleTests(unittest.TestCase):
             else:
                 self.assertEqual(count_opcode(pickle.PROTO, pickled), 0)
 
-        oob = protocols[-1] + 1  # a future protocol
+        oob = protocols[-1] + 1     # a future protocol
         build_none = pickle.NONE + pickle.STOP
         badpickle = pickle.PROTO + bytes([oob]) + build_none
         try:
@@ -1871,7 +1816,7 @@ class AbstractPickleTests(unittest.TestCase):
             self.assertEqual(opcode_in_pickle(pickle.LONG1, s), proto >= 2)
 
     def test_long4(self):
-        x = 12345678910111213141516178920 << (256 * 8)
+        x = 12345678910111213141516178920 << (256*8)
         for proto in protocols:
             s = self.dumps(x, proto)
             y = self.loads(s)
@@ -1880,28 +1825,30 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_short_tuples(self):
         # Map (proto, len(tuple)) to expected opcode.
-        expected_opcode = {
-            (0, 0): pickle.TUPLE,
-            (0, 1): pickle.TUPLE,
-            (0, 2): pickle.TUPLE,
-            (0, 3): pickle.TUPLE,
-            (0, 4): pickle.TUPLE,
-            (1, 0): pickle.EMPTY_TUPLE,
-            (1, 1): pickle.TUPLE,
-            (1, 2): pickle.TUPLE,
-            (1, 3): pickle.TUPLE,
-            (1, 4): pickle.TUPLE,
-            (2, 0): pickle.EMPTY_TUPLE,
-            (2, 1): pickle.TUPLE1,
-            (2, 2): pickle.TUPLE2,
-            (2, 3): pickle.TUPLE3,
-            (2, 4): pickle.TUPLE,
-            (3, 0): pickle.EMPTY_TUPLE,
-            (3, 1): pickle.TUPLE1,
-            (3, 2): pickle.TUPLE2,
-            (3, 3): pickle.TUPLE3,
-            (3, 4): pickle.TUPLE,
-        }
+        expected_opcode = {(0, 0): pickle.TUPLE,
+                           (0, 1): pickle.TUPLE,
+                           (0, 2): pickle.TUPLE,
+                           (0, 3): pickle.TUPLE,
+                           (0, 4): pickle.TUPLE,
+
+                           (1, 0): pickle.EMPTY_TUPLE,
+                           (1, 1): pickle.TUPLE,
+                           (1, 2): pickle.TUPLE,
+                           (1, 3): pickle.TUPLE,
+                           (1, 4): pickle.TUPLE,
+
+                           (2, 0): pickle.EMPTY_TUPLE,
+                           (2, 1): pickle.TUPLE1,
+                           (2, 2): pickle.TUPLE2,
+                           (2, 3): pickle.TUPLE3,
+                           (2, 4): pickle.TUPLE,
+
+                           (3, 0): pickle.EMPTY_TUPLE,
+                           (3, 1): pickle.TUPLE1,
+                           (3, 2): pickle.TUPLE2,
+                           (3, 3): pickle.TUPLE3,
+                           (3, 4): pickle.TUPLE,
+                          }
         a = ()
         b = (1,)
         c = (1, 2)
@@ -1917,20 +1864,21 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_singletons(self):
         # Map (proto, singleton) to expected opcode.
-        expected_opcode = {
-            (0, None): pickle.NONE,
-            (1, None): pickle.NONE,
-            (2, None): pickle.NONE,
-            (3, None): pickle.NONE,
-            (0, True): pickle.INT,
-            (1, True): pickle.INT,
-            (2, True): pickle.NEWTRUE,
-            (3, True): pickle.NEWTRUE,
-            (0, False): pickle.INT,
-            (1, False): pickle.INT,
-            (2, False): pickle.NEWFALSE,
-            (3, False): pickle.NEWFALSE,
-        }
+        expected_opcode = {(0, None): pickle.NONE,
+                           (1, None): pickle.NONE,
+                           (2, None): pickle.NONE,
+                           (3, None): pickle.NONE,
+
+                           (0, True): pickle.INT,
+                           (1, True): pickle.INT,
+                           (2, True): pickle.NEWTRUE,
+                           (3, True): pickle.NEWTRUE,
+
+                           (0, False): pickle.INT,
+                           (1, False): pickle.INT,
+                           (2, False): pickle.NEWFALSE,
+                           (3, False): pickle.NEWFALSE,
+                          }
         for proto in protocols:
             for x in None, False, True:
                 s = self.dumps(x, proto)
@@ -1966,7 +1914,7 @@ class AbstractPickleTests(unittest.TestCase):
                 s = self.dumps(x, proto)
                 y = self.loads(s)
                 detail = (proto, C, B, x, y, type(y))
-                self.assert_is_copy(x, y)  # XXX revisit
+                self.assert_is_copy(x, y) # XXX revisit
                 self.assertEqual(B(x), B(y), detail)
                 self.assertEqual(x.__dict__, y.__dict__, detail)
 
@@ -2035,17 +1983,17 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_global_ext1(self):
         self.produce_global_ext(0x00000001, pickle.EXT1)  # smallest EXT1 code
-        self.produce_global_ext(0x000000FF, pickle.EXT1)  # largest EXT1 code
+        self.produce_global_ext(0x000000ff, pickle.EXT1)  # largest EXT1 code
 
     def test_global_ext2(self):
         self.produce_global_ext(0x00000100, pickle.EXT2)  # smallest EXT2 code
-        self.produce_global_ext(0x0000FFFF, pickle.EXT2)  # largest EXT2 code
-        self.produce_global_ext(0x0000ABCD, pickle.EXT2)  # check endianness
+        self.produce_global_ext(0x0000ffff, pickle.EXT2)  # largest EXT2 code
+        self.produce_global_ext(0x0000abcd, pickle.EXT2)  # check endianness
 
     def test_global_ext4(self):
         self.produce_global_ext(0x00010000, pickle.EXT4)  # smallest EXT4 code
-        self.produce_global_ext(0x7FFFFFFF, pickle.EXT4)  # largest EXT4 code
-        self.produce_global_ext(0x12ABCDEF, pickle.EXT4)  # check endianness
+        self.produce_global_ext(0x7fffffff, pickle.EXT4)  # largest EXT4 code
+        self.produce_global_ext(0x12abcdef, pickle.EXT4)  # check endianness
 
     def test_list_chunking(self):
         n = 10  # too small to chunk
@@ -2118,41 +2066,43 @@ class AbstractPickleTests(unittest.TestCase):
                 self.assertGreaterEqual(num_additems, 2)
 
     def test_simple_newobj(self):
-        x = SimpleNewObj.__new__(SimpleNewObj, 0xFACE)  # avoid __init__
+        x = SimpleNewObj.__new__(SimpleNewObj, 0xface)  # avoid __init__
         x.abc = 666
         for proto in protocols:
             with self.subTest(proto=proto):
                 s = self.dumps(x, proto)
                 if proto < 1:
-                    self.assertIn(b"\nI64206", s)  # INT
+                    self.assertIn(b'\nI64206', s)  # INT
                 else:
-                    self.assertIn(b"M\xce\xfa", s)  # BININT2
-                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ, s), 2 <= proto)
+                    self.assertIn(b'M\xce\xfa', s)  # BININT2
+                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ, s),
+                                 2 <= proto)
                 self.assertFalse(opcode_in_pickle(pickle.NEWOBJ_EX, s))
-                y = self.loads(s)  # will raise TypeError if __init__ called
+                y = self.loads(s)   # will raise TypeError if __init__ called
                 self.assert_is_copy(x, y)
 
     def test_complex_newobj(self):
-        x = ComplexNewObj.__new__(ComplexNewObj, 0xFACE)  # avoid __init__
+        x = ComplexNewObj.__new__(ComplexNewObj, 0xface)  # avoid __init__
         x.abc = 666
         for proto in protocols:
             with self.subTest(proto=proto):
                 s = self.dumps(x, proto)
                 if proto < 1:
-                    self.assertIn(b"\nI64206", s)  # INT
+                    self.assertIn(b'\nI64206', s)  # INT
                 elif proto < 2:
-                    self.assertIn(b"M\xce\xfa", s)  # BININT2
+                    self.assertIn(b'M\xce\xfa', s)  # BININT2
                 elif proto < 4:
-                    self.assertIn(b"X\x04\x00\x00\x00FACE", s)  # BINUNICODE
+                    self.assertIn(b'X\x04\x00\x00\x00FACE', s)  # BINUNICODE
                 else:
-                    self.assertIn(b"\x8c\x04FACE", s)  # SHORT_BINUNICODE
-                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ, s), 2 <= proto)
+                    self.assertIn(b'\x8c\x04FACE', s)  # SHORT_BINUNICODE
+                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ, s),
+                                 2 <= proto)
                 self.assertFalse(opcode_in_pickle(pickle.NEWOBJ_EX, s))
-                y = self.loads(s)  # will raise TypeError if __init__ called
+                y = self.loads(s)   # will raise TypeError if __init__ called
                 self.assert_is_copy(x, y)
 
     def test_complex_newobj_ex(self):
-        x = ComplexNewObjEx.__new__(ComplexNewObjEx, 0xFACE)  # avoid __init__
+        x = ComplexNewObjEx.__new__(ComplexNewObjEx, 0xface)  # avoid __init__
         x.abc = 666
         for proto in protocols:
             if sys.version_info < (3, 6) and proto < 4:
@@ -2162,16 +2112,17 @@ class AbstractPickleTests(unittest.TestCase):
             with self.subTest(proto=proto):
                 s = self.dumps(x, proto)
                 if proto < 1:
-                    self.assertIn(b"\nI64206", s)  # INT
+                    self.assertIn(b'\nI64206', s)  # INT
                 elif proto < 2:
-                    self.assertIn(b"M\xce\xfa", s)  # BININT2
+                    self.assertIn(b'M\xce\xfa', s)  # BININT2
                 elif proto < 4:
-                    self.assertIn(b"X\x04\x00\x00\x00FACE", s)  # BINUNICODE
+                    self.assertIn(b'X\x04\x00\x00\x00FACE', s)  # BINUNICODE
                 else:
-                    self.assertIn(b"\x8c\x04FACE", s)  # SHORT_BINUNICODE
+                    self.assertIn(b'\x8c\x04FACE', s)  # SHORT_BINUNICODE
                 self.assertFalse(opcode_in_pickle(pickle.NEWOBJ, s))
-                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ_EX, s), 4 <= proto)
-                y = self.loads(s)  # will raise TypeError if __init__ called
+                self.assertEqual(opcode_in_pickle(pickle.NEWOBJ_EX, s),
+                                 4 <= proto)
+                y = self.loads(s)   # will raise TypeError if __init__ called
                 self.assert_is_copy(x, y)
 
     def test_newobj_list_slots(self):
@@ -2241,7 +2192,6 @@ class AbstractPickleTests(unittest.TestCase):
             def __reduce__(self):
                 # 4th item is not an iterator
                 return list, (), None, [], None
-
         class D(object):
             def __reduce__(self):
                 # 5th item is not an iterator
@@ -2299,7 +2249,7 @@ class AbstractPickleTests(unittest.TestCase):
         # Test the correctness of internal buffering routines when handling
         # large data.
         for proto in protocols:
-            data = (1, min, b"xy" * (30 * 1024), len)
+            data = (1, min, b'xy' * (30 * 1024), len)
             dumped = self.dumps(data, proto)
             loaded = self.loads(dumped)
             self.assertEqual(len(loaded), len(data))
@@ -2309,7 +2259,7 @@ class AbstractPickleTests(unittest.TestCase):
         # Test compacity of int representation (see issue #12744)
         for proto in protocols:
             with self.subTest(proto=proto):
-                pickles = [self.dumps(2 ** n, proto) for n in range(70)]
+                pickles = [self.dumps(2**n, proto) for n in range(70)]
                 sizes = list(map(len, pickles))
                 # the size function is monotonic
                 self.assertEqual(sorted(sizes), sizes)
@@ -2354,13 +2304,8 @@ class AbstractPickleTests(unittest.TestCase):
         the following consistency check.
         """
         frame_end = frameless_start = None
-        frameless_opcodes = {
-            "BINBYTES",
-            "BINUNICODE",
-            "BINBYTES8",
-            "BINUNICODE8",
-            "BYTEARRAY8",
-        }
+        frameless_opcodes = {'BINBYTES', 'BINUNICODE', 'BINBYTES8',
+                             'BINUNICODE8', 'BYTEARRAY8'}
         for op, arg, pos in pickletools.genops(pickled):
             if frame_end is not None:
                 self.assertLessEqual(pos, frame_end)
@@ -2368,25 +2313,26 @@ class AbstractPickleTests(unittest.TestCase):
                     frame_end = None
 
             if frame_end is not None:  # framed
-                self.assertNotEqual(op.name, "FRAME")
+                self.assertNotEqual(op.name, 'FRAME')
                 if op.name in frameless_opcodes:
                     # Only short bytes and str objects should be written
                     # in a frame
                     self.assertLessEqual(len(arg), self.FRAME_SIZE_TARGET)
 
             else:  # not framed
-                if op.name == "FRAME" or (
-                    op.name in frameless_opcodes and len(arg) > self.FRAME_SIZE_TARGET
-                ):
+                if (op.name == 'FRAME' or
+                    (op.name in frameless_opcodes and
+                     len(arg) > self.FRAME_SIZE_TARGET)):
                     # Frame or large bytes or str object
                     if frameless_start is not None:
                         # Only short data should be written outside of a frame
-                        self.assertLess(pos - frameless_start, self.FRAME_SIZE_MIN)
+                        self.assertLess(pos - frameless_start,
+                                        self.FRAME_SIZE_MIN)
                         frameless_start = None
-                elif frameless_start is None and op.name != "PROTO":
+                elif frameless_start is None and op.name != 'PROTO':
                     frameless_start = pos
 
-            if op.name == "FRAME":
+            if op.name == 'FRAME':
                 self.assertGreaterEqual(arg, self.FRAME_SIZE_MIN)
                 frame_end = pos + 9 + arg
 
@@ -2397,21 +2343,24 @@ class AbstractPickleTests(unittest.TestCase):
             self.assertLess(pos - frameless_start, self.FRAME_SIZE_MIN)
 
     def test_framing_many_objects(self):
-        obj = list(range(10 ** 5))
+        obj = list(range(10**5))
         for proto in range(4, pickle.HIGHEST_PROTOCOL + 1):
             with self.subTest(proto=proto):
                 pickled = self.dumps(obj, proto)
                 unpickled = self.loads(pickled)
                 self.assertEqual(obj, unpickled)
-                bytes_per_frame = len(pickled) / count_opcode(pickle.FRAME, pickled)
-                self.assertGreater(bytes_per_frame, self.FRAME_SIZE_TARGET / 2)
-                self.assertLessEqual(bytes_per_frame, self.FRAME_SIZE_TARGET * 1)
+                bytes_per_frame = (len(pickled) /
+                                   count_opcode(pickle.FRAME, pickled))
+                self.assertGreater(bytes_per_frame,
+                                   self.FRAME_SIZE_TARGET / 2)
+                self.assertLessEqual(bytes_per_frame,
+                                     self.FRAME_SIZE_TARGET * 1)
                 self.check_frame_opcodes(pickled)
 
     def test_framing_large_objects(self):
         N = 1024 * 1024
         small_items = [[i] for i in range(10)]
-        obj = [b"x" * N, *small_items, b"y" * N, "z" * N]
+        obj = [b'x' * N, *small_items, b'y' * N, 'z' * N]
         for proto in range(4, pickle.HIGHEST_PROTOCOL + 1):
             for fast in [False, True]:
                 with self.subTest(proto=proto, fast=fast):
@@ -2421,7 +2370,7 @@ class AbstractPickleTests(unittest.TestCase):
                         pickled = self.dumps(obj, proto)
                     else:
                         # Pickler is required when fast=True.
-                        if not hasattr(self, "pickler"):
+                        if not hasattr(self, 'pickler'):
                             continue
                         buf = io.BytesIO()
                         pickler = self.pickler(buf, protocol=proto)
@@ -2430,7 +2379,8 @@ class AbstractPickleTests(unittest.TestCase):
                         pickled = buf.getvalue()
                     unpickled = self.loads(pickled)
                     # More informative error message in case of failure.
-                    self.assertEqual([len(x) for x in obj], [len(x) for x in unpickled])
+                    self.assertEqual([len(x) for x in obj],
+                                     [len(x) for x in unpickled])
                     # Perform full equality check if the lengths match.
                     self.assertEqual(obj, unpickled)
                     n_frames = count_opcode(pickle.FRAME, pickled)
@@ -2449,7 +2399,7 @@ class AbstractPickleTests(unittest.TestCase):
             # 1 byte for the opcode and 8 for the argument
             frame_opcode_size = 9
             for opcode, _, pos in pickletools.genops(pickled):
-                if opcode.name == "FRAME":
+                if opcode.name == 'FRAME':
                     frame_starts.append(pos)
 
             newpickle = bytearray()
@@ -2477,31 +2427,26 @@ class AbstractPickleTests(unittest.TestCase):
                 self.assertEqual(obj, self.loads(frameless_pickle))
 
                 some_frames_pickle = remove_frames(pickled, lambda i: i % 2)
-                self.assertLess(
-                    count_opcode(pickle.FRAME, some_frames_pickle),
-                    count_opcode(pickle.FRAME, pickled),
-                )
+                self.assertLess(count_opcode(pickle.FRAME, some_frames_pickle),
+                                count_opcode(pickle.FRAME, pickled))
                 self.assertEqual(obj, self.loads(some_frames_pickle))
 
     def test_framed_write_sizes_with_delayed_writer(self):
         class ChunkAccumulator:
             """Accumulate pickler output in a list of raw chunks."""
-
             def __init__(self):
                 self.chunks = []
-
             def write(self, chunk):
                 self.chunks.append(chunk)
-
             def concatenate_chunks(self):
                 return b"".join(self.chunks)
 
         for proto in range(4, pickle.HIGHEST_PROTOCOL + 1):
-            objects = [
-                (str(i).encode("ascii"), i % 42, {"i": str(i)}) for i in range(int(1e4))
-            ]
+            objects = [(str(i).encode('ascii'), i % 42, {'i': str(i)})
+                       for i in range(int(1e4))]
             # Add a large unique ASCII string
-            objects.append("0123456789abcdef" * (self.FRAME_SIZE_TARGET // 16 + 1))
+            objects.append('0123456789abcdef' *
+                           (self.FRAME_SIZE_TARGET // 16 + 1))
 
             # Protocol 4 packs groups of small objects into frames and issues
             # calls to write only once or twice per frame:
@@ -2534,29 +2479,30 @@ class AbstractPickleTests(unittest.TestCase):
             self.assertLessEqual(len(writer.chunks), 2 * n_frames + 3)
 
             chunk_sizes = [len(c) for c in writer.chunks]
-            large_sizes = [s for s in chunk_sizes if s >= self.FRAME_SIZE_TARGET]
-            medium_sizes = [s for s in chunk_sizes if 9 < s < self.FRAME_SIZE_TARGET]
+            large_sizes = [s for s in chunk_sizes
+                           if s >= self.FRAME_SIZE_TARGET]
+            medium_sizes = [s for s in chunk_sizes
+                           if 9 < s < self.FRAME_SIZE_TARGET]
             small_sizes = [s for s in chunk_sizes if s <= 9]
 
             # Large chunks should not be too large:
             for chunk_size in large_sizes:
-                self.assertLess(chunk_size, 2 * self.FRAME_SIZE_TARGET, chunk_sizes)
+                self.assertLess(chunk_size, 2 * self.FRAME_SIZE_TARGET,
+                                chunk_sizes)
             # There shouldn't bee too many small chunks: the protocol header,
             # the frame headers and the large string headers are written
             # in small chunks.
-            self.assertLessEqual(
-                len(small_sizes), len(large_sizes) + len(medium_sizes) + 3, chunk_sizes
-            )
+            self.assertLessEqual(len(small_sizes),
+                                 len(large_sizes) + len(medium_sizes) + 3,
+                                 chunk_sizes)
 
     def test_nested_names(self):
         global Nested
-
         class Nested:
             class A:
                 class B:
                     class C:
                         pass
-
         for proto in range(pickle.HIGHEST_PROTOCOL + 1):
             for obj in [Nested.A, Nested.A.B, Nested.A.B.C]:
                 with self.subTest(proto=proto, obj=obj):
@@ -2565,47 +2511,38 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_recursive_nested_names(self):
         global Recursive
-
         class Recursive:
             pass
-
         Recursive.mod = sys.modules[Recursive.__module__]
-        Recursive.__qualname__ = "Recursive.mod.Recursive"
+        Recursive.__qualname__ = 'Recursive.mod.Recursive'
         for proto in range(pickle.HIGHEST_PROTOCOL + 1):
             with self.subTest(proto=proto):
                 unpickled = self.loads(self.dumps(Recursive, proto))
                 self.assertIs(unpickled, Recursive)
-        del Recursive.mod  # break reference loop
+        del Recursive.mod # break reference loop
 
     def test_py_methods(self):
         global PyMethodsTest
-
         class PyMethodsTest:
             @staticmethod
             def cheese():
                 return "cheese"
-
             @classmethod
             def wine(cls):
                 assert cls is PyMethodsTest
                 return "wine"
-
             def biscuits(self):
                 assert isinstance(self, PyMethodsTest)
                 return "biscuits"
-
             class Nested:
                 "Nested class"
-
                 @staticmethod
                 def ketchup():
                     return "ketchup"
-
                 @classmethod
                 def maple(cls):
                     assert cls is PyMethodsTest.Nested
                     return "maple"
-
                 def pie(self):
                     assert isinstance(self, PyMethodsTest.Nested)
                     return "pie"
@@ -2616,11 +2553,11 @@ class AbstractPickleTests(unittest.TestCase):
             PyMethodsTest().biscuits,
             PyMethodsTest.Nested.ketchup,
             PyMethodsTest.Nested.maple,
-            PyMethodsTest.Nested().pie,
+            PyMethodsTest.Nested().pie
         )
         py_unbound_methods = (
             (PyMethodsTest.biscuits, PyMethodsTest),
-            (PyMethodsTest.Nested.pie, PyMethodsTest.Nested),
+            (PyMethodsTest.Nested.pie, PyMethodsTest.Nested)
         )
         for proto in range(pickle.HIGHEST_PROTOCOL + 1):
             for method in py_methods:
@@ -2635,7 +2572,6 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_c_methods(self):
         global Subclass
-
         class Subclass(tuple):
             class Nested(str):
                 pass
@@ -2658,8 +2594,8 @@ class AbstractPickleTests(unittest.TestCase):
             # built-in static method
             (bytearray.maketrans, (b"abc", b"xyz")),
             # subclass methods
-            (Subclass([1, 2, 2]).count, (2,)),
-            (Subclass.count, (Subclass([1, 2, 2]), 2)),
+            (Subclass([1,2,2]).count, (2,)),
+            (Subclass.count, (Subclass([1,2,2]), 2)),
             (Subclass.Nested("sweet").count, ("e",)),
             (Subclass.Nested.count, (Subclass.Nested("sweet"), "e")),
         )
@@ -2671,20 +2607,20 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_compat_pickle(self):
         tests = [
-            (range(1, 7), "__builtin__", "xrange"),
-            (map(int, "123"), "itertools", "imap"),
-            (functools.reduce, "__builtin__", "reduce"),
-            (dbm.whichdb, "whichdb", "whichdb"),
-            (Exception(), "exceptions", "Exception"),
-            (collections.UserDict(), "UserDict", "IterableUserDict"),
-            (collections.UserList(), "UserList", "UserList"),
-            (collections.defaultdict(), "collections", "defaultdict"),
+            (range(1, 7), '__builtin__', 'xrange'),
+            (map(int, '123'), 'itertools', 'imap'),
+            (functools.reduce, '__builtin__', 'reduce'),
+            (dbm.whichdb, 'whichdb', 'whichdb'),
+            (Exception(), 'exceptions', 'Exception'),
+            (collections.UserDict(), 'UserDict', 'IterableUserDict'),
+            (collections.UserList(), 'UserList', 'UserList'),
+            (collections.defaultdict(), 'collections', 'defaultdict'),
         ]
         for val, mod, name in tests:
             for proto in range(3):
                 with self.subTest(type=type(val), proto=proto):
                     pickled = self.dumps(val, proto)
-                    self.assertIn(("c%s\n%s" % (mod, name)).encode(), pickled)
+                    self.assertIn(('c%s\n%s' % (mod, name)).encode(), pickled)
                     self.assertIs(type(self.loads(pickled)), type(val))
 
     def test_local_lookup_error(self):
@@ -2692,7 +2628,6 @@ class AbstractPickleTests(unittest.TestCase):
         # an assumed globally-reachable object fails.
         def f():
             pass
-
         # Since the function is local, lookup will fail
         for proto in range(0, pickle.HIGHEST_PROTOCOL + 1):
             with self.assertRaises((AttributeError, pickle.PicklingError)):
@@ -2720,18 +2655,18 @@ class AbstractPickleTests(unittest.TestCase):
         yield ZeroCopyBytearray(bytestring)
         if _testbuffer is not None:
             items = list(bytestring)
-            value = int.from_bytes(bytestring, byteorder="little")
+            value = int.from_bytes(bytestring, byteorder='little')
             for flags in (0, _testbuffer.ND_WRITABLE):
                 # 1-D, contiguous
-                yield PicklableNDArray(items, format="B", shape=(8,), flags=flags)
+                yield PicklableNDArray(items, format='B', shape=(8,),
+                                       flags=flags)
                 # 2-D, C-contiguous
-                yield PicklableNDArray(
-                    items, format="B", shape=(4, 2), strides=(2, 1), flags=flags
-                )
+                yield PicklableNDArray(items, format='B', shape=(4, 2),
+                                       strides=(2, 1), flags=flags)
                 # 2-D, Fortran-contiguous
-                yield PicklableNDArray(
-                    items, format="B", shape=(4, 2), strides=(1, 4), flags=flags
-                )
+                yield PicklableNDArray(items, format='B',
+                                       shape=(4, 2), strides=(1, 4),
+                                       flags=flags)
 
     def test_in_band_buffers(self):
         # Test in-band buffers (PEP 574)
@@ -2743,19 +2678,16 @@ class AbstractPickleTests(unittest.TestCase):
                     self.assertIn(b"abcdefgh", data)
                 self.assertEqual(count_opcode(pickle.NEXT_BUFFER, data), 0)
                 if proto >= 5:
-                    self.assertEqual(
-                        count_opcode(pickle.SHORT_BINBYTES, data),
-                        1 if obj.readonly else 0,
-                    )
-                    self.assertEqual(
-                        count_opcode(pickle.BYTEARRAY8, data), 0 if obj.readonly else 1
-                    )
+                    self.assertEqual(count_opcode(pickle.SHORT_BINBYTES, data),
+                                     1 if obj.readonly else 0)
+                    self.assertEqual(count_opcode(pickle.BYTEARRAY8, data),
+                                     0 if obj.readonly else 1)
                     # Return a true value from buffer_callback should have
                     # the same effect
                     def buffer_callback(obj):
                         return True
-
-                    data2 = self.dumps(obj, proto, buffer_callback=buffer_callback)
+                    data2 = self.dumps(obj, proto,
+                                       buffer_callback=buffer_callback)
                     self.assertEqual(data2, data)
 
                 new = self.loads(data)
@@ -2773,18 +2705,19 @@ class AbstractPickleTests(unittest.TestCase):
             for proto in range(0, 5):
                 # Need protocol >= 5 for buffer_callback
                 with self.assertRaises(ValueError):
-                    self.dumps(obj, proto, buffer_callback=[].append)
+                    self.dumps(obj, proto,
+                               buffer_callback=[].append)
             for proto in range(5, pickle.HIGHEST_PROTOCOL + 1):
                 buffers = []
                 buffer_callback = lambda pb: buffers.append(pb.raw())
-                data = self.dumps(obj, proto, buffer_callback=buffer_callback)
+                data = self.dumps(obj, proto,
+                                  buffer_callback=buffer_callback)
                 self.assertNotIn(b"abcdefgh", data)
                 self.assertEqual(count_opcode(pickle.SHORT_BINBYTES, data), 0)
                 self.assertEqual(count_opcode(pickle.BYTEARRAY8, data), 0)
                 self.assertEqual(count_opcode(pickle.NEXT_BUFFER, data), 1)
-                self.assertEqual(
-                    count_opcode(pickle.READONLY_BUFFER, data), 1 if obj.readonly else 0
-                )
+                self.assertEqual(count_opcode(pickle.READONLY_BUFFER, data),
+                                 1 if obj.readonly else 0)
 
                 if obj.c_contiguous:
                     self.assertEqual(bytes(buffers[0]), b"abcdefgh")
@@ -2830,8 +2763,7 @@ class AbstractPickleTests(unittest.TestCase):
 
     def test_buffer_callback_error(self):
         def buffer_callback(buffers):
-            1 / 0
-
+            1/0
         pb = pickle.PickleBuffer(b"foobar")
         with self.assertRaises(ZeroDivisionError):
             self.dumps(pb, 5, buffer_callback=buffer_callback)
@@ -2930,11 +2862,12 @@ class BigmemPickleTests(unittest.TestCase):
                 with self.subTest(proto=proto):
                     try:
                         pickled = self.dumps(data, protocol=proto)
-                        header = pickle.BINBYTES + struct.pack("<I", len(data))
+                        header = (pickle.BINBYTES +
+                                  struct.pack("<I", len(data)))
                         data_start = pickled.index(data)
                         self.assertEqual(
-                            header, pickled[data_start - len(header) : data_start]
-                        )
+                            header,
+                            pickled[data_start-len(header):data_start])
                     finally:
                         pickled = None
         finally:
@@ -2956,11 +2889,12 @@ class BigmemPickleTests(unittest.TestCase):
                         continue
                     try:
                         pickled = self.dumps(data, protocol=proto)
-                        header = pickle.BINBYTES8 + struct.pack("<Q", len(data))
+                        header = (pickle.BINBYTES8 +
+                                  struct.pack("<Q", len(data)))
                         data_start = pickled.index(data)
                         self.assertEqual(
-                            header, pickled[data_start - len(header) : data_start]
-                        )
+                            header,
+                            pickled[data_start-len(header):data_start])
                     finally:
                         pickled = None
         finally:
@@ -2979,19 +2913,14 @@ class BigmemPickleTests(unittest.TestCase):
                 with self.subTest(proto=proto):
                     try:
                         pickled = self.dumps(data, protocol=proto)
-                        header = pickle.BINUNICODE + struct.pack("<I", len(data))
-                        data_start = pickled.index(b"abcd")
+                        header = (pickle.BINUNICODE +
+                                  struct.pack("<I", len(data)))
+                        data_start = pickled.index(b'abcd')
                         self.assertEqual(
-                            header, pickled[data_start - len(header) : data_start]
-                        )
-                        self.assertEqual(
-                            (
-                                pickled.rindex(b"abcd")
-                                + len(b"abcd")
-                                - pickled.index(b"abcd")
-                            ),
-                            len(data),
-                        )
+                            header,
+                            pickled[data_start-len(header):data_start])
+                        self.assertEqual((pickled.rindex(b"abcd") + len(b"abcd") -
+                                          pickled.index(b"abcd")), len(data))
                     finally:
                         pickled = None
         finally:
@@ -3015,19 +2944,14 @@ class BigmemPickleTests(unittest.TestCase):
                         continue
                     try:
                         pickled = self.dumps(data, protocol=proto)
-                        header = pickle.BINUNICODE8 + struct.pack("<Q", len(data))
-                        data_start = pickled.index(b"abcd")
+                        header = (pickle.BINUNICODE8 +
+                                  struct.pack("<Q", len(data)))
+                        data_start = pickled.index(b'abcd')
                         self.assertEqual(
-                            header, pickled[data_start - len(header) : data_start]
-                        )
-                        self.assertEqual(
-                            (
-                                pickled.rindex(b"abcd")
-                                + len(b"abcd")
-                                - pickled.index(b"abcd")
-                            ),
-                            len(data),
-                        )
+                            header,
+                            pickled[data_start-len(header):data_start])
+                        self.assertEqual((pickled.rindex(b"abcd") + len(b"abcd") -
+                                          pickled.index(b"abcd")), len(data))
                     finally:
                         pickled = None
         finally:
@@ -3036,173 +2960,124 @@ class BigmemPickleTests(unittest.TestCase):
 
 # Test classes for reduce_ex
 
-
 class REX_one(object):
     """No __reduce_ex__ here, but inheriting it from object"""
-
     _reduce_called = 0
-
     def __reduce__(self):
         self._reduce_called = 1
         return REX_one, ()
 
-
 class REX_two(object):
     """No __reduce__ here, but inheriting it from object"""
-
     _proto = None
-
     def __reduce_ex__(self, proto):
         self._proto = proto
         return REX_two, ()
-
 
 class REX_three(object):
     _proto = None
-
     def __reduce_ex__(self, proto):
         self._proto = proto
         return REX_two, ()
-
     def __reduce__(self):
         raise TestFailed("This __reduce__ shouldn't be called")
 
-
 class REX_four(object):
     """Calling base class method should succeed"""
-
     _proto = None
-
     def __reduce_ex__(self, proto):
         self._proto = proto
         return object.__reduce_ex__(self, proto)
 
-
 class REX_five(object):
     """This one used to fail with infinite recursion"""
-
     _reduce_called = 0
-
     def __reduce__(self):
         self._reduce_called = 1
         return object.__reduce__(self)
-
 
 class REX_six(object):
     """This class is used to check the 4th argument (list iterator) of
     the reduce protocol.
     """
-
     def __init__(self, items=None):
         self.items = items if items is not None else []
-
     def __eq__(self, other):
         return type(self) is type(other) and self.items == other.items
-
     def append(self, item):
         self.items.append(item)
-
     def __reduce__(self):
         return type(self), (), None, iter(self.items), None
-
 
 class REX_seven(object):
     """This class is used to check the 5th argument (dict iterator) of
     the reduce protocol.
     """
-
     def __init__(self, table=None):
         self.table = table if table is not None else {}
-
     def __eq__(self, other):
         return type(self) is type(other) and self.table == other.table
-
     def __setitem__(self, key, value):
         self.table[key] = value
-
     def __reduce__(self):
         return type(self), (), None, None, iter(self.table.items())
 
 
 # Test classes for newobj
 
-
 class MyInt(int):
     sample = 1
-
 
 class MyFloat(float):
     sample = 1.0
 
-
 class MyComplex(complex):
     sample = 1.0 + 0.0j
-
 
 class MyStr(str):
     sample = "hello"
 
-
 class MyUnicode(str):
     sample = "hello \u1234"
-
 
 class MyTuple(tuple):
     sample = (1, 2, 3)
 
-
 class MyList(list):
     sample = [1, 2, 3]
-
 
 class MyDict(dict):
     sample = {"a": 1, "b": 2}
 
-
 class MySet(set):
     sample = {"a", "b"}
-
 
 class MyFrozenSet(frozenset):
     sample = frozenset({"a", "b"})
 
-
-myclasses = [
-    MyInt,
-    MyFloat,
-    MyComplex,
-    MyStr,
-    MyUnicode,
-    MyTuple,
-    MyList,
-    MyDict,
-    MySet,
-    MyFrozenSet,
-]
+myclasses = [MyInt, MyFloat,
+             MyComplex,
+             MyStr, MyUnicode,
+             MyTuple, MyList, MyDict, MySet, MyFrozenSet]
 
 
 class SlotList(MyList):
     __slots__ = ["foo"]
 
-
 class SimpleNewObj(int):
     def __init__(self, *args, **kwargs):
         # raise an error, to make sure this isn't called
         raise TypeError("SimpleNewObj.__init__() didn't expect to get called")
-
     def __eq__(self, other):
         return int(self) == int(other) and self.__dict__ == other.__dict__
 
-
 class ComplexNewObj(SimpleNewObj):
     def __getnewargs__(self):
-        return ("%X" % self, 16)
-
+        return ('%X' % self, 16)
 
 class ComplexNewObjEx(SimpleNewObj):
     def __getnewargs_ex__(self):
-        return ("%X" % self,), {"base": 16}
-
+        return ('%X' % self,), {'base': 16}
 
 class BadGetattr:
     def __getattr__(self, key):
@@ -3210,6 +3085,7 @@ class BadGetattr:
 
 
 class AbstractPickleModuleTests(unittest.TestCase):
+
     def test_dump_closed_file(self):
         f = open(TESTFN, "wb")
         try:
@@ -3259,20 +3135,16 @@ class AbstractPickleModuleTests(unittest.TestCase):
 
     def test_incomplete_input(self):
         s = io.BytesIO(b"X''.")
-        self.assertRaises(
-            (EOFError, struct.error, pickle.UnpicklingError), self.load, s
-        )
+        self.assertRaises((EOFError, struct.error, pickle.UnpicklingError), self.load, s)
 
     def test_bad_init(self):
         # Test issue3664 (pickle can segfault from a badly initialized Pickler).
         # Override initialization without calling __init__() of the superclass.
         class BadPickler(self.Pickler):
-            def __init__(self):
-                pass
+            def __init__(self): pass
 
         class BadUnpickler(self.Unpickler):
-            def __init__(self):
-                pass
+            def __init__(self): pass
 
         self.assertRaises(pickle.PicklingError, BadPickler().dump, 0)
         self.assertRaises(pickle.UnpicklingError, BadUnpickler().load)
@@ -3286,11 +3158,13 @@ class AbstractPickleModuleTests(unittest.TestCase):
         for proto in range(0, 5):
             # Need protocol >= 5 for buffer_callback
             with self.assertRaises(ValueError):
-                dumps(obj, protocol=proto, buffer_callback=[].append)
+                dumps(obj, protocol=proto,
+                      buffer_callback=[].append)
         for proto in range(5, pickle.HIGHEST_PROTOCOL + 1):
             buffers = []
             buffer_callback = buffers.append
-            data = dumps(obj, protocol=proto, buffer_callback=buffer_callback)
+            data = dumps(obj, protocol=proto,
+                         buffer_callback=buffer_callback)
             self.assertNotIn(b"foo", data)
             self.assertEqual(bytes(buffers[0]), b"foo")
             # Need buffers argument to unpickle properly
@@ -3358,6 +3232,7 @@ class AbstractPersistentPicklerTests(unittest.TestCase):
 
 
 class AbstractIdentityPersistentPicklerTests(unittest.TestCase):
+
     def persistent_id(self, obj):
         return obj
 
@@ -3381,7 +3256,7 @@ class AbstractIdentityPersistentPicklerTests(unittest.TestCase):
     def test_protocol0_is_ascii_only(self):
         non_ascii_str = "\N{EMPTY SET}"
         self.assertRaises(pickle.PicklingError, self.dumps, non_ascii_str, 0)
-        pickled = pickle.PERSID + non_ascii_str.encode("utf-8") + b"\n."
+        pickled = pickle.PERSID + non_ascii_str.encode('utf-8') + b'\n.'
         self.assertRaises(pickle.UnpicklingError, self.loads, pickled)
 
 
@@ -3546,13 +3421,11 @@ class AbstractPicklerUnpicklerObjectTests(unittest.TestCase):
 
 # Tests for dispatch_table attribute
 
-REDUCE_A = "reduce_A"
-
+REDUCE_A = 'reduce_A'
 
 class AAA(object):
     def __reduce__(self):
         return str, (REDUCE_A,)
-
 
 class BBB(object):
     def __init__(self):
@@ -3576,31 +3449,30 @@ def setstate_bbb(obj, state):
     obj.a = "custom state_setter"
 
 
+
 class AbstractCustomPicklerClass:
     """Pickler implementing a reducing hook using reducer_override."""
-
     def reducer_override(self, obj):
         obj_name = getattr(obj, "__name__", None)
 
-        if obj_name == "f":
+        if obj_name == 'f':
             # asking the pickler to save f as 5
-            return int, (5,)
+            return int, (5, )
 
-        if obj_name == "MyClass":
-            return str, ("some str",)
+        if obj_name == 'MyClass':
+            return str, ('some str',)
 
-        elif obj_name == "g":
+        elif obj_name == 'g':
             # in this case, the callback returns an invalid result (not a 2-5
             # tuple or a string), the pickler should raise a proper error.
             return False
 
-        elif obj_name == "h":
+        elif obj_name == 'h':
             # Simulate a case when the reducer fails. The error should
             # be propagated to the original ``dump`` call.
-            raise ValueError("The reducer just failed")
+            raise ValueError('The reducer just failed')
 
         return NotImplemented
-
 
 class AbstractHookTests(unittest.TestCase):
     def test_pickler_hook(self):
@@ -3629,7 +3501,7 @@ class AbstractHookTests(unittest.TestCase):
                 new_f, some_str, math_log = pickle.loads(bio.getvalue())
 
                 self.assertEqual(new_f, 5)
-                self.assertEqual(some_str, "some str")
+                self.assertEqual(some_str, 'some str')
                 # math.log does not have its usual reducer overriden, so the
                 # custom reduction callback should silently direct the pickler
                 # to the default pickling by attribute, by returning
@@ -3639,7 +3511,8 @@ class AbstractHookTests(unittest.TestCase):
                 with self.assertRaises(pickle.PicklingError):
                     p.dump(g)
 
-                with self.assertRaisesRegex(ValueError, "The reducer just failed"):
+                with self.assertRaisesRegex(
+                        ValueError, 'The reducer just failed'):
                     p.dump(h)
 
     @support.cpython_only
@@ -3650,7 +3523,6 @@ class AbstractHookTests(unittest.TestCase):
 
         for proto in range(0, pickle.HIGHEST_PROTOCOL + 1):
             with self.subTest(proto=proto):
-
                 def f():
                     pass
 
@@ -3669,13 +3541,14 @@ class AbstractHookTests(unittest.TestCase):
 
 
 class AbstractDispatchTableTests(unittest.TestCase):
+
     def test_default_dispatch_table(self):
         # No dispatch_table attribute by default
         f = io.BytesIO()
         p = self.pickler_class(f, 0)
         with self.assertRaises(AttributeError):
             p.dispatch_table
-        self.assertFalse(hasattr(p, "dispatch_table"))
+        self.assertFalse(hasattr(p, 'dispatch_table'))
 
     def test_class_dispatch_table(self):
         # A dispatch_table attribute can be specified class-wide
@@ -3721,11 +3594,9 @@ class AbstractDispatchTableTests(unittest.TestCase):
         self.assertEqual(default_load_dump(z), z)
 
         # modify pickling of complex
-        REDUCE_1 = "reduce_1"
-
+        REDUCE_1 = 'reduce_1'
         def reduce_1(obj):
             return str, (REDUCE_1,)
-
         dispatch_table[complex] = reduce_1
         self.assertEqual(custom_load_dump(z), REDUCE_1)
         self.assertEqual(default_load_dump(z), z)
@@ -3746,11 +3617,9 @@ class AbstractDispatchTableTests(unittest.TestCase):
         self.assertIsInstance(default_load_dump(b), BBB)
 
         # revert pickling of BBB and modify pickling of AAA
-        REDUCE_2 = "reduce_2"
-
+        REDUCE_2 = 'reduce_2'
         def reduce_2(obj):
             return str, (REDUCE_2,)
-
         dispatch_table[AAA] = reduce_2
         del dispatch_table[BBB]
         self.assertEqual(custom_load_dump(a), REDUCE_2)
@@ -3781,18 +3650,17 @@ class AbstractDispatchTableTests(unittest.TestCase):
 if __name__ == "__main__":
     # Print some stuff that can be used to rewrite DATA{0,1,2}
     from pickletools import dis
-
     x = create_data()
-    for i in range(pickle.HIGHEST_PROTOCOL + 1):
+    for i in range(pickle.HIGHEST_PROTOCOL+1):
         p = pickle.dumps(x, i)
         print("DATA{0} = (".format(i))
         for j in range(0, len(p), 20):
-            b = bytes(p[j : j + 20])
+            b = bytes(p[j:j+20])
             print("    {0!r}".format(b))
         print(")")
         print()
         print("# Disassembly of DATA{0}".format(i))
-        print('DATA{0}_DIS = """\\'.format(i))
+        print("DATA{0}_DIS = \"\"\"\\".format(i))
         dis(p)
-        print('"""')
+        print("\"\"\"")
         print()

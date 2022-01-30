@@ -16,15 +16,13 @@ class RequestMetadata:
             time to `request_slo_ms`.
     """
 
-    def __init__(
-        self,
-        endpoint,
-        request_context,
-        relative_slo_ms=None,
-        absolute_slo_ms=None,
-        call_method="__call__",
-        shard_key=None,
-    ):
+    def __init__(self,
+                 endpoint,
+                 request_context,
+                 relative_slo_ms=None,
+                 absolute_slo_ms=None,
+                 call_method="__call__",
+                 shard_key=None):
 
         self.endpoint = endpoint
         self.request_context = request_context

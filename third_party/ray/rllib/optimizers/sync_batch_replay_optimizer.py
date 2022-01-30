@@ -3,11 +3,8 @@ import random
 import ray
 from ray.rllib.evaluation.metrics import get_learner_stats
 from ray.rllib.optimizers.policy_optimizer import PolicyOptimizer
-from ray.rllib.policy.sample_batch import (
-    SampleBatch,
-    DEFAULT_POLICY_ID,
-    MultiAgentBatch,
-)
+from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
+    MultiAgentBatch
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.timer import TimerStat
 
@@ -17,9 +14,11 @@ class SyncBatchReplayOptimizer(PolicyOptimizer):
 
     This enables RNN support. Does not currently support prioritization."""
 
-    def __init__(
-        self, workers, learning_starts=1000, buffer_size=10000, train_batch_size=32
-    ):
+    def __init__(self,
+                 workers,
+                 learning_starts=1000,
+                 buffer_size=10000,
+                 train_batch_size=32):
         """Initialize a batch replay optimizer.
 
         Arguments:
@@ -57,8 +56,7 @@ class SyncBatchReplayOptimizer(PolicyOptimizer):
         with self.sample_timer:
             if self.workers.remote_workers():
                 batches = ray.get(
-                    [e.sample.remote() for e in self.workers.remote_workers()]
-                )
+                    [e.sample.remote() for e in self.workers.remote_workers()])
             else:
                 batches = [self.workers.local_worker().sample()]
 
@@ -66,7 +64,9 @@ class SyncBatchReplayOptimizer(PolicyOptimizer):
             tmp = []
             for batch in batches:
                 if isinstance(batch, SampleBatch):
-                    batch = MultiAgentBatch({DEFAULT_POLICY_ID: batch}, batch.count)
+                    batch = MultiAgentBatch({
+                        DEFAULT_POLICY_ID: batch
+                    }, batch.count)
                 tmp.append(batch)
             batches = tmp
 
@@ -74,10 +74,8 @@ class SyncBatchReplayOptimizer(PolicyOptimizer):
                 if batch.count > self.max_buffer_size:
                     raise ValueError(
                         "The size of a single sample batch exceeds the replay "
-                        "buffer size ({} > {})".format(
-                            batch.count, self.max_buffer_size
-                        )
-                    )
+                        "buffer size ({} > {})".format(batch.count,
+                                                       self.max_buffer_size))
                 self.replay_buffer.append(batch)
                 self.num_steps_sampled += batch.count
                 self.buffer_size += batch.count
@@ -93,16 +91,16 @@ class SyncBatchReplayOptimizer(PolicyOptimizer):
     @override(PolicyOptimizer)
     def stats(self):
         return dict(
-            PolicyOptimizer.stats(self),
-            **{
+            PolicyOptimizer.stats(self), **{
                 "sample_time_ms": round(1000 * self.sample_timer.mean, 3),
                 "grad_time_ms": round(1000 * self.grad_timer.mean, 3),
-                "update_time_ms": round(1000 * self.update_weights_timer.mean, 3),
-                "opt_peak_throughput": round(self.grad_timer.mean_throughput, 3),
+                "update_time_ms": round(1000 * self.update_weights_timer.mean,
+                                        3),
+                "opt_peak_throughput": round(self.grad_timer.mean_throughput,
+                                             3),
                 "opt_samples": round(self.grad_timer.mean_units_processed, 3),
                 "learner": self.learner_stats,
-            }
-        )
+            })
 
     def _optimize(self):
         samples = [random.choice(self.replay_buffer)]

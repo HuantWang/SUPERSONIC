@@ -45,12 +45,10 @@ class MyTrainableClass(Trainable):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing"
-    )
+        "--smoke-test", action="store_true", help="Finish quickly for testing")
     parser.add_argument(
         "--ray-address",
-        help="Address of Ray cluster for seamless distributed execution.",
-    )
+        help="Address of Ray cluster for seamless distributed execution.")
     args, _ = parser.parse_known_args()
     ray.init(address=args.ray_address)
 
@@ -63,18 +61,18 @@ if __name__ == "__main__":
         metric="episode_reward_mean",
         mode="max",
         grace_period=5,
-        max_t=100,
-    )
+        max_t=100)
 
-    run(
-        MyTrainableClass,
+    run(MyTrainableClass,
         name="asynchyperband_test",
         scheduler=ahb,
         stop={"training_iteration": 1 if args.smoke_test else 99999},
         num_samples=20,
-        resources_per_trial={"cpu": 1, "gpu": 0},
+        resources_per_trial={
+            "cpu": 1,
+            "gpu": 0
+        },
         config={
             "width": sample_from(lambda spec: 10 + int(90 * random.random())),
             "height": sample_from(lambda spec: int(100 * random.random())),
-        },
-    )
+        })

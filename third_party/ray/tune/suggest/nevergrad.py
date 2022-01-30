@@ -1,6 +1,5 @@
 import logging
 import pickle
-
 try:
     import nevergrad as ng
 except ImportError:
@@ -65,53 +64,47 @@ class NevergradSearch(Searcher):
 
     """
 
-    def __init__(
-        self,
-        optimizer,
-        parameter_names,
-        metric="episode_reward_mean",
-        mode="max",
-        max_concurrent=None,
-        **kwargs
-    ):
+    def __init__(self,
+                 optimizer,
+                 parameter_names,
+                 metric="episode_reward_mean",
+                 mode="max",
+                 max_concurrent=None,
+                 **kwargs):
         assert ng is not None, "Nevergrad must be installed!"
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
 
         self._parameters = parameter_names
         # nevergrad.tell internally minimizes, so "max" => -1
         if mode == "max":
-            self._metric_op = -1.0
+            self._metric_op = -1.
         elif mode == "min":
-            self._metric_op = 1.0
+            self._metric_op = 1.
         self._nevergrad_opt = optimizer
         self._live_trial_mapping = {}
         self.max_concurrent = max_concurrent
         super(NevergradSearch, self).__init__(
-            metric=metric, mode=mode, max_concurrent=max_concurrent, **kwargs
-        )
+            metric=metric, mode=mode, max_concurrent=max_concurrent, **kwargs)
         # validate parameters
         if hasattr(optimizer, "instrumentation"):  # added in v0.2.0
             if optimizer.instrumentation.kwargs:
                 if optimizer.instrumentation.args:
-                    raise ValueError("Instrumented optimizers should use kwargs only")
-                if parameter_names is not None:
                     raise ValueError(
-                        "Instrumented optimizers should provide "
-                        "None as parameter_names"
-                    )
+                        "Instrumented optimizers should use kwargs only")
+                if parameter_names is not None:
+                    raise ValueError("Instrumented optimizers should provide "
+                                     "None as parameter_names")
             else:
                 if parameter_names is None:
-                    raise ValueError(
-                        "Non-instrumented optimizers should have "
-                        "a list of parameter_names"
-                    )
+                    raise ValueError("Non-instrumented optimizers should have "
+                                     "a list of parameter_names")
                 if len(optimizer.instrumentation.args) != 1:
-                    raise ValueError("Instrumented optimizers should use kwargs only")
-        if parameter_names is not None and optimizer.dimension != len(parameter_names):
-            raise ValueError(
-                "len(parameters_names) must match optimizer "
-                "dimension for non-instrumented optimizers"
-            )
+                    raise ValueError(
+                        "Instrumented optimizers should use kwargs only")
+        if parameter_names is not None and optimizer.dimension != len(
+                parameter_names):
+            raise ValueError("len(parameters_names) must match optimizer "
+                             "dimension for non-instrumented optimizers")
 
     def suggest(self, trial_id):
         if self.max_concurrent:
@@ -141,7 +134,8 @@ class NevergradSearch(Searcher):
 
     def _process_result(self, trial_id, result):
         ng_trial_info = self._live_trial_mapping[trial_id]
-        self._nevergrad_opt.tell(ng_trial_info, self._metric_op * result[self._metric])
+        self._nevergrad_opt.tell(ng_trial_info,
+                                 self._metric_op * result[self._metric])
 
     def save(self, checkpoint_dir):
         trials_object = (self._nevergrad_opt, self._parameters)

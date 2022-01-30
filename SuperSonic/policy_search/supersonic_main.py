@@ -141,6 +141,7 @@ parser.add_argument(
 )
 parser.add_argument("--Policy", help="Policy")
 parser.add_argument("--Dataset", help="Dataset")
+parser.add_argument("--datapath",default="../../tasks/CSR/DATA", help="Input Data Path and split to train/valid")
 
 class PolSearch_main:
     """:class:
@@ -164,14 +165,15 @@ class PolSearch_main:
         os.makedirs(directory)
 
         self.flags.Policy = policy_define.SuperOptimizer(
-            StateFunctions=["Word2vec", "Doc2vec", "Bert", "Actionhistory"],
+            StateFunctions=["Word2vec", "Doc2vec", "Bert"],
             RewardFunctions=["weight"],
             RLAlgorithms=["MCTS", "PPO", "DQN", "QLearning"],
             ActionFunctions=["init"],
         ).PolicyDefined()
 
         self.flags.Dataset = policy_define.SuperOptimizer(
-            datapath="../../tasks/stoke/example/hacker"
+            datapath=self.flags.datapath
+            # datapath="../../tasks/stoke/example/hacker"
         ).cross_valid()
 
         arguments = (
@@ -188,7 +190,7 @@ class PolSearch_main:
 
         print("starting to run the best policy for your task")
 
-        TaskEngine(bestpolicy,tasks_name='Stoke').run()
+        # TaskEngine(bestpolicy,tasks_name='Stoke').run()
 
 
 if __name__ == "__main__":

@@ -14,7 +14,6 @@ class EndpointPolicy:
     provide a non-default constructor. However, this state will be lost when
     the policy is updated (e.g., a new backend is added).
     """
-
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -49,7 +48,8 @@ class RandomEndpointPolicy(EndpointPolicy):
     """
 
     def __init__(self, traffic_dict):
-        self.backend_names, self.backend_weights = zip(*sorted(traffic_dict.items()))
+        self.backend_names, self.backend_weights = zip(
+            *sorted(traffic_dict.items()))
 
     def flush(self, endpoint_queue, backend_queues):
         if len(self.backend_names) == 0:
@@ -68,8 +68,8 @@ class RandomEndpointPolicy(EndpointPolicy):
                 rstate = np.random.RandomState(seed)
 
             chosen_backend = rstate.choice(
-                self.backend_names, replace=False, p=self.backend_weights
-            ).squeeze()
+                self.backend_names, replace=False,
+                p=self.backend_weights).squeeze()
 
             assigned_backends.add(chosen_backend)
             backend_queues[chosen_backend].add(query)

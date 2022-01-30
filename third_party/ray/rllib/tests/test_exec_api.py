@@ -19,8 +19,11 @@ class TestDistributedExecution(unittest.TestCase):
     def test_exec_plan_stats(ray_start_regular):
         for fw in framework_iterator(frameworks=("torch", "tf")):
             trainer = A2CTrainer(
-                env="CartPole-v0", config={"min_iter_time_s": 0, "framework": fw,}
-            )
+                env="CartPole-v0",
+                config={
+                    "min_iter_time_s": 0,
+                    "framework": fw,
+                })
             result = trainer.train()
             assert isinstance(result, dict)
             assert "info" in result
@@ -37,22 +40,26 @@ class TestDistributedExecution(unittest.TestCase):
     def test_exec_plan_save_restore(ray_start_regular):
         for fw in framework_iterator(frameworks=("torch", "tf")):
             trainer = A2CTrainer(
-                env="CartPole-v0", config={"min_iter_time_s": 0, "framework": fw,}
-            )
+                env="CartPole-v0",
+                config={
+                    "min_iter_time_s": 0,
+                    "framework": fw,
+                })
             res1 = trainer.train()
             checkpoint = trainer.save()
             for _ in range(2):
                 res2 = trainer.train()
-            assert res2["timesteps_total"] > res1["timesteps_total"], (res1, res2)
+            assert res2["timesteps_total"] > res1["timesteps_total"], \
+                (res1, res2)
             trainer.restore(checkpoint)
 
             # Should restore the timesteps counter to the same as res2.
             res3 = trainer.train()
-            assert res3["timesteps_total"] < res2["timesteps_total"], (res2, res3)
+            assert res3["timesteps_total"] < res2["timesteps_total"], \
+                (res2, res3)
 
 
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

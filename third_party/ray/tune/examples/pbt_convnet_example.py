@@ -7,7 +7,8 @@ import numpy as np
 import torch
 import torch.optim as optim
 from torchvision import datasets
-from ray.tune.examples.mnist_pytorch import train, test, ConvNet, get_data_loaders
+from ray.tune.examples.mnist_pytorch import train, test, ConvNet,\
+    get_data_loaders
 
 import ray
 from ray import tune
@@ -32,8 +33,7 @@ class PytorchTrainble(tune.Trainable):
         self.optimizer = optim.SGD(
             self.model.parameters(),
             lr=config.get("lr", 0.01),
-            momentum=config.get("momentum", 0.9),
-        )
+            momentum=config.get("momentum", 0.9))
 
     def _train(self):
         train(self.model, self.optimizer, self.train_loader)
@@ -72,8 +72,7 @@ class PytorchTrainble(tune.Trainable):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing"
-    )
+        "--smoke-test", action="store_true", help="Finish quickly for testing")
     args, _ = parser.parse_known_args()
 
     ray.init()
@@ -94,8 +93,7 @@ if __name__ == "__main__":
             "lr": lambda: np.random.uniform(0.0001, 1),
             # allow perturbations within this set of categorical values
             "momentum": [0.8, 0.9, 0.99],
-        },
-    )
+        })
 
     # __pbt_end__
 
@@ -127,14 +125,15 @@ if __name__ == "__main__":
         checkpoint_freq=5,
         keep_checkpoints_num=4,
         num_samples=4,
-        config={"lr": tune.uniform(0.001, 1), "momentum": tune.uniform(0.001, 1),},
-    )
+        config={
+            "lr": tune.uniform(0.001, 1),
+            "momentum": tune.uniform(0.001, 1),
+        })
     # __tune_end__
 
     best_trial = analysis.get_best_trial("mean_accuracy")
     best_checkpoint = max(
-        analysis.get_trial_checkpoints_paths(best_trial, "mean_accuracy")
-    )
+        analysis.get_trial_checkpoints_paths(best_trial, "mean_accuracy"))
     restored_trainable = PytorchTrainble()
     restored_trainable.restore(best_checkpoint[0])
     best_model = restored_trainable.model

@@ -28,14 +28,12 @@ class StatusReporter:
         >>>     reporter(timesteps_this_iter=1)
     """
 
-    def __init__(
-        self,
-        result_queue,
-        continue_semaphore,
-        trial_name=None,
-        trial_id=None,
-        logdir=None,
-    ):
+    def __init__(self,
+                 result_queue,
+                 continue_semaphore,
+                 trial_name=None,
+                 trial_id=None,
+                 logdir=None):
         self._queue = result_queue
         self._last_report_time = None
         self._continue_semaphore = continue_semaphore
@@ -62,8 +60,7 @@ class StatusReporter:
 
         assert self._last_report_time is not None, (
             "StatusReporter._start() must be called before the first "
-            "report __call__ is made to ensure correct runtime metrics."
-        )
+            "report __call__ is made to ensure correct runtime metrics.")
 
         # time per iteration is recorded directly in the reporter to ensure
         # any delays in logging results aren't counted
@@ -112,11 +109,8 @@ class _RunnerThread(threading.Thread):
             self._entrypoint()
         except StopIteration:
             logger.debug(
-                (
-                    "Thread runner raised StopIteration. Interperting it as a "
-                    "signal to terminate the thread without error."
-                )
-            )
+                ("Thread runner raised StopIteration. Interperting it as a "
+                 "signal to terminate the thread without error."))
         except Exception as e:
             logger.exception("Runner Thread raised error.")
             try:
@@ -125,16 +119,12 @@ class _RunnerThread(threading.Thread):
                 # case that something went terribly wrong
                 err_tb_str = traceback.format_exc()
                 self._error_queue.put(
-                    err_tb_str, block=True, timeout=ERROR_REPORT_TIMEOUT
-                )
+                    err_tb_str, block=True, timeout=ERROR_REPORT_TIMEOUT)
             except queue.Full:
                 logger.critical(
-                    (
-                        "Runner Thread was unable to report error to main "
-                        "function runner thread. This means a previous error "
-                        "was not processed. This should never happen."
-                    )
-                )
+                    ("Runner Thread was unable to report error to main "
+                     "function runner thread. This means a previous error "
+                     "was not processed. This should never happen."))
             raise e
 
 
@@ -163,8 +153,7 @@ class FunctionRunner(Trainable):
             self._continue_semaphore,
             trial_name=self.trial_name,
             trial_id=self.trial_id,
-            logdir=self.logdir,
-        )
+            logdir=self.logdir)
         self._last_result = {}
         config = config.copy()
 
@@ -208,8 +197,7 @@ class FunctionRunner(Trainable):
             # fetch the next produced result
             try:
                 result = self._results_queue.get(
-                    block=True, timeout=RESULT_FETCH_TIMEOUT
-                )
+                    block=True, timeout=RESULT_FETCH_TIMEOUT)
             except queue.Empty:
                 pass
 
@@ -234,20 +222,14 @@ class FunctionRunner(Trainable):
             # runner thread never reported any results which should not be
             # possible when wrapping functions with `wrap_function`.
             raise TuneError(
-                (
-                    "Wrapped function ran until completion without reporting "
-                    "results or raising an exception."
-                )
-            )
+                ("Wrapped function ran until completion without reporting "
+                 "results or raising an exception."))
 
         else:
             if not self._error_queue.empty():
                 logger.warning(
-                    (
-                        "Runner error waiting to be raised in main thread. "
-                        "Logging all available results first."
-                    )
-                )
+                    ("Runner error waiting to be raised in main thread. "
+                     "Logging all available results first."))
 
         # This keyword appears if the train_func using the Function API
         # finishes without "done=True". This duplicates the last result, but
@@ -264,11 +246,8 @@ class FunctionRunner(Trainable):
         # If everything stayed in synch properly, this should never happen.
         if not self._results_queue.empty():
             logger.warning(
-                (
-                    "Some results were added after the trial stop condition. "
-                    "These results won't be logged."
-                )
-            )
+                ("Some results were added after the trial stop condition. "
+                 "These results won't be logged."))
 
         # Check for any errors that might have been missed.
         self._report_thread_runner_error()
@@ -277,10 +256,10 @@ class FunctionRunner(Trainable):
 
     def _report_thread_runner_error(self, block=False):
         try:
-            err_tb_str = self._error_queue.get(block=block, timeout=ERROR_FETCH_TIMEOUT)
-            raise TuneError(
-                ("Trial raised an exception. Traceback:\n{}".format(err_tb_str))
-            )
+            err_tb_str = self._error_queue.get(
+                block=block, timeout=ERROR_FETCH_TIMEOUT)
+            raise TuneError(("Trial raised an exception. Traceback:\n{}"
+                             .format(err_tb_str)))
         except queue.Empty:
             pass
 
@@ -289,7 +268,7 @@ def wrap_function(train_func):
     class ImplicitFunc(FunctionRunner):
         def _trainable_func(self, config, reporter):
             func_args = inspect.getfullargspec(train_func).args
-            use_track = "reporter" not in func_args and len(func_args) == 1
+            use_track = ("reporter" not in func_args and len(func_args) == 1)
             if use_track:
                 output = train_func(config)
             else:

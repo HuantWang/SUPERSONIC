@@ -51,14 +51,11 @@ class AzureNodeProvider(NodeProvider):
             kwargs["subscription_id"] = provider_config["subscription_id"]
         try:
             self.compute_client = get_client_from_cli_profile(
-                client_class=ComputeManagementClient, **kwargs
-            )
+                client_class=ComputeManagementClient, **kwargs)
             self.network_client = get_client_from_cli_profile(
-                client_class=NetworkManagementClient, **kwargs
-            )
+                client_class=NetworkManagementClient, **kwargs)
             self.resource_client = get_client_from_cli_profile(
-                client_class=ResourceManagementClient, **kwargs
-            )
+                client_class=ResourceManagementClient, **kwargs)
         except CLIError as e:
             if str(e) != "Please run 'az login' to setup account.":
                 raise
@@ -67,14 +64,11 @@ class AzureNodeProvider(NodeProvider):
 
                 credentials = MSIAuthentication()
                 self.compute_client = ComputeManagementClient(
-                    credentials=credentials, **kwargs
-                )
+                    credentials=credentials, **kwargs)
                 self.network_client = NetworkManagementClient(
-                    credentials=credentials, **kwargs
-                )
+                    credentials=credentials, **kwargs)
                 self.resource_client = ResourceManagementClient(
-                    credentials=credentials, **kwargs
-                )
+                    credentials=credentials, **kwargs)
 
         self.lock = RLock()
 
@@ -90,8 +84,7 @@ class AzureNodeProvider(NodeProvider):
             return True
 
         vms = self.compute_client.virtual_machines.list(
-            resource_group_name=self.provider_config["resource_group"]
-        )
+            resource_group_name=self.provider_config["resource_group"])
 
         nodes = [self._extract_metadata(vm) for vm in filter(match_tags, vms)]
         self.cached_nodes = {node["name"]: node for node in nodes}
@@ -104,8 +97,7 @@ class AzureNodeProvider(NodeProvider):
         # get status
         resource_group = self.provider_config["resource_group"]
         instance = self.compute_client.virtual_machines.instance_view(
-            resource_group_name=resource_group, vm_name=vm.name
-        ).as_dict()
+            resource_group_name=resource_group, vm_name=vm.name).as_dict()
         for status in instance["statuses"]:
             code, state = status["code"].split("/")
             # skip provisioning status
@@ -118,8 +110,7 @@ class AzureNodeProvider(NodeProvider):
         metadata["nic_name"] = nic_id.split("/")[-1]
         nic = self.network_client.network_interfaces.get(
             resource_group_name=resource_group,
-            network_interface_name=metadata["nic_name"],
-        )
+            network_interface_name=metadata["nic_name"])
         ip_config = nic.ip_configurations[0]
 
         if not self.provider_config.get("use_internal_ips", False):
@@ -127,8 +118,7 @@ class AzureNodeProvider(NodeProvider):
             metadata["public_ip_name"] = public_ip_id.split("/")[-1]
             public_ip = self.network_client.public_ip_addresses.get(
                 resource_group_name=resource_group,
-                public_ip_address_name=metadata["public_ip_name"],
-            )
+                public_ip_address_name=metadata["public_ip_name"])
             metadata["external_ip"] = public_ip.ip_address
 
         metadata["internal_ip"] = ip_config.private_ip_address
@@ -148,7 +138,10 @@ class AzureNodeProvider(NodeProvider):
             ["node-1", "node-2"]
         """
         nodes = self._get_filtered_nodes(tag_filters=tag_filters)
-        return [k for k, v in nodes.items() if not v["status"].startswith("deallocat")]
+        return [
+            k for k, v in nodes.items()
+            if not v["status"].startswith("deallocat")
+        ]
 
     def is_running(self, node_id):
         """Return whether the specified node is running."""
@@ -168,18 +161,14 @@ class AzureNodeProvider(NodeProvider):
 
     def external_ip(self, node_id):
         """Returns the external ip of the given node."""
-        ip = (
-            self._get_cached_node(node_id=node_id)["external_ip"]
-            or self._get_node(node_id=node_id)["external_ip"]
-        )
+        ip = (self._get_cached_node(node_id=node_id)["external_ip"]
+              or self._get_node(node_id=node_id)["external_ip"])
         return ip
 
     def internal_ip(self, node_id):
         """Returns the internal ip (Ray ip) of the given node."""
-        ip = (
-            self._get_cached_node(node_id=node_id)["internal_ip"]
-            or self._get_node(node_id=node_id)["internal_ip"]
-        )
+        ip = (self._get_cached_node(node_id=node_id)["internal_ip"]
+              or self._get_node(node_id=node_id)["internal_ip"])
         return ip
 
     def create_node(self, node_config, tags, count):
@@ -214,8 +203,11 @@ class AzureNodeProvider(NodeProvider):
                 "mode": DeploymentMode.incremental,
                 "template": template,
                 "parameters": {
-                    key: {"value": value} for key, value in template_params.items()
-                },
+                    key: {
+                        "value": value
+                    }
+                    for key, value in template_params.items()
+                }
             }
         }
 
@@ -223,8 +215,7 @@ class AzureNodeProvider(NodeProvider):
         self.resource_client.deployments.create_or_update(
             resource_group_name=resource_group,
             deployment_name="ray-vm-{}".format(name_tag),
-            parameters=parameters,
-        ).wait()
+            parameters=parameters).wait()
 
     @synchronized
     def set_node_tags(self, node_id, tags):
@@ -234,8 +225,7 @@ class AzureNodeProvider(NodeProvider):
         self.compute_client.virtual_machines.update(
             resource_group_name=self.provider_config["resource_group"],
             vm_name=node_id,
-            parameters={"tags": node_tags},
-        )
+            parameters={"tags": node_tags})
         self.cached_nodes[node_id]["tags"] = node_tags
 
     def terminate_node(self, node_id):
@@ -257,16 +247,14 @@ class AzureNodeProvider(NodeProvider):
 
         # gather disks to delete later
         vm = self.compute_client.virtual_machines.get(
-            resource_group_name=resource_group, vm_name=node_id
-        )
+            resource_group_name=resource_group, vm_name=node_id)
         disks = {d.name for d in vm.storage_profile.data_disks}
         disks.add(vm.storage_profile.os_disk.name)
 
         try:
             # delete machine, must wait for this to complete
             self.compute_client.virtual_machines.delete(
-                resource_group_name=resource_group, vm_name=node_id
-            ).wait()
+                resource_group_name=resource_group, vm_name=node_id).wait()
         except Exception as e:
             logger.warning("Failed to delete VM: {}".format(e))
 
@@ -274,8 +262,7 @@ class AzureNodeProvider(NodeProvider):
             # delete nic
             self.network_client.network_interfaces.delete(
                 resource_group_name=resource_group,
-                network_interface_name=metadata["nic_name"],
-            )
+                network_interface_name=metadata["nic_name"])
         except Exception as e:
             logger.warning("Failed to delete nic: {}".format(e))
 
@@ -284,8 +271,7 @@ class AzureNodeProvider(NodeProvider):
             try:
                 self.network_client.public_ip_addresses.delete(
                     resource_group_name=resource_group,
-                    public_ip_address_name=metadata["public_ip_name"],
-                )
+                    public_ip_address_name=metadata["public_ip_name"])
             except Exception as e:
                 logger.warning("Failed to delete public ip: {}".format(e))
 
@@ -293,8 +279,7 @@ class AzureNodeProvider(NodeProvider):
         for disk in disks:
             try:
                 self.compute_client.disks.delete(
-                    resource_group_name=resource_group, disk_name=disk
-                )
+                    resource_group_name=resource_group, disk_name=disk)
             except Exception as e:
                 logger.warning("Failed to delete disk: {}".format(e))
 

@@ -30,16 +30,14 @@ parser.add_argument("--stop-timesteps", type=int, default=100000)
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    assert not (
-        args.torch and args.mixed_torch_tf
-    ), "Use either --torch or --mixed-torch-tf, not both!"
+    assert not (args.torch and args.mixed_torch_tf),\
+        "Use either --torch or --mixed-torch-tf, not both!"
 
     ray.init()
 
     # Simple environment with 4 independent cartpole entities
-    register_env(
-        "multi_agent_cartpole", lambda _: MultiAgentCartPole({"num_agents": 4})
-    )
+    register_env("multi_agent_cartpole",
+                 lambda _: MultiAgentCartPole({"num_agents": 4}))
     single_env = gym.make("CartPole-v0")
     obs_space = single_env.observation_space
     act_space = single_env.action_space
@@ -47,18 +45,10 @@ if __name__ == "__main__":
     # You can also have multiple policies per trainer, but here we just
     # show one each for PPO and DQN.
     policies = {
-        "ppo_policy": (
-            PPOTorchPolicy if args.torch else PPOTFPolicy,
-            obs_space,
-            act_space,
-            {},
-        ),
-        "dqn_policy": (
-            DQNTorchPolicy if args.torch or args.mixed_torch_tf else DQNTFPolicy,
-            obs_space,
-            act_space,
-            {},
-        ),
+        "ppo_policy": (PPOTorchPolicy if args.torch else PPOTFPolicy,
+                       obs_space, act_space, {}),
+        "dqn_policy": (DQNTorchPolicy if args.torch or args.mixed_torch_tf else
+                       DQNTFPolicy, obs_space, act_space, {}),
     }
 
     def policy_mapping_fn(agent_id):
@@ -80,8 +70,7 @@ if __name__ == "__main__":
             # as well to the DQN agent
             "observation_filter": "NoFilter",
             "framework": "torch" if args.torch else "tf",
-        },
-    )
+        })
 
     dqn_trainer = DQNTrainer(
         env="multi_agent_cartpole",
@@ -93,9 +82,8 @@ if __name__ == "__main__":
             },
             "gamma": 0.95,
             "n_step": 3,
-            "framework": "torch" if args.torch or args.mixed_torch_tf else "tf",
-        },
-    )
+            "framework": "torch" if args.torch or args.mixed_torch_tf else "tf"
+        })
 
     # You should see both the printed X and Y approach 200 as this trains:
     # info:
@@ -116,11 +104,9 @@ if __name__ == "__main__":
         print(pretty_print(result_ppo))
 
         # Test passed gracefully.
-        if (
-            args.as_test
-            and result_dqn["episode_reward_mean"] > args.stop_reward
-            and result_ppo["episode_reward_mean"] > args.stop_reward
-        ):
+        if args.as_test and \
+                result_dqn["episode_reward_mean"] > args.stop_reward and \
+                result_ppo["episode_reward_mean"] > args.stop_reward:
             print("test passed (both agents above requested reward)")
             quit(0)
 
@@ -130,4 +116,5 @@ if __name__ == "__main__":
 
     # Desired reward not reached.
     if args.as_test:
-        raise ValueError("Desired reward ({}) not reached!".format(args.stop_reward))
+        raise ValueError("Desired reward ({}) not reached!".format(
+            args.stop_reward))

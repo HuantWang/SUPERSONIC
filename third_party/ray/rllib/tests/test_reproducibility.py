@@ -13,8 +13,7 @@ class TestReproducibility(unittest.TestCase):
         class PickLargest(gym.Env):
             def __init__(self):
                 self.observation_space = gym.spaces.Box(
-                    low=float("-inf"), high=float("inf"), shape=(4,)
-                )
+                    low=float("-inf"), high=float("inf"), shape=(4, ))
                 self.action_space = gym.spaces.Discrete(4)
 
             def reset(self, **kwargs):
@@ -70,5 +69,4 @@ class TestReproducibility(unittest.TestCase):
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

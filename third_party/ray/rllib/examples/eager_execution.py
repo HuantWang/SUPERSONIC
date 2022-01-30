@@ -39,16 +39,23 @@ def policy_gradient_loss(policy, model, dist_class, train_batch):
 
     actions = train_batch[SampleBatch.ACTIONS]
     rewards = train_batch[SampleBatch.REWARDS]
-    penalty = tf.py_function(compute_penalty, [actions, rewards], Tout=tf.float32)
+    penalty = tf.py_function(
+        compute_penalty, [actions, rewards], Tout=tf.float32)
 
     return penalty - tf.reduce_mean(action_dist.logp(actions) * rewards)
 
 
 # <class 'ray.rllib.policy.tf_policy_template.MyTFPolicy'>
-MyTFPolicy = build_tf_policy(name="MyTFPolicy", loss_fn=policy_gradient_loss,)
+MyTFPolicy = build_tf_policy(
+    name="MyTFPolicy",
+    loss_fn=policy_gradient_loss,
+)
 
 # <class 'ray.rllib.agents.trainer_template.MyCustomTrainer'>
-MyTrainer = build_trainer(name="MyCustomTrainer", default_policy=MyTFPolicy,)
+MyTrainer = build_trainer(
+    name="MyCustomTrainer",
+    default_policy=MyTFPolicy,
+)
 
 if __name__ == "__main__":
     ray.init()
@@ -58,7 +65,9 @@ if __name__ == "__main__":
     config = {
         "env": "CartPole-v0",
         "num_workers": 0,
-        "model": {"custom_model": "eager_model"},
+        "model": {
+            "custom_model": "eager_model"
+        },
         "framework": "tfe",
     }
     stop = {

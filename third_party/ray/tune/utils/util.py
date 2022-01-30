@@ -54,11 +54,9 @@ class UtilMonitor(Thread):
         with self.lock:
             if psutil is not None:
                 self.values["cpu_util_percent"].append(
-                    float(psutil.cpu_percent(interval=None))
-                )
+                    float(psutil.cpu_percent(interval=None)))
                 self.values["ram_util_percent"].append(
-                    float(getattr(psutil.virtual_memory(), "percent"))
-                )
+                    float(getattr(psutil.virtual_memory(), "percent")))
             if GPUtil is not None:
                 gpu_list = []
                 try:
@@ -67,11 +65,9 @@ class UtilMonitor(Thread):
                     logger.debug("GPUtil failed to retrieve GPUs.")
                 for gpu in gpu_list:
                     self.values["gpu_util_percent" + str(gpu.id)].append(
-                        float(gpu.load)
-                    )
+                        float(gpu.load))
                     self.values["vram_util_percent" + str(gpu.id)].append(
-                        float(gpu.memoryUtil)
-                    )
+                        float(gpu.memoryUtil))
 
     def get_data(self):
         if self.stopped:
@@ -81,7 +77,12 @@ class UtilMonitor(Thread):
             ret_values = copy.deepcopy(self.values)
             for key, val in self.values.items():
                 del val[:]
-        return {"perf": {k: np.mean(v) for k, v in ret_values.items() if len(v) > 0}}
+        return {
+            "perf": {
+                k: np.mean(v)
+                for k, v in ret_values.items() if len(v) > 0
+            }
+        }
 
     def run(self):
         self.stopped = False
@@ -132,10 +133,8 @@ class warn_if_slow:
             self.too_slow = True
             logger.warning(
                 "The `%s` operation took %s seconds to complete, "
-                "which may be a performance bottleneck.",
-                self.name,
-                now - self.start,
-            )
+                "which may be a performance bottleneck.", self.name,
+                now - self.start)
 
 
 def merge_dicts(d1, d2):
@@ -152,13 +151,11 @@ def merge_dicts(d1, d2):
     return merged
 
 
-def deep_update(
-    original,
-    new_dict,
-    new_keys_allowed=False,
-    whitelist=None,
-    override_all_if_type_changes=None,
-):
+def deep_update(original,
+                new_dict,
+                new_keys_allowed=False,
+                whitelist=None,
+                override_all_if_type_changes=None):
     """Updates original dict with values from new_dict recursively.
 
     If new key is introduced in new_dict, then if new_keys_allowed is not
@@ -186,12 +183,9 @@ def deep_update(
         # Both orginal value and new one are dicts.
         if isinstance(original.get(k), dict) and isinstance(value, dict):
             # Check old type vs old one. If different, override entire value.
-            if (
-                k in override_all_if_type_changes
-                and "type" in value
-                and "type" in original[k]
-                and value["type"] != original[k]["type"]
-            ):
+            if k in override_all_if_type_changes and \
+                    "type" in value and "type" in original[k] and \
+                    value["type"] != original[k]["type"]:
                 original[k] = value
             # Whitelisted key -> ok to add new subkeys.
             elif k in whitelist:
@@ -238,9 +232,10 @@ def _from_pinnable(obj):
     return obj[0]
 
 
-def validate_save_restore(
-    trainable_cls, config=None, num_gpus=0, use_object_store=False
-):
+def validate_save_restore(trainable_cls,
+                          config=None,
+                          num_gpus=0,
+                          use_object_store=False):
     """Helper method to check if your Trainable class will resume correctly.
 
     Args:
@@ -263,16 +258,15 @@ def validate_save_restore(
 
     assert res.get(TRAINING_ITERATION), (
         "Validation will not pass because it requires `training_iteration` "
-        "to be returned."
-    )
+        "to be returned.")
 
     if use_object_store:
         restore_check = trainable_2.restore_from_object.remote(
-            trainable_1.save_to_object.remote()
-        )
+            trainable_1.save_to_object.remote())
         ray.get(restore_check)
     else:
-        restore_check = ray.get(trainable_2.restore.remote(trainable_1.save.remote()))
+        restore_check = ray.get(
+            trainable_2.restore.remote(trainable_1.save.remote()))
 
     res = ray.get(trainable_2.train.remote())
     assert res[TRAINING_ITERATION] == 4

@@ -64,11 +64,8 @@ class RecurrentNetwork(TorchModelV2):
             seq_lens = torch.Tensor(seq_lens).int()
         output, new_state = self.forward_rnn(
             add_time_dimension(
-                input_dict["obs_flat"].float(), seq_lens, framework="torch"
-            ),
-            state,
-            seq_lens,
-        )
+                input_dict["obs_flat"].float(), seq_lens, framework="torch"),
+            state, seq_lens)
         return torch.reshape(output, [-1, self.num_outputs]), new_state
 
     def forward_rnn(self, inputs, state, seq_lens):
@@ -97,7 +94,8 @@ class LSTMWrapper(RecurrentNetwork, nn.Module):
     """An LSTM wrapper serving as an interface for ModelV2s that set use_lstm.
     """
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+    def __init__(self, obs_space, action_space, num_outputs, model_config,
+                 name):
 
         nn.Module.__init__(self)
         super().__init__(obs_space, action_space, None, model_config, name)
@@ -112,14 +110,12 @@ class LSTMWrapper(RecurrentNetwork, nn.Module):
             in_size=self.cell_size,
             out_size=self.num_outputs,
             activation_fn=None,
-            initializer=torch.nn.init.xavier_uniform_,
-        )
+            initializer=torch.nn.init.xavier_uniform_)
         self._value_branch = SlimFC(
             in_size=self.cell_size,
             out_size=1,
             activation_fn=None,
-            initializer=torch.nn.init.xavier_uniform_,
-        )
+            initializer=torch.nn.init.xavier_uniform_)
 
     @override(RecurrentNetwork)
     def forward(self, input_dict, state, seq_lens):
@@ -134,8 +130,9 @@ class LSTMWrapper(RecurrentNetwork, nn.Module):
     @override(RecurrentNetwork)
     def forward_rnn(self, inputs, state, seq_lens):
         self._features, [h, c] = self.lstm(
-            inputs, [torch.unsqueeze(state[0], 0), torch.unsqueeze(state[1], 0)]
-        )
+            inputs,
+            [torch.unsqueeze(state[0], 0),
+             torch.unsqueeze(state[1], 0)])
         model_out = self._logits_branch(self._features)
         return model_out, [torch.squeeze(h, 0), torch.squeeze(c, 0)]
 
@@ -145,7 +142,7 @@ class LSTMWrapper(RecurrentNetwork, nn.Module):
         linear = next(self._logits_branch._model.children())
         h = [
             linear.weight.new(1, self.cell_size).zero_().squeeze(0),
-            linear.weight.new(1, self.cell_size).zero_().squeeze(0),
+            linear.weight.new(1, self.cell_size).zero_().squeeze(0)
         ]
         return h
 

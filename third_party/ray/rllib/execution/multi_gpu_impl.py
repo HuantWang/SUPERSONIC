@@ -48,16 +48,14 @@ class LocalSyncParallelOptimizer:
             TF Policy instance.
     """
 
-    def __init__(
-        self,
-        optimizer,
-        devices,
-        input_placeholders,
-        rnn_inputs,
-        max_per_device_batch_size,
-        build_graph,
-        grad_norm_clipping=None,
-    ):
+    def __init__(self,
+                 optimizer,
+                 devices,
+                 input_placeholders,
+                 rnn_inputs,
+                 max_per_device_batch_size,
+                 build_graph,
+                 grad_norm_clipping=None):
         self.optimizer = optimizer
         self.devices = devices
         self.max_per_device_batch_size = max_per_device_batch_size
@@ -68,16 +66,14 @@ class LocalSyncParallelOptimizer:
         with tf.name_scope(TOWER_SCOPE_NAME):
             self._shared_loss = build_graph(self.loss_inputs)
         shared_ops = tf.get_collection(
-            tf.GraphKeys.UPDATE_OPS, scope=tf.get_variable_scope().name
-        )
+            tf.GraphKeys.UPDATE_OPS, scope=tf.get_variable_scope().name)
 
         # Then setup the per-device loss graphs that use the shared weights
         self._batch_index = tf.placeholder(tf.int32, name="batch_index")
 
         # Dynamic batch size, which may be shrunk if there isn't enough data
         self._per_device_batch_size = tf.placeholder(
-            tf.int32, name="per_device_batch_size"
-        )
+            tf.int32, name="per_device_batch_size")
         self._loaded_per_device_batch_size = max_per_device_batch_size
 
         # When loading RNN input, we dynamically determine the max seq len
@@ -86,13 +82,14 @@ class LocalSyncParallelOptimizer:
 
         # Split on the CPU in case the data doesn't fit in GPU memory.
         with tf.device("/cpu:0"):
-            data_splits = zip(*[tf.split(ph, len(devices)) for ph in self.loss_inputs])
+            data_splits = zip(
+                *[tf.split(ph, len(devices)) for ph in self.loss_inputs])
 
         self._towers = []
         for device, device_placeholders in zip(self.devices, data_splits):
             self._towers.append(
-                self._setup_device(device, device_placeholders, len(input_placeholders))
-            )
+                self._setup_device(device, device_placeholders,
+                                   len(input_placeholders)))
 
         avg = average_gradients([t.grads for t in self._towers])
         if grad_norm_clipping:
@@ -107,14 +104,12 @@ class LocalSyncParallelOptimizer:
         # use all the ops found which won't work for DQN / DDPG, but those
         # aren't supported with multi-gpu right now anyways.
         self._update_ops = tf.get_collection(
-            tf.GraphKeys.UPDATE_OPS, scope=tf.get_variable_scope().name
-        )
+            tf.GraphKeys.UPDATE_OPS, scope=tf.get_variable_scope().name)
         for op in shared_ops:
             self._update_ops.remove(op)  # only care about tower update ops
         if self._update_ops:
-            logger.debug(
-                "Update ops to run on apply gradient: {}".format(self._update_ops)
-            )
+            logger.debug("Update ops to run on apply gradient: {}".format(
+                self._update_ops))
 
         with tf.control_dependencies(self._update_ops):
             self._train_op = self.optimizer.apply_gradients(avg)
@@ -142,22 +137,15 @@ class LocalSyncParallelOptimizer:
         if log_once("load_data"):
             logger.info(
                 "Training on concatenated sample batches:\n\n{}\n".format(
-                    summarize(
-                        {
-                            "placeholders": self.loss_inputs,
-                            "inputs": inputs,
-                            "state_inputs": state_inputs,
-                        }
-                    )
-                )
-            )
+                    summarize({
+                        "placeholders": self.loss_inputs,
+                        "inputs": inputs,
+                        "state_inputs": state_inputs
+                    })))
 
         feed_dict = {}
-        assert len(self.loss_inputs) == len(inputs + state_inputs), (
-            self.loss_inputs,
-            inputs,
-            state_inputs,
-        )
+        assert len(self.loss_inputs) == len(inputs + state_inputs), \
+            (self.loss_inputs, inputs, state_inputs)
 
         # Let's suppose we have the following input data, and 2 devices:
         # 1 2 3 4 5 6 7                              <- state inputs shape
@@ -176,63 +164,48 @@ class LocalSyncParallelOptimizer:
             self._loaded_max_seq_len = 1
 
         sequences_per_minibatch = (
-            self.max_per_device_batch_size
-            // self._loaded_max_seq_len
-            * len(self.devices)
-        )
+            self.max_per_device_batch_size // self._loaded_max_seq_len * len(
+                self.devices))
         if sequences_per_minibatch < 1:
             logger.warning(
-                (
-                    "Target minibatch size is {}, however the rollout sequence "
-                    "length is {}, hence the minibatch size will be raised to "
-                    "{}."
-                ).format(
-                    self.max_per_device_batch_size,
-                    self._loaded_max_seq_len,
-                    self._loaded_max_seq_len * len(self.devices),
-                )
-            )
+                ("Target minibatch size is {}, however the rollout sequence "
+                 "length is {}, hence the minibatch size will be raised to "
+                 "{}.").format(self.max_per_device_batch_size,
+                               self._loaded_max_seq_len,
+                               self._loaded_max_seq_len * len(self.devices)))
             sequences_per_minibatch = 1
 
         if len(smallest_array) < sequences_per_minibatch:
             # Dynamically shrink the batch size if insufficient data
             sequences_per_minibatch = make_divisible_by(
-                len(smallest_array), len(self.devices)
-            )
+                len(smallest_array), len(self.devices))
 
         if log_once("data_slicing"):
             logger.info(
-                (
-                    "Divided {} rollout sequences, each of length {}, among "
-                    "{} devices."
-                ).format(
-                    len(smallest_array), self._loaded_max_seq_len, len(self.devices)
-                )
-            )
+                ("Divided {} rollout sequences, each of length {}, among "
+                 "{} devices.").format(
+                     len(smallest_array), self._loaded_max_seq_len,
+                     len(self.devices)))
 
         if sequences_per_minibatch < len(self.devices):
             raise ValueError(
                 "Must load at least 1 tuple sequence per device. Try "
                 "increasing `sgd_minibatch_size` or reducing `max_seq_len` "
-                "to ensure that at least one sequence fits per device."
-            )
-        self._loaded_per_device_batch_size = (
-            sequences_per_minibatch // len(self.devices) * self._loaded_max_seq_len
-        )
+                "to ensure that at least one sequence fits per device.")
+        self._loaded_per_device_batch_size = (sequences_per_minibatch // len(
+            self.devices) * self._loaded_max_seq_len)
 
         if len(state_inputs) > 0:
             # First truncate the RNN state arrays to the sequences_per_minib.
             state_inputs = [
-                make_divisible_by(arr, sequences_per_minibatch) for arr in state_inputs
+                make_divisible_by(arr, sequences_per_minibatch)
+                for arr in state_inputs
             ]
             # Then truncate the data inputs to match
-            inputs = [arr[: len(state_inputs[0]) * seq_len] for arr in inputs]
-            assert len(state_inputs[0]) * seq_len == len(inputs[0]), (
-                len(state_inputs[0]),
-                sequences_per_minibatch,
-                seq_len,
-                len(inputs[0]),
-            )
+            inputs = [arr[:len(state_inputs[0]) * seq_len] for arr in inputs]
+            assert len(state_inputs[0]) * seq_len == len(inputs[0]), \
+                (len(state_inputs[0]), sequences_per_minibatch, seq_len,
+                 len(inputs[0]))
             for ph, arr in zip(self.loss_inputs, inputs + state_inputs):
                 feed_dict[ph] = arr
             truncated_len = len(inputs[0])
@@ -297,8 +270,10 @@ class LocalSyncParallelOptimizer:
                 device_input_slices = []
                 for i, ph in enumerate(device_input_placeholders):
                     current_batch = tf.Variable(
-                        ph, trainable=False, validate_shape=False, collections=[]
-                    )
+                        ph,
+                        trainable=False,
+                        validate_shape=False,
+                        collections=[])
                     device_input_batches.append(current_batch)
                     if i < num_data_in:
                         scale = self._max_seq_len
@@ -308,24 +283,19 @@ class LocalSyncParallelOptimizer:
                         granularity = 1
                     current_slice = tf.slice(
                         current_batch,
-                        (
-                            [self._batch_index // scale * granularity]
-                            + [0] * len(ph.shape[1:])
-                        ),
-                        (
-                            [self._per_device_batch_size // scale * granularity]
-                            + [-1] * len(ph.shape[1:])
-                        ),
-                    )
+                        ([self._batch_index // scale * granularity] +
+                         [0] * len(ph.shape[1:])),
+                        ([self._per_device_batch_size // scale * granularity] +
+                         [-1] * len(ph.shape[1:])))
                     current_slice.set_shape(ph.shape)
                     device_input_slices.append(current_slice)
                 graph_obj = self.build_graph(device_input_slices)
-                device_grads = graph_obj.gradients(self.optimizer, graph_obj._loss)
+                device_grads = graph_obj.gradients(self.optimizer,
+                                                   graph_obj._loss)
             return Tower(
-                tf.group(*[batch.initializer for batch in device_input_batches]),
-                device_grads,
-                graph_obj,
-            )
+                tf.group(
+                    *[batch.initializer for batch in device_input_batches]),
+                device_grads, graph_obj)
 
 
 # Each tower is a copy of the loss graph pinned to a specific device.
@@ -335,7 +305,7 @@ Tower = namedtuple("Tower", ["init_op", "grads", "loss_graph"])
 def make_divisible_by(a, n):
     if type(a) is int:
         return a - a % n
-    return a[0 : a.shape[0] - a.shape[0] % n]
+    return a[0:a.shape[0] - a.shape[0] % n]
 
 
 def average_gradients(tower_grads):

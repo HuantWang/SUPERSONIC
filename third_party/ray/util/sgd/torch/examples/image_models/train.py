@@ -23,7 +23,6 @@ import ray
 from ray.util.sgd.utils import BATCH_SIZE
 
 from ray.util.sgd import TorchTrainer
-
 # from ray.util.sgd.torch import TrainingOperator
 
 from ray.util.sgd.torch.examples.image_models.args import parse_args
@@ -45,8 +44,7 @@ def model_creator(config):
         bn_tf=args.bn_tf,
         bn_momentum=args.bn_momentum,
         bn_eps=args.bn_eps,
-        checkpoint_path=args.initial_checkpoint,
-    )
+        checkpoint_path=args.initial_checkpoint)
 
     # always false right now
     if args.split_bn:
@@ -77,7 +75,8 @@ def data_creator(config):
     if args.prefetcher and args.mixup > 0:
         # collate conflict (need to support deinterleaving in collate mixup)
         assert args.num_aug_splits == 0
-        collate_fn = FastCollateMixup(args.mixup, args.smoothing, args.num_classes)
+        collate_fn = FastCollateMixup(args.mixup, args.smoothing,
+                                      args.num_classes)
 
     common_params = dict(
         input_size=data_config["input_size"],
@@ -86,8 +85,7 @@ def data_creator(config):
         std=data_config["std"],
         num_workers=1,
         distributed=args.distributed,
-        pin_memory=args.pin_mem,
-    )
+        pin_memory=args.pin_mem)
 
     train_loader = create_loader(
         dataset_train,
@@ -102,16 +100,14 @@ def data_creator(config):
         auto_augment=args.aa,
         interpolation=args.train_interpolation,
         num_aug_splits=args.num_aug_splits,  # always 0 right now
-        **common_params
-    )
+        **common_params)
     eval_loader = create_loader(
         dataset_eval,
         is_training=False,
         batch_size=args.validation_batch_size_multiplier * config[BATCH_SIZE],
         interpolation=data_config["interpolation"],
         crop_pct=data_config["crop_pct"],
-        **common_params
-    )
+        **common_params)
 
     return train_loader, eval_loader
 
@@ -142,9 +138,11 @@ def main():
         use_tqdm=True,
         use_fp16=args.amp,
         apex_args={"opt_level": "O1"},
-        config={"args": args, BATCH_SIZE: args.batch_size},
-        num_workers=args.ray_num_workers,
-    )
+        config={
+            "args": args,
+            BATCH_SIZE: args.batch_size
+        },
+        num_workers=args.ray_num_workers)
 
     if args.smoke_test:
         args.epochs = 1

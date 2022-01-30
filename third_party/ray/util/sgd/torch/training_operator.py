@@ -1,12 +1,9 @@
 import torch
 
-from ray.util.sgd.utils import TimerCollection, AverageMeterCollection, NUM_SAMPLES
-from ray.util.sgd.torch.constants import (
-    SCHEDULER_STEP_EPOCH,
-    NUM_STEPS,
-    SCHEDULER_STEP_BATCH,
-    SCHEDULER_STEP,
-)
+from ray.util.sgd.utils import (TimerCollection, AverageMeterCollection,
+                                NUM_SAMPLES)
+from ray.util.sgd.torch.constants import (SCHEDULER_STEP_EPOCH, NUM_STEPS,
+                                          SCHEDULER_STEP_BATCH, SCHEDULER_STEP)
 
 amp = None
 
@@ -58,30 +55,30 @@ class TrainingOperator:
             to train over multiple models/optimizers/schedulers.
     """
 
-    def __init__(
-        self,
-        config,
-        models,
-        optimizers,
-        train_loader,
-        validation_loader,
-        world_rank,
-        criterion=None,
-        schedulers=None,
-        device_ids=None,
-        use_gpu=False,
-        use_fp16=False,
-        use_tqdm=False,
-    ):
+    def __init__(self,
+                 config,
+                 models,
+                 optimizers,
+                 train_loader,
+                 validation_loader,
+                 world_rank,
+                 criterion=None,
+                 schedulers=None,
+                 device_ids=None,
+                 use_gpu=False,
+                 use_fp16=False,
+                 use_tqdm=False):
         # You are not expected to override this method.
         self._models = models  # List of models
         assert isinstance(
-            models, Iterable
-        ), "Components need to be iterable. Got: {}".format(type(models))
+            models,
+            Iterable), ("Components need to be iterable. Got: {}".format(
+                type(models)))
         self._optimizers = optimizers  # List of optimizers
         assert isinstance(
-            optimizers, Iterable
-        ), "Components need to be iterable. Got: {}".format(type(optimizers))
+            optimizers,
+            Iterable), ("Components need to be iterable. Got: {}".format(
+                type(optimizers)))
         self._train_loader = train_loader
         self._validation_loader = validation_loader
         self._world_rank = world_rank
@@ -89,8 +86,9 @@ class TrainingOperator:
         self._schedulers = schedulers
         if schedulers:
             assert isinstance(
-                schedulers, Iterable
-            ), "Components need to be iterable. Got: {}".format(type(schedulers))
+                schedulers,
+                Iterable), ("Components need to be iterable. Got: {}".format(
+                    type(schedulers)))
         self._config = config
         self._use_fp16 = use_fp16
         self._device_ids = device_ids
@@ -107,8 +105,7 @@ class TrainingOperator:
                     raise ValueError(
                         "Need to provide a custom operator subclassing "
                         "TrainingOperator if using multi-scheduler, "
-                        "multi-model or multi-optimizer training/validation."
-                    )
+                        "multi-model or multi-optimizer training/validation.")
         self.timers = TimerCollection()
         self.setup(config)
 
@@ -168,21 +165,24 @@ class TrainingOperator:
             desc = ""
             if info is not None and "epoch_idx" in info:
                 if "num_epochs" in info:
-                    desc = "{}/{}e".format(info["epoch_idx"] + 1, info["num_epochs"])
+                    desc = "{}/{}e".format(info["epoch_idx"] + 1,
+                                           info["num_epochs"])
                 else:
                     desc = "{}e".format(info["epoch_idx"] + 1)
             _progress_bar = tqdm(
                 total=info[NUM_STEPS] or len(self.train_loader),
                 desc=desc,
                 unit="batch",
-                leave=False,
-            )
+                leave=False)
 
         metric_meters = AverageMeterCollection()
 
         self.model.train()
         for batch_idx, batch in enumerate(iterator):
-            batch_info = {"batch_idx": batch_idx, "global_step": self.global_step}
+            batch_info = {
+                "batch_idx": batch_idx,
+                "global_step": self.global_step
+            }
             batch_info.update(info)
             metrics = self.train_batch(batch, batch_info=batch_info)
 
@@ -193,10 +193,8 @@ class TrainingOperator:
                     postfix.update(loss=metrics["train_loss"])
                 _progress_bar.set_postfix(postfix)
 
-            if (
-                self.scheduler
-                and batch_info.get(SCHEDULER_STEP) == SCHEDULER_STEP_BATCH
-            ):
+            if self.scheduler and batch_info.get(
+                    SCHEDULER_STEP) == SCHEDULER_STEP_BATCH:
                 self.scheduler.step()
 
             metric_meters.update(metrics, n=metrics.pop(NUM_SAMPLES, 1))
@@ -244,7 +242,9 @@ class TrainingOperator:
         *features, target = batch
         # Create non_blocking tensors for distributed training
         if self.use_gpu:
-            features = [feature.cuda(non_blocking=True) for feature in features]
+            features = [
+                feature.cuda(non_blocking=True) for feature in features
+            ]
             target = target.cuda(non_blocking=True)
 
         # Compute output.
@@ -328,7 +328,9 @@ class TrainingOperator:
         # unpack features into list to support multiple inputs model
         *features, target = batch
         if self.use_gpu:
-            features = [feature.cuda(non_blocking=True) for feature in features]
+            features = [
+                feature.cuda(non_blocking=True) for feature in features
+            ]
             target = target.cuda(non_blocking=True)
 
         # compute output
@@ -343,7 +345,7 @@ class TrainingOperator:
         return {
             "val_loss": loss.item(),
             "val_accuracy": num_correct / num_samples,
-            NUM_SAMPLES: num_samples,
+            NUM_SAMPLES: num_samples
         }
 
     def state_dict(self):
@@ -461,13 +463,15 @@ class _TestMetricsOperator(TrainingOperator):
         self.key = config["key"]
 
     def train_batch(self, batch, batch_info=None):
-        metrics = super(_TestMetricsOperator, self).train_batch(batch, batch_info)
+        metrics = super(_TestMetricsOperator, self).train_batch(
+            batch, batch_info)
         num_samples = metrics[NUM_SAMPLES]
         metrics.update({self.key: self._train_scores.pop(0) / num_samples})
         return metrics
 
     def validate_batch(self, batch, batch_info=None):
-        metrics = super(_TestMetricsOperator, self).validate_batch(batch, batch_info)
+        metrics = super(_TestMetricsOperator, self).validate_batch(
+            batch, batch_info)
         num_samples = metrics[NUM_SAMPLES]
         metrics.update({self.key: self._val_scores.pop(0) / num_samples})
         return metrics

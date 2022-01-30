@@ -33,8 +33,7 @@ parser.add_argument(
     default="3DBall",
     choices=["3DBall", "SoccerStrikersVsGoalie"],
     help="The name of the Env to run in the Unity3D editor. Either `3DBall` "
-    "or `SoccerStrikersVsGoalie` (feel free to add more to this script!)",
-)
+    "or `SoccerStrikersVsGoalie` (feel free to add more to this script!)")
 parser.add_argument("--as-test", action="store_true")
 parser.add_argument("--stop-iters", type=int, default=150)
 parser.add_argument("--stop-reward", type=float, default=9999.0)
@@ -44,8 +43,7 @@ parser.add_argument(
     type=int,
     default=200,
     help="The max. number of `step()`s for any episode (per agent) before "
-    "it'll be reset again automatically.",
-)
+    "it'll be reset again automatically.")
 parser.add_argument("--torch", action="store_true")
 
 if __name__ == "__main__":
@@ -54,16 +52,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     tune.register_env(
-        "unity3d", lambda c: Unity3DEnv(episode_horizon=c.get("episode_horizon", 1000))
-    )
+        "unity3d",
+        lambda c: Unity3DEnv(episode_horizon=c.get("episode_horizon", 1000)))
 
     # Get policies (different agent types; "behaviors" in MLAgents) and
     # the mappings from individual agents to Policies.
-    policies, policy_mapping_fn = Unity3DEnv.get_policy_configs_for_game(args.env)
+    policies, policy_mapping_fn = \
+        Unity3DEnv.get_policy_configs_for_game(args.env)
 
     config = {
         "env": "unity3d",
-        "env_config": {"episode_horizon": args.horizon,},
+        "env_config": {
+            "episode_horizon": args.horizon,
+        },
         # IMPORTANT: Just use one Worker (we only have one Unity running)!
         "num_workers": 0,
         # Other settings.
@@ -71,7 +72,10 @@ if __name__ == "__main__":
         "train_batch_size": 256,
         "rollout_fragment_length": 20,
         # Multi-agent setup for the particular env.
-        "multiagent": {"policies": policies, "policy_mapping_fn": policy_mapping_fn,},
+        "multiagent": {
+            "policies": policies,
+            "policy_mapping_fn": policy_mapping_fn,
+        },
         "framework": "tf",
     }
 

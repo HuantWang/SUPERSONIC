@@ -12,11 +12,8 @@ except ImportError:
 
 from ray.rllib.offline.input_reader import InputReader
 from ray.rllib.offline.io_context import IOContext
-from ray.rllib.policy.sample_batch import (
-    MultiAgentBatch,
-    SampleBatch,
-    DEFAULT_POLICY_ID,
-)
+from ray.rllib.policy.sample_batch import MultiAgentBatch, SampleBatch, \
+    DEFAULT_POLICY_ID
 from ray.rllib.utils.annotations import override, PublicAPI
 from ray.rllib.utils.compression import unpack_if_needed
 
@@ -46,21 +43,19 @@ class JsonReader(InputReader):
             if os.path.isdir(inputs):
                 inputs = os.path.join(inputs, "*.json")
                 logger.warning(
-                    "Treating input directory as glob pattern: {}".format(inputs)
-                )
+                    "Treating input directory as glob pattern: {}".format(
+                        inputs))
             if urlparse(inputs).scheme:
                 raise ValueError(
-                    "Don't know how to glob over `{}`, ".format(inputs)
-                    + "please specify a list of files to read instead."
-                )
+                    "Don't know how to glob over `{}`, ".format(inputs) +
+                    "please specify a list of files to read instead.")
             else:
                 self.files = glob.glob(inputs)
         elif type(inputs) is list:
             self.files = inputs
         else:
             raise ValueError(
-                "type of inputs must be list or str, not {}".format(inputs)
-            )
+                "type of inputs must be list or str, not {}".format(inputs))
         if self.files:
             logger.info("Found {} input files.".format(len(self.files)))
         else:
@@ -78,9 +73,7 @@ class JsonReader(InputReader):
         if not batch:
             raise ValueError(
                 "Failed to read valid experience batch from file: {}".format(
-                    self.cur_file
-                )
-            )
+                    self.cur_file))
         return self._postprocess_if_needed(batch)
 
     def _postprocess_if_needed(self, batch):
@@ -90,18 +83,14 @@ class JsonReader(InputReader):
         if isinstance(batch, SampleBatch):
             out = []
             for sub_batch in batch.split_by_episode():
-                out.append(
-                    self.ioctx.worker.policy_map[
-                        DEFAULT_POLICY_ID
-                    ].postprocess_trajectory(sub_batch)
-                )
+                out.append(self.ioctx.worker.policy_map[DEFAULT_POLICY_ID]
+                           .postprocess_trajectory(sub_batch))
             return SampleBatch.concat_samples(out)
         else:
             # TODO(ekl) this is trickier since the alignments between agent
             # trajectories in the episode are not available any more.
             raise NotImplementedError(
-                "Postprocessing of multi-agent data not implemented yet."
-            )
+                "Postprocessing of multi-agent data not implemented yet.")
 
     def _try_parse(self, line):
         line = line.strip()
@@ -110,9 +99,8 @@ class JsonReader(InputReader):
         try:
             return _from_json(line)
         except Exception:
-            logger.exception(
-                "Ignoring corrupt json record in {}: {}".format(self.cur_file, line)
-            )
+            logger.exception("Ignoring corrupt json record in {}: {}".format(
+                self.cur_file, line))
             return None
 
     def _next_line(self):
@@ -129,9 +117,8 @@ class JsonReader(InputReader):
             if not line:
                 logger.debug("Ignoring empty file {}".format(self.cur_file))
         if not line:
-            raise ValueError(
-                "Failed to read next line from files: {}".format(self.files)
-            )
+            raise ValueError("Failed to read next line from files: {}".format(
+                self.files))
         return line
 
     def _next_file(self):
@@ -140,8 +127,7 @@ class JsonReader(InputReader):
             if smart_open is None:
                 raise ValueError(
                     "You must install the `smart_open` module to read "
-                    "from URIs like {}".format(path)
-                )
+                    "from URIs like {}".format(path))
             return smart_open(path, "r")
         else:
             return open(path, "r")
@@ -171,5 +157,5 @@ def _from_json(batch):
         return MultiAgentBatch(policy_batches, data["count"])
     else:
         raise ValueError(
-            "Type field must be one of ['SampleBatch', 'MultiAgentBatch']", data_type
-        )
+            "Type field must be one of ['SampleBatch', 'MultiAgentBatch']",
+            data_type)

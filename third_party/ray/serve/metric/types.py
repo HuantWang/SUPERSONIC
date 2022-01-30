@@ -6,20 +6,18 @@ from collections import namedtuple
 # and MetricRecord. Metadata is declared at creation time and include names
 # and the label names. The label values will be supplied at observation time.
 MetricMetadata = namedtuple(
-    "MetricMetadata", ["name", "type", "description", "label_names", "default_labels"]
-)
+    "MetricMetadata",
+    ["name", "type", "description", "label_names", "default_labels"])
 MetricRecord = namedtuple("MetricRecord", ["name", "labels", "value"])
 MetricBatch = List[MetricRecord]
 
 
 class BaseMetric:
-    def __init__(
-        self,
-        client,
-        name: str,
-        label_names: Tuple[str],
-        dynamic_labels: Optional[Dict[str, str]] = None,
-    ):
+    def __init__(self,
+                 client,
+                 name: str,
+                 label_names: Tuple[str],
+                 dynamic_labels: Optional[Dict[str, str]] = None):
         """Represent a single metric stream
 
         Args:
@@ -39,10 +37,8 @@ class BaseMetric:
     def check_all_labels_fulfilled_or_error(self):
         unfulfilled = set(self.label_names) - set(self.dynamic_labels.keys())
         if len(unfulfilled) != 0:
-            raise ValueError(
-                "The following labels doesn't have associated "
-                "values: {}".format(unfulfilled)
-            )
+            raise ValueError("The following labels doesn't have associated "
+                             "values: {}".format(unfulfilled))
 
     def labels(self, **kwargs):
         """Apply dynamic label to the metric
@@ -58,11 +54,10 @@ class BaseMetric:
                 raise ValueError(
                     "Label {} was not part of registered "
                     "label names. Allowed label names are {}.".format(
-                        k, self.label_names
-                    )
-                )
+                        k, self.label_names))
             new_dynamic_labels[k] = str(v)
-        return type(self)(self.client, self.name, self.label_names, new_dynamic_labels)
+        return type(self)(self.client, self.name, self.label_names,
+                          new_dynamic_labels)
 
 
 # The metric types are inspired by OpenTelemetry spec:
@@ -72,8 +67,7 @@ class Counter(BaseMetric):
         """Increment the counter by some amount. Default is 1"""
         self.check_all_labels_fulfilled_or_error()
         self.client.metric_records.append(
-            MetricRecord(self.name, self.dynamic_labels, increment)
-        )
+            MetricRecord(self.name, self.dynamic_labels, increment))
 
 
 class Measure(BaseMetric):
@@ -81,8 +75,7 @@ class Measure(BaseMetric):
         """Record the given value for the measure"""
         self.check_all_labels_fulfilled_or_error()
         self.client.metric_records.append(
-            MetricRecord(self.name, self.dynamic_labels, value)
-        )
+            MetricRecord(self.name, self.dynamic_labels, value))
 
 
 class MetricType(enum.IntEnum):

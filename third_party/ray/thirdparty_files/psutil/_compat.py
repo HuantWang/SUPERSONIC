@@ -10,24 +10,10 @@ import functools
 import os
 import sys
 
-__all__ = [
-    "PY3",
-    "long",
-    "xrange",
-    "unicode",
-    "basestring",
-    "u",
-    "b",
-    "lru_cache",
-    "which",
-    "get_terminal_size",
-    "FileNotFoundError",
-    "PermissionError",
-    "ProcessLookupError",
-    "InterruptedError",
-    "ChildProcessError",
-    "FileExistsError",
-]
+__all__ = ["PY3", "long", "xrange", "unicode", "basestring", "u", "b",
+           "lru_cache", "which", "get_terminal_size",
+           "FileNotFoundError", "PermissionError", "ProcessLookupError",
+           "InterruptedError", "ChildProcessError", "FileExistsError"]
 
 PY3 = sys.version_info[0] == 3
 
@@ -42,8 +28,6 @@ if PY3:
 
     def b(s):
         return s.encode("latin-1")
-
-
 else:
     long = long
     xrange = xrange
@@ -77,11 +61,12 @@ else:
     def instance_checking_exception(base_exception=Exception):
         def wrapped(instance_checker):
             class TemporaryClass(base_exception):
+
                 def __init__(self, *args, **kwargs):
                     if len(args) == 1 and isinstance(args[0], TemporaryClass):
                         unwrap_me = args[0]
                         for attr in dir(unwrap_me):
-                            if not attr.startswith("__"):
+                            if not attr.startswith('__'):
                                 setattr(self, attr, getattr(unwrap_me, attr))
                     else:
                         super(TemporaryClass, self).__init__(*args, **kwargs)
@@ -102,27 +87,28 @@ else:
 
     @instance_checking_exception(EnvironmentError)
     def FileNotFoundError(inst):
-        return getattr(inst, "errno", _singleton) == errno.ENOENT
+        return getattr(inst, 'errno', _singleton) == errno.ENOENT
 
     @instance_checking_exception(EnvironmentError)
     def ProcessLookupError(inst):
-        return getattr(inst, "errno", _singleton) == errno.ESRCH
+        return getattr(inst, 'errno', _singleton) == errno.ESRCH
 
     @instance_checking_exception(EnvironmentError)
     def PermissionError(inst):
-        return getattr(inst, "errno", _singleton) in (errno.EACCES, errno.EPERM)
+        return getattr(inst, 'errno', _singleton) in (
+            errno.EACCES, errno.EPERM)
 
     @instance_checking_exception(EnvironmentError)
     def InterruptedError(inst):
-        return getattr(inst, "errno", _singleton) == errno.EINTR
+        return getattr(inst, 'errno', _singleton) == errno.EINTR
 
     @instance_checking_exception(EnvironmentError)
     def ChildProcessError(inst):
-        return getattr(inst, "errno", _singleton) == errno.ECHILD
+        return getattr(inst, 'errno', _singleton) == errno.ECHILD
 
     @instance_checking_exception(EnvironmentError)
     def FileExistsError(inst):
-        return getattr(inst, "errno", _singleton) == errno.EEXIST
+        return getattr(inst, 'errno', _singleton) == errno.EEXIST
 
     if platform.python_implementation() != "CPython":
         try:
@@ -132,8 +118,7 @@ else:
         except OSError:
             raise RuntimeError(
                 "broken / incompatible Python implementation, see: "
-                "https://github.com/giampaolo/psutil/issues/1659"
-            )
+                "https://github.com/giampaolo/psutil/issues/1659")
 
 
 # --- stdlib additions
@@ -151,11 +136,10 @@ except ImportError:
         from dummy_threading import RLock
 
     _CacheInfo = collections.namedtuple(
-        "CacheInfo", ["hits", "misses", "maxsize", "currsize"]
-    )
+        "CacheInfo", ["hits", "misses", "maxsize", "currsize"])
 
     class _HashedSeq(list):
-        __slots__ = "hashvalue"
+        __slots__ = 'hashvalue'
 
         def __init__(self, tup, hash=hash):
             self[:] = tup
@@ -164,17 +148,10 @@ except ImportError:
         def __hash__(self):
             return self.hashvalue
 
-    def _make_key(
-        args,
-        kwds,
-        typed,
-        kwd_mark=(object(),),
-        fasttypes=set((int, str, frozenset, type(None))),
-        sorted=sorted,
-        tuple=tuple,
-        type=type,
-        len=len,
-    ):
+    def _make_key(args, kwds, typed,
+                  kwd_mark=(object(), ),
+                  fasttypes=set((int, str, frozenset, type(None))),
+                  sorted=sorted, tuple=tuple, type=type, len=len):
         key = args
         if kwds:
             sorted_items = sorted(kwds.items())
@@ -193,7 +170,6 @@ except ImportError:
         """Least-recently-used cache decorator, see:
         http://docs.python.org/3/library/functools.html#functools.lru_cache
         """
-
         def decorating_function(user_function):
             cache = dict()
             stats = [0, 0]
@@ -207,14 +183,11 @@ except ImportError:
             nonlocal_root = [root]
             PREV, NEXT, KEY, RESULT = 0, 1, 2, 3
             if maxsize == 0:
-
                 def wrapper(*args, **kwds):
                     result = user_function(*args, **kwds)
                     stats[MISSES] += 1
                     return result
-
             elif maxsize is None:
-
                 def wrapper(*args, **kwds):
                     key = make_key(args, kwds, typed)
                     result = cache_get(key, root)
@@ -225,9 +198,7 @@ except ImportError:
                     cache[key] = result
                     stats[MISSES] += 1
                     return result
-
             else:
-
                 def wrapper(*args, **kwds):
                     if kwds or typed:
                         key = make_key(args, kwds, typed)
@@ -237,7 +208,7 @@ except ImportError:
                     try:
                         link = cache_get(key)
                         if link is not None:
-                            (root,) = nonlocal_root
+                            root, = nonlocal_root
                             link_prev, link_next, key, result = link
                             link_prev[NEXT] = link_next
                             link_next[PREV] = link_prev
@@ -252,7 +223,7 @@ except ImportError:
                     result = user_function(*args, **kwds)
                     lock.acquire()
                     try:
-                        (root,) = nonlocal_root
+                        root, = nonlocal_root
                         if key in cache:
                             pass
                         elif _len(cache) >= maxsize:
@@ -277,7 +248,8 @@ except ImportError:
                 """Report cache statistics"""
                 lock.acquire()
                 try:
-                    return _CacheInfo(stats[HITS], stats[MISSES], maxsize, len(cache))
+                    return _CacheInfo(stats[HITS], stats[MISSES], maxsize,
+                                      len(cache))
                 finally:
                     lock.release()
 
@@ -304,7 +276,6 @@ except ImportError:
 try:
     from shutil import which
 except ImportError:
-
     def which(cmd, mode=os.F_OK | os.X_OK, path=None):
         """Given a command, mode, and a PATH string, return the path which
         conforms to the given mode on the PATH, or None if there is no such
@@ -314,9 +285,9 @@ except ImportError:
         of os.environ.get("PATH"), or can be overridden with a custom search
         path.
         """
-
         def _access_check(fn, mode):
-            return os.path.exists(fn) and os.access(fn, mode) and not os.path.isdir(fn)
+            return (os.path.exists(fn) and os.access(fn, mode) and
+                    not os.path.isdir(fn))
 
         if os.path.dirname(cmd):
             if _access_check(cmd, mode):
@@ -357,7 +328,6 @@ except ImportError:
 try:
     from shutil import get_terminal_size
 except ImportError:
-
     def get_terminal_size(fallback=(80, 24)):
         try:
             import fcntl
@@ -368,7 +338,8 @@ except ImportError:
         else:
             try:
                 # This should work on Linux.
-                res = struct.unpack("hh", fcntl.ioctl(1, termios.TIOCGWINSZ, "1234"))
+                res = struct.unpack(
+                    'hh', fcntl.ioctl(1, termios.TIOCGWINSZ, '1234'))
                 return (res[1], res[0])
             except Exception:
                 return fallback

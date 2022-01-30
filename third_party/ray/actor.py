@@ -68,9 +68,12 @@ class ActorMethod:
             "test_decorated_method" in "python/ray/tests/test_actor.py".
     """
 
-    def __init__(
-        self, actor, method_name, num_return_vals, decorator=None, hardref=False
-    ):
+    def __init__(self,
+                 actor,
+                 method_name,
+                 num_return_vals,
+                 decorator=None,
+                 hardref=False):
         self._actor_ref = weakref.ref(actor)
         self._method_name = method_name
         self._num_return_vals = num_return_vals
@@ -89,11 +92,10 @@ class ActorMethod:
             self._actor_hard_ref = None
 
     def __call__(self, *args, **kwargs):
-        raise TypeError(
-            "Actor methods cannot be called directly. Instead "
-            "of running 'object.{}()', try "
-            "'object.{}.remote()'.".format(self._method_name, self._method_name)
-        )
+        raise TypeError("Actor methods cannot be called directly. Instead "
+                        "of running 'object.{}()', try "
+                        "'object.{}.remote()'.".format(self._method_name,
+                                                       self._method_name))
 
     def remote(self, *args, **kwargs):
         return self._remote(args, kwargs)
@@ -110,8 +112,7 @@ class ActorMethod:
                 self._method_name,
                 args=args,
                 kwargs=kwargs,
-                num_return_vals=num_return_vals,
-            )
+                num_return_vals=num_return_vals)
 
         # Apply the decorator if there is one.
         if self._decorator is not None:
@@ -133,8 +134,7 @@ class ActorMethod:
             state["method_name"],
             state["num_return_vals"],
             state["decorator"],
-            hardref=True,
-        )
+            hardref=True)
 
 
 class ActorClassMethodMetadata(object):
@@ -155,12 +155,9 @@ class ActorClassMethodMetadata(object):
 
     def __init__(self):
         class_name = type(self).__name__
-        raise TypeError(
-            "{} can not be constructed directly, "
-            "instead of running '{}()', try '{}.create()'".format(
-                class_name, class_name, class_name
-            )
-        )
+        raise TypeError("{} can not be constructed directly, "
+                        "instead of running '{}()', try '{}.create()'".format(
+                            class_name, class_name, class_name))
 
     @classmethod
     def reset_cache(cls):
@@ -176,9 +173,8 @@ class ActorClassMethodMetadata(object):
         # Create an instance without __init__ called.
         self = cls.__new__(cls)
 
-        actor_methods = inspect.getmembers(
-            modified_class, ray.utils.is_function_or_method
-        )
+        actor_methods = inspect.getmembers(modified_class,
+                                           ray.utils.is_function_or_method)
         self.methods = dict(actor_methods)
 
         # Extract the signatures of each of the methods. This will be used
@@ -191,27 +187,27 @@ class ActorClassMethodMetadata(object):
             # Whether or not this method requires binding of its first
             # argument. For class and static methods, we do not want to bind
             # the first argument, but we do for instance methods
-            is_bound = ray.utils.is_class_method(method) or ray.utils.is_static_method(
-                modified_class, method_name
-            )
+            is_bound = (ray.utils.is_class_method(method)
+                        or ray.utils.is_static_method(modified_class,
+                                                      method_name))
 
             # Print a warning message if the method signature is not
             # supported. We don't raise an exception because if the actor
             # inherits from a class that has a method whose signature we
             # don't support, there may not be much the user can do about it.
             self.signatures[method_name] = signature.extract_signature(
-                method, ignore_first=not is_bound
-            )
+                method, ignore_first=not is_bound)
             # Set the default number of return values for this method.
             if hasattr(method, "__ray_num_return_vals__"):
-                self.num_return_vals[method_name] = method.__ray_num_return_vals__
+                self.num_return_vals[method_name] = (
+                    method.__ray_num_return_vals__)
             else:
-                self.num_return_vals[
-                    method_name
-                ] = ray_constants.DEFAULT_ACTOR_METHOD_NUM_RETURN_VALS
+                self.num_return_vals[method_name] = (
+                    ray_constants.DEFAULT_ACTOR_METHOD_NUM_RETURN_VALS)
 
             if hasattr(method, "__ray_invocation_decorator__"):
-                self.decorators[method_name] = method.__ray_invocation_decorator__
+                self.decorators[method_name] = (
+                    method.__ray_invocation_decorator__)
 
         # Update cache.
         cls._cache[actor_creation_function_descriptor] = self
@@ -245,23 +241,14 @@ class ActorClassMetadata:
         method_meta: The actor method metadata.
     """
 
-    def __init__(
-        self,
-        language,
-        modified_class,
-        actor_creation_function_descriptor,
-        class_id,
-        max_restarts,
-        max_task_retries,
-        num_cpus,
-        num_gpus,
-        memory,
-        object_store_memory,
-        resources,
-    ):
+    def __init__(self, language, modified_class,
+                 actor_creation_function_descriptor, class_id, max_restarts,
+                 max_task_retries, num_cpus, num_gpus, memory,
+                 object_store_memory, resources):
         self.language = language
         self.modified_class = modified_class
-        self.actor_creation_function_descriptor = actor_creation_function_descriptor
+        self.actor_creation_function_descriptor = \
+            actor_creation_function_descriptor
         self.class_name = actor_creation_function_descriptor.class_name
         self.is_cross_language = language != Language.PYTHON
         self.class_id = class_id
@@ -274,8 +261,7 @@ class ActorClassMetadata:
         self.resources = resources
         self.last_export_session_and_job = None
         self.method_meta = ActorClassMethodMetadata.create(
-            modified_class, actor_creation_function_descriptor
-        )
+            modified_class, actor_creation_function_descriptor)
 
 
 class ActorClass:
@@ -299,21 +285,18 @@ class ActorClass:
         """
         for base in bases:
             if isinstance(base, ActorClass):
-                raise TypeError(
-                    "Attempted to define subclass '{}' of actor "
-                    "class '{}'. Inheriting from actor classes is "
-                    "not currently supported. You can instead "
-                    "inherit from a non-actor base class and make "
-                    "the derived class an actor class (with "
-                    "@ray.remote).".format(name, base.__ray_metadata__.class_name)
-                )
+                raise TypeError("Attempted to define subclass '{}' of actor "
+                                "class '{}'. Inheriting from actor classes is "
+                                "not currently supported. You can instead "
+                                "inherit from a non-actor base class and make "
+                                "the derived class an actor class (with "
+                                "@ray.remote).".format(
+                                    name, base.__ray_metadata__.class_name))
 
         # This shouldn't be reached because one of the base classes must be
         # an actor class if this was meant to be subclassed.
-        assert False, (
-            "ActorClass.__init__ should not be called. Please use "
-            "the @ray.remote decorator instead."
-        )
+        assert False, ("ActorClass.__init__ should not be called. Please use "
+                       "the @ray.remote decorator instead.")
 
     def __call__(self, *args, **kwargs):
         """Prevents users from directly instantiating an ActorClass.
@@ -325,39 +308,23 @@ class ActorClass:
         Raises:
             Exception: Always.
         """
-        raise TypeError(
-            "Actors cannot be instantiated directly. "
-            "Instead of '{}()', use '{}.remote()'.".format(
-                self.__ray_metadata__.class_name, self.__ray_metadata__.class_name
-            )
-        )
+        raise TypeError("Actors cannot be instantiated directly. "
+                        "Instead of '{}()', use '{}.remote()'.".format(
+                            self.__ray_metadata__.class_name,
+                            self.__ray_metadata__.class_name))
 
     @classmethod
-    def _ray_from_modified_class(
-        cls,
-        modified_class,
-        class_id,
-        max_restarts,
-        max_task_retries,
-        num_cpus,
-        num_gpus,
-        memory,
-        object_store_memory,
-        resources,
-    ):
+    def _ray_from_modified_class(cls, modified_class, class_id, max_restarts,
+                                 max_task_retries, num_cpus, num_gpus, memory,
+                                 object_store_memory, resources):
         for attribute in [
-            "remote",
-            "_remote",
-            "_ray_from_modified_class",
-            "_ray_from_function_descriptor",
+                "remote", "_remote", "_ray_from_modified_class",
+                "_ray_from_function_descriptor"
         ]:
             if hasattr(modified_class, attribute):
-                logger.warning(
-                    "Creating an actor from class {} overwrites "
-                    "attribute {} of that class".format(
-                        modified_class.__name__, attribute
-                    )
-                )
+                logger.warning("Creating an actor from class {} overwrites "
+                               "attribute {} of that class".format(
+                                   modified_class.__name__, attribute))
 
         # Make sure the actor class we are constructing inherits from the
         # original class so it retains all class properties.
@@ -371,54 +338,29 @@ class ActorClass:
         # Construct the base object.
         self = DerivedActorClass.__new__(DerivedActorClass)
         # Actor creation function descriptor.
-        actor_creation_function_descriptor = PythonFunctionDescriptor.from_class(
-            modified_class.__ray_actor_class__
-        )
+        actor_creation_function_descriptor = \
+            PythonFunctionDescriptor.from_class(
+                modified_class.__ray_actor_class__)
 
         self.__ray_metadata__ = ActorClassMetadata(
-            Language.PYTHON,
-            modified_class,
-            actor_creation_function_descriptor,
-            class_id,
-            max_restarts,
-            max_task_retries,
-            num_cpus,
-            num_gpus,
-            memory,
-            object_store_memory,
-            resources,
-        )
+            Language.PYTHON, modified_class,
+            actor_creation_function_descriptor, class_id, max_restarts,
+            max_task_retries, num_cpus, num_gpus, memory, object_store_memory,
+            resources)
 
         return self
 
     @classmethod
     def _ray_from_function_descriptor(
-        cls,
-        language,
-        actor_creation_function_descriptor,
-        max_restarts,
-        max_task_retries,
-        num_cpus,
-        num_gpus,
-        memory,
-        object_store_memory,
-        resources,
-    ):
+            cls, language, actor_creation_function_descriptor, max_restarts,
+            max_task_retries, num_cpus, num_gpus, memory, object_store_memory,
+            resources):
         self = ActorClass.__new__(ActorClass)
 
         self.__ray_metadata__ = ActorClassMetadata(
-            language,
-            None,
-            actor_creation_function_descriptor,
-            None,
-            max_restarts,
-            max_task_retries,
-            num_cpus,
-            num_gpus,
-            memory,
-            object_store_memory,
-            resources,
-        )
+            language, None, actor_creation_function_descriptor, None,
+            max_restarts, max_task_retries, num_cpus, num_gpus, memory,
+            object_store_memory, resources)
 
         return self
 
@@ -456,22 +398,20 @@ class ActorClass:
 
         return ActorOptionWrapper()
 
-    def _remote(
-        self,
-        args=None,
-        kwargs=None,
-        num_cpus=None,
-        num_gpus=None,
-        memory=None,
-        object_store_memory=None,
-        resources=None,
-        is_direct_call=None,
-        max_concurrency=None,
-        max_restarts=None,
-        max_task_retries=None,
-        name=None,
-        detached=False,
-    ):
+    def _remote(self,
+                args=None,
+                kwargs=None,
+                num_cpus=None,
+                num_gpus=None,
+                memory=None,
+                object_store_memory=None,
+                resources=None,
+                is_direct_call=None,
+                max_concurrency=None,
+                max_restarts=None,
+                max_task_retries=None,
+                name=None,
+                detached=False):
         """Create an actor.
 
         This method allows more flexibility than the remote method because
@@ -508,14 +448,10 @@ class ActorClass:
             raise ValueError("Non-direct call actors are no longer supported.")
 
         meta = self.__ray_metadata__
-        actor_has_async_methods = (
-            len(
-                inspect.getmembers(
-                    meta.modified_class, predicate=inspect.iscoroutinefunction
-                )
-            )
-            > 0
-        )
+        actor_has_async_methods = len(
+            inspect.getmembers(
+                meta.modified_class,
+                predicate=inspect.iscoroutinefunction)) > 0
         is_asyncio = actor_has_async_methods
 
         if max_concurrency is None:
@@ -529,21 +465,17 @@ class ActorClass:
 
         worker = ray.worker.global_worker
         if worker.mode is None:
-            raise RuntimeError(
-                "Actors cannot be created before ray.init() " "has been called."
-            )
+            raise RuntimeError("Actors cannot be created before ray.init() "
+                               "has been called.")
 
         if detached:
-            logger.warning(
-                "The detached flag is deprecated. To create a "
-                "detached actor, use the name parameter."
-            )
+            logger.warning("The detached flag is deprecated. To create a "
+                           "detached actor, use the name parameter.")
 
         if name is not None:
             if not isinstance(name, str):
-                raise TypeError(
-                    "name must be None or a string, " "got: '{}'.".format(type(name))
-                )
+                raise TypeError("name must be None or a string, "
+                                "got: '{}'.".format(type(name)))
             if name == "":
                 raise ValueError("Actor name cannot be an empty string.")
 
@@ -561,8 +493,7 @@ class ActorClass:
                 raise ValueError(
                     "The name {name} is already taken. Please use "
                     "a different name or get the existing actor using "
-                    "ray.get_actor('{name}')".format(name=name)
-                )
+                    "ray.get_actor('{name}')".format(name=name))
             detached = True
         else:
             detached = False
@@ -571,14 +502,9 @@ class ActorClass:
         # conditions are to check that no resources were specified in the
         # decorator. Last three conditions are to check that no resources were
         # specified when _remote() was called.
-        if (
-            meta.num_cpus is None
-            and meta.num_gpus is None
-            and meta.resources is None
-            and num_cpus is None
-            and num_gpus is None
-            and resources is None
-        ):
+        if (meta.num_cpus is None and meta.num_gpus is None
+                and meta.resources is None and num_cpus is None
+                and num_gpus is None and resources is None):
             # In the default case, actors acquire no resources for
             # their lifetime, and actor methods will require 1 CPU.
             cpus_to_use = ray_constants.DEFAULT_ACTOR_CREATION_CPU_SIMPLE
@@ -587,49 +513,34 @@ class ActorClass:
             # If any resources are specified (here or in decorator), then
             # all resources are acquired for the actor's lifetime and no
             # resources are associated with methods.
-            cpus_to_use = (
-                ray_constants.DEFAULT_ACTOR_CREATION_CPU_SPECIFIED
-                if meta.num_cpus is None
-                else meta.num_cpus
-            )
+            cpus_to_use = (ray_constants.DEFAULT_ACTOR_CREATION_CPU_SPECIFIED
+                           if meta.num_cpus is None else meta.num_cpus)
             actor_method_cpu = ray_constants.DEFAULT_ACTOR_METHOD_CPU_SPECIFIED
 
         # LOCAL_MODE cannot handle cross_language
         if worker.mode == ray.LOCAL_MODE:
-            assert (
-                not meta.is_cross_language
-            ), "Cross language ActorClass cannot be executed locally."
+            assert not meta.is_cross_language, \
+                "Cross language ActorClass cannot be executed locally."
 
         # Export the actor.
-        if not meta.is_cross_language and (
-            meta.last_export_session_and_job != worker.current_session_and_job
-        ):
+        if not meta.is_cross_language and (meta.last_export_session_and_job !=
+                                           worker.current_session_and_job):
             # If this actor class was not exported in this session and job,
             # we need to export this function again, because current GCS
             # doesn't have it.
-            meta.last_export_session_and_job = worker.current_session_and_job
+            meta.last_export_session_and_job = (worker.current_session_and_job)
             # After serialize / deserialize modified class, the __module__
             # of modified class will be ray.cloudpickle.cloudpickle.
             # So, here pass actor_creation_function_descriptor to make
             # sure export actor class correct.
             worker.function_actor_manager.export_actor_class(
-                meta.modified_class,
-                meta.actor_creation_function_descriptor,
-                meta.method_meta.methods.keys(),
-            )
+                meta.modified_class, meta.actor_creation_function_descriptor,
+                meta.method_meta.methods.keys())
 
         resources = ray.utils.resources_from_resource_arguments(
-            cpus_to_use,
-            meta.num_gpus,
-            meta.memory,
-            meta.object_store_memory,
-            meta.resources,
-            num_cpus,
-            num_gpus,
-            memory,
-            object_store_memory,
-            resources,
-        )
+            cpus_to_use, meta.num_gpus, meta.memory, meta.object_store_memory,
+            meta.resources, num_cpus, num_gpus, memory, object_store_memory,
+            resources)
 
         # If the actor methods require CPU resources, then set the required
         # placement resources. If actor_placement_resources is empty, then
@@ -643,7 +554,8 @@ class ActorClass:
             creation_args = cross_language.format_args(worker, args, kwargs)
         else:
             function_signature = meta.method_meta.signatures["__init__"]
-            creation_args = signature.flatten_args(function_signature, args, kwargs)
+            creation_args = signature.flatten_args(function_signature, args,
+                                                   kwargs)
         actor_id = worker.core_worker.create_actor(
             meta.language,
             meta.actor_creation_function_descriptor,
@@ -657,8 +569,7 @@ class ActorClass:
             name if name is not None else "",
             is_asyncio,
             # Store actor_method_cpu in actor handle's extension data.
-            extension_data=str(actor_method_cpu),
-        )
+            extension_data=str(actor_method_cpu))
 
         actor_handle = ActorHandle(
             meta.language,
@@ -669,8 +580,7 @@ class ActorClass:
             actor_method_cpu,
             meta.actor_creation_function_descriptor,
             worker.current_session_and_job,
-            original_handle=True,
-        )
+            original_handle=True)
 
         if name is not None and not gcs_actor_service_enabled():
             ray.util.named_actors._register_actor(name, actor_handle)
@@ -708,18 +618,16 @@ class ActorHandle:
             of the actor creation task.
     """
 
-    def __init__(
-        self,
-        language,
-        actor_id,
-        method_decorators,
-        method_signatures,
-        method_num_return_vals,
-        actor_method_cpus,
-        actor_creation_function_descriptor,
-        session_and_job,
-        original_handle=False,
-    ):
+    def __init__(self,
+                 language,
+                 actor_id,
+                 method_decorators,
+                 method_signatures,
+                 method_num_return_vals,
+                 actor_method_cpus,
+                 actor_creation_function_descriptor,
+                 session_and_job,
+                 original_handle=False):
         self._ray_actor_language = language
         self._ray_actor_id = actor_id
         self._ray_original_handle = original_handle
@@ -729,28 +637,25 @@ class ActorHandle:
         self._ray_actor_method_cpus = actor_method_cpus
         self._ray_session_and_job = session_and_job
         self._ray_is_cross_language = language != Language.PYTHON
-        self._ray_actor_creation_function_descriptor = (
+        self._ray_actor_creation_function_descriptor = \
             actor_creation_function_descriptor
-        )
         self._ray_function_descriptor = {}
 
         if not self._ray_is_cross_language:
-            assert isinstance(
-                actor_creation_function_descriptor, PythonFunctionDescriptor
-            )
+            assert isinstance(actor_creation_function_descriptor,
+                              PythonFunctionDescriptor)
             module_name = actor_creation_function_descriptor.module_name
             class_name = actor_creation_function_descriptor.class_name
             for method_name in self._ray_method_signatures.keys():
                 function_descriptor = PythonFunctionDescriptor(
-                    module_name, method_name, class_name
-                )
-                self._ray_function_descriptor[method_name] = function_descriptor
+                    module_name, method_name, class_name)
+                self._ray_function_descriptor[
+                    method_name] = function_descriptor
                 method = ActorMethod(
                     self,
                     method_name,
                     self._ray_method_num_return_vals[method_name],
-                    decorator=self._ray_method_decorators.get(method_name),
-                )
+                    decorator=self._ray_method_decorators.get(method_name))
                 setattr(self, method_name, method)
 
     def __del__(self):
@@ -758,11 +663,14 @@ class ActorHandle:
         # handles are out of scope, the actor will exit.
         worker = ray.worker.global_worker
         if worker.connected and hasattr(worker, "core_worker"):
-            worker.core_worker.remove_actor_handle_reference(self._ray_actor_id)
+            worker.core_worker.remove_actor_handle_reference(
+                self._ray_actor_id)
 
-    def _actor_method_call(
-        self, method_name, args=None, kwargs=None, num_return_vals=None
-    ):
+    def _actor_method_call(self,
+                           method_name,
+                           args=None,
+                           kwargs=None,
+                           num_return_vals=None):
         """Method execution stub for an actor handle.
 
         This is the function that executes when
@@ -786,33 +694,28 @@ class ActorHandle:
         kwargs = kwargs or {}
         if self._ray_is_cross_language:
             list_args = cross_language.format_args(worker, args, kwargs)
-            function_descriptor = cross_language.get_function_descriptor_for_actor_method(
-                self._ray_actor_language,
-                self._ray_actor_creation_function_descriptor,
-                method_name,
-            )
+            function_descriptor = \
+                cross_language.get_function_descriptor_for_actor_method(
+                    self._ray_actor_language,
+                    self._ray_actor_creation_function_descriptor, method_name)
         else:
             function_signature = self._ray_method_signatures[method_name]
 
             if not args and not kwargs and not function_signature:
                 list_args = []
             else:
-                list_args = signature.flatten_args(function_signature, args, kwargs)
+                list_args = signature.flatten_args(function_signature, args,
+                                                   kwargs)
             function_descriptor = self._ray_function_descriptor[method_name]
 
         if worker.mode == ray.LOCAL_MODE:
-            assert not self._ray_is_cross_language, (
-                "Cross language remote actor method " "cannot be executed locally."
-            )
+            assert not self._ray_is_cross_language,\
+                "Cross language remote actor method " \
+                "cannot be executed locally."
 
         object_ids = worker.core_worker.submit_actor_task(
-            self._ray_actor_language,
-            self._ray_actor_id,
-            function_descriptor,
-            list_args,
-            num_return_vals,
-            self._ray_actor_method_cpus,
-        )
+            self._ray_actor_language, self._ray_actor_id, function_descriptor,
+            list_args, num_return_vals, self._ray_actor_method_cpus)
 
         if len(object_ids) == 1:
             object_ids = object_ids[0]
@@ -823,26 +726,21 @@ class ActorHandle:
 
     def __getattr__(self, item):
         if not self._ray_is_cross_language:
-            raise AttributeError(
-                "'{}' object has no attribute '{}'".format(type(self).__name__, item)
-            )
+            raise AttributeError("'{}' object has no attribute '{}'".format(
+                type(self).__name__, item))
         if item in ["__ray_terminate__", "__ray_checkpoint__"]:
 
             class FakeActorMethod(object):
                 def __call__(self, *args, **kwargs):
                     raise TypeError(
                         "Actor methods cannot be called directly. Instead "
-                        "of running 'object.{}()', try 'object.{}.remote()'.".format(
-                            item, item
-                        )
-                    )
+                        "of running 'object.{}()', try 'object.{}.remote()'.".
+                        format(item, item))
 
                 def remote(self, *args, **kwargs):
                     logger.warning(
-                        "Actor method {} is not supported by cross language.".format(
-                            item
-                        )
-                    )
+                        "Actor method {} is not supported by cross language."
+                        .format(item))
 
             return FakeActorMethod()
 
@@ -853,8 +751,7 @@ class ActorHandle:
             # Currently, we use default num returns
             DEFAULT_ACTOR_METHOD_NUM_RETURN_VALS,
             # Currently, cross-lang actor method not support decorator
-            decorator=None,
-        )
+            decorator=None)
 
     # Make tab completion work.
     def __dir__(self):
@@ -863,8 +760,7 @@ class ActorHandle:
     def __repr__(self):
         return "Actor({}, {})".format(
             self._ray_actor_creation_function_descriptor.class_name,
-            self._actor_id.hex(),
-        )
+            self._actor_id.hex())
 
     @property
     def _actor_id(self):
@@ -881,21 +777,20 @@ class ActorHandle:
 
         if hasattr(worker, "core_worker"):
             # Non-local mode
-            state = worker.core_worker.serialize_actor_handle(self._ray_actor_id)
+            state = worker.core_worker.serialize_actor_handle(
+                self._ray_actor_id)
         else:
             # Local mode
-            state = (
-                {
-                    "actor_language": self._ray_actor_language,
-                    "actor_id": self._ray_actor_id,
-                    "method_decorators": self._ray_method_decorators,
-                    "method_signatures": self._ray_method_signatures,
-                    "method_num_return_vals": self._ray_method_num_return_vals,
-                    "actor_method_cpus": self._ray_actor_method_cpus,
-                    "actor_creation_function_descriptor": self._ray_actor_creation_function_descriptor,
-                },
-                None,
-            )
+            state = ({
+                "actor_language": self._ray_actor_language,
+                "actor_id": self._ray_actor_id,
+                "method_decorators": self._ray_method_decorators,
+                "method_signatures": self._ray_method_signatures,
+                "method_num_return_vals": self._ray_method_num_return_vals,
+                "actor_method_cpus": self._ray_actor_method_cpus,
+                "actor_creation_function_descriptor": self.
+                _ray_actor_creation_function_descriptor,
+            }, None)
 
         return state
 
@@ -916,8 +811,7 @@ class ActorHandle:
         if hasattr(worker, "core_worker"):
             # Non-local mode
             return worker.core_worker.deserialize_and_register_actor_handle(
-                state, outer_object_id
-            )
+                state, outer_object_id)
         else:
             # Local mode
             return cls(
@@ -930,8 +824,7 @@ class ActorHandle:
                 state["method_num_return_vals"],
                 state["actor_method_cpus"],
                 state["actor_creation_function_descriptor"],
-                worker.current_session_and_job,
-            )
+                worker.current_session_and_job)
 
     def __reduce__(self):
         """This code path is used by pickling but not by Ray forking."""
@@ -949,14 +842,12 @@ def modify_class(cls):
         raise TypeError(
             "The @ray.remote decorator cannot be applied to old-style "
             "classes. In Python 2, you must declare the class with "
-            "'class ClassName(object):' instead of 'class ClassName:'."
-        )
+            "'class ClassName(object):' instead of 'class ClassName:'.")
 
     if issubclass(cls, Checkpointable) and inspect.isabstract(cls):
         raise TypeError(
             "A checkpointable actor class should implement all abstract "
-            "methods in the `Checkpointable` interface."
-        )
+            "methods in the `Checkpointable` interface.")
 
     # Modify the class to have an additional method that will be used for
     # terminating the worker.
@@ -979,8 +870,7 @@ def modify_class(cls):
             if not isinstance(self, ray.actor.Checkpointable):
                 raise TypeError(
                     "__ray_checkpoint__.remote() may only be called on actors "
-                    "that implement ray.actor.Checkpointable"
-                )
+                    "that implement ray.actor.Checkpointable")
             return worker._save_actor_checkpoint()
 
     Class.__module__ = cls.__module__
@@ -999,16 +889,8 @@ def modify_class(cls):
     return Class
 
 
-def make_actor(
-    cls,
-    num_cpus,
-    num_gpus,
-    memory,
-    object_store_memory,
-    resources,
-    max_restarts,
-    max_task_retries,
-):
+def make_actor(cls, num_cpus, num_gpus, memory, object_store_memory, resources,
+               max_restarts, max_task_retries):
     Class = modify_class(cls)
 
     if max_restarts is None:
@@ -1019,29 +901,20 @@ def make_actor(
     infinite_restart = max_restarts == -1
     if not infinite_restart:
         if max_restarts < 0:
-            raise ValueError(
-                "max_restarts must be an integer >= -1 "
-                "-1 indicates infinite restarts"
-            )
+            raise ValueError("max_restarts must be an integer >= -1 "
+                             "-1 indicates infinite restarts")
         else:
             # Make sure we don't pass too big of an int to C++, causing
             # an overflow.
             max_restarts = min(max_restarts, ray_constants.MAX_INT64_VALUE)
 
     if max_restarts == 0 and max_task_retries != 0:
-        raise ValueError("max_task_retries cannot be set if max_restarts is 0.")
+        raise ValueError(
+            "max_task_retries cannot be set if max_restarts is 0.")
 
     return ActorClass._ray_from_modified_class(
-        Class,
-        ActorClassID.from_random(),
-        max_restarts,
-        max_task_retries,
-        num_cpus,
-        num_gpus,
-        memory,
-        object_store_memory,
-        resources,
-    )
+        Class, ActorClassID.from_random(), max_restarts, max_task_retries,
+        num_cpus, num_gpus, memory, object_store_memory, resources)
 
 
 def exit_actor():
@@ -1185,11 +1058,11 @@ def get_checkpoints_for_actor(actor_id):
     if checkpoint_info is None:
         return []
     checkpoints = [
-        Checkpoint(checkpoint_id, timestamp)
-        for checkpoint_id, timestamp in zip(
-            checkpoint_info["CheckpointIds"], checkpoint_info["Timestamps"]
-        )
+        Checkpoint(checkpoint_id, timestamp) for checkpoint_id, timestamp in
+        zip(checkpoint_info["CheckpointIds"], checkpoint_info["Timestamps"])
     ]
     return sorted(
-        checkpoints, key=lambda checkpoint: checkpoint.timestamp, reverse=True,
+        checkpoints,
+        key=lambda checkpoint: checkpoint.timestamp,
+        reverse=True,
     )

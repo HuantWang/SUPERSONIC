@@ -4,7 +4,11 @@ import gym
 import numpy as np
 from gym import spaces
 
-DEFAULT_CONFIG_LINEAR = {"feature_dim": 8, "num_actions": 4, "reward_noise_std": 0.01}
+DEFAULT_CONFIG_LINEAR = {
+    "feature_dim": 8,
+    "num_actions": 4,
+    "reward_noise_std": 0.01
+}
 
 
 class LinearDiscreteEnv(gym.Env):
@@ -27,25 +31,26 @@ class LinearDiscreteEnv(gym.Env):
         self.sigma = self.config["reward_noise_std"]
 
         self.action_space = spaces.Discrete(self.num_actions)
-        self.observation_space = spaces.Box(low=-10, high=10, shape=(self.feature_dim,))
+        self.observation_space = spaces.Box(
+            low=-10, high=10, shape=(self.feature_dim, ))
 
-        self.thetas = np.random.uniform(-1, 1, (self.num_actions, self.feature_dim))
+        self.thetas = np.random.uniform(-1, 1,
+                                        (self.num_actions, self.feature_dim))
         self.thetas /= np.linalg.norm(self.thetas, axis=1, keepdims=True)
 
         self._elapsed_steps = 0
         self._current_context = None
 
     def _sample_context(self):
-        return np.random.normal(scale=1 / 3, size=(self.feature_dim,))
+        return np.random.normal(scale=1 / 3, size=(self.feature_dim, ))
 
     def reset(self):
         self._current_context = self._sample_context()
         return self._current_context
 
     def step(self, action):
-        assert (
-            self._elapsed_steps is not None
-        ), "Cannot call env.step() beforecalling reset()"
+        assert self._elapsed_steps is not None,\
+            "Cannot call env.step() beforecalling reset()"
         assert action < self.num_actions, "Invalid action."
 
         action = int(action)
@@ -61,18 +66,22 @@ class LinearDiscreteEnv(gym.Env):
 
         reward = rewards[action]
         self._current_context = self._sample_context()
-        return (
-            self._current_context,
-            reward,
-            True,
-            {"regret": regret, "opt_action": opt_action},
-        )
+        return self._current_context, reward, True, {
+            "regret": regret,
+            "opt_action": opt_action
+        }
 
     def render(self, mode="human"):
         raise NotImplementedError
 
 
-DEFAULT_CONFIG_WHEEL = {"delta": 0.5, "mu_1": 1.2, "mu_2": 1, "mu_3": 50, "std": 0.01}
+DEFAULT_CONFIG_WHEEL = {
+    "delta": 0.5,
+    "mu_1": 1.2,
+    "mu_2": 1,
+    "mu_3": 50,
+    "std": 0.01
+}
 
 
 class WheelBanditEnv(gym.Env):
@@ -95,7 +104,8 @@ class WheelBanditEnv(gym.Env):
         self.std = self.config["std"]
 
         self.action_space = spaces.Discrete(self.num_actions)
-        self.observation_space = spaces.Box(low=-1, high=1, shape=(self.feature_dim,))
+        self.observation_space = spaces.Box(
+            low=-1, high=1, shape=(self.feature_dim, ))
 
         self.means = [self.mu_1] + 4 * [self.mu_2]
         self._elapsed_steps = 0
@@ -112,14 +122,14 @@ class WheelBanditEnv(gym.Env):
         return self._current_context
 
     def step(self, action):
-        assert (
-            self._elapsed_steps is not None
-        ), "Cannot call env.step() before calling reset()"
+        assert self._elapsed_steps is not None,\
+            "Cannot call env.step() before calling reset()"
 
         action = int(action)
         self._elapsed_steps += 1
         rewards = [
-            np.random.normal(self.means[j], self.std) for j in range(self.num_actions)
+            np.random.normal(self.means[j], self.std)
+            for j in range(self.num_actions)
         ]
         context = self._current_context
         r_big = np.random.normal(self.mu_3, self.std)
@@ -152,12 +162,10 @@ class WheelBanditEnv(gym.Env):
         regret = rewards[opt_action] - reward
 
         self._current_context = self._sample_context()
-        return (
-            self._current_context,
-            reward,
-            True,
-            {"regret": regret, "opt_action": opt_action},
-        )
+        return self._current_context, reward, True, {
+            "regret": regret,
+            "opt_action": opt_action
+        }
 
     def render(self, mode="human"):
         raise NotImplementedError

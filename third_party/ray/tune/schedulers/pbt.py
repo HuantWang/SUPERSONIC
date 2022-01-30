@@ -26,7 +26,8 @@ class PBTTrialState:
         self.last_perturbation_time = 0
 
     def __repr__(self):
-        return str((self.last_score, self.last_checkpoint, self.last_perturbation_time))
+        return str((self.last_score, self.last_checkpoint,
+                    self.last_perturbation_time))
 
 
 def explore(config, mutations, resample_probability, custom_explore_fn):
@@ -44,23 +45,22 @@ def explore(config, mutations, resample_probability, custom_explore_fn):
     new_config = copy.deepcopy(config)
     for key, distribution in mutations.items():
         if isinstance(distribution, dict):
-            new_config.update(
-                {key: explore(config[key], mutations[key], resample_probability, None)}
-            )
+            new_config.update({
+                key: explore(config[key], mutations[key], resample_probability,
+                             None)
+            })
         elif isinstance(distribution, list):
-            if (
-                random.random() < resample_probability
-                or config[key] not in distribution
-            ):
+            if random.random() < resample_probability or \
+                    config[key] not in distribution:
                 new_config[key] = random.choice(distribution)
             elif random.random() > 0.5:
-                new_config[key] = distribution[
-                    max(0, distribution.index(config[key]) - 1)
-                ]
+                new_config[key] = distribution[max(
+                    0,
+                    distribution.index(config[key]) - 1)]
             else:
-                new_config[key] = distribution[
-                    min(len(distribution) - 1, distribution.index(config[key]) + 1)
-                ]
+                new_config[key] = distribution[min(
+                    len(distribution) - 1,
+                    distribution.index(config[key]) + 1)]
         else:
             if random.random() < resample_probability:
                 new_config[key] = distribution()
@@ -72,8 +72,10 @@ def explore(config, mutations, resample_probability, custom_explore_fn):
                 new_config[key] = int(new_config[key])
     if custom_explore_fn:
         new_config = custom_explore_fn(new_config)
-        assert new_config is not None, "Custom explore fn failed to return new config"
-    logger.info("[explore] perturbed config from {} -> {}".format(config, new_config))
+        assert new_config is not None, \
+            "Custom explore fn failed to return new config"
+    logger.info("[explore] perturbed config from {} -> {}".format(
+        config, new_config))
     return new_config
 
 
@@ -170,37 +172,31 @@ class PopulationBasedTraining(FIFOScheduler):
         tune.run({...}, num_samples=8, scheduler=pbt)
     """
 
-    def __init__(
-        self,
-        time_attr="time_total_s",
-        reward_attr=None,
-        metric="episode_reward_mean",
-        mode="max",
-        perturbation_interval=60.0,
-        hyperparam_mutations={},
-        quantile_fraction=0.25,
-        resample_probability=0.25,
-        custom_explore_fn=None,
-        log_config=True,
-    ):
+    def __init__(self,
+                 time_attr="time_total_s",
+                 reward_attr=None,
+                 metric="episode_reward_mean",
+                 mode="max",
+                 perturbation_interval=60.0,
+                 hyperparam_mutations={},
+                 quantile_fraction=0.25,
+                 resample_probability=0.25,
+                 custom_explore_fn=None,
+                 log_config=True):
         for value in hyperparam_mutations.values():
             if not (isinstance(value, (list, dict)) or callable(value)):
-                raise TypeError(
-                    "`hyperparam_mutation` values must be either "
-                    "a List, Dict, or callable."
-                )
+                raise TypeError("`hyperparam_mutation` values must be either "
+                                "a List, Dict, or callable.")
 
         if not hyperparam_mutations and not custom_explore_fn:
             raise TuneError(
                 "You must specify at least one of `hyperparam_mutations` or "
-                "`custom_explore_fn` to use PBT."
-            )
+                "`custom_explore_fn` to use PBT.")
 
         if quantile_fraction > 0.5 or quantile_fraction < 0:
             raise TuneError(
                 "You must set `quantile_fraction` to a value between 0 and"
-                "0.5. Current value: '{}'".format(quantile_fraction)
-            )
+                "0.5. Current value: '{}'".format(quantile_fraction))
 
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
 
@@ -210,15 +206,14 @@ class PopulationBasedTraining(FIFOScheduler):
             logger.warning(
                 "`reward_attr` is deprecated and will be removed in a future "
                 "version of Tune. "
-                "Setting `metric={}` and `mode=max`.".format(reward_attr)
-            )
+                "Setting `metric={}` and `mode=max`.".format(reward_attr))
 
         FIFOScheduler.__init__(self)
         self._metric = metric
         if mode == "max":
-            self._metric_op = 1.0
+            self._metric_op = 1.
         elif mode == "min":
-            self._metric_op = -1.0
+            self._metric_op = -1.
         self._time_attr = time_attr
         self._perturbation_interval = perturbation_interval
         self._hyperparam_mutations = hyperparam_mutations
@@ -253,8 +248,7 @@ class PopulationBasedTraining(FIFOScheduler):
             # The trial last result is only updated after the scheduler
             # callback. So, we override with the current result.
             state.last_checkpoint = trial_runner.trial_executor.save(
-                trial, Checkpoint.MEMORY, result=result
-            )
+                trial, Checkpoint.MEMORY, result=result)
             self._num_checkpoints += 1
         else:
             state.last_checkpoint = None  # not a top trial
@@ -270,28 +264,27 @@ class PopulationBasedTraining(FIFOScheduler):
 
         return TrialScheduler.CONTINUE
 
-    def _log_config_on_step(
-        self, trial_state, new_state, trial, trial_to_clone, new_config
-    ):
+    def _log_config_on_step(self, trial_state, new_state, trial,
+                            trial_to_clone, new_config):
         """Logs transition during exploit/exploit step.
 
         For each step, logs: [target trial tag, clone trial tag, target trial
         iteration, clone trial iteration, old config, new config].
         """
-        trial_name, trial_to_clone_name = (trial_state.orig_tag, new_state.orig_tag)
+        trial_name, trial_to_clone_name = (trial_state.orig_tag,
+                                           new_state.orig_tag)
         trial_id = trial.trial_id
         trial_to_clone_id = trial_to_clone.trial_id
-        trial_path = os.path.join(trial.local_dir, "pbt_policy_" + trial_id + ".txt")
+        trial_path = os.path.join(trial.local_dir,
+                                  "pbt_policy_" + trial_id + ".txt")
         trial_to_clone_path = os.path.join(
-            trial_to_clone.local_dir, "pbt_policy_" + trial_to_clone_id + ".txt"
-        )
+            trial_to_clone.local_dir,
+            "pbt_policy_" + trial_to_clone_id + ".txt")
         policy = [
-            trial_name,
-            trial_to_clone_name,
+            trial_name, trial_to_clone_name,
             trial.last_result.get(TRAINING_ITERATION, 0),
             trial_to_clone.last_result.get(TRAINING_ITERATION, 0),
-            trial_to_clone.config,
-            new_config,
+            trial_to_clone.config, new_config
         ]
         # Log to global file.
         with open(os.path.join(trial.local_dir, "pbt_global.txt"), "a+") as f:
@@ -311,45 +304,39 @@ class PopulationBasedTraining(FIFOScheduler):
         trial_state = self._trial_state[trial]
         new_state = self._trial_state[trial_to_clone]
         if not new_state.last_checkpoint:
-            logger.info(
-                "[pbt]: no checkpoint for trial."
-                " Skip exploit for Trial {}".format(trial)
-            )
+            logger.info("[pbt]: no checkpoint for trial."
+                        " Skip exploit for Trial {}".format(trial))
             return
-        new_config = explore(
-            trial_to_clone.config,
-            self._hyperparam_mutations,
-            self._resample_probability,
-            self._custom_explore_fn,
-        )
-        logger.info(
-            "[exploit] transferring weights from trial "
-            "{} (score {}) -> {} (score {})".format(
-                trial_to_clone, new_state.last_score, trial, trial_state.last_score
-            )
-        )
+        new_config = explore(trial_to_clone.config, self._hyperparam_mutations,
+                             self._resample_probability,
+                             self._custom_explore_fn)
+        logger.info("[exploit] transferring weights from trial "
+                    "{} (score {}) -> {} (score {})".format(
+                        trial_to_clone, new_state.last_score, trial,
+                        trial_state.last_score))
 
         if self._log_config:
-            self._log_config_on_step(
-                trial_state, new_state, trial, trial_to_clone, new_config
-            )
+            self._log_config_on_step(trial_state, new_state, trial,
+                                     trial_to_clone, new_config)
 
-        new_tag = make_experiment_tag(
-            trial_state.orig_tag, new_config, self._hyperparam_mutations
-        )
-        reset_successful = trial_executor.reset_trial(trial, new_config, new_tag)
+        new_tag = make_experiment_tag(trial_state.orig_tag, new_config,
+                                      self._hyperparam_mutations)
+        reset_successful = trial_executor.reset_trial(trial, new_config,
+                                                      new_tag)
 
         # TODO(ujvl): Refactor Scheduler abstraction to abstract
         #  mechanism for trial restart away. We block on restore
         #  and suppress train on start as a stop-gap fix to
         #  https://github.com/ray-project/ray/issues/7258.
         if reset_successful:
-            trial_executor.restore(trial, new_state.last_checkpoint, block=True)
+            trial_executor.restore(
+                trial, new_state.last_checkpoint, block=True)
         else:
             trial_executor.stop_trial(trial, stop_logger=False)
             trial.config = new_config
             trial.experiment_tag = new_tag
-            trial_executor.start_trial(trial, new_state.last_checkpoint, train=False)
+            trial_executor.start_trial(
+                trial, new_state.last_checkpoint, train=False)
 
         self._num_perturbations += 1
         # Transfer over the last perturbation time as well
@@ -370,11 +357,11 @@ class PopulationBasedTraining(FIFOScheduler):
             return [], []
         else:
             num_trials_in_quantile = int(
-                math.ceil(len(trials) * self._quantile_fraction)
-            )
+                math.ceil(len(trials) * self._quantile_fraction))
             if num_trials_in_quantile > len(trials) / 2:
                 num_trials_in_quantile = int(math.floor(len(trials) / 2))
-            return (trials[:num_trials_in_quantile], trials[-num_trials_in_quantile:])
+            return (trials[:num_trials_in_quantile],
+                    trials[-num_trials_in_quantile:])
 
     def choose_trial_to_run(self, trial_runner):
         """Ensures all trials get fair share of time (as defined by time_attr).
@@ -384,14 +371,11 @@ class PopulationBasedTraining(FIFOScheduler):
         """
         candidates = []
         for trial in trial_runner.get_trials():
-            if trial.status in [
-                Trial.PENDING,
-                Trial.PAUSED,
-            ] and trial_runner.has_resources(trial.resources):
+            if trial.status in [Trial.PENDING, Trial.PAUSED] and \
+                    trial_runner.has_resources(trial.resources):
                 candidates.append(trial)
         candidates.sort(
-            key=lambda trial: self._trial_state[trial].last_perturbation_time
-        )
+            key=lambda trial: self._trial_state[trial].last_perturbation_time)
         return candidates[0] if candidates else None
 
     def reset_stats(self):
@@ -408,5 +392,4 @@ class PopulationBasedTraining(FIFOScheduler):
 
     def debug_string(self):
         return "PopulationBasedTraining: {} checkpoints, {} perturbs".format(
-            self._num_checkpoints, self._num_perturbations
-        )
+            self._num_checkpoints, self._num_perturbations)

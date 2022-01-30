@@ -17,16 +17,14 @@ logger = logging.getLogger(__name__)
 class Model:
     """This class is deprecated! Use ModelV2 instead."""
 
-    def __init__(
-        self,
-        input_dict,
-        obs_space,
-        action_space,
-        num_outputs,
-        options,
-        state_in=None,
-        seq_lens=None,
-    ):
+    def __init__(self,
+                 input_dict,
+                 obs_space,
+                 action_space,
+                 num_outputs,
+                 options,
+                 state_in=None,
+                 seq_lens=None):
         # Soft-deprecate this class. All Models should use the ModelV2
         # API from here on.
         deprecation_warning("Model", "ModelV2", error=False)
@@ -47,8 +45,7 @@ class Model:
             self.seq_lens = seq_lens
         else:
             self.seq_lens = tf.placeholder(
-                dtype=tf.int32, shape=[None], name="seq_lens"
-            )
+                dtype=tf.int32, shape=[None], name="seq_lens")
 
         self._num_outputs = num_outputs
         if options.get("free_log_std"):
@@ -58,24 +55,25 @@ class Model:
         ok = True
         try:
             restored = input_dict.copy()
-            restored["obs"] = restore_original_dimensions(input_dict["obs"], obs_space)
+            restored["obs"] = restore_original_dimensions(
+                input_dict["obs"], obs_space)
             self.outputs, self.last_layer = self._build_layers_v2(
-                restored, num_outputs, options
-            )
+                restored, num_outputs, options)
         except NotImplementedError:
             ok = False
         # In TF 1.14, you cannot construct variable scopes in exception
         # handlers so we have to set the OK flag and check it here:
         if not ok:
             self.outputs, self.last_layer = self._build_layers(
-                input_dict["obs"], num_outputs, options
-            )
+                input_dict["obs"], num_outputs, options)
 
         if options.get("free_log_std", False):
             log_std = tf.get_variable(
-                name="log_std", shape=[num_outputs], initializer=tf.zeros_initializer
-            )
-            self.outputs = tf.concat([self.outputs, 0.0 * self.outputs + log_std], 1)
+                name="log_std",
+                shape=[num_outputs],
+                initializer=tf.zeros_initializer)
+            self.outputs = tf.concat(
+                [self.outputs, 0.0 * self.outputs + log_std], 1)
 
     def _build_layers(self, inputs, num_outputs, options):
         """Builds and returns the output and last layer of the network.
@@ -129,8 +127,7 @@ class Model:
             Tensor of size [BATCH_SIZE] for the value function.
         """
         return tf.reshape(
-            linear(self.last_layer, 1, "value", normc_initializer(1.0)), [-1]
-        )
+            linear(self.last_layer, 1, "value", normc_initializer(1.0)), [-1])
 
     @PublicAPI
     def custom_loss(self, policy_loss, loss_inputs):
@@ -152,8 +149,7 @@ class Model:
         """
         if self.loss() is not None:
             raise DeprecationWarning(
-                "self.loss() is deprecated, use self.custom_loss() instead."
-            )
+                "self.loss() is deprecated, use self.custom_loss() instead.")
         return policy_loss
 
     @PublicAPI
@@ -180,8 +176,7 @@ class Model:
     def get_initial_state(cls, obs_space, action_space, num_outputs, options):
         raise NotImplementedError(
             "In order to use recurrent models with ModelV2, you should define "
-            "the get_initial_state @classmethod on your custom model class."
-        )
+            "the get_initial_state @classmethod on your custom model class.")
 
     def _validate_output_shape(self):
         """Checks that the model has the correct number of outputs."""
@@ -194,9 +189,7 @@ class Model:
             if len(shape) != 2 or shape[1] != self._num_outputs:
                 raise ValueError(
                     "Expected output shape of [None, {}], got {}".format(
-                        self._num_outputs, shape
-                    )
-                )
+                        self._num_outputs, shape))
 
 
 @DeveloperAPI
@@ -254,7 +247,8 @@ def _unpack_obs(obs, space, tensorlib=tf):
         tensorlib: The library used to unflatten (reshape) the array/tensor
     """
 
-    if isinstance(space, gym.spaces.Dict) or isinstance(space, gym.spaces.Tuple):
+    if (isinstance(space, gym.spaces.Dict)
+            or isinstance(space, gym.spaces.Tuple)):
         if id(space) in _cache:
             prep = _cache[id(space)]
         else:
@@ -265,35 +259,29 @@ def _unpack_obs(obs, space, tensorlib=tf):
         if len(obs.shape) != 2 or obs.shape[1] != prep.shape[0]:
             raise ValueError(
                 "Expected flattened obs shape of [None, {}], got {}".format(
-                    prep.shape[0], obs.shape
-                )
-            )
-        assert len(prep.preprocessors) == len(space.spaces), len(
-            prep.preprocessors
-        ) == len(space.spaces)
+                    prep.shape[0], obs.shape))
+        assert len(prep.preprocessors) == len(space.spaces), \
+            (len(prep.preprocessors) == len(space.spaces))
         offset = 0
         if isinstance(space, gym.spaces.Tuple):
             u = []
             for p, v in zip(prep.preprocessors, space.spaces):
-                obs_slice = obs[:, offset : offset + p.size]
+                obs_slice = obs[:, offset:offset + p.size]
                 offset += p.size
                 u.append(
                     _unpack_obs(
                         tensorlib.reshape(obs_slice, [-1] + list(p.shape)),
                         v,
-                        tensorlib=tensorlib,
-                    )
-                )
+                        tensorlib=tensorlib))
         else:
             u = OrderedDict()
             for p, (k, v) in zip(prep.preprocessors, space.spaces.items()):
-                obs_slice = obs[:, offset : offset + p.size]
+                obs_slice = obs[:, offset:offset + p.size]
                 offset += p.size
                 u[k] = _unpack_obs(
                     tensorlib.reshape(obs_slice, [-1] + list(p.shape)),
                     v,
-                    tensorlib=tensorlib,
-                )
+                    tensorlib=tensorlib)
         return u
     else:
         return obs

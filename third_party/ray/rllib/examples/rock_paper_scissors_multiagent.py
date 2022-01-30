@@ -15,10 +15,8 @@ from ray import tune
 from ray.rllib.agents.pg import PGTrainer, PGTFPolicy, PGTorchPolicy
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.examples.env.rock_paper_scissors import RockPaperScissors
-from ray.rllib.examples.policy.rock_paper_scissors_dummies import (
-    BeatLastHeuristic,
-    AlwaysSameHeuristic,
-)
+from ray.rllib.examples.policy.rock_paper_scissors_dummies import \
+    BeatLastHeuristic, AlwaysSameHeuristic
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.test_utils import check_learning_achieved
 
@@ -72,17 +70,15 @@ def run_heuristic_vs_learned(args, use_lstm=False, trainer="PG"):
         "multiagent": {
             "policies_to_train": ["learned"],
             "policies": {
-                "always_same": (AlwaysSameHeuristic, Discrete(3), Discrete(3), {}),
+                "always_same": (AlwaysSameHeuristic, Discrete(3), Discrete(3),
+                                {}),
                 "beat_last": (BeatLastHeuristic, Discrete(3), Discrete(3), {}),
-                "learned": (
-                    None,
-                    Discrete(3),
-                    Discrete(3),
-                    {
-                        "model": {"use_lstm": use_lstm},
-                        "framework": "torch" if args.torch else "tf",
+                "learned": (None, Discrete(3), Discrete(3), {
+                    "model": {
+                        "use_lstm": use_lstm
                     },
-                ),
+                    "framework": "torch" if args.torch else "tf",
+                }),
             },
             "policy_mapping_fn": select_policy,
         },
@@ -104,10 +100,8 @@ def run_heuristic_vs_learned(args, use_lstm=False, trainer="PG"):
     # Reward (difference) not reached: Error if `as_test`.
     if args.as_test:
         raise ValueError(
-            "Desired reward difference ({}) not reached! Only got to {}.".format(
-                args.stop_reward, env.player1_score - env.player2_score
-            )
-        )
+            "Desired reward difference ({}) not reached! Only got to {}.".
+            format(args.stop_reward, env.player1_score - env.player2_score))
 
 
 def run_with_custom_entropy_loss(args, stop):
@@ -121,21 +115,20 @@ def run_with_custom_entropy_loss(args, stop):
         if args.torch:
             # required by PGTorchPolicy's stats fn.
             policy.pi_err = torch.tensor([0.0])
-            return torch.mean(
-                -0.1 * action_dist.entropy()
-                - (action_dist.logp(train_batch["actions"]) * train_batch["advantages"])
-            )
+            return torch.mean(-0.1 * action_dist.entropy() -
+                              (action_dist.logp(train_batch["actions"]) *
+                               train_batch["advantages"]))
         else:
-            return -0.1 * action_dist.entropy() - tf.reduce_mean(
-                action_dist.logp(train_batch["actions"]) * train_batch["advantages"]
-            )
+            return (-0.1 * action_dist.entropy() - tf.reduce_mean(
+                action_dist.logp(train_batch["actions"]) *
+                train_batch["advantages"]))
 
     policy_cls = PGTorchPolicy if args.torch else PGTFPolicy
-    EntropyPolicy = policy_cls.with_updates(loss_fn=entropy_policy_gradient_loss)
+    EntropyPolicy = policy_cls.with_updates(
+        loss_fn=entropy_policy_gradient_loss)
 
     EntropyLossPG = PGTrainer.with_updates(
-        name="EntropyPG", get_policy_class=lambda _: EntropyPolicy
-    )
+        name="EntropyPG", get_policy_class=lambda _: EntropyPolicy)
 
     run_heuristic_vs_learned(args, use_lstm=True, trainer=EntropyLossPG)
 

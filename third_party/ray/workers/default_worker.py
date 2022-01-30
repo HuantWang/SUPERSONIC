@@ -9,79 +9,77 @@ import ray.utils
 from ray.parameter import RayParams
 
 parser = argparse.ArgumentParser(
-    description=("Parse addresses for the worker " "to connect to.")
-)
+    description=("Parse addresses for the worker "
+                 "to connect to."))
 parser.add_argument(
     "--node-ip-address",
     required=True,
     type=str,
-    help="the ip address of the worker's node",
-)
+    help="the ip address of the worker's node")
 parser.add_argument(
-    "--node-manager-port", required=True, type=int, help="the port of the worker's node"
-)
+    "--node-manager-port",
+    required=True,
+    type=int,
+    help="the port of the worker's node")
 parser.add_argument(
     "--raylet-ip-address",
     required=False,
     type=str,
     default=None,
-    help="the ip address of the worker's raylet",
-)
+    help="the ip address of the worker's raylet")
 parser.add_argument(
-    "--redis-address", required=True, type=str, help="the address to use for Redis"
-)
+    "--redis-address",
+    required=True,
+    type=str,
+    help="the address to use for Redis")
 parser.add_argument(
     "--redis-password",
     required=False,
     type=str,
     default=None,
-    help="the password to use for Redis",
-)
+    help="the password to use for Redis")
 parser.add_argument(
-    "--object-store-name", required=True, type=str, help="the object store's name"
-)
-parser.add_argument("--raylet-name", required=False, type=str, help="the raylet's name")
+    "--object-store-name",
+    required=True,
+    type=str,
+    help="the object store's name")
+parser.add_argument(
+    "--raylet-name", required=False, type=str, help="the raylet's name")
 parser.add_argument(
     "--logging-level",
     required=False,
     type=str,
     default=ray_constants.LOGGER_LEVEL,
     choices=ray_constants.LOGGER_LEVEL_CHOICES,
-    help=ray_constants.LOGGER_LEVEL_HELP,
-)
+    help=ray_constants.LOGGER_LEVEL_HELP)
 parser.add_argument(
     "--logging-format",
     required=False,
     type=str,
     default=ray_constants.LOGGER_FORMAT,
-    help=ray_constants.LOGGER_FORMAT_HELP,
-)
+    help=ray_constants.LOGGER_FORMAT_HELP)
 parser.add_argument(
     "--config-list",
     required=False,
     type=str,
     default=None,
-    help="Override internal config options for the worker process.",
-)
+    help="Override internal config options for the worker process.")
 parser.add_argument(
     "--temp-dir",
     required=False,
     type=str,
     default=None,
-    help="Specify the path of the temporary directory use by Ray process.",
-)
+    help="Specify the path of the temporary directory use by Ray process.")
 parser.add_argument(
     "--load-code-from-local",
     default=False,
     action="store_true",
-    help="True if code is loaded from local files, as opposed to the GCS.",
-)
+    help="True if code is loaded from local files, as opposed to the GCS.")
 parser.add_argument(
     "--use-pickle",
     default=False,
     action="store_true",
-    help="True if cloudpickle should be used for serialization.",
-)
+    help="True if cloudpickle should be used for serialization.")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -119,8 +117,7 @@ if __name__ == "__main__":
         head=False,
         shutdown_at_exit=False,
         spawn_reaper=False,
-        connect_only=True,
-    )
+        connect_only=True)
     ray.worker._global_node = node
     ray.worker.connect(node, mode=ray.WORKER_MODE)
     ray.worker.global_worker.main_loop()

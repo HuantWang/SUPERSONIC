@@ -5,43 +5,42 @@ from . import reporter_pb2 as src_dot_ray_dot_protobuf_dot_reporter__pb2
 
 
 class ReporterServiceStub(object):
-    # missing associated documentation comment in .proto file
-    pass
+  # missing associated documentation comment in .proto file
+  pass
 
-    def __init__(self, channel):
-        """Constructor.
+  def __init__(self, channel):
+    """Constructor.
 
     Args:
       channel: A grpc.Channel.
     """
-        self.GetProfilingStats = channel.unary_unary(
-            "/ray.rpc.ReporterService/GetProfilingStats",
-            request_serializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsRequest.SerializeToString,
-            response_deserializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsReply.FromString,
+    self.GetProfilingStats = channel.unary_unary(
+        '/ray.rpc.ReporterService/GetProfilingStats',
+        request_serializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsRequest.SerializeToString,
+        response_deserializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsReply.FromString,
         )
 
 
 class ReporterServiceServicer(object):
+  # missing associated documentation comment in .proto file
+  pass
+
+  def GetProfilingStats(self, request, context):
     # missing associated documentation comment in .proto file
     pass
-
-    def GetProfilingStats(self, request, context):
-        # missing associated documentation comment in .proto file
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
 
 
 def add_ReporterServiceServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        "GetProfilingStats": grpc.unary_unary_rpc_method_handler(
-            servicer.GetProfilingStats,
-            request_deserializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsRequest.FromString,
-            response_serializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsReply.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        "ray.rpc.ReporterService", rpc_method_handlers
-    )
-    server.add_generic_rpc_handlers((generic_handler,))
+  rpc_method_handlers = {
+      'GetProfilingStats': grpc.unary_unary_rpc_method_handler(
+          servicer.GetProfilingStats,
+          request_deserializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsRequest.FromString,
+          response_serializer=src_dot_ray_dot_protobuf_dot_reporter__pb2.GetProfilingStatsReply.SerializeToString,
+      ),
+  }
+  generic_handler = grpc.method_handlers_generic_handler(
+      'ray.rpc.ReporterService', rpc_method_handlers)
+  server.add_generic_rpc_handlers((generic_handler,))

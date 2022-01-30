@@ -125,7 +125,6 @@ def unbatch(batches_struct):
         out.append(
             tree.unflatten_as(
                 batches_struct,
-                [flat_batches[i][batch_pos] for i in range(len(flat_batches))],
-            )
-        )
+                [flat_batches[i][batch_pos]
+                 for i in range(len(flat_batches))]))
     return out

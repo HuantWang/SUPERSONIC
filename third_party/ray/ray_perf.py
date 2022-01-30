@@ -85,7 +85,8 @@ def timeit(name, fn, multiplier=1):
             count += 1
         end = time.time()
         stats.append(multiplier * count / (end - start))
-    print(name, "per second", round(np.mean(stats), 2), "+-", round(np.std(stats), 2))
+    print(name, "per second", round(np.mean(stats), 2), "+-",
+          round(np.std(stats), 2))
 
 
 def main():
@@ -200,7 +201,8 @@ def main():
     def actor_multi2_direct_arg():
         ray.get([c.small_value_batch_arg.remote(n) for c in clients])
 
-    timeit("n:n actor calls with arg async", actor_multi2_direct_arg, n * len(clients))
+    timeit("n:n actor calls with arg async", actor_multi2_direct_arg,
+           n * len(clients))
 
     a = AsyncActor.remote()
 

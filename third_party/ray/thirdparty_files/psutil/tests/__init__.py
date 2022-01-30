@@ -69,82 +69,39 @@ else:
 
 __all__ = [
     # constants
-    "APPVEYOR",
-    "DEVNULL",
-    "GLOBAL_TIMEOUT",
-    "MEMORY_TOLERANCE",
-    "NO_RETRIES",
-    "PYPY",
-    "PYTHON_EXE",
-    "ROOT_DIR",
-    "SCRIPTS_DIR",
-    "TESTFILE_PREFIX",
-    "TESTFN",
-    "TESTFN_UNICODE",
-    "TOX",
-    "TRAVIS",
-    "CIRRUS",
-    "CI_TESTING",
-    "VALID_PROC_STATUSES",
-    "HAS_CPU_AFFINITY",
-    "HAS_CPU_FREQ",
-    "HAS_ENVIRON",
-    "HAS_PROC_IO_COUNTERS",
-    "HAS_IONICE",
-    "HAS_MEMORY_MAPS",
-    "HAS_PROC_CPU_NUM",
-    "HAS_RLIMIT",
-    "HAS_SENSORS_BATTERY",
-    "HAS_BATTERY",
-    "HAS_SENSORS_FANS",
-    "HAS_SENSORS_TEMPERATURES",
-    "HAS_MEMORY_FULL_INFO",
+    'APPVEYOR', 'DEVNULL', 'GLOBAL_TIMEOUT', 'MEMORY_TOLERANCE', 'NO_RETRIES',
+    'PYPY', 'PYTHON_EXE', 'ROOT_DIR', 'SCRIPTS_DIR', 'TESTFILE_PREFIX',
+    'TESTFN', 'TESTFN_UNICODE', 'TOX', 'TRAVIS', 'CIRRUS', 'CI_TESTING',
+    'VALID_PROC_STATUSES',
+    "HAS_CPU_AFFINITY", "HAS_CPU_FREQ", "HAS_ENVIRON", "HAS_PROC_IO_COUNTERS",
+    "HAS_IONICE", "HAS_MEMORY_MAPS", "HAS_PROC_CPU_NUM", "HAS_RLIMIT",
+    "HAS_SENSORS_BATTERY", "HAS_BATTERY", "HAS_SENSORS_FANS",
+    "HAS_SENSORS_TEMPERATURES", "HAS_MEMORY_FULL_INFO",
     # subprocesses
-    "pyrun",
-    "reap_children",
-    "get_test_subprocess",
-    "create_zombie_proc",
-    "create_proc_children_pair",
+    'pyrun', 'reap_children', 'get_test_subprocess', 'create_zombie_proc',
+    'create_proc_children_pair',
     # threads
-    "ThreadTask"
+    'ThreadTask'
     # test utils
-    "unittest",
-    "skip_on_access_denied",
-    "skip_on_not_implemented",
-    "retry_on_failure",
+    'unittest', 'skip_on_access_denied', 'skip_on_not_implemented',
+    'retry_on_failure',
     # install utils
-    "install_pip",
-    "install_test_deps",
+    'install_pip', 'install_test_deps',
     # fs utils
-    "chdir",
-    "safe_rmpath",
-    "create_exe",
-    "decode_path",
-    "encode_path",
-    "unique_filename",
+    'chdir', 'safe_rmpath', 'create_exe', 'decode_path', 'encode_path',
+    'unique_filename',
     # os
-    "get_winver",
-    "get_kernel_version",
+    'get_winver', 'get_kernel_version',
     # sync primitives
-    "call_until",
-    "wait_for_pid",
-    "wait_for_file",
+    'call_until', 'wait_for_pid', 'wait_for_file',
     # network
-    "check_net_address",
-    "get_free_port",
-    "unix_socket_path",
-    "bind_socket",
-    "bind_unix_socket",
-    "tcp_socketpair",
-    "unix_socketpair",
-    "create_sockets",
+    'check_net_address',
+    'get_free_port', 'unix_socket_path', 'bind_socket', 'bind_unix_socket',
+    'tcp_socketpair', 'unix_socketpair', 'create_sockets',
     # compat
-    "reload_module",
-    "import_module_by_path",
+    'reload_module', 'import_module_by_path',
     # others
-    "warn",
-    "copyload_shared_lib",
-    "is_namedtuple",
+    'warn', 'copyload_shared_lib', 'is_namedtuple',
 ]
 
 
@@ -154,12 +111,12 @@ __all__ = [
 
 # --- platforms
 
-TOX = os.getenv("TOX") or "" in ("1", "true")
-PYPY = "__pypy__" in sys.builtin_module_names
+TOX = os.getenv('TOX') or '' in ('1', 'true')
+PYPY = '__pypy__' in sys.builtin_module_names
 # whether we're running this test suite on a Continuous Integration service
-TRAVIS = bool(os.environ.get("TRAVIS"))
-APPVEYOR = bool(os.environ.get("APPVEYOR"))
-CIRRUS = bool(os.environ.get("CIRRUS"))
+TRAVIS = bool(os.environ.get('TRAVIS'))
+APPVEYOR = bool(os.environ.get('APPVEYOR'))
+CIRRUS = bool(os.environ.get('CIRRUS'))
 CI_TESTING = TRAVIS or APPVEYOR or CIRRUS
 
 # --- configurable defaults
@@ -178,25 +135,26 @@ if TRAVIS or APPVEYOR:
 
 # --- files
 
-TESTFILE_PREFIX = "$testfn"
-if os.name == "java":
+TESTFILE_PREFIX = '$testfn'
+if os.name == 'java':
     # Jython disallows @ in module names
-    TESTFILE_PREFIX = "$psutil-test-"
+    TESTFILE_PREFIX = '$psutil-test-'
 else:
-    TESTFILE_PREFIX = "@psutil-test-"
+    TESTFILE_PREFIX = '@psutil-test-'
 TESTFN = os.path.join(os.path.realpath(os.getcwd()), TESTFILE_PREFIX)
 # Disambiguate TESTFN for parallel testing, while letting it remain a valid
 # module name.
 TESTFN = TESTFN + str(os.getpid())
 
-_TESTFN = TESTFN + "-internal"
+_TESTFN = TESTFN + '-internal'
 TESTFN_UNICODE = TESTFN + u("-ƒőő")
-ASCII_FS = sys.getfilesystemencoding().lower() in ("ascii", "us-ascii")
+ASCII_FS = sys.getfilesystemencoding().lower() in ('ascii', 'us-ascii')
 
 # --- paths
 
-ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SCRIPTS_DIR = os.path.join(ROOT_DIR, "scripts")
+ROOT_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(__file__), '..', '..'))
+SCRIPTS_DIR = os.path.join(ROOT_DIR, 'scripts')
 HERE = os.path.realpath(os.path.dirname(__file__))
 
 # --- support
@@ -229,20 +187,18 @@ def _get_py_exe():
     def attempt(exe):
         try:
             subprocess.check_call(
-                [exe, "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
+                [exe, "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except Exception:
             return None
         else:
             return exe
 
     if MACOS:
-        exe = (
-            attempt(sys.executable)
-            or attempt(os.path.realpath(sys.executable))
-            or attempt(which("python%s.%s" % sys.version_info[:2]))
-            or attempt(psutil.Process().exe())
-        )
+        exe = \
+            attempt(sys.executable) or \
+            attempt(os.path.realpath(sys.executable)) or \
+            attempt(which("python%s.%s" % sys.version_info[:2])) or \
+            attempt(psutil.Process().exe())
         if not exe:
             raise ValueError("can't find python exe real abspath")
         return exe
@@ -253,10 +209,9 @@ def _get_py_exe():
 
 
 PYTHON_EXE = _get_py_exe()
-DEVNULL = open(os.devnull, "r+")
-VALID_PROC_STATUSES = [
-    getattr(psutil, x) for x in dir(psutil) if x.startswith("STATUS_")
-]
+DEVNULL = open(os.devnull, 'r+')
+VALID_PROC_STATUSES = [getattr(psutil, x) for x in dir(psutil)
+                       if x.startswith('STATUS_')]
 AF_UNIX = getattr(socket, "AF_UNIX", object())
 
 _subprocesses_started = set()
@@ -267,7 +222,7 @@ _testfiles_created = set()
 @atexit.register
 def cleanup_test_files():
     DEVNULL.close()
-    for name in os.listdir(u(".")):
+    for name in os.listdir(u('.')):
         if isinstance(name, unicode):
             prefix = u(TESTFILE_PREFIX)
         else:
@@ -306,7 +261,7 @@ class ThreadTask(threading.Thread):
 
     def __repr__(self):
         name = self.__class__.__name__
-        return "<%s running=%s at %#x>" % (name, self._running, id(self))
+        return '<%s running=%s at %#x>' % (name, self._running, id(self))
 
     def __enter__(self):
         self.start()
@@ -351,7 +306,6 @@ def _reap_children_on_err(fun):
         except Exception:
             reap_children()
             raise
-
     return wrapper
 
 
@@ -377,9 +331,9 @@ def get_test_subprocess(cmd=None, **kwds):
         kwds.setdefault("creationflags", CREATE_NO_WINDOW)
     if cmd is None:
         safe_rmpath(_TESTFN)
-        pyline = (
-            "from time import sleep;" "open(r'%s', 'w').close();" "sleep(60);" % _TESTFN
-        )
+        pyline = "from time import sleep;" \
+                 "open(r'%s', 'w').close();" \
+                 "sleep(60);" % _TESTFN
         cmd = [PYTHON_EXE, "-c", pyline]
         sproc = subprocess.Popen(cmd, **kwds)
         _subprocesses_started.add(sproc)
@@ -399,9 +353,8 @@ def create_proc_children_pair():
     The 2 processes are fully initialized and will live for 60 secs
     and are registered for cleanup on reap_children().
     """
-    _TESTFN2 = os.path.basename(_TESTFN) + "2"  # need to be relative
-    s = textwrap.dedent(
-        """\
+    _TESTFN2 = os.path.basename(_TESTFN) + '2'  # need to be relative
+    s = textwrap.dedent("""\
         import subprocess, os, sys, time
         s = "import os, time;"
         s += "f = open('%s', 'w');"
@@ -410,9 +363,7 @@ def create_proc_children_pair():
         s += "time.sleep(60);"
         p = subprocess.Popen([r'%s', '-c', s])
         p.wait()
-        """
-        % (_TESTFN2, PYTHON_EXE)
-    )
+        """ % (_TESTFN2, PYTHON_EXE))
     # On Windows if we create a subprocess with CREATE_NO_WINDOW flag
     # set (which is the default) a "conhost.exe" extra process will be
     # spawned as a child. We don't want that.
@@ -433,8 +384,7 @@ def create_zombie_proc():
     """Create a zombie process and return its PID."""
     assert psutil.POSIX
     unix_file = tempfile.mktemp(prefix=TESTFILE_PREFIX) if MACOS else TESTFN
-    src = textwrap.dedent(
-        """\
+    src = textwrap.dedent("""\
         import os, sys, time, socket, contextlib
         child_pid = os.fork()
         if child_pid > 0:
@@ -449,9 +399,7 @@ def create_zombie_proc():
                 else:
                     pid = bytes(str(os.getpid()), 'ascii')
                 s.sendall(pid)
-        """
-        % unix_file
-    )
+        """ % unix_file)
     with contextlib.closing(socket.socket(socket.AF_UNIX)) as sock:
         sock.settimeout(GLOBAL_TIMEOUT)
         sock.bind(unix_file)
@@ -477,8 +425,7 @@ def pyrun(src, **kwds):
     kwds.setdefault("stdout", None)
     kwds.setdefault("stderr", None)
     with tempfile.NamedTemporaryFile(
-        prefix=TESTFILE_PREFIX, mode="wt", delete=False
-    ) as f:
+            prefix=TESTFILE_PREFIX, mode="wt", delete=False) as f:
         _testfiles_created.add(f.name)
         f.write(src)
         f.flush()
@@ -510,7 +457,7 @@ def sh(cmd, **kwds):
         raise RuntimeError(stderr)
     if stderr:
         warn(stderr)
-    if stdout.endswith("\n"):
+    if stdout.endswith('\n'):
         stdout = stdout[:-1]
     return stdout
 
@@ -618,7 +565,7 @@ def get_kernel_version():
     s = ""
     uname = os.uname()[2]
     for c in uname:
-        if c.isdigit() or c == ".":
+        if c.isdigit() or c == '.':
             s += c
         else:
             break
@@ -626,7 +573,7 @@ def get_kernel_version():
         raise ValueError("can't parse %r" % uname)
     minor = 0
     micro = 0
-    nums = s.split(".")
+    nums = s.split('.')
     major = int(nums[0])
     if len(nums) >= 2:
         minor = int(nums[1])
@@ -639,7 +586,7 @@ def get_winver():
     if not WINDOWS:
         raise NotImplementedError("not WINDOWS")
     wv = sys.getwindowsversion()
-    if hasattr(wv, "service_pack_major"):  # python >= 2.7
+    if hasattr(wv, 'service_pack_major'):  # python >= 2.7
         sp = wv.service_pack_major or 0
     else:
         r = re.search(r"\s\d$", wv[4])
@@ -658,14 +605,13 @@ def get_winver():
 class retry(object):
     """A retry decorator."""
 
-    def __init__(
-        self,
-        exception=Exception,
-        timeout=None,
-        retries=None,
-        interval=0.001,
-        logfun=None,
-    ):
+    def __init__(self,
+                 exception=Exception,
+                 timeout=None,
+                 retries=None,
+                 interval=0.001,
+                 logfun=None,
+                 ):
         if timeout and retries:
             raise ValueError("timeout and retries args are mutually exclusive")
         self.exception = exception
@@ -714,9 +660,8 @@ class retry(object):
         return wrapper
 
 
-@retry(
-    exception=psutil.NoSuchProcess, logfun=None, timeout=GLOBAL_TIMEOUT, interval=0.001
-)
+@retry(exception=psutil.NoSuchProcess, logfun=None, timeout=GLOBAL_TIMEOUT,
+       interval=0.001)
 def wait_for_pid(pid):
     """Wait for pid to show up in the process list then return.
     Used in the test suite to give time the sub process to initialize.
@@ -727,12 +672,8 @@ def wait_for_pid(pid):
         time.sleep(0.01)
 
 
-@retry(
-    exception=(EnvironmentError, AssertionError),
-    logfun=None,
-    timeout=GLOBAL_TIMEOUT,
-    interval=0.001,
-)
+@retry(exception=(EnvironmentError, AssertionError), logfun=None,
+       timeout=GLOBAL_TIMEOUT, interval=0.001)
 def wait_for_file(fname, delete=True, empty=False):
     """Wait for a file to be written on disk with some content."""
     with open(fname, "rb") as f:
@@ -744,7 +685,8 @@ def wait_for_file(fname, delete=True, empty=False):
     return data
 
 
-@retry(exception=AssertionError, logfun=None, timeout=GLOBAL_TIMEOUT, interval=0.001)
+@retry(exception=AssertionError, logfun=None, timeout=GLOBAL_TIMEOUT,
+       interval=0.001)
 def call_until(fun, expr):
     """Keep calling function for timeout secs and exit if eval()
     expression is True.
@@ -761,7 +703,6 @@ def call_until(fun, expr):
 
 def safe_rmpath(path):
     "Convenience function for removing temporary test files or dirs"
-
     def retry_fun(fun):
         # On Windows it could happen that the file or directory has
         # open handles or references preventing the delete operation
@@ -818,7 +759,7 @@ def create_exe(outpath, c_code=None):
     if c_code:
         if not which("gcc"):
             raise ValueError("gcc is not installed")
-        if isinstance(c_code, bool):  # c_code is True
+        if isinstance(c_code, bool):        # c_code is True
             c_code = textwrap.dedent(
                 """
                 #include <unistd.h>
@@ -826,10 +767,10 @@ def create_exe(outpath, c_code=None):
                     pause();
                     return 1;
                 }
-                """
-            )
+                """)
         assert isinstance(c_code, str), c_code
-        with tempfile.NamedTemporaryFile(suffix=".c", delete=False, mode="wt") as f:
+        with tempfile.NamedTemporaryFile(
+                suffix='.c', delete=False, mode='wt') as f:
             f.write(c_code)
         try:
             subprocess.check_call(["gcc", f.name, "-o", outpath])
@@ -858,13 +799,14 @@ class TestCase(unittest.TestCase):
     # being run.
     def __str__(self):
         fqmod = self.__class__.__module__
-        if not fqmod.startswith("psutil."):
-            fqmod = "psutil.tests." + fqmod
-        return "%s.%s.%s" % (fqmod, self.__class__.__name__, self._testMethodName)
+        if not fqmod.startswith('psutil.'):
+            fqmod = 'psutil.tests.' + fqmod
+        return "%s.%s.%s" % (
+            fqmod, self.__class__.__name__, self._testMethodName)
 
     # assertRaisesRegexp renamed to assertRaisesRegex in 3.3;
     # add support for the new name.
-    if not hasattr(unittest.TestCase, "assertRaisesRegex"):
+    if not hasattr(unittest.TestCase, 'assertRaisesRegex'):
         assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
 
@@ -876,16 +818,15 @@ def retry_on_failure(retries=NO_RETRIES):
     """Decorator which runs a test function and retries N times before
     actually failing.
     """
-
     def logfun(exc):
         print("%r, retrying" % exc, file=sys.stderr)
 
-    return retry(exception=AssertionError, timeout=None, retries=retries, logfun=logfun)
+    return retry(exception=AssertionError, timeout=None, retries=retries,
+                 logfun=logfun)
 
 
 def skip_on_access_denied(only_if=None):
     """Decorator to Ignore AccessDenied exceptions."""
-
     def decorator(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
@@ -896,15 +837,12 @@ def skip_on_access_denied(only_if=None):
                     if not only_if:
                         raise
                 raise unittest.SkipTest("raises AccessDenied")
-
         return wrapper
-
     return decorator
 
 
 def skip_on_not_implemented(only_if=None):
     """Decorator to Ignore NotImplementedError exceptions."""
-
     def decorator(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
@@ -914,14 +852,10 @@ def skip_on_not_implemented(only_if=None):
                 if only_if is not None:
                     if not only_if:
                         raise
-                msg = (
-                    "%r was skipped because it raised NotImplementedError"
-                    % fun.__name__
-                )
+                msg = "%r was skipped because it raised NotImplementedError" \
+                      % fun.__name__
                 raise unittest.SkipTest(msg)
-
         return wrapper
-
     return decorator
 
 
@@ -930,7 +864,7 @@ def skip_on_not_implemented(only_if=None):
 # ===================================================================
 
 
-def get_free_port(host="127.0.0.1"):
+def get_free_port(host='127.0.0.1'):
     """Return an unused TCP port."""
     with contextlib.closing(socket.socket()) as sock:
         sock.bind((host, 0))
@@ -959,7 +893,7 @@ def bind_socket(family=AF_INET, type=SOCK_STREAM, addr=None):
         addr = ("", 0)
     sock = socket.socket(family, type)
     try:
-        if os.name not in ("nt", "cygwin"):
+        if os.name not in ('nt', 'cygwin'):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(addr)
         if type == socket.SOCK_STREAM:
@@ -1066,11 +1000,10 @@ def check_net_address(addr, family):
     IPv6 and MAC addresses.
     """
     import ipaddress  # python >= 3.3 / requires "pip install ipaddress"
-
     if enum and PY3:
         assert isinstance(family, enum.IntEnum), family
     if family == socket.AF_INET:
-        octs = [int(x) for x in addr.split(".")]
+        octs = [int(x) for x in addr.split('.')]
         assert len(octs) == 4, addr
         for num in octs:
             assert 0 <= num <= 255, addr
@@ -1083,7 +1016,7 @@ def check_net_address(addr, family):
             addr = unicode(addr)
         ipaddress.IPv6Address(addr)
     elif family == psutil.AF_LINK:
-        assert re.match(r"([a-fA-F0-9]{2}[:|\-]?){6}", addr) is not None, addr
+        assert re.match(r'([a-fA-F0-9]{2}[:|\-]?){6}', addr) is not None, addr
     else:
         raise ValueError("unknown family %r", family)
 
@@ -1097,12 +1030,10 @@ def reload_module(module):
     """Backport of importlib.reload of Python 3.3+."""
     try:
         import importlib
-
-        if not hasattr(importlib, "reload"):  # python <=3.3
+        if not hasattr(importlib, 'reload'):  # python <=3.3
             raise ImportError
     except ImportError:
         import imp
-
         return imp.reload(module)
     else:
         return importlib.reload(module)
@@ -1112,15 +1043,12 @@ def import_module_by_path(path):
     name = os.path.splitext(os.path.basename(path))[0]
     if sys.version_info[0] == 2:
         import imp
-
         return imp.load_source(name, path)
     elif sys.version_info[:2] <= (3, 4):
         from importlib.machinery import SourceFileLoader
-
         return SourceFileLoader(name, path).load_module()
     else:
         import importlib.util
-
         spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -1143,28 +1071,25 @@ def is_namedtuple(x):
     b = t.__bases__
     if len(b) != 1 or b[0] != tuple:
         return False
-    f = getattr(t, "_fields", None)
+    f = getattr(t, '_fields', None)
     if not isinstance(f, tuple):
         return False
     return all(type(n) == str for n in f)
 
 
 if POSIX:
-
     @contextlib.contextmanager
     def copyload_shared_lib(dst_prefix=TESTFILE_PREFIX):
         """Ctx manager which picks up a random shared CO lib used
         by this process, copies it in another location and loads it
         in memory via ctypes. Return the new absolutized path.
         """
-        exe = "pypy" if PYPY else "python"
+        exe = 'pypy' if PYPY else 'python'
         ext = ".so"
         dst = tempfile.mktemp(prefix=dst_prefix, suffix=ext)
-        libs = [
-            x.path
-            for x in psutil.Process().memory_maps()
-            if os.path.splitext(x.path)[1] == ext and exe in x.path.lower()
-        ]
+        libs = [x.path for x in psutil.Process().memory_maps() if
+                os.path.splitext(x.path)[1] == ext and
+                exe in x.path.lower()]
         src = random.choice(libs)
         shutil.copyfile(src, dst)
         try:
@@ -1172,10 +1097,7 @@ if POSIX:
             yield dst
         finally:
             safe_rmpath(dst)
-
-
 else:
-
     @contextlib.contextmanager
     def copyload_shared_lib(dst_prefix=TESTFILE_PREFIX):
         """Ctx manager which picks up a random shared DLL lib used
@@ -1185,22 +1107,15 @@ else:
         """
         from ctypes import wintypes
         from ctypes import WinError
-
         ext = ".dll"
         dst = tempfile.mktemp(prefix=dst_prefix, suffix=ext)
-        libs = [
-            x.path
-            for x in psutil.Process().memory_maps()
-            if x.path.lower().endswith(ext)
-            and "python" in os.path.basename(x.path).lower()
-            and "wow64" not in x.path.lower()
-        ]
+        libs = [x.path for x in psutil.Process().memory_maps() if
+                x.path.lower().endswith(ext) and
+                'python' in os.path.basename(x.path).lower() and
+                'wow64' not in x.path.lower()]
         if PYPY and not libs:
-            libs = [
-                x.path
-                for x in psutil.Process().memory_maps()
-                if "pypy" in os.path.basename(x.path).lower()
-            ]
+            libs = [x.path for x in psutil.Process().memory_maps() if
+                    'pypy' in os.path.basename(x.path).lower()]
         src = random.choice(libs)
         shutil.copyfile(src, dst)
         cfile = None

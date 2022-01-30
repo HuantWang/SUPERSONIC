@@ -9,13 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 class Cluster:
-    def __init__(
-        self,
-        initialize_head=False,
-        connect=False,
-        head_node_args=None,
-        shutdown_at_exit=True,
-    ):
+    def __init__(self,
+                 initialize_head=False,
+                 connect=False,
+                 head_node_args=None,
+                 shutdown_at_exit=True):
         """Initializes the cluster.
 
         Args:
@@ -56,8 +54,7 @@ class Cluster:
         output_info = ray.init(
             ignore_reinit_error=True,
             address=self.redis_address,
-            redis_password=self.redis_password,
-        )
+            redis_password=self.redis_password)
         logger.info(output_info)
         self.connected = True
 
@@ -84,7 +81,8 @@ class Cluster:
             "max_worker_port": 0,
         }
         if "_internal_config" in node_args:
-            node_args["_internal_config"] = json.loads(node_args["_internal_config"])
+            node_args["_internal_config"] = json.loads(
+                node_args["_internal_config"])
         ray_params = ray.parameter.RayParams(**node_args)
         ray_params.update_if_absent(**default_kwargs)
         if self.head_node is None:
@@ -92,18 +90,15 @@ class Cluster:
                 ray_params,
                 head=True,
                 shutdown_at_exit=self._shutdown_at_exit,
-                spawn_reaper=self._shutdown_at_exit,
-            )
+                spawn_reaper=self._shutdown_at_exit)
             self.head_node = node
             self.redis_address = self.head_node.redis_address
             self.redis_password = node_args.get(
-                "redis_password", ray_constants.REDIS_DEFAULT_PASSWORD
-            )
+                "redis_password", ray_constants.REDIS_DEFAULT_PASSWORD)
             self.webui_url = self.head_node.webui_url
             # Init global state accessor when creating head node.
-            self.global_state._initialize_global_state(
-                self.redis_address, self.redis_password
-            )
+            self.global_state._initialize_global_state(self.redis_address,
+                                                       self.redis_password)
         else:
             ray_params.update_if_absent(redis_address=self.redis_address)
             # We only need one log monitor per physical node.
@@ -114,8 +109,7 @@ class Cluster:
                 ray_params,
                 head=False,
                 shutdown_at_exit=self._shutdown_at_exit,
-                spawn_reaper=self._shutdown_at_exit,
-            )
+                spawn_reaper=self._shutdown_at_exit)
             self.worker_nodes.add(node)
 
         # Wait for the node to appear in the client table. We do this so that
@@ -136,17 +130,16 @@ class Cluster:
         """
         if self.head_node == node:
             self.head_node.kill_all_processes(
-                check_alive=False, allow_graceful=allow_graceful
-            )
+                check_alive=False, allow_graceful=allow_graceful)
             self.head_node = None
             # TODO(rliaw): Do we need to kill all worker processes?
         else:
-            node.kill_all_processes(check_alive=False, allow_graceful=allow_graceful)
+            node.kill_all_processes(
+                check_alive=False, allow_graceful=allow_graceful)
             self.worker_nodes.remove(node)
 
-        assert (
-            not node.any_processes_alive()
-        ), "There are zombie processes left over after killing."
+        assert not node.any_processes_alive(), (
+            "There are zombie processes left over after killing.")
 
     def _wait_for_node(self, node, timeout=30):
         """Wait until this node has appeared in the client table.
@@ -201,8 +194,7 @@ class Cluster:
             else:
                 logger.debug(
                     "{} nodes are currently registered, but we are expecting "
-                    "{}".format(len(live_clients), expected)
-                )
+                    "{}".format(len(live_clients), expected))
                 time.sleep(0.1)
         raise TimeoutError("Timed out while waiting for nodes to join.")
 
@@ -229,7 +221,8 @@ class Cluster:
         Returns:
             True if all processes are alive and false otherwise.
         """
-        return all(node.remaining_processes_alive() for node in self.list_all_nodes())
+        return all(
+            node.remaining_processes_alive() for node in self.list_all_nodes())
 
     def shutdown(self):
         """Removes all nodes."""

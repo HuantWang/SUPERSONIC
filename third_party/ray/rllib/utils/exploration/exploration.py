@@ -18,16 +18,9 @@ class Exploration:
     implemented exploration schema.
     """
 
-    def __init__(
-        self,
-        action_space: Space,
-        *,
-        framework: str,
-        policy_config: dict,
-        model: ModelV2,
-        num_workers: int,
-        worker_index: int
-    ):
+    def __init__(self, action_space: Space, *, framework: str,
+                 policy_config: dict, model: ModelV2, num_workers: int,
+                 worker_index: int):
         """
         Args:
             action_space (Space): The action space in which to explore.
@@ -52,9 +45,12 @@ class Exploration:
                 self.device = params[0].device
 
     @DeveloperAPI
-    def before_compute_actions(
-        self, *, timestep=None, explore=None, tf_sess=None, **kwargs
-    ):
+    def before_compute_actions(self,
+                               *,
+                               timestep=None,
+                               explore=None,
+                               tf_sess=None,
+                               **kwargs):
         """Hook for preparations before policy.compute_actions() is called.
 
         Args:
@@ -66,13 +62,11 @@ class Exploration:
         pass
 
     @DeveloperAPI
-    def get_exploration_action(
-        self,
-        *,
-        action_distribution: ActionDistribution,
-        timestep: Union[int, TensorType],
-        explore: bool = True
-    ):
+    def get_exploration_action(self,
+                               *,
+                               action_distribution: ActionDistribution,
+                               timestep: Union[int, TensorType],
+                               explore: bool = True):
         """Returns a (possibly) exploratory action and its log-likelihood.
 
         Given the Model's logits outputs and action distribution, returns an
@@ -97,7 +91,12 @@ class Exploration:
         pass
 
     @DeveloperAPI
-    def on_episode_start(self, policy, *, environment=None, episode=None, tf_sess=None):
+    def on_episode_start(self,
+                         policy,
+                         *,
+                         environment=None,
+                         episode=None,
+                         tf_sess=None):
         """Handles necessary exploration logic at the beginning of an episode.
 
         Args:
@@ -109,7 +108,12 @@ class Exploration:
         pass
 
     @DeveloperAPI
-    def on_episode_end(self, policy, *, environment=None, episode=None, tf_sess=None):
+    def on_episode_end(self,
+                       policy,
+                       *,
+                       environment=None,
+                       episode=None,
+                       tf_sess=None):
         """Handles necessary exploration logic at the end of an episode.
 
         Args:

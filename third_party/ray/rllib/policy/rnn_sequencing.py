@@ -27,9 +27,11 @@ logger = logging.getLogger(__name__)
 
 
 @DeveloperAPI
-def pad_batch_to_sequences_of_same_size(
-    batch, max_seq_len, shuffle=False, batch_divisibility_req=1, feature_keys=None
-):
+def pad_batch_to_sequences_of_same_size(batch,
+                                        max_seq_len,
+                                        shuffle=False,
+                                        batch_divisibility_req=1,
+                                        feature_keys=None):
     """Applies padding to `batch` so it's choppable into same-size sequences.
 
     Shuffles `batch` (if desired), makes sure divisibility requirement is met,
@@ -54,8 +56,7 @@ def pad_batch_to_sequences_of_same_size(
         meets_divisibility_reqs = (
             len(batch[SampleBatch.CUR_OBS]) % batch_divisibility_req == 0
             # not multiagent
-            and max(batch[SampleBatch.AGENT_INDEX]) == 0
-        )
+            and max(batch[SampleBatch.AGENT_INDEX]) == 0)
     else:
         meets_divisibility_reqs = True
 
@@ -81,16 +82,16 @@ def pad_batch_to_sequences_of_same_size(
         elif not feature_keys and "state_out_" not in k and k != "infos":
             feature_keys_.append(k)
 
-    feature_sequences, initial_states, seq_lens = chop_into_sequences(
-        batch[SampleBatch.EPS_ID],
-        batch[SampleBatch.UNROLL_ID],
-        batch[SampleBatch.AGENT_INDEX],
-        [batch[k] for k in feature_keys_],
-        [batch[k] for k in state_keys],
-        max_seq_len,
-        dynamic_max=dynamic_max,
-        shuffle=shuffle,
-    )
+    feature_sequences, initial_states, seq_lens = \
+        chop_into_sequences(
+            batch[SampleBatch.EPS_ID],
+            batch[SampleBatch.UNROLL_ID],
+            batch[SampleBatch.AGENT_INDEX],
+            [batch[k] for k in feature_keys_],
+            [batch[k] for k in state_keys],
+            max_seq_len,
+            dynamic_max=dynamic_max,
+            shuffle=shuffle)
     for i, k in enumerate(feature_keys_):
         batch[k] = feature_sequences[i]
     for i, k in enumerate(state_keys):
@@ -98,18 +99,13 @@ def pad_batch_to_sequences_of_same_size(
     batch["seq_lens"] = seq_lens
 
     if log_once("rnn_ma_feed_dict"):
-        logger.info(
-            "Padded input for RNN:\n\n{}\n".format(
-                summarize(
-                    {
-                        "features": feature_sequences,
-                        "initial_states": initial_states,
-                        "seq_lens": seq_lens,
-                        "max_seq_len": max_seq_len,
-                    }
-                )
-            )
-        )
+        logger.info("Padded input for RNN:\n\n{}\n".format(
+            summarize({
+                "features": feature_sequences,
+                "initial_states": initial_states,
+                "seq_lens": seq_lens,
+                "max_seq_len": max_seq_len,
+            })))
 
 
 @DeveloperAPI
@@ -136,9 +132,8 @@ def add_time_dimension(padded_inputs, seq_lens, framework="tf"):
 
         # Dynamically reshape the padded batch to introduce a time dimension.
         new_batch_size = padded_batch_size // max_seq_len
-        new_shape = [new_batch_size, max_seq_len] + padded_inputs.get_shape().as_list()[
-            1:
-        ]
+        new_shape = ([new_batch_size, max_seq_len] +
+                     padded_inputs.get_shape().as_list()[1:])
         return tf.reshape(padded_inputs, new_shape)
     else:
         assert framework == "torch", "`framework` must be either tf or torch!"
@@ -152,17 +147,15 @@ def add_time_dimension(padded_inputs, seq_lens, framework="tf"):
 
 
 @DeveloperAPI
-def chop_into_sequences(
-    episode_ids,
-    unroll_ids,
-    agent_indices,
-    feature_columns,
-    state_columns,
-    max_seq_len,
-    dynamic_max=True,
-    shuffle=False,
-    _extra_padding=0,
-):
+def chop_into_sequences(episode_ids,
+                        unroll_ids,
+                        agent_indices,
+                        feature_columns,
+                        state_columns,
+                        max_seq_len,
+                        dynamic_max=True,
+                        shuffle=False,
+                        _extra_padding=0):
     """Truncate and pad experiences into fixed-length sequences.
 
     Args:
@@ -208,9 +201,12 @@ def chop_into_sequences(
     prev_id = None
     seq_lens = []
     seq_len = 0
-    unique_ids = np.add(np.add(episode_ids, agent_indices), np.array(unroll_ids) << 32)
+    unique_ids = np.add(
+        np.add(episode_ids, agent_indices),
+        np.array(unroll_ids) << 32)
     for uid in unique_ids:
-        if (prev_id is not None and uid != prev_id) or seq_len >= max_seq_len:
+        if (prev_id is not None and uid != prev_id) or \
+                seq_len >= max_seq_len:
             seq_lens.append(seq_len)
             seq_len = 0
         seq_len += 1
@@ -227,7 +223,7 @@ def chop_into_sequences(
     feature_sequences = []
     for f in feature_columns:
         f = np.array(f)
-        f_pad = np.zeros((len(seq_lens) * max_seq_len,) + np.shape(f)[1:])
+        f_pad = np.zeros((len(seq_lens) * max_seq_len, ) + np.shape(f)[1:])
         seq_base = 0
         i = 0
         for l in seq_lens:

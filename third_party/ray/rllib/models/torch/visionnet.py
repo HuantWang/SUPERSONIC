@@ -1,10 +1,6 @@
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
-from ray.rllib.models.torch.misc import (
-    normc_initializer,
-    valid_padding,
-    SlimConv2d,
-    SlimFC,
-)
+from ray.rllib.models.torch.misc import normc_initializer, valid_padding, \
+    SlimConv2d, SlimFC
 from ray.rllib.models.tf.visionnet_v1 import _get_filter_config
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import get_activation_fn
@@ -16,15 +12,14 @@ _, nn = try_import_torch()
 class VisionNetwork(TorchModelV2, nn.Module):
     """Generic vision network."""
 
-    def __init__(self, obs_space, action_space, num_outputs, model_config, name):
-        TorchModelV2.__init__(
-            self, obs_space, action_space, num_outputs, model_config, name
-        )
+    def __init__(self, obs_space, action_space, num_outputs, model_config,
+                 name):
+        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
+                              model_config, name)
         nn.Module.__init__(self)
 
         activation = get_activation_fn(
-            model_config.get("conv_activation"), framework="torch"
-        )
+            model_config.get("conv_activation"), framework="torch")
         filters = model_config.get("conv_filters")
         if not filters:
             filters = _get_filter_config(obs_space.shape)
@@ -35,7 +30,8 @@ class VisionNetwork(TorchModelV2, nn.Module):
         (w, h, in_channels) = obs_space.shape
         in_size = [w, h]
         for out_channels, kernel, stride in filters[:-1]:
-            padding, out_size = valid_padding(in_size, kernel, [stride, stride])
+            padding, out_size = valid_padding(in_size, kernel,
+                                              [stride, stride])
             layers.append(
                 SlimConv2d(
                     in_channels,
@@ -43,9 +39,7 @@ class VisionNetwork(TorchModelV2, nn.Module):
                     kernel,
                     stride,
                     padding,
-                    activation_fn=activation,
-                )
-            )
+                    activation_fn=activation))
             in_channels = out_channels
             in_size = out_size
 
@@ -57,15 +51,13 @@ class VisionNetwork(TorchModelV2, nn.Module):
                 kernel,
                 stride,
                 None,
-                activation_fn=activation,
-            )
-        )
+                activation_fn=activation))
         self._convs = nn.Sequential(*layers)
 
         self._logits = SlimFC(
-            out_channels, num_outputs, initializer=nn.init.xavier_uniform_
-        )
-        self._value_branch = SlimFC(out_channels, 1, initializer=normc_initializer())
+            out_channels, num_outputs, initializer=nn.init.xavier_uniform_)
+        self._value_branch = SlimFC(
+            out_channels, 1, initializer=normc_initializer())
         # Holds the current "base" output (before logits layer).
         self._features = None
 

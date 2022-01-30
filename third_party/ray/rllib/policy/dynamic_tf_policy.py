@@ -38,23 +38,21 @@ class DynamicTFPolicy(TFPolicy):
         dist_class (type): TF action distribution class
     """
 
-    def __init__(
-        self,
-        obs_space,
-        action_space,
-        config,
-        loss_fn,
-        stats_fn=None,
-        grad_stats_fn=None,
-        before_loss_init=None,
-        make_model=None,
-        action_sampler_fn=None,
-        action_distribution_fn=None,
-        existing_inputs=None,
-        existing_model=None,
-        get_batch_divisibility_req=None,
-        obs_include_prev_action_reward=True,
-    ):
+    def __init__(self,
+                 obs_space,
+                 action_space,
+                 config,
+                 loss_fn,
+                 stats_fn=None,
+                 grad_stats_fn=None,
+                 before_loss_init=None,
+                 make_model=None,
+                 action_sampler_fn=None,
+                 action_distribution_fn=None,
+                 existing_inputs=None,
+                 existing_model=None,
+                 get_batch_divisibility_req=None,
+                 obs_include_prev_action_reward=True):
         """Initialize a dynamic TF policy.
 
         Arguments:
@@ -118,15 +116,17 @@ class DynamicTFPolicy(TFPolicy):
             timestep = existing_inputs["timestep"]
         else:
             obs = tf.placeholder(
-                tf.float32, shape=[None] + list(obs_space.shape), name="observation"
-            )
+                tf.float32,
+                shape=[None] + list(obs_space.shape),
+                name="observation")
             action_input = ModelCatalog.get_action_placeholder(action_space)
             if self._obs_include_prev_action_reward:
                 prev_actions = ModelCatalog.get_action_placeholder(
-                    action_space, "prev_action"
-                )
-                prev_rewards = tf.placeholder(tf.float32, [None], name="prev_reward")
-            explore = tf.placeholder_with_default(True, (), name="is_exploring")
+                    action_space, "prev_action")
+                prev_rewards = tf.placeholder(
+                    tf.float32, [None], name="prev_reward")
+            explore = tf.placeholder_with_default(
+                True, (), name="is_exploring")
             timestep = tf.placeholder(tf.int32, (), name="timestep")
 
         self._input_dict = {
@@ -136,19 +136,18 @@ class DynamicTFPolicy(TFPolicy):
             "is_training": self._get_is_training_placeholder(),
         }
         # Placeholder for RNN time-chunk valid lengths.
-        self._seq_lens = tf.placeholder(dtype=tf.int32, shape=[None], name="seq_lens")
+        self._seq_lens = tf.placeholder(
+            dtype=tf.int32, shape=[None], name="seq_lens")
 
         dist_class = dist_inputs = None
         if action_sampler_fn or action_distribution_fn:
             if not make_model:
                 raise ValueError(
                     "`make_model` is required if `action_sampler_fn` OR "
-                    "`action_distribution_fn` is given"
-                )
+                    "`action_distribution_fn` is given")
         else:
             dist_class, logit_dim = ModelCatalog.get_action_dist(
-                action_space, self.config["model"]
-            )
+                action_space, self.config["model"])
 
         # Setup self.model.
         if existing_model:
@@ -162,21 +161,21 @@ class DynamicTFPolicy(TFPolicy):
                 num_outputs=logit_dim,
                 model_config=self.config["model"],
                 framework="tf",
-                **self.config["model"].get("custom_model_config", {})
-            )
+                **self.config["model"].get("custom_model_config", {}))
 
         # Create the Exploration object to use for this Policy.
         self.exploration = self._create_exploration()
 
         if existing_inputs:
             self._state_in = [
-                v for k, v in existing_inputs.items() if k.startswith("state_in_")
+                v for k, v in existing_inputs.items()
+                if k.startswith("state_in_")
             ]
             if self._state_in:
                 self._seq_lens = existing_inputs["seq_lens"]
         else:
             self._state_in = [
-                tf.placeholder(shape=(None,) + s.shape, dtype=s.dtype)
+                tf.placeholder(shape=(None, ) + s.shape, dtype=s.dtype)
                 for s in self.model.get_initial_state()
             ]
 
@@ -191,38 +190,36 @@ class DynamicTFPolicy(TFPolicy):
                 prev_action_batch=self._input_dict[SampleBatch.PREV_ACTIONS],
                 prev_reward_batch=self._input_dict[SampleBatch.PREV_REWARDS],
                 explore=explore,
-                is_training=self._input_dict["is_training"],
-            )
+                is_training=self._input_dict["is_training"])
         else:
             # Distribution generation is customized, e.g., DQN, DDPG.
             if action_distribution_fn:
-                dist_inputs, dist_class, self._state_out = action_distribution_fn(
-                    self,
-                    self.model,
-                    obs_batch=self._input_dict[SampleBatch.CUR_OBS],
-                    state_batches=self._state_in,
-                    seq_lens=self._seq_lens,
-                    prev_action_batch=self._input_dict[SampleBatch.PREV_ACTIONS],
-                    prev_reward_batch=self._input_dict[SampleBatch.PREV_REWARDS],
-                    explore=explore,
-                    is_training=self._input_dict["is_training"],
-                )
+                dist_inputs, dist_class, self._state_out = \
+                    action_distribution_fn(
+                        self, self.model,
+                        obs_batch=self._input_dict[SampleBatch.CUR_OBS],
+                        state_batches=self._state_in,
+                        seq_lens=self._seq_lens,
+                        prev_action_batch=self._input_dict[
+                            SampleBatch.PREV_ACTIONS],
+                        prev_reward_batch=self._input_dict[
+                            SampleBatch.PREV_REWARDS],
+                        explore=explore,
+                        is_training=self._input_dict["is_training"])
             # Default distribution generation behavior:
             # Pass through model. E.g., PG, PPO.
             else:
                 dist_inputs, self._state_out = self.model(
-                    self._input_dict, self._state_in, self._seq_lens
-                )
+                    self._input_dict, self._state_in, self._seq_lens)
 
             action_dist = dist_class(dist_inputs, self.model)
 
             # Using exploration to get final action (e.g. via sampling).
-            (
-                sampled_action,
-                sampled_action_logp,
-            ) = self.exploration.get_exploration_action(
-                action_distribution=action_dist, timestep=timestep, explore=explore
-            )
+            sampled_action, sampled_action_logp = \
+                self.exploration.get_exploration_action(
+                    action_distribution=action_dist,
+                    timestep=timestep,
+                    explore=explore)
 
         # Phase 1 init.
         sess = tf.get_default_session() or tf.Session()
@@ -253,8 +250,7 @@ class DynamicTFPolicy(TFPolicy):
             max_seq_len=config["model"]["max_seq_len"],
             batch_divisibility_req=batch_divisibility_req,
             explore=explore,
-            timestep=timestep,
-        )
+            timestep=timestep)
 
         # Phase 2 init.
         if before_loss_init is not None:
@@ -273,50 +269,39 @@ class DynamicTFPolicy(TFPolicy):
         else:
             num_state_inputs = 0
         if len(self._loss_inputs) + num_state_inputs != len(existing_inputs):
-            raise ValueError(
-                "Tensor list mismatch",
-                self._loss_inputs,
-                self._state_inputs,
-                existing_inputs,
-            )
+            raise ValueError("Tensor list mismatch", self._loss_inputs,
+                             self._state_inputs, existing_inputs)
         for i, (k, v) in enumerate(self._loss_inputs):
             if v.shape.as_list() != existing_inputs[i].shape.as_list():
-                raise ValueError(
-                    "Tensor shape mismatch", i, k, v.shape, existing_inputs[i].shape
-                )
+                raise ValueError("Tensor shape mismatch", i, k, v.shape,
+                                 existing_inputs[i].shape)
         # By convention, the loss inputs are followed by state inputs and then
         # the seq len tensor
         rnn_inputs = []
         for i in range(len(self._state_inputs)):
-            rnn_inputs.append(
-                ("state_in_{}".format(i), existing_inputs[len(self._loss_inputs) + i])
-            )
+            rnn_inputs.append(("state_in_{}".format(i),
+                               existing_inputs[len(self._loss_inputs) + i]))
         if rnn_inputs:
             rnn_inputs.append(("seq_lens", existing_inputs[-1]))
-        input_dict = OrderedDict(
-            [("is_exploring", self._is_exploring), ("timestep", self._timestep)]
-            + [(k, existing_inputs[i]) for i, (k, _) in enumerate(self._loss_inputs)]
-            + rnn_inputs
-        )
+        input_dict = OrderedDict([("is_exploring", self._is_exploring), (
+            "timestep", self._timestep)] + [(k, existing_inputs[i]) for i, (
+                k, _) in enumerate(self._loss_inputs)] + rnn_inputs)
         instance = self.__class__(
             self.observation_space,
             self.action_space,
             self.config,
             existing_inputs=input_dict,
-            existing_model=self.model,
-        )
+            existing_model=self.model)
 
         instance._loss_input_dict = input_dict
         loss = instance._do_loss_init(input_dict)
-        loss_inputs = [
-            (k, existing_inputs[i]) for i, (k, _) in enumerate(self._loss_inputs)
-        ]
+        loss_inputs = [(k, existing_inputs[i])
+                       for i, (k, _) in enumerate(self._loss_inputs)]
 
         TFPolicy._initialize_loss(instance, loss, loss_inputs)
         if instance._grad_stats_fn:
             instance._stats_fetches.update(
-                instance._grad_stats_fn(instance, input_dict, instance._grads)
-            )
+                instance._grad_stats_fn(instance, input_dict, instance._grads))
         return instance
 
     @override(Policy)
@@ -337,17 +322,14 @@ class DynamicTFPolicy(TFPolicy):
             SampleBatch.NEXT_OBS: fake_array(self._obs_input),
             SampleBatch.DONES: np.array([False], dtype=np.bool),
             SampleBatch.ACTIONS: fake_array(
-                ModelCatalog.get_action_placeholder(self.action_space)
-            ),
+                ModelCatalog.get_action_placeholder(self.action_space)),
             SampleBatch.REWARDS: np.array([0], dtype=np.float32),
         }
         if self._obs_include_prev_action_reward:
-            dummy_batch.update(
-                {
-                    SampleBatch.PREV_ACTIONS: fake_array(self._prev_action_input),
-                    SampleBatch.PREV_REWARDS: fake_array(self._prev_reward_input),
-                }
-            )
+            dummy_batch.update({
+                SampleBatch.PREV_ACTIONS: fake_array(self._prev_action_input),
+                SampleBatch.PREV_REWARDS: fake_array(self._prev_reward_input),
+            })
         state_init = self.get_initial_state()
         state_batches = []
         for i, h in enumerate(state_init):
@@ -362,27 +344,28 @@ class DynamicTFPolicy(TFPolicy):
         # postprocessing might depend on variable init, so run it first here
         self._sess.run(tf.global_variables_initializer())
 
-        postprocessed_batch = self.postprocess_trajectory(SampleBatch(dummy_batch))
+        postprocessed_batch = self.postprocess_trajectory(
+            SampleBatch(dummy_batch))
 
         # model forward pass for the loss (needed after postprocess to
         # overwrite any tensor state from that call)
         self.model(self._input_dict, self._state_in, self._seq_lens)
 
         if self._obs_include_prev_action_reward:
-            train_batch = UsageTrackingDict(
-                {
-                    SampleBatch.PREV_ACTIONS: self._prev_action_input,
-                    SampleBatch.PREV_REWARDS: self._prev_reward_input,
-                    SampleBatch.CUR_OBS: self._obs_input,
-                }
-            )
+            train_batch = UsageTrackingDict({
+                SampleBatch.PREV_ACTIONS: self._prev_action_input,
+                SampleBatch.PREV_REWARDS: self._prev_reward_input,
+                SampleBatch.CUR_OBS: self._obs_input,
+            })
             loss_inputs = [
                 (SampleBatch.PREV_ACTIONS, self._prev_action_input),
                 (SampleBatch.PREV_REWARDS, self._prev_reward_input),
                 (SampleBatch.CUR_OBS, self._obs_input),
             ]
         else:
-            train_batch = UsageTrackingDict({SampleBatch.CUR_OBS: self._obs_input,})
+            train_batch = UsageTrackingDict({
+                SampleBatch.CUR_OBS: self._obs_input,
+            })
             loss_inputs = [
                 (SampleBatch.CUR_OBS, self._obs_input),
             ]
@@ -394,7 +377,7 @@ class DynamicTFPolicy(TFPolicy):
                 continue  # can't handle arbitrary objects in TF
             elif k == "seq_lens" or k.startswith("state_in_"):
                 continue
-            shape = (None,) + v.shape[1:]
+            shape = (None, ) + v.shape[1:]
             dtype = np.float32 if v.dtype == np.float64 else v.dtype
             placeholder = tf.placeholder(dtype, shape=shape, name=k)
             train_batch[k] = placeholder
@@ -406,9 +389,7 @@ class DynamicTFPolicy(TFPolicy):
         if log_once("loss_init"):
             logger.debug(
                 "Initializing loss function with dummy input:\n\n{}\n".format(
-                    summarize(train_batch)
-                )
-            )
+                    summarize(train_batch)))
 
         self._loss_input_dict = train_batch
         loss = self._do_loss_init(train_batch)
@@ -419,8 +400,7 @@ class DynamicTFPolicy(TFPolicy):
         TFPolicy._initialize_loss(self, loss, loss_inputs)
         if self._grad_stats_fn:
             self._stats_fetches.update(
-                self._grad_stats_fn(self, train_batch, self._grads)
-            )
+                self._grad_stats_fn(self, train_batch, self._grads))
         self._sess.run(tf.global_variables_initializer())
 
     def _do_loss_init(self, train_batch):

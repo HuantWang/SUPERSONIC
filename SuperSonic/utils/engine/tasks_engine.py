@@ -19,6 +19,8 @@ class TimeStopper(Stopper):
         self._start = time.time()
         self._deadline = deadline  # set time
 
+
+
     def __call__(self, trial_id, result):
         """Returns true if the trial should be terminated given the result."""
 
@@ -84,7 +86,8 @@ class Halide:
                 :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
                 methods.
                 """
-        conn = sqlite3.connect("supersonic.db")
+        self.sql_path = os.path.abspath('../SQL/supersonic.db')
+        conn = sqlite3.connect(self.sql_path)
         c = conn.cursor()
         try:
             c.execute(
@@ -105,22 +108,24 @@ class Halide:
         conn.close()
         print("halide halide halide")
 
-        self.algorithm_id = 11
-        self.input_image = "alfaromeo_gray_64x.png"
-        self.max_stage_directive = 8
-        self.target = "localhost:50051"
-        self.log_path = "/home/huanting/CG/MTL_test/tasks/src/opt_test/MCTS/result"
-        self.halide_path = "/home/halide/grpc-halide/"
-        self.environment_path = (
-            SuperSonic.utils.interface.environments.halide_env.halide_rl
-        )
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
-        self.local_dir = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
+        self.algorithm_id = 11
+        self.max_stage_directive = 8
+        self.target = "localhost:50051"
+        self.input_image = "alfaromeo_gray_64x.png"
+        self.environment_path = (
+            SuperSonic.utils.environments.Halide_env.halide_rl
+        )
+        self.local_dir = "../../SuperSonic/logs/model_save"
+        self.log_path = "../../tasks/halide/result"
+        self.halide_path = "../../tasks/halide/grpc-halide/"
+
         stopper = {"training_iteration": 5}
         self.task_config = {
+            "sql_path": self.sql_path,
             "algorithm_id": self.algorithm_id,
             "input_image": self.input_image,
             "max_stage_directive": self.max_stage_directive,
@@ -146,7 +151,7 @@ class Halide:
 
     def sql(self):
         """ Database connection"""
-        conn = sqlite3.connect("halide.db")
+        conn = sqlite3.connect("../SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
@@ -175,7 +180,8 @@ class Stoke:
         methods.
         """
         # database
-        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
+        self.sql_path = os.path.abspath('../SQL/supersonic.db')
+        conn = sqlite3.connect(self.sql_path)
         c = conn.cursor()
         # result,action history,reward,execution outputs
         try:
@@ -197,23 +203,25 @@ class Stoke:
 
         self.RLAlgo = None
         self.target = "localhost:50055"
-        self.log_path = "/home/huanting/SuperSonic/tasks/stoke/result"
-        self.obs_file = (
-            "/home/huanting/SuperSonic/tasks/stoke/example/record/finish.txt"
-        )
-        self.stoke_path = "/home/huanting/SuperSonic/tasks/stoke/example/p04"
-        self.environment_path = SuperSonic.utils.environments.stoke_env.stoke_rl
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
+        self.environment_path = SuperSonic.utils.environments.stoke_env.stoke_rl
         self.experiment = "stoke"
-        self.local_dir = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
-        #   "/home/SuperSonic/tasks/src/opt_test/MCTS/examples/model_save_Stoke"
-        # stopper = CustomStopper(self.obs_file)
+
+
+
+        self.log_path = os.path.abspath("../../tasks/Stoke/result")
+        self.obs_file = os.path.abspath("../../tasks/stoke/example/record/finish.txt")
+
+        self.stoke_path = os.path.abspath("../../tasks/stoke/example/p04")
+        self.local_dir = os.path.abspath('../../SuperSonic/logs/model_save')
+
         self.deadline = 50
         stopper = {"time_total_s": self.deadline}
         self.task_config = {
+            "sql_path": self.sql_path,
             "target": self.target,
             "log_path": self.log_path,
             "obs_file": self.obs_file,
@@ -243,7 +251,7 @@ class Stoke:
 
     def sql(self):
         """ Database connection"""
-        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
+        conn = sqlite3.connect("../SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
@@ -271,7 +279,12 @@ class CSR:
                  the current compiler pass sequence.
                 """
         # database
-        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
+        # rootpath = os.path.abspath('../SQL/supersonic.db')  # 获取上级路径
+        # print(rootpath)
+        # print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+        self.sql_path = os.path.abspath('../SQL/supersonic.db')
+
+        conn = sqlite3.connect(self.sql_path)
         c = conn.cursor()
         try:
             c.execute(
@@ -286,25 +299,9 @@ class CSR:
             print("Table created successfully")
         except:
             pass
-
         conn.commit()
         conn.close()
-        # print("dbl success")
 
-        # init parameter
-
-        #
-
-        #
-        # '''
-        # import os
-        # rootpath = os.path.abspath('../../../')  # 获取上级路径
-        # '''
-        #
-        self.benchmark = "/home/huanting/SuperSonic/tasks/CSR/DATA/mandel-text.bc"
-        self.seed = "0xCC"
-        self.log_path = "/home/huanting/SuperSonic/tasks/CSR/result"
-        self.pass_path = "/home/huanting/SuperSonic/tasks/CSR/pass"
         self.deadline = 20
         self.environment_path = SuperSonic.utils.environments.CSR_env.csr_rl
         self.state_function = policy["StatList"]
@@ -312,10 +309,16 @@ class CSR:
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
         self.experiment = "csr"
-        self.local_dir = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
+        self.local_dir = os.path.abspath('../../SuperSonic/logs/model_save')
+        self.benchmark = os.path.abspath('../../tasks/CSR/DATA/mandel-text.bc')
+        self.seed = "0xCC"
+        self.log_path = os.path.abspath("../../tasks/CSR/result")
+        self.pass_path = os.path.abspath("../../tasks/CSR/pass")
+
         # stopper = TimeStopper(self.deadline)
         stopper = {"time_total_s": self.deadline}
         self.task_config = {
+            "sql_path": self.sql_path,
             "benchmark": self.benchmark,
             "seed": self.seed,
             "log_path": self.log_path,
@@ -336,7 +339,7 @@ class CSR:
 
     def sql(self):
         """ Database connection"""
-        conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
+        conn = sqlite3.connect("../SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
@@ -392,18 +395,18 @@ class TaskEngine:
 #     #Halide.startserve()
 #     #Halide.run()
 #    '''
-#     #stoke
-#     print("start stoke")
-#     policy = {
-#         "StatList": "Actionhistory",
-#          "ActList": "Doc2vec",
-#          "RewList": "weight",
-#          "AlgList": "DQN",
-#     }
-#             # Stoke=Stoke(policy)
-#             #Stoke.sql()
-#             #Stoke.startclient()
-#     Stoke(policy).main()
+    #stoke
+    # print("start stoke")
+    # policy = {
+    #     "StatList": "Actionhistory",
+    #      "ActList": "Doc2vec",
+    #      "RewList": "weight",
+    #      "AlgList": "DQN",
+    # }
+    #         # Stoke=Stoke(policy)
+    #         #Stoke.sql()
+    #         #Stoke.startclient()
+    # Stoke(policy).main()
 #
 #     #csr
 #

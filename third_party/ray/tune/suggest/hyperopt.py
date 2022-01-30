@@ -3,7 +3,6 @@ import copy
 import logging
 from functools import partial
 import pickle
-
 try:
     hyperopt_logger = logging.getLogger("hyperopt")
     hyperopt_logger.setLevel(logging.WARNING)
@@ -84,39 +83,37 @@ class HyperOptSearch(Searcher):
     """
 
     def __init__(
-        self,
-        space,
-        metric="episode_reward_mean",
-        mode="max",
-        points_to_evaluate=None,
-        n_initial_points=20,
-        random_state_seed=None,
-        gamma=0.25,
-        max_concurrent=None,
-        use_early_stopped_trials=None,
+            self,
+            space,
+            metric="episode_reward_mean",
+            mode="max",
+            points_to_evaluate=None,
+            n_initial_points=20,
+            random_state_seed=None,
+            gamma=0.25,
+            max_concurrent=None,
+            use_early_stopped_trials=None,
     ):
-        assert (
-            hpo is not None
-        ), "HyperOpt must be installed! Run `pip install hyperopt`."
+        assert hpo is not None, (
+            "HyperOpt must be installed! Run `pip install hyperopt`.")
         from hyperopt.fmin import generate_trials_to_calculate
-
         super(HyperOptSearch, self).__init__(
             metric=metric,
             mode=mode,
             max_concurrent=max_concurrent,
-            use_early_stopped_trials=use_early_stopped_trials,
-        )
+            use_early_stopped_trials=use_early_stopped_trials)
         self.max_concurrent = max_concurrent
         # hyperopt internally minimizes, so "max" => -1
         if mode == "max":
-            self.metric_op = -1.0
+            self.metric_op = -1.
         elif mode == "min":
-            self.metric_op = 1.0
+            self.metric_op = 1.
 
         if n_initial_points is None:
             self.algo = hpo.tpe.suggest
         else:
-            self.algo = partial(hpo.tpe.suggest, n_startup_jobs=n_initial_points)
+            self.algo = partial(
+                hpo.tpe.suggest, n_startup_jobs=n_initial_points)
         if gamma is not None:
             self.algo = partial(self.algo, gamma=gamma)
         self.domain = hpo.Domain(lambda spc: spc, space)
@@ -125,7 +122,8 @@ class HyperOptSearch(Searcher):
             self._points_to_evaluate = 0
         else:
             assert type(points_to_evaluate) == list
-            self._hpopt_trials = generate_trials_to_calculate(points_to_evaluate)
+            self._hpopt_trials = generate_trials_to_calculate(
+                points_to_evaluate)
             self._hpopt_trials.refresh()
             self._points_to_evaluate = len(points_to_evaluate)
         self._live_trial_mapping = {}
@@ -146,12 +144,8 @@ class HyperOptSearch(Searcher):
             self._hpopt_trials.refresh()
 
             # Get new suggestion from Hyperopt
-            new_trials = self.algo(
-                new_ids,
-                self.domain,
-                self._hpopt_trials,
-                self.rstate.randint(2 ** 31 - 1),
-            )
+            new_trials = self.algo(new_ids, self.domain, self._hpopt_trials,
+                                   self.rstate.randint(2**31 - 1))
             self._hpopt_trials.insert_trial_docs(new_trials)
             self._hpopt_trials.refresh()
             new_trial = new_trials[0]
@@ -161,15 +155,13 @@ class HyperOptSearch(Searcher):
         config = hpo.base.spec_from_misc(new_trial["misc"])
         ctrl = hpo.base.Ctrl(self._hpopt_trials, current_trial=new_trial)
         memo = self.domain.memo_from_config(config)
-        hpo.utils.use_obj_for_literal_in_memo(
-            self.domain.expr, ctrl, hpo.base.Ctrl, memo
-        )
+        hpo.utils.use_obj_for_literal_in_memo(self.domain.expr, ctrl,
+                                              hpo.base.Ctrl, memo)
 
         suggested_config = hpo.pyll.rec_eval(
             self.domain.expr,
             memo=memo,
-            print_node_on_error=self.domain.rec_eval_print_node_on_error,
-        )
+            print_node_on_error=self.domain.rec_eval_print_node_on_error)
         return copy.deepcopy(suggested_config)
 
     def on_trial_result(self, trial_id, result):
@@ -216,7 +208,9 @@ class HyperOptSearch(Searcher):
         if trial_id not in self._live_trial_mapping:
             return
         hyperopt_tid = self._live_trial_mapping[trial_id][0]
-        return [t for t in self._hpopt_trials.trials if t["tid"] == hyperopt_tid][0]
+        return [
+            t for t in self._hpopt_trials.trials if t["tid"] == hyperopt_tid
+        ][0]
 
     def save(self, checkpoint_dir):
         trials_object = (self._hpopt_trials, self.rstate.get_state())

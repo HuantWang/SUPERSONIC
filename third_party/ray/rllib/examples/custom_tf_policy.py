@@ -18,11 +18,13 @@ def policy_gradient_loss(policy, model, dist_class, train_batch):
     logits, _ = model.from_batch(train_batch)
     action_dist = dist_class(logits, model)
     return -tf.reduce_mean(
-        action_dist.logp(train_batch["actions"]) * train_batch["returns"]
-    )
+        action_dist.logp(train_batch["actions"]) * train_batch["returns"])
 
 
-def calculate_advantages(policy, sample_batch, other_agent_batches=None, episode=None):
+def calculate_advantages(policy,
+                         sample_batch,
+                         other_agent_batches=None,
+                         episode=None):
     sample_batch["returns"] = discount(sample_batch["rewards"], 0.99)
     return sample_batch
 
@@ -35,7 +37,10 @@ MyTFPolicy = build_tf_policy(
 )
 
 # <class 'ray.rllib.agents.trainer_template.MyCustomTrainer'>
-MyTrainer = build_trainer(name="MyCustomTrainer", default_policy=MyTFPolicy,)
+MyTrainer = build_trainer(
+    name="MyCustomTrainer",
+    default_policy=MyTFPolicy,
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -43,5 +48,8 @@ if __name__ == "__main__":
     tune.run(
         MyTrainer,
         stop={"training_iteration": args.stop_iters},
-        config={"env": "CartPole-v0", "num_workers": 2, "framework": "tf",},
-    )
+        config={
+            "env": "CartPole-v0",
+            "num_workers": 2,
+            "framework": "tf",
+        })

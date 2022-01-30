@@ -89,47 +89,45 @@ class RayParams:
             RayConfig defaults. For testing purposes ONLY.
     """
 
-    def __init__(
-        self,
-        redis_address=None,
-        num_cpus=None,
-        num_gpus=None,
-        resources=None,
-        memory=None,
-        object_store_memory=None,
-        redis_max_memory=None,
-        redis_port=None,
-        redis_shard_ports=None,
-        object_manager_port=None,
-        node_manager_port=None,
-        node_ip_address=None,
-        raylet_ip_address=None,
-        min_worker_port=None,
-        max_worker_port=None,
-        object_id_seed=None,
-        driver_mode=None,
-        redirect_worker_output=None,
-        redirect_output=None,
-        num_redis_shards=None,
-        redis_max_clients=None,
-        redis_password=ray_constants.REDIS_DEFAULT_PASSWORD,
-        plasma_directory=None,
-        worker_path=None,
-        huge_pages=False,
-        include_webui=None,
-        webui_host="localhost",
-        logging_level=logging.INFO,
-        logging_format=ray_constants.LOGGER_FORMAT,
-        plasma_store_socket_name=None,
-        raylet_socket_name=None,
-        temp_dir=None,
-        include_log_monitor=None,
-        autoscaling_config=None,
-        include_java=False,
-        java_worker_options=None,
-        load_code_from_local=False,
-        _internal_config=None,
-    ):
+    def __init__(self,
+                 redis_address=None,
+                 num_cpus=None,
+                 num_gpus=None,
+                 resources=None,
+                 memory=None,
+                 object_store_memory=None,
+                 redis_max_memory=None,
+                 redis_port=None,
+                 redis_shard_ports=None,
+                 object_manager_port=None,
+                 node_manager_port=None,
+                 node_ip_address=None,
+                 raylet_ip_address=None,
+                 min_worker_port=None,
+                 max_worker_port=None,
+                 object_id_seed=None,
+                 driver_mode=None,
+                 redirect_worker_output=None,
+                 redirect_output=None,
+                 num_redis_shards=None,
+                 redis_max_clients=None,
+                 redis_password=ray_constants.REDIS_DEFAULT_PASSWORD,
+                 plasma_directory=None,
+                 worker_path=None,
+                 huge_pages=False,
+                 include_webui=None,
+                 webui_host="localhost",
+                 logging_level=logging.INFO,
+                 logging_format=ray_constants.LOGGER_FORMAT,
+                 plasma_store_socket_name=None,
+                 raylet_socket_name=None,
+                 temp_dir=None,
+                 include_log_monitor=None,
+                 autoscaling_config=None,
+                 include_java=False,
+                 java_worker_options=None,
+                 load_code_from_local=False,
+                 _internal_config=None):
         self.object_id_seed = object_id_seed
         self.redis_address = redis_address
         self.num_cpus = num_cpus
@@ -178,7 +176,8 @@ class RayParams:
             if hasattr(self, arg):
                 setattr(self, arg, kwargs[arg])
             else:
-                raise ValueError("Invalid RayParams parameter in" " update: %s" % arg)
+                raise ValueError("Invalid RayParams parameter in"
+                                 " update: %s" % arg)
 
         self._check_usage()
 
@@ -193,9 +192,8 @@ class RayParams:
                 if getattr(self, arg) is None:
                     setattr(self, arg, kwargs[arg])
             else:
-                raise ValueError(
-                    "Invalid RayParams parameter in" " update_if_absent: %s" % arg
-                )
+                raise ValueError("Invalid RayParams parameter in"
+                                 " update_if_absent: %s" % arg)
 
         self._check_usage()
 
@@ -207,54 +205,45 @@ class RayParams:
                 self.max_worker_port = 0
 
         if self.min_worker_port is not None:
-            if self.min_worker_port != 0 and (
-                self.min_worker_port < 1024 or self.min_worker_port > 65535
-            ):
-                raise ValueError(
-                    "min_worker_port must be 0 or an integer " "between 1024 and 65535."
-                )
+            if self.min_worker_port != 0 and (self.min_worker_port < 1024
+                                              or self.min_worker_port > 65535):
+                raise ValueError("min_worker_port must be 0 or an integer "
+                                 "between 1024 and 65535.")
 
         if self.max_worker_port is not None:
             if self.min_worker_port is None:
-                raise ValueError(
-                    "If max_worker_port is set, min_worker_port " "must also be set."
-                )
+                raise ValueError("If max_worker_port is set, min_worker_port "
+                                 "must also be set.")
             elif self.max_worker_port != 0:
                 if self.max_worker_port < 1024 or self.max_worker_port > 65535:
                     raise ValueError(
                         "max_worker_port must be 0 or an integer between "
-                        "1024 and 65535."
-                    )
+                        "1024 and 65535.")
                 elif self.max_worker_port <= self.min_worker_port:
-                    raise ValueError(
-                        "max_worker_port must be higher than " "min_worker_port."
-                    )
+                    raise ValueError("max_worker_port must be higher than "
+                                     "min_worker_port.")
 
         if self.resources is not None:
             assert "CPU" not in self.resources, (
                 "'CPU' should not be included in the resource dictionary. Use "
-                "num_cpus instead."
-            )
+                "num_cpus instead.")
             assert "GPU" not in self.resources, (
                 "'GPU' should not be included in the resource dictionary. Use "
-                "num_gpus instead."
-            )
+                "num_gpus instead.")
 
         if self.redirect_worker_output is not None:
             raise DeprecationWarning(
                 "The redirect_worker_output argument is deprecated. To "
                 "control logging to the driver, use the 'log_to_driver' "
-                "argument to 'ray.init()'"
-            )
+                "argument to 'ray.init()'")
 
         if self.redirect_output is not None:
-            raise DeprecationWarning("The redirect_output argument is deprecated.")
+            raise DeprecationWarning(
+                "The redirect_output argument is deprecated.")
 
         # Parse the numpy version.
         numpy_version = np.__version__.split(".")
         numpy_major, numpy_minor = int(numpy_version[0]), int(numpy_version[1])
         if numpy_major <= 1 and numpy_minor < 16:
-            logger.warning(
-                "Using ray with numpy < 1.16.0 will result in slow "
-                "serialization. Upgrade numpy if using with ray."
-            )
+            logger.warning("Using ray with numpy < 1.16.0 will result in slow "
+                           "serialization. Upgrade numpy if using with ray.")

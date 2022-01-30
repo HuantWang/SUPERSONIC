@@ -4,12 +4,8 @@ import time
 from ray.rllib.agents import with_common_config
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.agents.trainer_template import build_trainer
-from ray.rllib.execution.replay_ops import (
-    SimpleReplayBuffer,
-    Replay,
-    StoreToReplayBuffer,
-    WaitUntilTimestepsElapsed,
-)
+from ray.rllib.execution.replay_ops import SimpleReplayBuffer, Replay, \
+    StoreToReplayBuffer, WaitUntilTimestepsElapsed
 from ray.rllib.execution.rollout_ops import ParallelRollouts, ConcatBatches
 from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.execution.train_ops import TrainOneStep
@@ -24,7 +20,6 @@ from ray.rllib.contrib.alpha_zero.core.alpha_zero_policy import AlphaZeroPolicy
 from ray.rllib.contrib.alpha_zero.core.mcts import MCTS
 from ray.rllib.contrib.alpha_zero.core.ranked_rewards import get_r2_env_wrapper
 import gym
-
 tf = try_import_tf()
 torch, nn = try_import_torch()
 
@@ -43,6 +38,8 @@ class AlphaZeroDefaultCallbacks(DefaultCallbacks):
         env = base_env.get_unwrapped()[0]
         state = env.get_state()
         episode.user_data["initial_state"] = state
+
+
 
 
 # yapf: disable
@@ -122,9 +119,8 @@ DEFAULT_CONFIG = with_common_config({
 
 def alpha_zero_loss(policy, model, dist_class, train_batch):
     # get inputs unflattened inputs
-    input_dict = restore_original_dimensions(
-        train_batch["obs"], policy.observation_space, "torch"
-    )
+    input_dict = restore_original_dimensions(train_batch["obs"],
+                                             policy.observation_space, "torch")
     # forward pass in model
     model_out = model.forward(input_dict, None, [1])
     logits, _ = model_out
@@ -133,8 +129,9 @@ def alpha_zero_loss(policy, model, dist_class, train_batch):
     priors = nn.Softmax(dim=-1)(logits)
     # one = torch.add(torch.zeros_like(priors), torch.median(priors) )
     # priors = torch.where(priors == torch.min(priors), one, priors)
-    priors = torch.log(priors)
-    policy_loss = torch.mean(-torch.sum(train_batch["mcts_policies"] * priors, dim=-1))
+    priors=torch.log(priors)
+    policy_loss = torch.mean(
+        -torch.sum(train_batch["mcts_policies"] * priors, dim=-1))
     value_loss = torch.mean(torch.pow(values - train_batch["value_label"], 2))
     # compute total loss
     total_loss = (policy_loss + value_loss) / 2
@@ -145,8 +142,7 @@ def alpha_zero_loss(policy, model, dist_class, train_batch):
 class AlphaZeroPolicyWrapperClass(AlphaZeroPolicy):
     def __init__(self, obs_space, action_space, config):
         model = ModelCatalog.get_model_v2(
-            obs_space, action_space, action_space.n, config["model"], "torch"
-        )
+            obs_space, action_space, action_space.n, config["model"], "torch")
         env_creator = _global_registry.get(ENV_CREATOR, config["env"])
         if config["ranked_rewards"]["enable"]:
             # if r2 is enabled, tne env is wrapped to include a rewards buffer
@@ -157,7 +153,6 @@ class AlphaZeroPolicyWrapperClass(AlphaZeroPolicy):
             # rollout workers
             def _env_creator():
                 return env_cls(config["env_config"])
-
         else:
 
             def _env_creator():
@@ -166,40 +161,35 @@ class AlphaZeroPolicyWrapperClass(AlphaZeroPolicy):
         def mcts_creator():
             return MCTS(model, config["mcts_config"])
 
-        super().__init__(
-            obs_space,
-            action_space,
-            config,
-            model,
-            alpha_zero_loss,
-            TorchCategorical,
-            mcts_creator,
-            _env_creator,
-        )
+        super().__init__(obs_space, action_space, config, model,
+                         alpha_zero_loss, TorchCategorical, mcts_creator,
+                         _env_creator)
 
 
 def execution_plan(workers, config):
     rollouts = ParallelRollouts(workers, mode="bulk_sync")
 
     if config["simple_optimizer"]:
-        train_op = rollouts.combine(
-            ConcatBatches(min_batch_size=config["train_batch_size"])
-        ).for_each(TrainOneStep(workers, num_sgd_iter=config["num_sgd_iter"]))
+        train_op = rollouts \
+            .combine(ConcatBatches(
+                min_batch_size=config["train_batch_size"])) \
+            .for_each(TrainOneStep(
+                workers, num_sgd_iter=config["num_sgd_iter"]))
     else:
         replay_buffer = SimpleReplayBuffer(config["buffer_size"])
 
-        store_op = rollouts.for_each(StoreToReplayBuffer(local_buffer=replay_buffer))
+        store_op = rollouts \
+            .for_each(StoreToReplayBuffer(local_buffer=replay_buffer))
 
-        replay_op = (
-            Replay(local_buffer=replay_buffer)
-            .filter(WaitUntilTimestepsElapsed(config["learning_starts"]))
-            .combine(ConcatBatches(min_batch_size=config["train_batch_size"]))
-            .for_each(TrainOneStep(workers, num_sgd_iter=config["num_sgd_iter"]))
-        )
+        replay_op = Replay(local_buffer=replay_buffer) \
+            .filter(WaitUntilTimestepsElapsed(config["learning_starts"])) \
+            .combine(
+                ConcatBatches(min_batch_size=config["train_batch_size"])) \
+            .for_each(TrainOneStep(
+                workers, num_sgd_iter=config["num_sgd_iter"]))
 
         train_op = Concurrently(
-            [store_op, replay_op], mode="round_robin", output_indexes=[1]
-        )
+            [store_op, replay_op], mode="round_robin", output_indexes=[1])
 
     return StandardMetricsReporting(train_op, workers, config)
 
@@ -208,5 +198,4 @@ AlphaZeroTrainer = build_trainer(
     name="AlphaZero",
     default_config=DEFAULT_CONFIG,
     default_policy=AlphaZeroPolicyWrapperClass,
-    execution_plan=execution_plan,
-)
+    execution_plan=execution_plan)

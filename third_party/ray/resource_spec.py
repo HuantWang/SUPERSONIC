@@ -15,18 +15,10 @@ NODE_ID_PREFIX = "node:"
 
 
 class ResourceSpec(
-    namedtuple(
-        "ResourceSpec",
-        [
-            "num_cpus",
-            "num_gpus",
-            "memory",
-            "object_store_memory",
-            "resources",
-            "redis_max_memory",
-        ],
-    )
-):
+        namedtuple("ResourceSpec", [
+            "num_cpus", "num_gpus", "memory", "object_store_memory",
+            "resources", "redis_max_memory"
+        ])):
     """Represents the resource configuration passed to a raylet.
 
     All fields can be None. Before starting services, resolve() should be
@@ -48,24 +40,16 @@ class ResourceSpec(
             capped at 10GB but can be set higher.
     """
 
-    def __new__(
-        cls,
-        num_cpus=None,
-        num_gpus=None,
-        memory=None,
-        object_store_memory=None,
-        resources=None,
-        redis_max_memory=None,
-    ):
-        return super(ResourceSpec, cls).__new__(
-            cls,
-            num_cpus,
-            num_gpus,
-            memory,
-            object_store_memory,
-            resources,
-            redis_max_memory,
-        )
+    def __new__(cls,
+                num_cpus=None,
+                num_gpus=None,
+                memory=None,
+                object_store_memory=None,
+                resources=None,
+                redis_max_memory=None):
+        return super(ResourceSpec, cls).__new__(cls, num_cpus, num_gpus,
+                                                memory, object_store_memory,
+                                                resources, redis_max_memory)
 
     def resolved(self):
         """Returns if this ResourceSpec has default values filled out."""
@@ -82,35 +66,32 @@ class ResourceSpec(
         """
         assert self.resolved()
 
-        memory_units = ray_constants.to_memory_units(self.memory, round_up=False)
+        memory_units = ray_constants.to_memory_units(
+            self.memory, round_up=False)
         reservable_object_store_memory = (
-            self.object_store_memory * ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION
-        )
-        if reservable_object_store_memory < ray_constants.MEMORY_RESOURCE_UNIT_BYTES:
+            self.object_store_memory *
+            ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION)
+        if (reservable_object_store_memory <
+                ray_constants.MEMORY_RESOURCE_UNIT_BYTES):
             raise ValueError(
                 "The minimum amount of object_store_memory that can be "
                 "requested is {}, but you specified {}.".format(
                     int(
                         math.ceil(
-                            ray_constants.MEMORY_RESOURCE_UNIT_BYTES
-                            / ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION
-                        )
-                    ),
-                    self.object_store_memory,
-                )
-            )
+                            ray_constants.MEMORY_RESOURCE_UNIT_BYTES /
+                            ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION)),
+                    self.object_store_memory))
         object_store_memory_units = ray_constants.to_memory_units(
-            self.object_store_memory * ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION,
-            round_up=False,
-        )
+            self.object_store_memory *
+            ray_constants.PLASMA_RESERVABLE_MEMORY_FRACTION,
+            round_up=False)
 
         resources = dict(
             self.resources,
             CPU=self.num_cpus,
             GPU=self.num_gpus,
             memory=memory_units,
-            object_store_memory=object_store_memory_units,
-        )
+            object_store_memory=object_store_memory_units)
 
         resources = {
             resource_label: resource_quantity
@@ -120,29 +101,23 @@ class ResourceSpec(
 
         # Check types.
         for resource_label, resource_quantity in resources.items():
-            assert isinstance(resource_quantity, int) or isinstance(
-                resource_quantity, float
-            )
-            if (
-                isinstance(resource_quantity, float)
-                and not resource_quantity.is_integer()
-            ):
+            assert (isinstance(resource_quantity, int)
+                    or isinstance(resource_quantity, float))
+            if (isinstance(resource_quantity, float)
+                    and not resource_quantity.is_integer()):
                 raise ValueError(
                     "Resource quantities must all be whole numbers. "
-                    "Violated by resource '{}' in {}.".format(resource_label, resources)
-                )
-            if resource_quantity < 0:
-                raise ValueError(
-                    "Resource quantities must be nonnegative. "
-                    "Violated by resource '{}' in {}.".format(resource_label, resources)
-                )
-            if resource_quantity > ray_constants.MAX_RESOURCE_QUANTITY:
-                raise ValueError(
-                    "Resource quantities must be at most {}. "
                     "Violated by resource '{}' in {}.".format(
-                        ray_constants.MAX_RESOURCE_QUANTITY, resource_label, resources
-                    )
-                )
+                        resource_label, resources))
+            if resource_quantity < 0:
+                raise ValueError("Resource quantities must be nonnegative. "
+                                 "Violated by resource '{}' in {}.".format(
+                                     resource_label, resources))
+            if resource_quantity > ray_constants.MAX_RESOURCE_QUANTITY:
+                raise ValueError("Resource quantities must be at most {}. "
+                                 "Violated by resource '{}' in {}.".format(
+                                     ray_constants.MAX_RESOURCE_QUANTITY,
+                                     resource_label, resources))
 
         return resources
 
@@ -167,11 +142,11 @@ class ResourceSpec(
         gpu_ids = ray.utils.get_cuda_visible_devices()
         # Check that the number of GPUs that the raylet wants doesn't
         # excede the amount allowed by CUDA_VISIBLE_DEVICES.
-        if num_gpus is not None and gpu_ids is not None and num_gpus > len(gpu_ids):
-            raise ValueError(
-                "Attempting to start raylet with {} GPUs, "
-                "but CUDA_VISIBLE_DEVICES contains {}.".format(num_gpus, gpu_ids)
-            )
+        if (num_gpus is not None and gpu_ids is not None
+                and num_gpus > len(gpu_ids)):
+            raise ValueError("Attempting to start raylet with {} GPUs, "
+                             "but CUDA_VISIBLE_DEVICES contains {}.".format(
+                                 num_gpus, gpu_ids))
         if num_gpus is None:
             # Try to automatically detect the number of GPUs.
             num_gpus = _autodetect_num_gpus()
@@ -186,42 +161,35 @@ class ResourceSpec(
         if object_store_memory is None:
             object_store_memory = int(avail_memory * 0.3)
             # Cap memory to avoid memory waste and perf issues on large nodes
-            if (
-                object_store_memory
-                > ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES
-            ):
+            if (object_store_memory >
+                    ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES):
                 logger.debug(
                     "Warning: Capping object memory store to {}GB. ".format(
-                        ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES // 1e9
-                    )
-                    + "To increase this further, specify `object_store_memory` "
-                    "when calling ray.init() or ray start."
-                )
+                        ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES //
+                        1e9) +
+                    "To increase this further, specify `object_store_memory` "
+                    "when calling ray.init() or ray start.")
                 object_store_memory = (
-                    ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES
-                )
+                    ray_constants.DEFAULT_OBJECT_STORE_MAX_MEMORY_BYTES)
 
         redis_max_memory = self.redis_max_memory
         if redis_max_memory is None:
             redis_max_memory = min(
                 ray_constants.DEFAULT_REDIS_MAX_MEMORY_BYTES,
-                max(int(avail_memory * 0.1), ray_constants.REDIS_MINIMUM_MEMORY_BYTES),
-            )
+                max(
+                    int(avail_memory * 0.1),
+                    ray_constants.REDIS_MINIMUM_MEMORY_BYTES))
         if redis_max_memory < ray_constants.REDIS_MINIMUM_MEMORY_BYTES:
             raise ValueError(
                 "Attempting to cap Redis memory usage at {} bytes, "
                 "but the minimum allowed is {} bytes.".format(
-                    redis_max_memory, ray_constants.REDIS_MINIMUM_MEMORY_BYTES
-                )
-            )
+                    redis_max_memory,
+                    ray_constants.REDIS_MINIMUM_MEMORY_BYTES))
 
         memory = self.memory
         if memory is None:
-            memory = (
-                avail_memory
-                - object_store_memory
-                - (redis_max_memory if is_head else 0)
-            )
+            memory = (avail_memory - object_store_memory - (redis_max_memory
+                                                            if is_head else 0))
             if memory < 100e6 and memory < 0.05 * system_memory:
                 raise ValueError(
                     "After taking into account object store and redis memory "
@@ -230,9 +198,8 @@ class ResourceSpec(
                     "You can adjust these settings with "
                     "ray.init(memory=<bytes>, "
                     "object_store_memory=<bytes>).".format(
-                        round(memory / 1e9, 2), int(100 * (memory / system_memory))
-                    )
-                )
+                        round(memory / 1e9, 2),
+                        int(100 * (memory / system_memory))))
 
         logger.info(
             "Starting Ray with {} GiB memory available for workers and up to "
@@ -240,17 +207,12 @@ class ResourceSpec(
             "with ray.init(memory=<bytes>, "
             "object_store_memory=<bytes>).".format(
                 round(
-                    ray_constants.round_to_memory_units(memory, round_up=False)
-                    / (1024 ** 3),
-                    2,
-                ),
-                round(object_store_memory / (1024 ** 3), 2),
-            )
-        )
+                    ray_constants.round_to_memory_units(
+                        memory, round_up=False) / (1024**3), 2),
+                round(object_store_memory / (1024**3), 2)))
 
-        spec = ResourceSpec(
-            num_cpus, num_gpus, memory, object_store_memory, resources, redis_max_memory
-        )
+        spec = ResourceSpec(num_cpus, num_gpus, memory, object_store_memory,
+                            resources, redis_max_memory)
         assert spec.resolved()
         return spec
 

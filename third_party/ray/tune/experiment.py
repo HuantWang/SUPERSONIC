@@ -19,11 +19,9 @@ def _raise_deprecation_note(deprecated, replacement, soft=False):
         replacement (str): Replacement parameter to use instead.
         soft (bool): Fatal if True.
     """
-    error_msg = (
-        "`{deprecated}` is deprecated. Please use `{replacement}`. "
-        "`{deprecated}` will be removed in future versions of "
-        "Ray.".format(deprecated=deprecated, replacement=replacement)
-    )
+    error_msg = ("`{deprecated}` is deprecated. Please use `{replacement}`. "
+                 "`{deprecated}` will be removed in future versions of "
+                 "Ray.".format(deprecated=deprecated, replacement=replacement))
     if soft:
         logger.warning(error_msg)
     else:
@@ -33,20 +31,17 @@ def _raise_deprecation_note(deprecated, replacement, soft=False):
 def _raise_on_durable(trainable_name, sync_to_driver, upload_dir):
     trainable_cls = get_trainable_cls(trainable_name)
     from ray.tune.durable_trainable import DurableTrainable
-
     if issubclass(trainable_cls, DurableTrainable):
         if sync_to_driver is not False:
             raise ValueError(
                 "EXPERIMENTAL: DurableTrainable will automatically sync "
                 "results to the provided upload_dir. "
-                "Set `sync_to_driver=False` to avoid data inconsistencies."
-            )
+                "Set `sync_to_driver=False` to avoid data inconsistencies.")
         if not upload_dir:
             raise ValueError(
                 "EXPERIMENTAL: DurableTrainable will automatically sync "
                 "results to the provided upload_dir. "
-                "`upload_dir` must be provided."
-            )
+                "`upload_dir` must be provided.")
 
 
 class Experiment:
@@ -75,28 +70,26 @@ class Experiment:
             max_failures=2)
     """
 
-    def __init__(
-        self,
-        name,
-        run,
-        stop=None,
-        config=None,
-        resources_per_trial=None,
-        num_samples=1,
-        local_dir=None,
-        upload_dir=None,
-        trial_name_creator=None,
-        loggers=None,
-        sync_to_driver=None,
-        checkpoint_freq=0,
-        checkpoint_at_end=False,
-        sync_on_checkpoint=True,
-        keep_checkpoints_num=None,
-        checkpoint_score_attr=None,
-        export_formats=None,
-        max_failures=0,
-        restore=None,
-    ):
+    def __init__(self,
+                 name,
+                 run,
+                 stop=None,
+                 config=None,
+                 resources_per_trial=None,
+                 num_samples=1,
+                 local_dir=None,
+                 upload_dir=None,
+                 trial_name_creator=None,
+                 loggers=None,
+                 sync_to_driver=None,
+                 checkpoint_freq=0,
+                 checkpoint_at_end=False,
+                 sync_on_checkpoint=True,
+                 keep_checkpoints_num=None,
+                 checkpoint_score_attr=None,
+                 export_formats=None,
+                 max_failures=0,
+                 restore=None):
 
         config = config or {}
         self._run_identifier = Experiment.register_if_needed(run)
@@ -118,15 +111,12 @@ class Experiment:
             elif issubclass(type(stop), Stopper):
                 self._stopper = stop
             else:
-                raise ValueError(
-                    "Provided stop object must be either a dict, "
-                    "a function, or a subclass of "
-                    "`ray.tune.Stopper`."
-                )
+                raise ValueError("Provided stop object must be either a dict, "
+                                 "a function, or a subclass of "
+                                 "`ray.tune.Stopper`.")
         else:
-            raise ValueError(
-                "Invalid stop criteria: {}. Must be a " "callable or dict".format(stop)
-            )
+            raise ValueError("Invalid stop criteria: {}. Must be a "
+                             "callable or dict".format(stop))
 
         _raise_on_durable(self._run_identifier, sync_to_driver, upload_dir)
 
@@ -137,8 +127,7 @@ class Experiment:
             "resources_per_trial": resources_per_trial,
             "num_samples": num_samples,
             "local_dir": os.path.abspath(
-                os.path.expanduser(local_dir or DEFAULT_RESULTS_DIR)
-            ),
+                os.path.expanduser(local_dir or DEFAULT_RESULTS_DIR)),
             "upload_dir": upload_dir,
             "remote_checkpoint_dir": self.remote_checkpoint_dir,
             "trial_name_creator": trial_name_creator,
@@ -152,8 +141,7 @@ class Experiment:
             "export_formats": export_formats or [],
             "max_failures": max_failures,
             "restore": os.path.abspath(os.path.expanduser(restore))
-            if restore
-            else None,
+            if restore else None
         }
         self.spec = spec
 
@@ -210,7 +198,8 @@ class Experiment:
             if hasattr(run_object, "__name__"):
                 name = run_object.__name__
             else:
-                logger.warning("No name detected on trainable. Using {}.".format(name))
+                logger.warning(
+                    "No name detected on trainable. Using {}.".format(name))
             register_trainable(name, run_object)
             return name
         else:
@@ -257,16 +246,17 @@ def convert_to_experiment_list(experiments):
         exp_list = [experiments]
     elif type(experiments) is dict:
         exp_list = [
-            Experiment.from_json(name, spec) for name, spec in experiments.items()
+            Experiment.from_json(name, spec)
+            for name, spec in experiments.items()
         ]
 
     # Validate exp_list
-    if type(exp_list) is list and all(isinstance(exp, Experiment) for exp in exp_list):
+    if (type(exp_list) is list
+            and all(isinstance(exp, Experiment) for exp in exp_list)):
         if len(exp_list) > 1:
             logger.info(
                 "Running with multiple concurrent experiments. "
-                "All experiments will be using the same SearchAlgorithm."
-            )
+                "All experiments will be using the same SearchAlgorithm.")
     else:
         raise TuneError("Invalid argument: {}".format(experiments))
 

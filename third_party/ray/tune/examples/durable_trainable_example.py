@@ -19,20 +19,15 @@ class MockDurableTrainable(DurableTrainable):
     def __init__(self, remote_checkpoint_dir, *args, **kwargs):
         # Mock the path as a local path.
         local_dir_suffix = remote_checkpoint_dir.split("://")[1]
-        remote_checkpoint_dir = os.path.join(
-            ray.utils.get_user_temp_dir(), local_dir_suffix
-        )
+        remote_checkpoint_dir = os.path.join(ray.utils.get_user_temp_dir(),
+                                             local_dir_suffix)
         # Disallow malformed relative paths for delete safety.
         assert os.path.abspath(remote_checkpoint_dir).startswith(
-            ray.utils.get_user_temp_dir()
-        )
-        logger.info(
-            "Using %s as the mocked remote checkpoint directory.",
-            self.remote_checkpoint_dir,
-        )
-        super(MockDurableTrainable, self).__init__(
-            remote_checkpoint_dir, *args, **kwargs
-        )
+            ray.utils.get_user_temp_dir())
+        logger.info("Using %s as the mocked remote checkpoint directory.",
+                    self.remote_checkpoint_dir)
+        super(MockDurableTrainable, self).__init__(remote_checkpoint_dir,
+                                                   *args, **kwargs)
 
     def _create_storage_client(self):
         sync = "mkdir -p {target} && rsync -avz {source} {target}"
@@ -47,7 +42,7 @@ class OptimusFn(object):
 
     def eval(self, k, add_noise=True):
         b0, b1, b2 = self.params
-        score = (b0 * k / 100 + 0.1 * b1 + 0.5) ** (-1) + b2 * 0.01
+        score = (b0 * k / 100 + 0.1 * b1 + 0.5)**(-1) + b2 * 0.01
         if add_noise:
             return score + abs(self.noise[k])
         else:
@@ -73,7 +68,7 @@ def get_optimus_trainable(parent_cls):
             return {
                 "mean_loss": float(new_loss),
                 "mean_accuracy": (2 - new_loss) / 2,
-                "samples": self.initial_samples_per_step,
+                "samples": self.initial_samples_per_step
             }
 
         def _save(self, checkpoint_dir):
@@ -82,7 +77,7 @@ def get_optimus_trainable(parent_cls):
                 "func": cloudpickle.dumps(self.func),
                 "seed": np.random.get_state(),
                 "data": self.mock_data,
-                "iter": self.iter,
+                "iter": self.iter
             }
 
         def _restore(self, checkpoint):

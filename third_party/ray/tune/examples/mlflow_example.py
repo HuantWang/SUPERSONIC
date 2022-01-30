@@ -19,8 +19,7 @@ def easy_objective(config):
     for i in range(20):
         result = dict(
             timesteps_total=i,
-            mean_loss=(config["height"] - 14) ** 2 - abs(config["width"] - 3),
-        )
+            mean_loss=(config["height"] - 14)**2 - abs(config["width"] - 3))
         tune.report(**result)
         time.sleep(0.02)
 
@@ -33,13 +32,13 @@ if __name__ == "__main__":
         easy_objective,
         name="mlflow",
         num_samples=5,
-        loggers=DEFAULT_LOGGERS + (MLFLowLogger,),
+        loggers=DEFAULT_LOGGERS + (MLFLowLogger, ),
         config={
             "mlflow_experiment_id": experiment_id,
-            "width": tune.sample_from(lambda spec: 10 + int(90 * random.random())),
-            "height": tune.sample_from(lambda spec: int(100 * random.random())),
-        },
-    )
+            "width": tune.sample_from(
+                lambda spec: 10 + int(90 * random.random())),
+            "height": tune.sample_from(lambda spec: int(100 * random.random()))
+        })
 
     df = mlflow.search_runs([experiment_id])
     print(df)

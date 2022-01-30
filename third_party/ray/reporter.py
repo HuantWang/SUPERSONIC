@@ -28,8 +28,7 @@ try:
 except ImportError:
     gpustat = None
     logger.warning(
-        "Install gpustat with 'pip install gpustat' to enable GPU monitoring."
-    )
+        "Install gpustat with 'pip install gpustat' to enable GPU monitoring.")
 
 
 class ReporterServer(reporter_pb2_grpc.ReporterServiceServicer):
@@ -39,17 +38,14 @@ class ReporterServer(reporter_pb2_grpc.ReporterServiceServicer):
     def GetProfilingStats(self, request, context):
         pid = request.pid
         duration = request.duration
-        profiling_file_path = os.path.join(
-            ray.utils.get_ray_temp_dir(), "{}_profiling.txt".format(pid)
-        )
+        profiling_file_path = os.path.join(ray.utils.get_ray_temp_dir(),
+                                           "{}_profiling.txt".format(pid))
         process = subprocess.Popen(
-            "sudo $(which py-spy) record -o {} -p {} -d {} -f speedscope".format(
-                profiling_file_path, pid, duration
-            ),
+            "sudo $(which py-spy) record -o {} -p {} -d {} -f speedscope"
+            .format(profiling_file_path, pid, duration),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True,
-        )
+            shell=True)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
             profiling_stats = ""
@@ -57,8 +53,7 @@ class ReporterServer(reporter_pb2_grpc.ReporterServiceServicer):
             with open(profiling_file_path, "r") as f:
                 profiling_stats = f.read()
         return reporter_pb2.GetProfilingStatsReply(
-            profiling_stats=profiling_stats, stdout=stdout, stderr=stderr
-        )
+            profiling_stats=profiling_stats, stdout=stdout, stderr=stderr)
 
 
 def recursive_asdict(o):
@@ -107,10 +102,10 @@ class Reporter:
 
         _ = psutil.cpu_percent()  # For initialization
 
-        self.redis_key = "{}.{}".format(ray.gcs_utils.REPORTER_CHANNEL, self.hostname)
+        self.redis_key = "{}.{}".format(ray.gcs_utils.REPORTER_CHANNEL,
+                                        self.hostname)
         self.redis_client = ray.services.create_redis_client(
-            redis_address, password=redis_password
-        )
+            redis_address, password=redis_password)
 
         self.network_stats_hist = [(0, (0.0, 0.0))]  # time, (sent, recv)
 
@@ -127,11 +122,15 @@ class Reporter:
         try:
             gpus = gpustat.new_query().gpus
         except Exception as e:
-            logger.debug("gpustat failed to retrieve GPU information: {}".format(e))
+            logger.debug(
+                "gpustat failed to retrieve GPU information: {}".format(e))
         for gpu in gpus:
             # Note the keys in this dict have periods which throws
             # off javascript so we change .s to _s
-            gpu_data = {"_".join(key.split(".")): val for key, val in gpu.entry.items()}
+            gpu_data = {
+                "_".join(key.split(".")): val
+                for key, val in gpu.entry.items()
+            }
             gpu_utilizations.append(gpu_data)
         return gpu_utilizations
 
@@ -142,7 +141,8 @@ class Reporter:
     @staticmethod
     def get_network_stats():
         ifaces = [
-            v for k, v in psutil.net_io_counters(pernic=True).items() if k[0] == "e"
+            v for k, v in psutil.net_io_counters(pernic=True).items()
+            if k[0] == "e"
         ]
 
         sent = sum((iface.bytes_sent for iface in ifaces))
@@ -165,17 +165,14 @@ class Reporter:
     @staticmethod
     def get_workers():
         return [
-            x.as_dict(
-                attrs=[
-                    "pid",
-                    "create_time",
-                    "cpu_percent",
-                    "cpu_times",
-                    "cmdline",
-                    "memory_info",
-                ]
-            )
-            for x in psutil.process_iter(attrs=["cmdline"])
+            x.as_dict(attrs=[
+                "pid",
+                "create_time",
+                "cpu_percent",
+                "cpu_times",
+                "cmdline",
+                "memory_info",
+            ]) for x in psutil.process_iter(attrs=["cmdline"])
             if is_worker(x.info["cmdline"])
         ]
 
@@ -195,10 +192,8 @@ class Reporter:
         self.network_stats_hist.append((now, network_stats))
         self.network_stats_hist = self.network_stats_hist[-7:]
         then, prev_network_stats = self.network_stats_hist[0]
-        netstats = (
-            (network_stats[0] - prev_network_stats[0]) / (now - then),
-            (network_stats[1] - prev_network_stats[1]) / (now - then),
-        )
+        netstats = ((network_stats[0] - prev_network_stats[0]) / (now - then),
+                    (network_stats[1] - prev_network_stats[1]) / (now - then))
 
         return {
             "now": now,
@@ -220,16 +215,16 @@ class Reporter:
         stats = self.get_all_stats()
 
         self.redis_client.publish(
-            self.redis_key, jsonify_asdict(stats),
+            self.redis_key,
+            jsonify_asdict(stats),
         )
 
     def run(self):
         """Publish the port."""
         thread_pool = futures.ThreadPoolExecutor(max_workers=10)
-        server = grpc.server(thread_pool, options=(("grpc.so_reuseport", 0),))
+        server = grpc.server(thread_pool, options=(("grpc.so_reuseport", 0), ))
         reporter_pb2_grpc.add_ReporterServiceServicer_to_server(
-            ReporterServer(), server
-        )
+            ReporterServer(), server)
         port = server.add_insecure_port("[::]:0")
         server.start()
         self.redis_client.set("REPORTER_PORT:{}".format(self.ip), port)
@@ -246,33 +241,32 @@ class Reporter:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=("Parse Redis server for the " "reporter to connect to.")
-    )
+        description=("Parse Redis server for the "
+                     "reporter to connect to."))
     parser.add_argument(
-        "--redis-address", required=True, type=str, help="The address to use for Redis."
-    )
+        "--redis-address",
+        required=True,
+        type=str,
+        help="The address to use for Redis.")
     parser.add_argument(
         "--redis-password",
         required=False,
         type=str,
         default=None,
-        help="the password to use for Redis",
-    )
+        help="the password to use for Redis")
     parser.add_argument(
         "--logging-level",
         required=False,
         type=str,
         default=ray_constants.LOGGER_LEVEL,
         choices=ray_constants.LOGGER_LEVEL_CHOICES,
-        help=ray_constants.LOGGER_LEVEL_HELP,
-    )
+        help=ray_constants.LOGGER_LEVEL_HELP)
     parser.add_argument(
         "--logging-format",
         required=False,
         type=str,
         default=ray_constants.LOGGER_FORMAT,
-        help=ray_constants.LOGGER_FORMAT_HELP,
-    )
+        help=ray_constants.LOGGER_FORMAT_HELP)
     args = parser.parse_args()
     ray.utils.setup_logger(args.logging_level, args.logging_format)
 
@@ -283,14 +277,10 @@ if __name__ == "__main__":
     except Exception as e:
         # Something went wrong, so push an error to all drivers.
         redis_client = ray.services.create_redis_client(
-            args.redis_address, password=args.redis_password
-        )
+            args.redis_address, password=args.redis_password)
         traceback_str = ray.utils.format_error_message(traceback.format_exc())
-        message = (
-            "The reporter on node {} failed with the following "
-            "error:\n{}".format(platform.node(), traceback_str)
-        )
+        message = ("The reporter on node {} failed with the following "
+                   "error:\n{}".format(platform.node(), traceback_str))
         ray.utils.push_error_to_driver_through_redis(
-            redis_client, ray_constants.REPORTER_DIED_ERROR, message
-        )
+            redis_client, ray_constants.REPORTER_DIED_ERROR, message)
         raise e

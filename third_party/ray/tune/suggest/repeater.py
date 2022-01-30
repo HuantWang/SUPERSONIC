@@ -17,8 +17,7 @@ def _warn_num_samples(searcher, num_samples):
             "including the repeat trials. For example, set num_samples=15 if "
             "you intend to obtain 3 search algorithm suggestions and repeat "
             "each suggestion 5 times. Any leftover trials "
-            "(num_samples mod repeat) will be ignored."
-        )
+            "(num_samples mod repeat) will be ignored.")
 
 
 class _TrialGroup:
@@ -36,7 +35,8 @@ class _TrialGroup:
     """
 
     def __init__(self, primary_trial_id, config, max_trials=1):
-        assert type(config) is dict, "config is not a dict, got {}".format(config)
+        assert type(config) is dict, (
+            "config is not a dict, got {}".format(config))
         self.primary_trial_id = primary_trial_id
         self.config = config
         self._trials = {primary_trial_id: None}
@@ -110,8 +110,7 @@ class Repeater(Searcher):
         self._trial_id_to_group = {}
         self._current_group = None
         super(Repeater, self).__init__(
-            metric=self.searcher.metric, mode=self.searcher.mode
-        )
+            metric=self.searcher.metric, mode=self.searcher.mode)
 
     def suggest(self, trial_id):
         if self._current_group is None or self._current_group.full():
@@ -119,8 +118,7 @@ class Repeater(Searcher):
             if config is None:
                 return config
             self._current_group = _TrialGroup(
-                trial_id, copy.deepcopy(config), max_trials=self.repeat
-            )
+                trial_id, copy.deepcopy(config), max_trials=self.repeat)
             self._groups.append(self._current_group)
             index_in_group = 0
         else:
@@ -144,10 +142,9 @@ class Repeater(Searcher):
 
         """
         if trial_id not in self._trial_id_to_group:
-            logger.error(
-                "Trial {} not in group; cannot report score. "
-                "Seen trials: {}".format(trial_id, list(self._trial_id_to_group))
-            )
+            logger.error("Trial {} not in group; cannot report score. "
+                         "Seen trials: {}".format(
+                             trial_id, list(self._trial_id_to_group)))
         trial_group = self._trial_id_to_group[trial_id]
         if not result or self.searcher.metric not in result:
             score = np.nan
@@ -160,8 +157,7 @@ class Repeater(Searcher):
             self.searcher.on_trial_complete(
                 trial_group.primary_trial_id,
                 result={self.searcher.metric: np.nanmean(scores)},
-                **kwargs
-            )
+                **kwargs)
 
     def save(self, path):
         self.searcher.save(path)

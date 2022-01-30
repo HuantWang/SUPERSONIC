@@ -19,15 +19,10 @@ class ObservationFunction:
     This API is **experimental**.
     """
 
-    def __call__(
-        self,
-        agent_obs: Dict[AgentID, TensorType],
-        worker: RolloutWorker,
-        base_env: BaseEnv,
-        policies: Dict[PolicyID, Policy],
-        episode: MultiAgentEpisode,
-        **kw
-    ) -> Dict[AgentID, TensorType]:
+    def __call__(self, agent_obs: Dict[AgentID, TensorType],
+                 worker: RolloutWorker, base_env: BaseEnv,
+                 policies: Dict[PolicyID, Policy], episode: MultiAgentEpisode,
+                 **kw) -> Dict[AgentID, TensorType]:
         """Callback run on each environment step to observe the environment.
 
         This method takes in the original agent observation dict returned by

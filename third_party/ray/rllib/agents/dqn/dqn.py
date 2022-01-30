@@ -153,81 +153,78 @@ def validate_config(config):
         config["grad_clip"] = config.pop("grad_norm_clipping")
 
     schedule_max_timesteps = None
-    if config.get("schedule_max_timesteps", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+    if config.get("schedule_max_timesteps", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
         deprecation_warning(
             "schedule_max_timesteps",
             "exploration_config.epsilon_timesteps AND "
-            "prioritized_replay_beta_annealing_timesteps",
-        )
+            "prioritized_replay_beta_annealing_timesteps")
         schedule_max_timesteps = config["schedule_max_timesteps"]
-    if config.get("exploration_final_eps", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning("exploration_final_eps", "exploration_config.final_epsilon")
+    if config.get("exploration_final_eps", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
+        deprecation_warning("exploration_final_eps",
+                            "exploration_config.final_epsilon")
         if isinstance(config["exploration_config"], dict):
-            config["exploration_config"]["final_epsilon"] = config.pop(
-                "exploration_final_eps"
-            )
-    if config.get("exploration_fraction", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+            config["exploration_config"]["final_epsilon"] = \
+                config.pop("exploration_final_eps")
+    if config.get("exploration_fraction", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
         assert schedule_max_timesteps is not None
-        deprecation_warning(
-            "exploration_fraction", "exploration_config.epsilon_timesteps"
-        )
+        deprecation_warning("exploration_fraction",
+                            "exploration_config.epsilon_timesteps")
         if isinstance(config["exploration_config"], dict):
-            config["exploration_config"]["epsilon_timesteps"] = (
-                config.pop("exploration_fraction") * schedule_max_timesteps
-            )
-    if config.get("beta_annealing_fraction", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+            config["exploration_config"]["epsilon_timesteps"] = config.pop(
+                "exploration_fraction") * schedule_max_timesteps
+    if config.get("beta_annealing_fraction", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
         assert schedule_max_timesteps is not None
         deprecation_warning(
             "beta_annealing_fraction (decimal)",
-            "prioritized_replay_beta_annealing_timesteps (int)",
-        )
-        config["prioritized_replay_beta_annealing_timesteps"] = (
-            config.pop("beta_annealing_fraction") * schedule_max_timesteps
-        )
-    if config.get("per_worker_exploration", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning(
-            "per_worker_exploration", "exploration_config.type=PerWorkerEpsilonGreedy"
-        )
+            "prioritized_replay_beta_annealing_timesteps (int)")
+        config["prioritized_replay_beta_annealing_timesteps"] = config.pop(
+            "beta_annealing_fraction") * schedule_max_timesteps
+    if config.get("per_worker_exploration", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
+        deprecation_warning("per_worker_exploration",
+                            "exploration_config.type=PerWorkerEpsilonGreedy")
         if isinstance(config["exploration_config"], dict):
             config["exploration_config"]["type"] = PerWorkerEpsilonGreedy
     if config.get("softmax_temp", DEPRECATED_VALUE) != DEPRECATED_VALUE:
         deprecation_warning(
-            "soft_q",
-            "exploration_config={" "type=StochasticSampling, temperature=[float]" "}",
-        )
+            "soft_q", "exploration_config={"
+            "type=StochasticSampling, temperature=[float]"
+            "}")
         if config.get("softmax_temp", 1.0) < 0.00001:
             logger.warning("softmax temp very low: Clipped it to 0.00001.")
             config["softmax_temperature"] = 0.00001
     if config.get("soft_q", DEPRECATED_VALUE) != DEPRECATED_VALUE:
         deprecation_warning(
-            "soft_q", "exploration_config={" "type=SoftQ, temperature=[float]" "}"
-        )
+            "soft_q", "exploration_config={"
+            "type=SoftQ, temperature=[float]"
+            "}")
         config["exploration_config"] = {
             "type": "SoftQ",
-            "temperature": config.get("softmax_temp", 1.0),
+            "temperature": config.get("softmax_temp", 1.0)
         }
     if config.get("parameter_noise", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning(
-            "parameter_noise", "exploration_config={" "type=ParameterNoise" "}"
-        )
+        deprecation_warning("parameter_noise", "exploration_config={"
+                            "type=ParameterNoise"
+                            "}")
 
     if config["exploration_config"]["type"] == "ParameterNoise":
         if config["batch_mode"] != "complete_episodes":
             logger.warning(
                 "ParameterNoise Exploration requires `batch_mode` to be "
-                "'complete_episodes'. Setting batch_mode=complete_episodes."
-            )
+                "'complete_episodes'. Setting batch_mode=complete_episodes.")
             config["batch_mode"] = "complete_episodes"
         if config.get("noisy", False):
             raise ValueError(
                 "ParameterNoise Exploration and `noisy` network cannot be "
-                "used at the same time!"
-            )
+                "used at the same time!")
 
     # Update effective batch size to include n-step
-    adjusted_batch_size = max(
-        config["rollout_fragment_length"], config.get("n_step", 1)
-    )
+    adjusted_batch_size = max(config["rollout_fragment_length"],
+                              config.get("n_step", 1))
     config["rollout_fragment_length"] = adjusted_batch_size
 
 
@@ -247,15 +244,15 @@ def execution_plan(workers, config):
         buffer_size=config["buffer_size"],
         replay_batch_size=config["train_batch_size"],
         multiagent_sync_replay=config.get("multiagent_sync_replay"),
-        **prio_args
-    )
+        **prio_args)
 
     rollouts = ParallelRollouts(workers, mode="bulk_sync")
 
     # We execute the following steps concurrently:
     # (1) Generate rollouts and store them in our local replay buffer. Calling
     # next() on store_op drives this.
-    store_op = rollouts.for_each(StoreToReplayBuffer(local_buffer=local_replay_buffer))
+    store_op = rollouts.for_each(
+        StoreToReplayBuffer(local_buffer=local_replay_buffer))
 
     def update_prio(item):
         samples, info_dict = item
@@ -266,11 +263,10 @@ def execution_plan(workers, config):
                 #  torch/tf. Clean up these results/info dicts across
                 #  policies (note: fixing this in torch_policy.py will
                 #  break e.g. DDPPO!).
-                td_error = info.get("td_error", info[LEARNER_STATS_KEY].get("td_error"))
-                prio_dict[policy_id] = (
-                    samples.policy_batches[policy_id].data.get("batch_indexes"),
-                    td_error,
-                )
+                td_error = info.get("td_error",
+                                    info[LEARNER_STATS_KEY].get("td_error"))
+                prio_dict[policy_id] = (samples.policy_batches[policy_id]
+                                        .data.get("batch_indexes"), td_error)
             local_replay_buffer.update_priorities(prio_dict)
         return info_dict
 
@@ -278,13 +274,12 @@ def execution_plan(workers, config):
     # returned from the LocalReplay() iterator is passed to TrainOneStep to
     # take a SGD step, and then we decide whether to update the target network.
     post_fn = config.get("before_learn_on_batch") or (lambda b, *a: b)
-    replay_op = (
-        Replay(local_buffer=local_replay_buffer)
-        .for_each(lambda x: post_fn(x, workers, config))
-        .for_each(TrainOneStep(workers))
-        .for_each(update_prio)
-        .for_each(UpdateTargetNetwork(workers, config["target_network_update_freq"]))
-    )
+    replay_op = Replay(local_buffer=local_replay_buffer) \
+        .for_each(lambda x: post_fn(x, workers, config)) \
+        .for_each(TrainOneStep(workers)) \
+        .for_each(update_prio) \
+        .for_each(UpdateTargetNetwork(
+            workers, config["target_network_update_freq"]))
 
     # Alternate deterministically between (1) and (2). Only return the output
     # of (2) since training metrics are not available until (2) runs.
@@ -292,8 +287,7 @@ def execution_plan(workers, config):
         [store_op, replay_op],
         mode="round_robin",
         output_indexes=[1],
-        round_robin_weights=calculate_rr_weights(config),
-    )
+        round_robin_weights=calculate_rr_weights(config))
 
     return StandardMetricsReporting(train_op, workers, config)
 
@@ -302,7 +296,8 @@ def calculate_rr_weights(config):
     if not config["training_intensity"]:
         return [1, 1]
     # e.g., 32 / 4 -> native ratio of 8.0
-    native_ratio = config["train_batch_size"] / config["rollout_fragment_length"]
+    native_ratio = (
+        config["train_batch_size"] / config["rollout_fragment_length"])
     # Training intensity is specified in terms of
     # (steps_replayed / steps_sampled), so adjust for the native ratio.
     weights = [1, config["training_intensity"] / native_ratio]
@@ -312,7 +307,6 @@ def calculate_rr_weights(config):
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.dqn.dqn_torch_policy import DQNTorchPolicy
-
         return DQNTorchPolicy
     else:
         return DQNTFPolicy
@@ -320,8 +314,8 @@ def get_policy_class(config):
 
 def get_simple_policy_class(config):
     if config["framework"] == "torch":
-        from ray.rllib.agents.dqn.simple_q_torch_policy import SimpleQTorchPolicy
-
+        from ray.rllib.agents.dqn.simple_q_torch_policy import \
+            SimpleQTorchPolicy
         return SimpleQTorchPolicy
     else:
         return SimpleQTFPolicy
@@ -333,13 +327,10 @@ GenericOffPolicyTrainer = build_trainer(
     get_policy_class=get_policy_class,
     default_config=DEFAULT_CONFIG,
     validate_config=validate_config,
-    execution_plan=execution_plan,
-)
+    execution_plan=execution_plan)
 
 DQNTrainer = GenericOffPolicyTrainer.with_updates(
-    name="DQN", default_policy=DQNTFPolicy, default_config=DEFAULT_CONFIG
-)
+    name="DQN", default_policy=DQNTFPolicy, default_config=DEFAULT_CONFIG)
 
 SimpleQTrainer = DQNTrainer.with_updates(
-    default_policy=SimpleQTFPolicy, get_policy_class=get_simple_policy_class
-)
+    default_policy=SimpleQTFPolicy, get_policy_class=get_simple_policy_class)

@@ -72,9 +72,9 @@ def resolve_nested_dict(nested_dict):
     for k, v in nested_dict.items():
         if isinstance(v, dict):
             for k_, v_ in resolve_nested_dict(v).items():
-                res[(k,) + k_] = v_
+                res[(k, ) + k_] = v_
         else:
-            res[(k,)] = v
+            res[(k, )] = v
     return res
 
 
@@ -138,16 +138,12 @@ def _generate_variants(spec):
             for path, value in grid_vars:
                 resolved_vars[path] = _get_value(spec, path)
             for k, v in resolved.items():
-                if (
-                    k in resolved_vars
-                    and v != resolved_vars[k]
-                    and _is_resolved(resolved_vars[k])
-                ):
+                if (k in resolved_vars and v != resolved_vars[k]
+                        and _is_resolved(resolved_vars[k])):
                     raise ValueError(
                         "The variable `{}` could not be unambiguously "
                         "resolved to a single value. Consider simplifying "
-                        "your configuration.".format(k)
-                    )
+                        "your configuration.".format(k))
                 resolved_vars[k] = v
             yield resolved_vars, spec
 
@@ -178,8 +174,7 @@ def _resolve_lambda_vars(spec, lambda_vars):
                 error = e
             except Exception:
                 raise ValueError(
-                    "Failed to evaluate expression: {}: {}".format(path, fn)
-                )
+                    "Failed to evaluate expression: {}: {}".format(path, fn))
             else:
                 _assign_value(spec, path, value)
                 resolved[path] = value
@@ -227,14 +222,15 @@ def _try_resolve(v):
         return False, v.func
     elif isinstance(v, dict) and len(v) == 1 and "eval" in v:
         # Lambda function in eval syntax
-        return False, lambda spec: eval(v["eval"], _STANDARD_IMPORTS, {"spec": spec})
+        return False, lambda spec: eval(
+            v["eval"], _STANDARD_IMPORTS, {"spec": spec})
     elif isinstance(v, dict) and len(v) == 1 and "grid_search" in v:
         # Grid search values
         grid_values = v["grid_search"]
         if not isinstance(grid_values, list):
             raise TuneError(
-                "Grid search expected list of values, got: {}".format(grid_values)
-            )
+                "Grid search expected list of values, got: {}".format(
+                    grid_values))
         return False, grid_values
     return True, v
 
@@ -244,16 +240,16 @@ def _unresolved_values(spec):
     for k, v in spec.items():
         resolved, v = _try_resolve(v)
         if not resolved:
-            found[(k,)] = v
+            found[(k, )] = v
         elif isinstance(v, dict):
             # Recurse into a dict
             for (path, value) in _unresolved_values(v).items():
-                found[(k,) + path] = value
+                found[(k, ) + path] = value
         elif isinstance(v, list):
             # Recurse into a list
             for i, elem in enumerate(v):
                 for (path, value) in _unresolved_values({i: elem}).items():
-                    found[(k,) + path] = value
+                    found[(k, ) + path] = value
     return found
 
 
@@ -266,8 +262,7 @@ class _UnresolvedAccessGuard(dict):
         value = dict.__getattribute__(self, item)
         if not _is_resolved(value):
             raise RecursiveDependencyError(
-                "`{}` recursively depends on {}".format(item, value)
-            )
+                "`{}` recursively depends on {}".format(item, value))
         elif isinstance(value, dict):
             return _UnresolvedAccessGuard(value)
         else:

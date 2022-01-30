@@ -5,7 +5,5 @@ __all__ = ["TorchTrainer", "TFTrainer"]
 
 
 def PyTorchTrainer(**kwargs):
-    raise DeprecationWarning(
-        "ray.util.sgd.pytorch.PyTorchTrainer has been "
-        "renamed to ray.util.sgd.torch.TorchTrainer"
-    )
+    raise DeprecationWarning("ray.util.sgd.pytorch.PyTorchTrainer has been "
+                             "renamed to ray.util.sgd.torch.TorchTrainer")

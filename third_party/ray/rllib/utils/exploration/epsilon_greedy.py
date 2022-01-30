@@ -3,7 +3,8 @@ from typing import Union
 from ray.rllib.models.action_dist import ActionDistribution
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.exploration.exploration import Exploration, TensorType
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
+from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
+    get_variable
 from ray.rllib.utils.from_config import from_config
 from ray.rllib.utils.numpy import LARGE_INTEGER
 from ray.rllib.utils.schedules import Schedule, PiecewiseSchedule
@@ -20,17 +21,15 @@ class EpsilonGreedy(Exploration):
     uses the model-computed one (if rand(1) >= eps).
     """
 
-    def __init__(
-        self,
-        action_space,
-        *,
-        framework: str,
-        initial_epsilon=1.0,
-        final_epsilon=0.05,
-        epsilon_timesteps=int(1e5),
-        epsilon_schedule=None,
-        **kwargs
-    ):
+    def __init__(self,
+                 action_space,
+                 *,
+                 framework: str,
+                 initial_epsilon=1.0,
+                 final_epsilon=0.05,
+                 epsilon_timesteps=int(1e5),
+                 epsilon_schedule=None,
+                 **kwargs):
         """Create an EpsilonGreedy exploration class.
 
         Args:
@@ -42,37 +41,39 @@ class EpsilonGreedy(Exploration):
                 to use (instead of constructing one from the given parameters).
         """
         assert framework is not None
-        super().__init__(action_space=action_space, framework=framework, **kwargs)
+        super().__init__(
+            action_space=action_space, framework=framework, **kwargs)
 
-        self.epsilon_schedule = from_config(
-            Schedule, epsilon_schedule, framework=framework
-        ) or PiecewiseSchedule(
-            endpoints=[(0, initial_epsilon), (epsilon_timesteps, final_epsilon)],
-            outside_value=final_epsilon,
-            framework=self.framework,
-        )
+        self.epsilon_schedule = \
+            from_config(Schedule, epsilon_schedule, framework=framework) or \
+            PiecewiseSchedule(
+                endpoints=[
+                    (0, initial_epsilon), (epsilon_timesteps, final_epsilon)],
+                outside_value=final_epsilon,
+                framework=self.framework)
 
         # The current timestep value (tf-var or python int).
-        self.last_timestep = get_variable(0, framework=framework, tf_name="timestep")
+        self.last_timestep = get_variable(
+            0, framework=framework, tf_name="timestep")
 
         # Build the tf-info-op.
         if self.framework == "tf":
             self._tf_info_op = self.get_info()
 
     @override(Exploration)
-    def get_exploration_action(
-        self,
-        *,
-        action_distribution: ActionDistribution,
-        timestep: Union[int, TensorType],
-        explore: bool = True
-    ):
+    def get_exploration_action(self,
+                               *,
+                               action_distribution: ActionDistribution,
+                               timestep: Union[int, TensorType],
+                               explore: bool = True):
 
         q_values = action_distribution.inputs
         if self.framework == "tf":
-            return self._get_tf_exploration_action_op(q_values, explore, timestep)
+            return self._get_tf_exploration_action_op(q_values, explore,
+                                                      timestep)
         else:
-            return self._get_torch_exploration_action(q_values, explore, timestep)
+            return self._get_torch_exploration_action(q_values, explore,
+                                                      timestep)
 
     def _get_tf_exploration_action_op(self, q_values, explore, timestep):
         """TF method to produce the tf op for an epsilon exploration action.
@@ -83,9 +84,8 @@ class EpsilonGreedy(Exploration):
         Returns:
             tf.Tensor: The tf exploration-action op.
         """
-        epsilon = self.epsilon_schedule(
-            timestep if timestep is not None else self.last_timestep
-        )
+        epsilon = self.epsilon_schedule(timestep if timestep is not None else
+                                        self.last_timestep)
 
         # Get the exploit action as the one with the highest logit value.
         exploit_action = tf.argmax(q_values, axis=1)
@@ -95,27 +95,22 @@ class EpsilonGreedy(Exploration):
         # them for exploration.
         random_valid_action_logits = tf.where(
             tf.equal(q_values, tf.float32.min),
-            tf.ones_like(q_values) * tf.float32.min,
-            tf.ones_like(q_values),
-        )
+            tf.ones_like(q_values) * tf.float32.min, tf.ones_like(q_values))
         random_actions = tf.squeeze(
-            tf.multinomial(random_valid_action_logits, 1), axis=1
-        )
+            tf.multinomial(random_valid_action_logits, 1), axis=1)
 
-        chose_random = (
-            tf.random_uniform(
-                tf.stack([batch_size]), minval=0, maxval=1, dtype=tf.float32
-            )
+        chose_random = tf.random_uniform(
+            tf.stack([batch_size]),
+            minval=0, maxval=1, dtype=tf.float32) \
             < epsilon
-        )
 
         action = tf.cond(
             pred=tf.constant(explore, dtype=tf.bool)
-            if isinstance(explore, bool)
-            else explore,
-            true_fn=(lambda: tf.where(chose_random, random_actions, exploit_action)),
-            false_fn=lambda: exploit_action,
-        )
+            if isinstance(explore, bool) else explore,
+            true_fn=(
+                lambda: tf.where(chose_random, random_actions, exploit_action)
+            ),
+            false_fn=lambda: exploit_action)
 
         assign_op = tf.assign(self.last_timestep, timestep)
         with tf.control_dependencies([assign_op]):
@@ -143,19 +138,15 @@ class EpsilonGreedy(Exploration):
             # even consider them for exploration.
             random_valid_action_logits = torch.where(
                 q_values == -float(LARGE_INTEGER),
-                torch.ones_like(q_values) * 0.0,
-                torch.ones_like(q_values),
-            )
+                torch.ones_like(q_values) * 0.0, torch.ones_like(q_values))
             # A random action.
             random_actions = torch.squeeze(
-                torch.multinomial(random_valid_action_logits, 1), axis=1
-            )
+                torch.multinomial(random_valid_action_logits, 1), axis=1)
             # Pick either random or greedy.
             action = torch.where(
-                torch.empty((batch_size,)).uniform_().to(self.device) < epsilon,
-                random_actions,
-                exploit_action,
-            )
+                torch.empty(
+                    (batch_size, )).uniform_().to(self.device) < epsilon,
+                random_actions, exploit_action)
 
             return action, action_logp
         # Return the deterministic "sample" (argmax) over the logits.

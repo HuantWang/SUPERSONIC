@@ -21,7 +21,8 @@ class EvalTest(unittest.TestCase):
         self.assertEqual(actions, ["a", "b", "a", "a", "a", "b", "a"])
         self.assertEqual(new_obs, [4, 5, 6, 7, 8, 8, 8])
         self.assertEqual(dones, [0, 0, 0, 0, 1, 1, 1])
-        self.assertEqual(rewards, [91.0, 171.0, 271.0, 271.0, 271.0, 190.0, 100.0])
+        self.assertEqual(rewards,
+                         [91.0, 171.0, 271.0, 271.0, 271.0, 190.0, 100.0])
 
     def test_evaluation_option(self):
         def env_creator(env_config):
@@ -40,11 +41,12 @@ class EvalTest(unittest.TestCase):
                         "evaluation_num_episodes": 2,
                         "evaluation_config": {
                             "gamma": 0.98,
-                            "env_config": {"fake_arg": True},
+                            "env_config": {
+                                "fake_arg": True
+                            }
                         },
                         "framework": fw,
-                    },
-                )
+                    })
                 # Given evaluation_interval=2, r0, r2, r4 should not contain
                 # evaluation metrics while r1, r3 should do.
                 r0 = agent.train()
@@ -64,5 +66,4 @@ class EvalTest(unittest.TestCase):
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

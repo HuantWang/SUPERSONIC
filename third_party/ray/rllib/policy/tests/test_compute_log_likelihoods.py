@@ -8,19 +8,19 @@ import ray.rllib.agents.ppo as ppo
 import ray.rllib.agents.sac as sac
 from ray.rllib.utils.framework import try_import_tf
 from ray.rllib.utils.test_utils import check, framework_iterator
-from ray.rllib.utils.numpy import one_hot, fc, MIN_LOG_NN_OUTPUT, MAX_LOG_NN_OUTPUT
+from ray.rllib.utils.numpy import one_hot, fc, MIN_LOG_NN_OUTPUT, \
+    MAX_LOG_NN_OUTPUT
 
 tf = try_import_tf()
 
 
-def do_test_log_likelihood(
-    run,
-    config,
-    prev_a=None,
-    continuous=False,
-    layer_key=("fc", (0, 4), ("_hidden_layers.0.", "_logits.")),
-    logp_func=None,
-):
+def do_test_log_likelihood(run,
+                           config,
+                           prev_a=None,
+                           continuous=False,
+                           layer_key=("fc", (0, 4), ("_hidden_layers.0.",
+                                                     "_logits.")),
+                           logp_func=None):
     config = config.copy()
     # Run locally.
     config["num_workers"] = 0
@@ -53,9 +53,10 @@ def do_test_log_likelihood(
             # Single action from single obs.
             actions.append(
                 trainer.compute_action(
-                    obs_batch[0], prev_action=prev_a, prev_reward=prev_r, explore=True
-                )
-            )
+                    obs_batch[0],
+                    prev_action=prev_a,
+                    prev_reward=prev_r,
+                    explore=True))
 
         # Test all taken actions for their log-likelihoods vs expected values.
         if continuous:
@@ -64,26 +65,23 @@ def do_test_log_likelihood(
                 if fw != "torch":
                     if isinstance(vars, list):
                         expected_mean_logstd = fc(
-                            fc(obs_batch, vars[layer_key[1][0]]), vars[layer_key[1][1]]
-                        )
+                            fc(obs_batch, vars[layer_key[1][0]]),
+                            vars[layer_key[1][1]])
                     else:
                         expected_mean_logstd = fc(
                             fc(
                                 obs_batch,
-                                vars["default_policy/{}_1/kernel".format(layer_key[0])],
-                            ),
-                            vars["default_policy/{}_out/kernel".format(layer_key[0])],
-                        )
+                                vars["default_policy/{}_1/kernel".format(
+                                    layer_key[0])]),
+                            vars["default_policy/{}_out/kernel".format(
+                                layer_key[0])])
                 else:
                     expected_mean_logstd = fc(
-                        fc(
-                            obs_batch,
-                            vars["{}_model.0.weight".format(layer_key[2][0])],
-                            framework=fw,
-                        ),
+                        fc(obs_batch,
+                           vars["{}_model.0.weight".format(layer_key[2][0])],
+                           framework=fw),
                         vars["{}_model.0.weight".format(layer_key[2][1])],
-                        framework=fw,
-                    )
+                        framework=fw)
                 mean, log_std = np.split(expected_mean_logstd, 2, axis=-1)
                 if logp_func is None:
                     expected_logp = np.log(norm.pdf(a, mean, np.exp(log_std)))
@@ -93,8 +91,7 @@ def do_test_log_likelihood(
                     np.array([a]),
                     preprocessed_obs_batch,
                     prev_action_batch=np.array([prev_a]),
-                    prev_reward_batch=np.array([prev_r]),
-                )
+                    prev_reward_batch=np.array([prev_r]))
                 check(logp, expected_logp[0], rtol=0.2)
         # Test all available actions for their logp values.
         else:
@@ -105,8 +102,7 @@ def do_test_log_likelihood(
                     np.array([a]),
                     preprocessed_obs_batch,
                     prev_action_batch=np.array([prev_a]),
-                    prev_reward_batch=np.array([prev_r]),
-                )
+                    prev_reward_batch=np.array([prev_r]))
                 check(np.exp(logp), expected_prob, atol=0.2)
 
 
@@ -129,8 +125,7 @@ class TestComputeLogLikelihood(unittest.TestCase):
             config,
             prev_a,
             continuous=True,
-            layer_key=("fc", (0, 2), ("_hidden_layers.0.", "_logits.")),
-        )
+            layer_key=("fc", (0, 2), ("_hidden_layers.0.", "_logits.")))
 
     def test_pg_discr(self):
         """Tests PG's (cont. actions) compute_log_likelihoods method."""
@@ -161,27 +156,24 @@ class TestComputeLogLikelihood(unittest.TestCase):
         # SAC cont uses a squashed normal distribution. Implement it's logp
         # logic here in numpy for comparing results.
         def logp_func(means, log_stds, values, low=-1.0, high=1.0):
-            stds = np.exp(np.clip(log_stds, MIN_LOG_NN_OUTPUT, MAX_LOG_NN_OUTPUT))
-            unsquashed_values = np.arctanh((values - low) / (high - low) * 2.0 - 1.0)
-            log_prob_unsquashed = np.sum(
-                np.log(norm.pdf(unsquashed_values, means, stds)), -1
-            )
-            return log_prob_unsquashed - np.sum(
-                np.log(1 - np.tanh(unsquashed_values) ** 2), axis=-1
-            )
+            stds = np.exp(
+                np.clip(log_stds, MIN_LOG_NN_OUTPUT, MAX_LOG_NN_OUTPUT))
+            unsquashed_values = np.arctanh((values - low) /
+                                           (high - low) * 2.0 - 1.0)
+            log_prob_unsquashed = \
+                np.sum(np.log(norm.pdf(unsquashed_values, means, stds)), -1)
+            return log_prob_unsquashed - \
+                np.sum(np.log(1 - np.tanh(unsquashed_values) ** 2),
+                       axis=-1)
 
         do_test_log_likelihood(
             sac.SACTrainer,
             config,
             prev_a,
             continuous=True,
-            layer_key=(
-                "sequential/action",
-                (0, 2),
-                ("action_model.action_0.", "action_model.action_out."),
-            ),
-            logp_func=logp_func,
-        )
+            layer_key=("sequential/action", (0, 2),
+                       ("action_model.action_0.", "action_model.action_out.")),
+            logp_func=logp_func)
 
     def test_sac_discr(self):
         """Tests SAC's (discrete actions) compute_log_likelihoods method."""
@@ -194,16 +186,11 @@ class TestComputeLogLikelihood(unittest.TestCase):
             sac.SACTrainer,
             config,
             prev_a,
-            layer_key=(
-                "sequential/action",
-                (0, 2),
-                ("action_model.action_0.", "action_model.action_out."),
-            ),
-        )
+            layer_key=("sequential/action", (0, 2),
+                       ("action_model.action_0.", "action_model.action_out.")))
 
 
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

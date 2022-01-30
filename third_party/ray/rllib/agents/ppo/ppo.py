@@ -3,12 +3,8 @@ import logging
 from ray.rllib.agents import with_common_config
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.trainer_template import build_trainer
-from ray.rllib.execution.rollout_ops import (
-    ParallelRollouts,
-    ConcatBatches,
-    StandardizeFields,
-    SelectExperiences,
-)
+from ray.rllib.execution.rollout_ops import ParallelRollouts, ConcatBatches, \
+    StandardizeFields, SelectExperiences
 from ray.rllib.execution.train_ops import TrainOneStep, TrainTFMultiGPU
 from ray.rllib.execution.metric_ops import StandardMetricsReporting
 from ray.rllib.utils import try_import_tf
@@ -89,9 +85,8 @@ def warn_about_bad_reward_scales(config, result):
     # Warn about excessively high VF loss.
     learner_stats = result["info"]["learner"]
     if "default_policy" in learner_stats:
-        scaled_vf_loss = (
-            config["vf_loss_coeff"] * learner_stats["default_policy"]["vf_loss"]
-        )
+        scaled_vf_loss = (config["vf_loss_coeff"] *
+                          learner_stats["default_policy"]["vf_loss"])
         policy_loss = learner_stats["default_policy"]["policy_loss"]
         if config["vf_share_layers"] and scaled_vf_loss > 100:
             logger.warning(
@@ -99,26 +94,22 @@ def warn_about_bad_reward_scales(config, result):
                 "({}) compared to the policy loss ({}). This can prevent the "
                 "policy from learning. Consider scaling down the VF loss by "
                 "reducing vf_loss_coeff, or disabling vf_share_layers.".format(
-                    scaled_vf_loss, policy_loss
-                )
-            )
+                    scaled_vf_loss, policy_loss))
 
     # Warn about bad clipping configs
     if config["vf_clip_param"] <= 0:
         rew_scale = float("inf")
     else:
         rew_scale = round(
-            abs(result["episode_reward_mean"]) / config["vf_clip_param"], 0
-        )
+            abs(result["episode_reward_mean"]) / config["vf_clip_param"], 0)
     if rew_scale > 200:
         logger.warning(
             "The magnitude of your environment rewards are more than "
-            "{}x the scale of `vf_clip_param`. ".format(rew_scale)
-            + "This means that it will take more than "
-            "{} iterations for your value ".format(rew_scale)
-            + "function to converge. If this is not intended, consider "
-            "increasing `vf_clip_param`."
-        )
+            "{}x the scale of `vf_clip_param`. ".format(rew_scale) +
+            "This means that it will take more than "
+            "{} iterations for your value ".format(rew_scale) +
+            "function to converge. If this is not intended, consider "
+            "increasing `vf_clip_param`.")
 
     return result
 
@@ -131,25 +122,20 @@ def validate_config(config):
     if config["sgd_minibatch_size"] > config["train_batch_size"]:
         raise ValueError(
             "Minibatch size {} must be <= train batch size {}.".format(
-                config["sgd_minibatch_size"], config["train_batch_size"]
-            )
-        )
+                config["sgd_minibatch_size"], config["train_batch_size"]))
     if config["batch_mode"] == "truncate_episodes" and not config["use_gae"]:
         raise ValueError(
             "Episode truncation is not supported without a value "
-            "function. Consider setting batch_mode=complete_episodes."
-        )
+            "function. Consider setting batch_mode=complete_episodes.")
     if config["multiagent"]["policies"] and not config["simple_optimizer"]:
         logger.info(
             "In multi-agent mode, policies will be optimized sequentially "
             "by the multi-GPU optimizer. Consider setting "
-            "simple_optimizer=True if this doesn't work for you."
-        )
+            "simple_optimizer=True if this doesn't work for you.")
     if config["simple_optimizer"]:
         logger.warning(
             "Using the simple minibatch optimizer. This will significantly "
-            "reduce performance, consider simple_optimizer=False."
-        )
+            "reduce performance, consider simple_optimizer=False.")
     # Multi-gpu not supported for PyTorch and tf-eager.
     elif config["framework"] in ["tfe", "torch"]:
         config["simple_optimizer"] = True
@@ -158,7 +144,6 @@ def validate_config(config):
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
-
         return PPOTorchPolicy
     else:
         return PPOTFPolicy
@@ -173,9 +158,7 @@ class UpdateKL:
     def __call__(self, fetches):
         def update(pi, pi_id):
             assert "kl" not in fetches, (
-                "kl should be nested under policy id key",
-                fetches,
-            )
+                "kl should be nested under policy id key", fetches)
             if pi_id in fetches:
                 assert "kl" in fetches[pi_id], (fetches, pi_id)
                 pi.update_kl(fetches[pi_id]["kl"])
@@ -189,10 +172,10 @@ def execution_plan(workers, config):
     rollouts = ParallelRollouts(workers, mode="bulk_sync")
 
     # Collect large batches of relevant experiences & standardize.
-    rollouts = rollouts.for_each(SelectExperiences(workers.trainable_policies()))
+    rollouts = rollouts.for_each(
+        SelectExperiences(workers.trainable_policies()))
     rollouts = rollouts.combine(
-        ConcatBatches(min_batch_size=config["train_batch_size"])
-    )
+        ConcatBatches(min_batch_size=config["train_batch_size"]))
     rollouts = rollouts.for_each(StandardizeFields(["advantages"]))
 
     if config["simple_optimizer"]:
@@ -200,9 +183,7 @@ def execution_plan(workers, config):
             TrainOneStep(
                 workers,
                 num_sgd_iter=config["num_sgd_iter"],
-                sgd_minibatch_size=config["sgd_minibatch_size"],
-            )
-        )
+                sgd_minibatch_size=config["sgd_minibatch_size"]))
     else:
         train_op = rollouts.for_each(
             TrainTFMultiGPU(
@@ -214,16 +195,13 @@ def execution_plan(workers, config):
                 num_envs_per_worker=config["num_envs_per_worker"],
                 train_batch_size=config["train_batch_size"],
                 shuffle_sequences=config["shuffle_sequences"],
-                _fake_gpus=config["_fake_gpus"],
-            )
-        )
+                _fake_gpus=config["_fake_gpus"]))
 
     # Update KL after each round of training.
     train_op = train_op.for_each(lambda t: t[1]).for_each(UpdateKL(workers))
 
-    return StandardMetricsReporting(train_op, workers, config).for_each(
-        lambda result: warn_about_bad_reward_scales(config, result)
-    )
+    return StandardMetricsReporting(train_op, workers, config) \
+        .for_each(lambda result: warn_about_bad_reward_scales(config, result))
 
 
 PPOTrainer = build_trainer(
@@ -232,5 +210,4 @@ PPOTrainer = build_trainer(
     default_policy=PPOTFPolicy,
     get_policy_class=get_policy_class,
     execution_plan=execution_plan,
-    validate_config=validate_config,
-)
+    validate_config=validate_config)

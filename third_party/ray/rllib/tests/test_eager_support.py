@@ -74,16 +74,16 @@ class TestEagerSupport(unittest.TestCase):
 
     def test_apex_dqn(self):
         check_support(
-            "APEX",
-            {
+            "APEX", {
                 "num_workers": 2,
                 "learning_starts": 0,
                 "num_gpus": 0,
                 "min_iter_time_s": 1,
                 "timesteps_per_iteration": 100,
-                "optimizer": {"num_replay_buffer_shards": 1,},
-            },
-        )
+                "optimizer": {
+                    "num_replay_buffer_shards": 1,
+                },
+            })
 
     # TODO(sven): Add this once SAC supports eager.
     # def test_sac(self):
@@ -93,5 +93,4 @@ class TestEagerSupport(unittest.TestCase):
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

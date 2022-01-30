@@ -39,23 +39,23 @@ def sysctl(cmdline):
 
 def vm_stat(field):
     """Wrapper around 'vm_stat' cmdline utility."""
-    out = sh("vm_stat")
-    for line in out.split("\n"):
+    out = sh('vm_stat')
+    for line in out.split('\n'):
         if field in line:
             break
     else:
         raise ValueError("line not found")
-    return int(re.search(r"\d+", line).group(0)) * PAGESIZE
+    return int(re.search(r'\d+', line).group(0)) * PAGESIZE
 
 
 # http://code.activestate.com/recipes/578019/
 def human2bytes(s):
     SYMBOLS = {
-        "customary": ("B", "K", "M", "G", "T", "P", "E", "Z", "Y"),
+        'customary': ('B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'),
     }
     init = s
     num = ""
-    while s and s[0:1].isdigit() or s[0:1] == ".":
+    while s and s[0:1].isdigit() or s[0:1] == '.':
         num += s[0]
         s = s[1:]
     num = float(num)
@@ -64,8 +64,8 @@ def human2bytes(s):
         if letter in sset:
             break
     else:
-        if letter == "k":
-            sset = SYMBOLS["customary"]
+        if letter == 'k':
+            sset = SYMBOLS['customary']
             letter = letter.upper()
         else:
             raise ValueError("can't interpret %r" % init)
@@ -77,6 +77,7 @@ def human2bytes(s):
 
 @unittest.skipIf(not MACOS, "MACOS only")
 class TestProcess(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         cls.pid = get_test_subprocess().pid
@@ -87,18 +88,21 @@ class TestProcess(unittest.TestCase):
 
     def test_process_create_time(self):
         output = sh("ps -o lstart -p %s" % self.pid)
-        start_ps = output.replace("STARTED", "").strip()
-        hhmmss = start_ps.split(" ")[-2]
-        year = start_ps.split(" ")[-1]
+        start_ps = output.replace('STARTED', '').strip()
+        hhmmss = start_ps.split(' ')[-2]
+        year = start_ps.split(' ')[-1]
         start_psutil = psutil.Process(self.pid).create_time()
         self.assertEqual(
-            hhmmss, time.strftime("%H:%M:%S", time.localtime(start_psutil))
-        )
-        self.assertEqual(year, time.strftime("%Y", time.localtime(start_psutil)))
+            hhmmss,
+            time.strftime("%H:%M:%S", time.localtime(start_psutil)))
+        self.assertEqual(
+            year,
+            time.strftime("%Y", time.localtime(start_psutil)))
 
 
 @unittest.skipIf(not MACOS, "MACOS only")
 class TestZombieProcessAPIs(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         zpid = create_zombie_proc()
@@ -150,7 +154,8 @@ class TestZombieProcessAPIs(unittest.TestCase):
         self.assertRaises(psutil.ZombieProcess, self.p.num_fds)
 
     def test_threads(self):
-        self.assertRaises((psutil.ZombieProcess, psutil.AccessDenied), self.p.threads)
+        self.assertRaises((psutil.ZombieProcess, psutil.AccessDenied),
+                          self.p.threads)
 
 
 @unittest.skipIf(not MACOS, "MACOS only")
@@ -163,12 +168,12 @@ class TestSystemAPIs(unittest.TestCase):
         # against "df -a"
         def df(path):
             out = sh('df -k "%s"' % path).strip()
-            lines = out.split("\n")
+            lines = out.split('\n')
             lines.pop(0)
             line = lines.pop(0)
             dev, total, used, free = line.split()[:4]
-            if dev == "none":
-                dev = ""
+            if dev == 'none':
+                dev = ''
             total = int(total) * 1024
             used = int(used) * 1024
             free = int(free) * 1024
@@ -197,14 +202,17 @@ class TestSystemAPIs(unittest.TestCase):
 
     def test_cpu_freq(self):
         freq = psutil.cpu_freq()
-        self.assertEqual(freq.current * 1000 * 1000, sysctl("sysctl hw.cpufrequency"))
-        self.assertEqual(freq.min * 1000 * 1000, sysctl("sysctl hw.cpufrequency_min"))
-        self.assertEqual(freq.max * 1000 * 1000, sysctl("sysctl hw.cpufrequency_max"))
+        self.assertEqual(
+            freq.current * 1000 * 1000, sysctl("sysctl hw.cpufrequency"))
+        self.assertEqual(
+            freq.min * 1000 * 1000, sysctl("sysctl hw.cpufrequency_min"))
+        self.assertEqual(
+            freq.max * 1000 * 1000, sysctl("sysctl hw.cpufrequency_max"))
 
     # --- virtual mem
 
     def test_vmem_total(self):
-        sysctl_hwphymem = sysctl("sysctl hw.memsize")
+        sysctl_hwphymem = sysctl('sysctl hw.memsize')
         self.assertEqual(sysctl_hwphymem, psutil.virtual_memory().total)
 
     @retry_on_failure()
@@ -264,8 +272,9 @@ class TestSystemAPIs(unittest.TestCase):
             except RuntimeError:
                 pass
             else:
-                self.assertEqual(stats.isup, "RUNNING" in out, msg=out)
-                self.assertEqual(stats.mtu, int(re.findall(r"mtu (\d+)", out)[0]))
+                self.assertEqual(stats.isup, 'RUNNING' in out, msg=out)
+                self.assertEqual(stats.mtu,
+                                 int(re.findall(r'mtu (\d+)', out)[0]))
 
     # --- sensors_battery
 
@@ -280,7 +289,6 @@ class TestSystemAPIs(unittest.TestCase):
         self.assertEqual(psutil_result.percent, int(percent))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from psutil.tests.runner import run
-
     run(__file__)

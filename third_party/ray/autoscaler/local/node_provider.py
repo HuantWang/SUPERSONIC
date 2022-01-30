@@ -6,7 +6,8 @@ import socket
 import logging
 
 from ray.autoscaler.node_provider import NodeProvider
-from ray.autoscaler.tags import TAG_RAY_NODE_TYPE, NODE_TYPE_WORKER, NODE_TYPE_HEAD
+from ray.autoscaler.tags import TAG_RAY_NODE_TYPE, NODE_TYPE_WORKER, \
+    NODE_TYPE_HEAD
 
 logger = logging.getLogger(__name__)
 
@@ -25,44 +26,40 @@ class ClusterState:
                 if os.path.exists(self.save_path):
                     workers = json.loads(open(self.save_path).read())
                     head_config = workers.get(provider_config["head_ip"])
-                    if (
-                        not head_config
-                        or head_config.get("tags", {}).get(TAG_RAY_NODE_TYPE)
-                        != NODE_TYPE_HEAD
-                    ):
+                    if (not head_config or
+                            head_config.get("tags", {}).get(TAG_RAY_NODE_TYPE)
+                            != NODE_TYPE_HEAD):
                         workers = {}
                         logger.info("Head IP changed - recreating cluster.")
                 else:
                     workers = {}
-                logger.info(
-                    "ClusterState: " "Loaded cluster state: {}".format(list(workers))
-                )
+                logger.info("ClusterState: "
+                            "Loaded cluster state: {}".format(list(workers)))
                 for worker_ip in provider_config["worker_ips"]:
                     if worker_ip not in workers:
                         workers[worker_ip] = {
-                            "tags": {TAG_RAY_NODE_TYPE: NODE_TYPE_WORKER},
+                            "tags": {
+                                TAG_RAY_NODE_TYPE: NODE_TYPE_WORKER
+                            },
                             "state": "terminated",
                         }
                     else:
-                        assert (
-                            workers[worker_ip]["tags"][TAG_RAY_NODE_TYPE]
-                            == NODE_TYPE_WORKER
-                        )
+                        assert workers[worker_ip]["tags"][
+                            TAG_RAY_NODE_TYPE] == NODE_TYPE_WORKER
                 if provider_config["head_ip"] not in workers:
                     workers[provider_config["head_ip"]] = {
-                        "tags": {TAG_RAY_NODE_TYPE: NODE_TYPE_HEAD},
+                        "tags": {
+                            TAG_RAY_NODE_TYPE: NODE_TYPE_HEAD
+                        },
                         "state": "terminated",
                     }
                 else:
-                    assert (
-                        workers[provider_config["head_ip"]]["tags"][TAG_RAY_NODE_TYPE]
-                        == NODE_TYPE_HEAD
-                    )
+                    assert workers[provider_config["head_ip"]]["tags"][
+                        TAG_RAY_NODE_TYPE] == NODE_TYPE_HEAD
                 assert len(workers) == len(provider_config["worker_ips"]) + 1
                 with open(self.save_path, "w") as f:
-                    logger.debug(
-                        "ClusterState: " "Writing cluster state: {}".format(workers)
-                    )
+                    logger.debug("ClusterState: "
+                                 "Writing cluster state: {}".format(workers))
                     f.write(json.dumps(workers))
 
     def get(self):
@@ -79,10 +76,9 @@ class ClusterState:
                 workers = self.get()
                 workers[worker_id] = info
                 with open(self.save_path, "w") as f:
-                    logger.info(
-                        "ClusterState: "
-                        "Writing cluster state: {}".format(list(workers))
-                    )
+                    logger.info("ClusterState: "
+                                "Writing cluster state: {}".format(
+                                    list(workers)))
                     f.write(json.dumps(workers))
 
 
@@ -94,11 +90,9 @@ class LocalNodeProvider(NodeProvider):
 
     def __init__(self, provider_config, cluster_name):
         NodeProvider.__init__(self, provider_config, cluster_name)
-        self.state = ClusterState(
-            "/tmp/cluster-{}.lock".format(cluster_name),
-            "/tmp/cluster-{}.state".format(cluster_name),
-            provider_config,
-        )
+        self.state = ClusterState("/tmp/cluster-{}.lock".format(cluster_name),
+                                  "/tmp/cluster-{}.state".format(cluster_name),
+                                  provider_config)
 
     def non_terminated_nodes(self, tag_filters):
         workers = self.state.get()
@@ -141,10 +135,8 @@ class LocalNodeProvider(NodeProvider):
         with self.state.file_lock:
             workers = self.state.get()
             for node_id, info in workers.items():
-                if (
-                    info["state"] == "terminated"
-                    and info["tags"][TAG_RAY_NODE_TYPE] == node_type
-                ):
+                if (info["state"] == "terminated"
+                        and info["tags"][TAG_RAY_NODE_TYPE] == node_type):
                     info["tags"] = tags
                     info["state"] = "running"
                     self.state.put(node_id, info)

@@ -3,10 +3,10 @@ import logging
 from ray.rllib.agents.trainer import with_common_config
 from ray.rllib.agents.dqn.dqn import GenericOffPolicyTrainer
 from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
-from ray.rllib.utils.deprecation import deprecation_warning, DEPRECATED_VALUE
-from ray.rllib.utils.exploration.per_worker_ornstein_uhlenbeck_noise import (
-    PerWorkerOrnsteinUhlenbeckNoise,
-)
+from ray.rllib.utils.deprecation import deprecation_warning, \
+    DEPRECATED_VALUE
+from ray.rllib.utils.exploration.per_worker_ornstein_uhlenbeck_noise import \
+    PerWorkerOrnsteinUhlenbeckNoise
 
 logger = logging.getLogger(__name__)
 
@@ -160,52 +160,51 @@ def validate_config(config):
     # TODO(sven): Remove at some point.
     #  Backward compatibility of noise-based exploration config.
     schedule_max_timesteps = None
-    if config.get("schedule_max_timesteps", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning(
-            "schedule_max_timesteps", "exploration_config.scale_timesteps"
-        )
+    if config.get("schedule_max_timesteps", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
+        deprecation_warning("schedule_max_timesteps",
+                            "exploration_config.scale_timesteps")
         schedule_max_timesteps = config["schedule_max_timesteps"]
-    if config.get("exploration_final_scale", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning("exploration_final_scale", "exploration_config.final_scale")
+    if config.get("exploration_final_scale", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
+        deprecation_warning("exploration_final_scale",
+                            "exploration_config.final_scale")
         if isinstance(config["exploration_config"], dict):
-            config["exploration_config"]["final_scale"] = config.pop(
-                "exploration_final_scale"
-            )
-    if config.get("exploration_fraction", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+            config["exploration_config"]["final_scale"] = \
+                config.pop("exploration_final_scale")
+    if config.get("exploration_fraction", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
         assert schedule_max_timesteps is not None
-        deprecation_warning(
-            "exploration_fraction", "exploration_config.scale_timesteps"
-        )
+        deprecation_warning("exploration_fraction",
+                            "exploration_config.scale_timesteps")
         if isinstance(config["exploration_config"], dict):
-            config["exploration_config"]["scale_timesteps"] = (
-                config.pop("exploration_fraction") * schedule_max_timesteps
-            )
-    if config.get("per_worker_exploration", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+            config["exploration_config"]["scale_timesteps"] = config.pop(
+                "exploration_fraction") * schedule_max_timesteps
+    if config.get("per_worker_exploration", DEPRECATED_VALUE) != \
+            DEPRECATED_VALUE:
         deprecation_warning(
             "per_worker_exploration",
-            "exploration_config.type=PerWorkerOrnsteinUhlenbeckNoise",
-        )
+            "exploration_config.type=PerWorkerOrnsteinUhlenbeckNoise")
         if isinstance(config["exploration_config"], dict):
-            config["exploration_config"]["type"] = PerWorkerOrnsteinUhlenbeckNoise
+            config["exploration_config"]["type"] = \
+                PerWorkerOrnsteinUhlenbeckNoise
 
     if config.get("parameter_noise", DEPRECATED_VALUE) != DEPRECATED_VALUE:
-        deprecation_warning(
-            "parameter_noise", "exploration_config={" "type=ParameterNoise" "}"
-        )
+        deprecation_warning("parameter_noise", "exploration_config={"
+                            "type=ParameterNoise"
+                            "}")
 
     if config["exploration_config"]["type"] == "ParameterNoise":
         if config["batch_mode"] != "complete_episodes":
             logger.warning(
                 "ParameterNoise Exploration requires `batch_mode` to be "
-                "'complete_episodes'. Setting batch_mode=complete_episodes."
-            )
+                "'complete_episodes'. Setting batch_mode=complete_episodes.")
             config["batch_mode"] = "complete_episodes"
 
 
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy
-
         return DDPGTorchPolicy
     else:
         return DDPGTFPolicy

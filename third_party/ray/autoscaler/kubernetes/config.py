@@ -9,11 +9,9 @@ logger = logging.getLogger(__name__)
 
 class InvalidNamespaceError(ValueError):
     def __init__(self, field_name, namespace):
-        self.message = (
-            "Namespace of {} config doesn't match provided "
-            "namespace '{}'. Either set it to {} or remove the "
-            "field".format(field_name, namespace, namespace)
-        )
+        self.message = ("Namespace of {} config doesn't match provided "
+                        "namespace '{}'. Either set it to {} or remove the "
+                        "field".format(field_name, namespace, namespace))
 
     def __str__(self):
         return self.message
@@ -28,7 +26,8 @@ def updating_existing_msg(resource_type, name):
 
 
 def not_found_msg(resource_type, name):
-    return "{} '{}' not found, attempting to create it".format(resource_type, name)
+    return "{} '{}' not found, attempting to create it".format(
+        resource_type, name)
 
 
 def created_msg(resource_type, name):
@@ -41,11 +40,9 @@ def not_provided_msg(resource_type):
 
 def bootstrap_kubernetes(config):
     if not config["provider"]["use_internal_ips"]:
-        return ValueError(
-            "Exposing external IP addresses for ray pods isn't "
-            "currently supported. Please set "
-            "'use_internal_ips' to false."
-        )
+        return ValueError("Exposing external IP addresses for ray pods isn't "
+                          "currently supported. Please set "
+                          "'use_internal_ips' to false.")
     namespace = _configure_namespace(config["provider"])
     _configure_autoscaler_service_account(namespace, config["provider"])
     _configure_autoscaler_role(namespace, config["provider"])
@@ -64,11 +61,13 @@ def _configure_namespace(provider_config):
     namespaces = core_api().list_namespace(field_selector=field_selector).items
     if len(namespaces) > 0:
         assert len(namespaces) == 1
-        logger.info(log_prefix + using_existing_msg(namespace_field, namespace))
+        logger.info(log_prefix +
+                    using_existing_msg(namespace_field, namespace))
         return namespace
 
     logger.info(log_prefix + not_found_msg(namespace_field, namespace))
-    namespace_config = client.V1Namespace(metadata=client.V1ObjectMeta(name=namespace))
+    namespace_config = client.V1Namespace(
+        metadata=client.V1ObjectMeta(name=namespace))
     core_api().create_namespace(namespace_config)
     logger.info(log_prefix + created_msg(namespace_field, namespace))
     return namespace
@@ -88,11 +87,8 @@ def _configure_autoscaler_service_account(namespace, provider_config):
 
     name = account["metadata"]["name"]
     field_selector = "metadata.name={}".format(name)
-    accounts = (
-        core_api()
-        .list_namespaced_service_account(namespace, field_selector=field_selector)
-        .items
-    )
+    accounts = core_api().list_namespaced_service_account(
+        namespace, field_selector=field_selector).items
     if len(accounts) > 0:
         assert len(accounts) == 1
         logger.info(log_prefix + using_existing_msg(account_field, name))
@@ -117,9 +113,8 @@ def _configure_autoscaler_role(namespace, provider_config):
 
     name = role["metadata"]["name"]
     field_selector = "metadata.name={}".format(name)
-    accounts = (
-        auth_api().list_namespaced_role(namespace, field_selector=field_selector).items
-    )
+    accounts = auth_api().list_namespaced_role(
+        namespace, field_selector=field_selector).items
     if len(accounts) > 0:
         assert len(accounts) == 1
         logger.info(log_prefix + using_existing_msg(role_field, name))
@@ -146,16 +141,13 @@ def _configure_autoscaler_role_binding(namespace, provider_config):
             subject["namespace"] = namespace
         elif subject["namespace"] != namespace:
             raise InvalidNamespaceError(
-                binding_field + " subject '{}'".format(subject["name"]), namespace
-            )
+                binding_field + " subject '{}'".format(subject["name"]),
+                namespace)
 
     name = binding["metadata"]["name"]
     field_selector = "metadata.name={}".format(name)
-    accounts = (
-        auth_api()
-        .list_namespaced_role_binding(namespace, field_selector=field_selector)
-        .items
-    )
+    accounts = auth_api().list_namespaced_role_binding(
+        namespace, field_selector=field_selector).items
     if len(accounts) > 0:
         assert len(accounts) == 1
         logger.info(log_prefix + using_existing_msg(binding_field, name))
@@ -181,11 +173,8 @@ def _configure_services(namespace, provider_config):
 
         name = service["metadata"]["name"]
         field_selector = "metadata.name={}".format(name)
-        services = (
-            core_api()
-            .list_namespaced_service(namespace, field_selector=field_selector)
-            .items
-        )
+        services = core_api().list_namespaced_service(
+            namespace, field_selector=field_selector).items
         if len(services) > 0:
             assert len(services) == 1
             existing_service = services[0]
@@ -193,7 +182,8 @@ def _configure_services(namespace, provider_config):
                 logger.info(log_prefix + using_existing_msg("service", name))
                 return
             else:
-                logger.info(log_prefix + updating_existing_msg("service", name))
+                logger.info(log_prefix +
+                            updating_existing_msg("service", name))
                 core_api().patch_namespaced_service(name, namespace, service)
         else:
             logger.info(log_prefix + not_found_msg("service", name))

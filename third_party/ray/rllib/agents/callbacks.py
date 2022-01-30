@@ -23,18 +23,12 @@ class DefaultCallbacks:
         if legacy_callbacks_dict:
             deprecation_warning(
                 "callbacks dict interface",
-                "a class extending rllib.agents.callbacks.DefaultCallbacks",
-            )
+                "a class extending rllib.agents.callbacks.DefaultCallbacks")
         self.legacy_callbacks = legacy_callbacks_dict or {}
 
-    def on_episode_start(
-        self,
-        worker: RolloutWorker,
-        base_env: BaseEnv,
-        policies: Dict[PolicyID, Policy],
-        episode: MultiAgentEpisode,
-        **kwargs
-    ):
+    def on_episode_start(self, worker: RolloutWorker, base_env: BaseEnv,
+                         policies: Dict[PolicyID, Policy],
+                         episode: MultiAgentEpisode, **kwargs):
         """Callback run on the rollout worker before each episode starts.
 
         Args:
@@ -51,17 +45,14 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_episode_start"):
-            self.legacy_callbacks["on_episode_start"](
-                {"env": base_env, "policy": policies, "episode": episode,}
-            )
+            self.legacy_callbacks["on_episode_start"]({
+                "env": base_env,
+                "policy": policies,
+                "episode": episode,
+            })
 
-    def on_episode_step(
-        self,
-        worker: RolloutWorker,
-        base_env: BaseEnv,
-        episode: MultiAgentEpisode,
-        **kwargs
-    ):
+    def on_episode_step(self, worker: RolloutWorker, base_env: BaseEnv,
+                        episode: MultiAgentEpisode, **kwargs):
         """Runs on each episode step.
 
         Args:
@@ -76,18 +67,14 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_episode_step"):
-            self.legacy_callbacks["on_episode_step"](
-                {"env": base_env, "episode": episode}
-            )
+            self.legacy_callbacks["on_episode_step"]({
+                "env": base_env,
+                "episode": episode
+            })
 
-    def on_episode_end(
-        self,
-        worker: RolloutWorker,
-        base_env: BaseEnv,
-        policies: Dict[PolicyID, Policy],
-        episode: MultiAgentEpisode,
-        **kwargs
-    ):
+    def on_episode_end(self, worker: RolloutWorker, base_env: BaseEnv,
+                       policies: Dict[PolicyID, Policy],
+                       episode: MultiAgentEpisode, **kwargs):
         """Runs when an episode is done.
 
         Args:
@@ -104,21 +91,17 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_episode_end"):
-            self.legacy_callbacks["on_episode_end"](
-                {"env": base_env, "policy": policies, "episode": episode,}
-            )
+            self.legacy_callbacks["on_episode_end"]({
+                "env": base_env,
+                "policy": policies,
+                "episode": episode,
+            })
 
     def on_postprocess_trajectory(
-        self,
-        worker: RolloutWorker,
-        episode: MultiAgentEpisode,
-        agent_id: AgentID,
-        policy_id: PolicyID,
-        policies: Dict[PolicyID, Policy],
-        postprocessed_batch: SampleBatch,
-        original_batches: Dict[AgentID, SampleBatch],
-        **kwargs
-    ):
+            self, worker: RolloutWorker, episode: MultiAgentEpisode,
+            agent_id: AgentID, policy_id: PolicyID,
+            policies: Dict[PolicyID, Policy], postprocessed_batch: SampleBatch,
+            original_batches: Dict[AgentID, SampleBatch], **kwargs):
         """Called immediately after a policy's postprocess_fn is called.
 
         You can use this callback to do additional postprocessing for a policy,
@@ -141,17 +124,16 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_postprocess_traj"):
-            self.legacy_callbacks["on_postprocess_traj"](
-                {
-                    "episode": episode,
-                    "agent_id": agent_id,
-                    "pre_batch": original_batches[agent_id],
-                    "post_batch": postprocessed_batch,
-                    "all_pre_batches": original_batches,
-                }
-            )
+            self.legacy_callbacks["on_postprocess_traj"]({
+                "episode": episode,
+                "agent_id": agent_id,
+                "pre_batch": original_batches[agent_id],
+                "post_batch": postprocessed_batch,
+                "all_pre_batches": original_batches,
+            })
 
-    def on_sample_end(self, worker: RolloutWorker, samples: SampleBatch, **kwargs):
+    def on_sample_end(self, worker: RolloutWorker, samples: SampleBatch,
+                      **kwargs):
         """Called at the end RolloutWorker.sample().
 
         Args:
@@ -162,9 +144,10 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_sample_end"):
-            self.legacy_callbacks["on_sample_end"](
-                {"worker": worker, "samples": samples,}
-            )
+            self.legacy_callbacks["on_sample_end"]({
+                "worker": worker,
+                "samples": samples,
+            })
 
     def on_train_result(self, trainer, result: dict, **kwargs):
         """Called at the end of Trainable.train().
@@ -177,6 +160,7 @@ class DefaultCallbacks:
         """
 
         if self.legacy_callbacks.get("on_train_result"):
-            self.legacy_callbacks["on_train_result"](
-                {"trainer": trainer, "result": result,}
-            )
+            self.legacy_callbacks["on_train_result"]({
+                "trainer": trainer,
+                "result": result,
+            })

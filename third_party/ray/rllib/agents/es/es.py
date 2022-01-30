@@ -17,17 +17,10 @@ from ray.rllib.utils.annotations import override
 
 logger = logging.getLogger(__name__)
 
-Result = namedtuple(
-    "Result",
-    [
-        "noise_indices",
-        "noisy_returns",
-        "sign_noisy_returns",
-        "noisy_lengths",
-        "eval_returns",
-        "eval_lengths",
-    ],
-)
+Result = namedtuple("Result", [
+    "noise_indices", "noisy_returns", "sign_noisy_returns", "noisy_lengths",
+    "eval_returns", "eval_lengths"
+])
 
 # yapf: disable
 # __sphinx_doc_begin__
@@ -63,7 +56,7 @@ class SharedNoiseTable:
         assert self.noise.dtype == np.float32
 
     def get(self, i, dim):
-        return self.noise[i : i + dim]
+        return self.noise[i:i + dim]
 
     def sample_index(self, dim):
         return np.random.randint(0, len(self.noise) - dim + 1)
@@ -71,15 +64,13 @@ class SharedNoiseTable:
 
 @ray.remote
 class Worker:
-    def __init__(
-        self,
-        config,
-        policy_params,
-        env_creator,
-        noise,
-        worker_index,
-        min_task_runtime=0.2,
-    ):
+    def __init__(self,
+                 config,
+                 policy_params,
+                 env_creator,
+                 noise,
+                 worker_index,
+                 min_task_runtime=0.2):
         self.min_task_runtime = min_task_runtime
         self.config = config
         self.config.update(policy_params)
@@ -89,15 +80,12 @@ class Worker:
         env_context = EnvContext(config["env_config"] or {}, worker_index)
         self.env = env_creator(env_context)
         from ray.rllib import models
-
         self.preprocessor = models.ModelCatalog.get_preprocessor(
-            self.env, config["model"]
-        )
+            self.env, config["model"])
 
         policy_cls = get_policy_class(config)
-        self.policy = policy_cls(
-            self.env.observation_space, self.env.action_space, config
-        )
+        self.policy = policy_cls(self.env.observation_space,
+                                 self.env.action_space, config)
 
     @property
     def filters(self):
@@ -117,8 +105,10 @@ class Worker:
 
     def rollout(self, timestep_limit, add_noise=True):
         rollout_rewards, rollout_fragment_length = rollout(
-            self.policy, self.env, timestep_limit=timestep_limit, add_noise=add_noise
-        )
+            self.policy,
+            self.env,
+            timestep_limit=timestep_limit,
+            add_noise=add_noise)
         return rollout_rewards, rollout_fragment_length
 
     def do_rollouts(self, params, timestep_limit=None):
@@ -130,9 +120,8 @@ class Worker:
 
         # Perform some rollouts with noise.
         task_tstart = time.time()
-        while (
-            len(noise_indices) == 0 or time.time() - task_tstart < self.min_task_runtime
-        ):
+        while (len(noise_indices) == 0
+               or time.time() - task_tstart < self.min_task_runtime):
 
             if np.random.uniform() < self.config["eval_prob"]:
                 # Do an evaluation run with no perturbation.
@@ -145,8 +134,7 @@ class Worker:
                 noise_index = self.noise.sample_index(self.policy.num_params)
 
                 perturbation = self.config["noise_stdev"] * self.noise.get(
-                    noise_index, self.policy.num_params
-                )
+                    noise_index, self.policy.num_params)
 
                 # These two sampling steps could be done in parallel on
                 # different actors letting us update twice as frequently.
@@ -159,8 +147,8 @@ class Worker:
                 noise_indices.append(noise_index)
                 returns.append([rewards_pos.sum(), rewards_neg.sum()])
                 sign_returns.append(
-                    [np.sign(rewards_pos).sum(), np.sign(rewards_neg).sum()]
-                )
+                    [np.sign(rewards_pos).sum(),
+                     np.sign(rewards_neg).sum()])
                 lengths.append([lengths_pos, lengths_neg])
 
         return Result(
@@ -169,14 +157,12 @@ class Worker:
             sign_noisy_returns=sign_returns,
             noisy_lengths=lengths,
             eval_returns=eval_returns,
-            eval_lengths=eval_lengths,
-        )
+            eval_lengths=eval_lengths)
 
 
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.es.es_torch_policy import ESTorchPolicy
-
         policy_cls = ESTorchPolicy
     else:
         policy_cls = ESTFPolicy
@@ -203,8 +189,7 @@ class ESTrainer(Trainer):
         self.policy = policy_cls(
             obs_space=env.observation_space,
             action_space=env.action_space,
-            config=config,
-        )
+            config=config)
         self.optimizer = optimizers.Adam(self.policy, config["stepsize"])
         self.report_length = config["report_length"]
 
@@ -227,10 +212,8 @@ class ESTrainer(Trainer):
     @override(Trainer)
     def get_policy(self, policy=DEFAULT_POLICY_ID):
         if policy != DEFAULT_POLICY_ID:
-            raise ValueError(
-                "ES has no policy '{}'! Use {} "
-                "instead.".format(policy, DEFAULT_POLICY_ID)
-            )
+            raise ValueError("ES has no policy '{}'! Use {} "
+                             "instead.".format(policy, DEFAULT_POLICY_ID))
         return self.policy
 
     @override(Trainer)
@@ -246,8 +229,7 @@ class ESTrainer(Trainer):
         # Use the actors to do rollouts, note that we pass in the ID of the
         # policy weights.
         results, num_episodes, num_timesteps = self._collect_results(
-            theta_id, config["episodes_per_batch"], config["train_batch_size"]
-        )
+            theta_id, config["episodes_per_batch"], config["train_batch_size"])
 
         all_noise_indices = []
         all_training_returns = []
@@ -265,11 +247,8 @@ class ESTrainer(Trainer):
             all_training_lengths += result.noisy_lengths
 
         assert len(all_eval_returns) == len(all_eval_lengths)
-        assert (
-            len(all_noise_indices)
-            == len(all_training_returns)
-            == len(all_training_lengths)
-        )
+        assert (len(all_noise_indices) == len(all_training_returns) ==
+                len(all_training_lengths))
 
         self.episodes_so_far += num_episodes
 
@@ -289,17 +268,15 @@ class ESTrainer(Trainer):
         # Compute and take a step.
         g, count = utils.batched_weighted_sum(
             proc_noisy_returns[:, 0] - proc_noisy_returns[:, 1],
-            (self.noise.get(index, self.policy.num_params) for index in noise_indices),
-            batch_size=500,
-        )
+            (self.noise.get(index, self.policy.num_params)
+             for index in noise_indices),
+            batch_size=500)
         g /= noisy_returns.size
-        assert (
-            g.shape == (self.policy.num_params,)
-            and g.dtype == np.float32
-            and count == len(noise_indices)
-        )
+        assert (g.shape == (self.policy.num_params, ) and g.dtype == np.float32
+                and count == len(noise_indices))
         # Compute the new weights theta.
-        theta, update_ratio = self.optimizer.update(-g + config["l2_coeff"] * theta)
+        theta, update_ratio = self.optimizer.update(-g +
+                                                    config["l2_coeff"] * theta)
         # Set the new weights in the local copy of the policy.
         self.policy.set_flat_weights(theta)
         # Store the rewards
@@ -307,9 +284,9 @@ class ESTrainer(Trainer):
             self.reward_list.append(np.mean(eval_returns))
 
         # Now sync the filters
-        FilterManager.synchronize(
-            {DEFAULT_POLICY_ID: self.policy.observation_filter}, self._workers
-        )
+        FilterManager.synchronize({
+            DEFAULT_POLICY_ID: self.policy.observation_filter
+        }, self._workers)
 
         info = {
             "weights_norm": np.square(theta).sum(),
@@ -319,13 +296,12 @@ class ESTrainer(Trainer):
             "episodes_so_far": self.episodes_so_far,
         }
 
-        reward_mean = np.mean(self.reward_list[-self.report_length :])
+        reward_mean = np.mean(self.reward_list[-self.report_length:])
         result = dict(
             episode_reward_mean=reward_mean,
             episode_len_mean=eval_lengths.mean(),
             timesteps_this_iter=noisy_lengths.sum(),
-            info=info,
-        )
+            info=info)
 
         return result
 
@@ -348,9 +324,7 @@ class ESTrainer(Trainer):
         while num_episodes < min_episodes or num_timesteps < min_timesteps:
             logger.info(
                 "Collected {} episodes {} timesteps so far this iter".format(
-                    num_episodes, num_timesteps
-                )
-            )
+                    num_episodes, num_timesteps))
             rollout_ids = [
                 worker.do_rollouts.remote(theta_id) for worker in self._workers
             ]
@@ -361,7 +335,8 @@ class ESTrainer(Trainer):
                 # keeping in mind that result.noisy_lengths is a list of lists,
                 # where the inner lists have length 2.
                 num_episodes += sum(len(pair) for pair in result.noisy_lengths)
-                num_timesteps += sum(sum(pair) for pair in result.noisy_lengths)
+                num_timesteps += sum(
+                    sum(pair) for pair in result.noisy_lengths)
 
         return results, num_episodes, num_timesteps
 
@@ -376,6 +351,6 @@ class ESTrainer(Trainer):
         self.episodes_so_far = state["episodes_so_far"]
         self.policy.set_flat_weights(state["weights"])
         self.policy.observation_filter = state["filter"]
-        FilterManager.synchronize(
-            {DEFAULT_POLICY_ID: self.policy.observation_filter}, self._workers
-        )
+        FilterManager.synchronize({
+            DEFAULT_POLICY_ID: self.policy.observation_filter
+        }, self._workers)

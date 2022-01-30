@@ -16,13 +16,18 @@ def get_mean_action(alg, obs):
 
 
 CONFIGS = {
-    "A3C": {"explore": False, "num_workers": 1,},
+    "A3C": {
+        "explore": False,
+        "num_workers": 1,
+    },
     "APEX_DDPG": {
         "explore": False,
         "observation_filter": "MeanStdFilter",
         "num_workers": 2,
         "min_iter_time_s": 1,
-        "optimizer": {"num_replay_buffer_shards": 1,},
+        "optimizer": {
+            "num_replay_buffer_shards": 1,
+        },
     },
     "ARS": {
         "explore": False,
@@ -31,8 +36,13 @@ CONFIGS = {
         "noise_size": 2500000,
         "observation_filter": "MeanStdFilter",
     },
-    "DDPG": {"explore": False, "timesteps_per_iteration": 100,},
-    "DQN": {"explore": False,},
+    "DDPG": {
+        "explore": False,
+        "timesteps_per_iteration": 100,
+    },
+    "DQN": {
+        "explore": False,
+    },
     "ES": {
         "explore": False,
         "episodes_per_batch": 10,
@@ -47,7 +57,9 @@ CONFIGS = {
         "train_batch_size": 1000,
         "num_workers": 2,
     },
-    "SAC": {"explore": False,},
+    "SAC": {
+        "explore": False,
+    },
 }
 
 
@@ -93,29 +105,25 @@ def ckpt_restore_test(alg_name, tfe=False):
                     for i, s2_ in enumerate(s2):
                         check(
                             list(s2_["state"].values()),
-                            list(optim_state[i]["state"].values()),
-                        )
+                            list(optim_state[i]["state"].values()))
 
             for _ in range(1):
                 if "DDPG" in alg_name or "SAC" in alg_name:
                     obs = np.clip(
                         np.random.uniform(size=3),
                         policy1.observation_space.low,
-                        policy1.observation_space.high,
-                    )
+                        policy1.observation_space.high)
                 else:
                     obs = np.clip(
                         np.random.uniform(size=4),
                         policy1.observation_space.low,
-                        policy1.observation_space.high,
-                    )
+                        policy1.observation_space.high)
                 a1 = get_mean_action(alg1, obs)
                 a2 = get_mean_action(alg2, obs)
                 print("Checking computed actions", alg1, obs, a1, a2)
-                if abs(a1 - a2) > 0.1:
-                    raise AssertionError(
-                        "algo={} [a1={} a2={}]".format(alg_name, a1, a2)
-                    )
+                if abs(a1 - a2) > .1:
+                    raise AssertionError("algo={} [a1={} a2={}]".format(
+                        alg_name, a1, a2))
 
 
 class TestCheckpointRestore(unittest.TestCase):
@@ -155,5 +163,4 @@ class TestCheckpointRestore(unittest.TestCase):
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

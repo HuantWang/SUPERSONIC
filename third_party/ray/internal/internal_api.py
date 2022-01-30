@@ -20,14 +20,12 @@ def memory_summary():
 
     # We can ask any Raylet for the global memory info.
     raylet = ray.nodes()[0]
-    raylet_address = "{}:{}".format(
-        raylet["NodeManagerAddress"], ray.nodes()[0]["NodeManagerPort"]
-    )
+    raylet_address = "{}:{}".format(raylet["NodeManagerAddress"],
+                                    ray.nodes()[0]["NodeManagerPort"])
     channel = grpc.insecure_channel(raylet_address)
     stub = node_manager_pb2_grpc.NodeManagerServiceStub(channel)
     reply = stub.FormatGlobalMemoryInfo(
-        node_manager_pb2.FormatGlobalMemoryInfoRequest(), timeout=30.0
-    )
+        node_manager_pb2.FormatGlobalMemoryInfoRequest(), timeout=30.0)
     return reply.memory_summary
 
 
@@ -62,21 +60,19 @@ def free(object_ids, local_only=False, delete_creating_tasks=False):
         object_ids = [object_ids]
 
     if not isinstance(object_ids, list):
-        raise TypeError(
-            "free() expects a list of ObjectID, got {}".format(type(object_ids))
-        )
+        raise TypeError("free() expects a list of ObjectID, got {}".format(
+            type(object_ids)))
 
     # Make sure that the values are object IDs.
     for object_id in object_ids:
         if not isinstance(object_id, ray.ObjectID):
-            raise TypeError(
-                "Attempting to call `free` on the value {}, "
-                "which is not an ray.ObjectID.".format(object_id)
-            )
+            raise TypeError("Attempting to call `free` on the value {}, "
+                            "which is not an ray.ObjectID.".format(object_id))
 
     worker.check_connected()
     with profiling.profile("ray.free"):
         if len(object_ids) == 0:
             return
 
-        worker.core_worker.free_objects(object_ids, local_only, delete_creating_tasks)
+        worker.core_worker.free_objects(object_ids, local_only,
+                                        delete_creating_tasks)

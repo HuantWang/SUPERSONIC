@@ -29,7 +29,7 @@ def set_resource(resource_name, capacity, client_id=None):
     else:
         client_id_obj = ray.ClientID.nil()
     if (capacity < 0) or (capacity != int(capacity)):
-        raise ValueError("Capacity {} must be a non-negative integer.".format(capacity))
+        raise ValueError(
+            "Capacity {} must be a non-negative integer.".format(capacity))
     return ray.worker.global_worker.core_worker.set_resource(
-        resource_name, capacity, client_id_obj
-    )
+        resource_name, capacity, client_id_obj)

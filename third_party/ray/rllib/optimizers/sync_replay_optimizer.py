@@ -3,14 +3,12 @@ import collections
 import numpy as np
 
 import ray
-from ray.rllib.optimizers.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from ray.rllib.optimizers.replay_buffer import ReplayBuffer, \
+    PrioritizedReplayBuffer
 from ray.rllib.optimizers.policy_optimizer import PolicyOptimizer
 from ray.rllib.evaluation.metrics import get_learner_stats
-from ray.rllib.policy.sample_batch import (
-    SampleBatch,
-    DEFAULT_POLICY_ID,
-    MultiAgentBatch,
-)
+from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
+    MultiAgentBatch
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.compression import pack_if_needed
 from ray.rllib.utils.timer import TimerStat
@@ -27,19 +25,19 @@ class SyncReplayOptimizer(PolicyOptimizer):
     term will be used for sample prioritization."""
 
     def __init__(
-        self,
-        workers,
-        learning_starts=1000,
-        buffer_size=10000,
-        prioritized_replay=True,
-        prioritized_replay_alpha=0.6,
-        prioritized_replay_beta=0.4,
-        prioritized_replay_eps=1e-6,
-        final_prioritized_replay_beta=0.4,
-        train_batch_size=32,
-        before_learn_on_batch=None,
-        synchronize_sampling=False,
-        prioritized_replay_beta_annealing_timesteps=100000 * 0.2,
+            self,
+            workers,
+            learning_starts=1000,
+            buffer_size=10000,
+            prioritized_replay=True,
+            prioritized_replay_alpha=0.6,
+            prioritized_replay_beta=0.4,
+            prioritized_replay_eps=1e-6,
+            final_prioritized_replay_beta=0.4,
+            train_batch_size=32,
+            before_learn_on_batch=None,
+            synchronize_sampling=False,
+            prioritized_replay_beta_annealing_timesteps=100000 * 0.2,
     ):
         """Initialize an sync replay optimizer.
 
@@ -68,16 +66,11 @@ class SyncReplayOptimizer(PolicyOptimizer):
         # Linearly annealing beta used in Rainbow paper, stopping at
         # `final_prioritized_replay_beta`.
         self.prioritized_replay_beta = PiecewiseSchedule(
-            endpoints=[
-                (0, prioritized_replay_beta),
-                (
-                    prioritized_replay_beta_annealing_timesteps,
-                    final_prioritized_replay_beta,
-                ),
-            ],
+            endpoints=[(0, prioritized_replay_beta),
+                       (prioritized_replay_beta_annealing_timesteps,
+                        final_prioritized_replay_beta)],
             outside_value=final_prioritized_replay_beta,
-            framework=None,
-        )
+            framework=None)
         self.prioritized_replay_eps = prioritized_replay_eps
         self.train_batch_size = train_batch_size
         self.before_learn_on_batch = before_learn_on_batch
@@ -95,9 +88,7 @@ class SyncReplayOptimizer(PolicyOptimizer):
 
             def new_buffer():
                 return PrioritizedReplayBuffer(
-                    buffer_size, alpha=prioritized_replay_alpha
-                )
-
+                    buffer_size, alpha=prioritized_replay_alpha)
         else:
 
             def new_buffer():
@@ -106,11 +97,8 @@ class SyncReplayOptimizer(PolicyOptimizer):
         self.replay_buffers = collections.defaultdict(new_buffer)
 
         if buffer_size < self.replay_starts:
-            logger.warning(
-                "buffer_size={} < replay_starts={}".format(
-                    buffer_size, self.replay_starts
-                )
-            )
+            logger.warning("buffer_size={} < replay_starts={}".format(
+                buffer_size, self.replay_starts))
 
         # If set, will use this batch for stepping/updating, instead of
         # sampling from the replay buffer. Actual sampling from the env
@@ -130,14 +118,18 @@ class SyncReplayOptimizer(PolicyOptimizer):
         with self.sample_timer:
             if self.workers.remote_workers():
                 batch = SampleBatch.concat_samples(
-                    ray.get([e.sample.remote() for e in self.workers.remote_workers()])
-                )
+                    ray.get([
+                        e.sample.remote()
+                        for e in self.workers.remote_workers()
+                    ]))
             else:
                 batch = self.workers.local_worker().sample()
 
             # Handle everything as if multiagent
             if isinstance(batch, SampleBatch):
-                batch = MultiAgentBatch({DEFAULT_POLICY_ID: batch}, batch.count)
+                batch = MultiAgentBatch({
+                    DEFAULT_POLICY_ID: batch
+                }, batch.count)
 
             for policy_id, s in batch.policy_batches.items():
                 for row in s.rows():
@@ -147,8 +139,7 @@ class SyncReplayOptimizer(PolicyOptimizer):
                         row["rewards"],
                         pack_if_needed(row["new_obs"]),
                         row["dones"],
-                        weight=None,
-                    )
+                        weight=None)
 
         if self.num_steps_sampled >= self.replay_starts:
             self._optimize()
@@ -158,22 +149,24 @@ class SyncReplayOptimizer(PolicyOptimizer):
     @override(PolicyOptimizer)
     def stats(self):
         return dict(
-            PolicyOptimizer.stats(self),
-            **{
+            PolicyOptimizer.stats(self), **{
                 "sample_time_ms": round(1000 * self.sample_timer.mean, 3),
                 "replay_time_ms": round(1000 * self.replay_timer.mean, 3),
                 "grad_time_ms": round(1000 * self.grad_timer.mean, 3),
-                "update_time_ms": round(1000 * self.update_weights_timer.mean, 3),
-                "opt_peak_throughput": round(self.grad_timer.mean_throughput, 3),
+                "update_time_ms": round(1000 * self.update_weights_timer.mean,
+                                        3),
+                "opt_peak_throughput": round(self.grad_timer.mean_throughput,
+                                             3),
                 "opt_samples": round(self.grad_timer.mean_units_processed, 3),
                 "learner": self.learner_stats,
-            }
-        )
+            })
 
     def _optimize(self):
         if self._fake_batch:
             fake_batch = SampleBatch(self._fake_batch)
-            samples = MultiAgentBatch({DEFAULT_POLICY_ID: fake_batch}, fake_batch.count)
+            samples = MultiAgentBatch({
+                DEFAULT_POLICY_ID: fake_batch
+            }, fake_batch.count)
         else:
             samples = self._replay()
 
@@ -182,8 +175,7 @@ class SyncReplayOptimizer(PolicyOptimizer):
                 samples = self.before_learn_on_batch(
                     samples,
                     self.workers.local_worker().policy_map,
-                    self.train_batch_size,
-                )
+                    self.train_batch_size)
             info_dict = self.workers.local_worker().learn_on_batch(samples)
             for policy_id, info in info_dict.items():
                 self.learner_stats[policy_id] = get_learner_stats(info)
@@ -193,14 +185,13 @@ class SyncReplayOptimizer(PolicyOptimizer):
                     #  torch/tf. Clean up these results/info dicts across
                     #  policies (note: fixing this in torch_policy.py will
                     #  break e.g. DDPPO!).
-                    td_error = info.get(
-                        "td_error", info["learner_stats"].get("td_error")
-                    )
-                    new_priorities = np.abs(td_error) + self.prioritized_replay_eps
+                    td_error = info.get("td_error",
+                                        info["learner_stats"].get("td_error"))
+                    new_priorities = (
+                        np.abs(td_error) + self.prioritized_replay_eps)
                     replay_buffer.update_priorities(
                         samples.policy_batches[policy_id]["batch_indexes"],
-                        new_priorities,
-                    )
+                        new_priorities)
             self.grad_timer.push_units_processed(samples.count)
 
         self.num_steps_trained += samples.count
@@ -212,42 +203,29 @@ class SyncReplayOptimizer(PolicyOptimizer):
             for policy_id, replay_buffer in self.replay_buffers.items():
                 if self.synchronize_sampling:
                     if idxes is None:
-                        idxes = replay_buffer.sample_idxes(self.train_batch_size)
+                        idxes = replay_buffer.sample_idxes(
+                            self.train_batch_size)
                 else:
                     idxes = replay_buffer.sample_idxes(self.train_batch_size)
 
                 if isinstance(replay_buffer, PrioritizedReplayBuffer):
-                    (
-                        obses_t,
-                        actions,
-                        rewards,
-                        obses_tp1,
-                        dones,
-                        weights,
-                        batch_indexes,
-                    ) = replay_buffer.sample_with_idxes(
-                        idxes,
-                        beta=self.prioritized_replay_beta.value(self.num_steps_trained),
-                    )
+                    (obses_t, actions, rewards, obses_tp1, dones, weights,
+                     batch_indexes) = replay_buffer.sample_with_idxes(
+                         idxes,
+                         beta=self.prioritized_replay_beta.value(
+                             self.num_steps_trained))
                 else:
-                    (
-                        obses_t,
-                        actions,
-                        rewards,
-                        obses_tp1,
-                        dones,
-                    ) = replay_buffer.sample_with_idxes(idxes)
+                    (obses_t, actions, rewards, obses_tp1,
+                     dones) = replay_buffer.sample_with_idxes(idxes)
                     weights = np.ones_like(rewards)
                     batch_indexes = -np.ones_like(rewards)
-                samples[policy_id] = SampleBatch(
-                    {
-                        "obs": obses_t,
-                        "actions": actions,
-                        "rewards": rewards,
-                        "new_obs": obses_tp1,
-                        "dones": dones,
-                        "weights": weights,
-                        "batch_indexes": batch_indexes,
-                    }
-                )
+                samples[policy_id] = SampleBatch({
+                    "obs": obses_t,
+                    "actions": actions,
+                    "rewards": rewards,
+                    "new_obs": obses_tp1,
+                    "dones": dones,
+                    "weights": weights,
+                    "batch_indexes": batch_indexes
+                })
         return MultiAgentBatch(samples, self.train_batch_size)

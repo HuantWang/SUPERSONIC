@@ -32,29 +32,24 @@ if __name__ == "__main__":
     grouping = {
         "group_1": [0, 1],
     }
-    obs_space = Tuple(
-        [
-            Dict(
-                {
-                    "obs": MultiDiscrete([2, 2, 2, 3]),
-                    ENV_STATE: MultiDiscrete([2, 2, 2]),
-                }
-            ),
-            Dict(
-                {
-                    "obs": MultiDiscrete([2, 2, 2, 3]),
-                    ENV_STATE: MultiDiscrete([2, 2, 2]),
-                }
-            ),
-        ]
-    )
-    act_space = Tuple([TwoStepGame.action_space, TwoStepGame.action_space,])
+    obs_space = Tuple([
+        Dict({
+            "obs": MultiDiscrete([2, 2, 2, 3]),
+            ENV_STATE: MultiDiscrete([2, 2, 2])
+        }),
+        Dict({
+            "obs": MultiDiscrete([2, 2, 2, 3]),
+            ENV_STATE: MultiDiscrete([2, 2, 2])
+        }),
+    ])
+    act_space = Tuple([
+        TwoStepGame.action_space,
+        TwoStepGame.action_space,
+    ])
     register_env(
         "grouped_twostep",
         lambda config: TwoStepGame(config).with_agent_groups(
-            grouping, obs_space=obs_space, act_space=act_space
-        ),
-    )
+            grouping, obs_space=obs_space, act_space=act_space))
 
     if args.run == "contrib/MADDPG":
         obs_space_dict = {
@@ -67,21 +62,17 @@ if __name__ == "__main__":
         }
         config = {
             "learning_starts": 100,
-            "env_config": {"actions_are_logits": True,},
+            "env_config": {
+                "actions_are_logits": True,
+            },
             "multiagent": {
                 "policies": {
-                    "pol1": (
-                        None,
-                        Discrete(6),
-                        TwoStepGame.action_space,
-                        {"agent_id": 0,},
-                    ),
-                    "pol2": (
-                        None,
-                        Discrete(6),
-                        TwoStepGame.action_space,
-                        {"agent_id": 1,},
-                    ),
+                    "pol1": (None, Discrete(6), TwoStepGame.action_space, {
+                        "agent_id": 0,
+                    }),
+                    "pol2": (None, Discrete(6), TwoStepGame.action_space, {
+                        "agent_id": 1,
+                    }),
                 },
                 "policy_mapping_fn": lambda x: "pol1" if x == 0 else "pol2",
             },
@@ -92,13 +83,13 @@ if __name__ == "__main__":
         config = {
             "rollout_fragment_length": 4,
             "train_batch_size": 32,
-            "exploration_fraction": 0.4,
+            "exploration_fraction": .4,
             "exploration_final_eps": 0.0,
             "num_workers": 0,
             "mixer": grid_search([None, "qmix", "vdn"]),
             "env_config": {
                 "separate_state_space": True,
-                "one_hot_state_encoding": True,
+                "one_hot_state_encoding": True
             },
             "framework": "torch" if args.torch else "tf",
         }
@@ -114,7 +105,9 @@ if __name__ == "__main__":
         "timesteps_total": args.stop_timesteps,
     }
 
-    config = dict(config, **{"env": "grouped_twostep" if group else TwoStepGame,})
+    config = dict(config, **{
+        "env": "grouped_twostep" if group else TwoStepGame,
+    })
 
     results = tune.run(args.run, stop=stop, config=config)
 

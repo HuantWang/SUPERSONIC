@@ -39,14 +39,12 @@ def _configure_resource_group(config):
     logger.info("Using subscription id: %s", subscription_id)
     config["provider"]["subscription_id"] = subscription_id
 
-    assert (
-        "resource_group" in config["provider"]
-    ), "Provider config must include resource_group field"
+    assert "resource_group" in config["provider"], (
+        "Provider config must include resource_group field")
     resource_group = config["provider"]["resource_group"]
 
-    assert (
-        "location" in config["provider"]
-    ), "Provider config must include location field"
+    assert "location" in config["provider"], (
+        "Provider config must include location field")
     params = {"location": config["provider"]["location"]}
 
     if "tags" in config["provider"]:
@@ -54,8 +52,7 @@ def _configure_resource_group(config):
 
     logger.info("Creating/Updating Resource Group: %s", resource_group)
     resource_client.resource_groups.create_or_update(
-        resource_group_name=resource_group, parameters=params
-    )
+        resource_group_name=resource_group, parameters=params)
 
     # load the template file
     current_path = os.path.dirname(os.path.abspath(__file__))
@@ -71,15 +68,18 @@ def _configure_resource_group(config):
         "properties": {
             "mode": DeploymentMode.incremental,
             "template": template,
-            "parameters": {"subnet": {"value": subnet_mask}},
+            "parameters": {
+                "subnet": {
+                    "value": subnet_mask
+                }
+            }
         }
     }
 
     resource_client.deployments.create_or_update(
         resource_group_name=resource_group,
         deployment_name="ray-config",
-        parameters=parameters,
-    ).wait()
+        parameters=parameters).wait()
 
     return config
 
@@ -95,7 +95,8 @@ def _configure_key_pair(config):
         except TypeError:
             raise Exception("Invalid config value for {}".format(key_type))
 
-        assert os.path.exists(key_path), "Could not find ssh key: {}".format(key_path)
+        assert os.path.exists(key_path), (
+            "Could not find ssh key: {}".format(key_path))
 
         if key_type == "ssh_public_key":
             with open(key_path, "r") as f:

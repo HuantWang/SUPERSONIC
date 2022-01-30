@@ -1,9 +1,11 @@
 import logging
 
 import ray
-from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing
+from ray.rllib.evaluation.postprocessing import compute_advantages, \
+    Postprocessing
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.tf_policy import LearningRateSchedule, EntropyCoeffSchedule
+from ray.rllib.policy.tf_policy import LearningRateSchedule, \
+    EntropyCoeffSchedule
 from ray.rllib.policy.tf_policy_template import build_tf_policy
 from ray.rllib.utils.explained_variance import explained_variance
 from ray.rllib.utils.tf_ops import make_tf_callable
@@ -15,26 +17,24 @@ logger = logging.getLogger(__name__)
 
 
 class PPOLoss:
-    def __init__(
-        self,
-        dist_class,
-        model,
-        value_targets,
-        advantages,
-        actions,
-        prev_logits,
-        prev_actions_logp,
-        vf_preds,
-        curr_action_dist,
-        value_fn,
-        cur_kl_coeff,
-        valid_mask,
-        entropy_coeff=0,
-        clip_param=0.1,
-        vf_clip_param=0.1,
-        vf_loss_coeff=1.0,
-        use_gae=True,
-    ):
+    def __init__(self,
+                 dist_class,
+                 model,
+                 value_targets,
+                 advantages,
+                 actions,
+                 prev_logits,
+                 prev_actions_logp,
+                 vf_preds,
+                 curr_action_dist,
+                 value_fn,
+                 cur_kl_coeff,
+                 valid_mask,
+                 entropy_coeff=0,
+                 clip_param=0.1,
+                 vf_clip_param=0.1,
+                 vf_loss_coeff=1.0,
+                 use_gae=True):
         """Constructs the loss for Proximal Policy Objective.
 
         Arguments:
@@ -85,31 +85,25 @@ class PPOLoss:
 
         surrogate_loss = tf.minimum(
             advantages * logp_ratio,
-            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param, 1 + clip_param),
-        )
+            advantages * tf.clip_by_value(logp_ratio, 1 - clip_param,
+                                          1 + clip_param))
         self.mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
         if use_gae:
             vf_loss1 = tf.square(value_fn - value_targets)
             vf_clipped = vf_preds + tf.clip_by_value(
-                value_fn - vf_preds, -vf_clip_param, vf_clip_param
-            )
+                value_fn - vf_preds, -vf_clip_param, vf_clip_param)
             vf_loss2 = tf.square(vf_clipped - value_targets)
             vf_loss = tf.maximum(vf_loss1, vf_loss2)
             self.mean_vf_loss = reduce_mean_valid(vf_loss)
             loss = reduce_mean_valid(
-                -surrogate_loss
-                + cur_kl_coeff * action_kl
-                + vf_loss_coeff * vf_loss
-                - entropy_coeff * curr_entropy
-            )
+                -surrogate_loss + cur_kl_coeff * action_kl +
+                vf_loss_coeff * vf_loss - entropy_coeff * curr_entropy)
         else:
             self.mean_vf_loss = tf.constant(0.0)
-            loss = reduce_mean_valid(
-                -surrogate_loss
-                + cur_kl_coeff * action_kl
-                - entropy_coeff * curr_entropy
-            )
+            loss = reduce_mean_valid(-surrogate_loss +
+                                     cur_kl_coeff * action_kl -
+                                     entropy_coeff * curr_entropy)
         self.loss = loss
 
 
@@ -154,8 +148,8 @@ def kl_and_loss_stats(policy, train_batch):
         "policy_loss": policy.loss_obj.mean_policy_loss,
         "vf_loss": policy.loss_obj.mean_vf_loss,
         "vf_explained_var": explained_variance(
-            train_batch[Postprocessing.VALUE_TARGETS], policy.model.value_function()
-        ),
+            train_batch[Postprocessing.VALUE_TARGETS],
+            policy.model.value_function()),
         "kl": policy.loss_obj.mean_kl,
         "entropy": policy.loss_obj.mean_entropy,
         "entropy_coeff": tf.cast(policy.entropy_coeff, tf.float64),
@@ -169,7 +163,10 @@ def vf_preds_fetches(policy):
     }
 
 
-def postprocess_ppo_gae(policy, sample_batch, other_agent_batches=None, episode=None):
+def postprocess_ppo_gae(policy,
+                        sample_batch,
+                        other_agent_batches=None,
+                        episode=None):
     """Adds the policy logits, VF preds, and advantages to the trajectory."""
 
     completed = sample_batch["dones"][-1]
@@ -179,19 +176,16 @@ def postprocess_ppo_gae(policy, sample_batch, other_agent_batches=None, episode=
         next_state = []
         for i in range(policy.num_state_tensors()):
             next_state.append([sample_batch["state_out_{}".format(i)][-1]])
-        last_r = policy._value(
-            sample_batch[SampleBatch.NEXT_OBS][-1],
-            sample_batch[SampleBatch.ACTIONS][-1],
-            sample_batch[SampleBatch.REWARDS][-1],
-            *next_state
-        )
+        last_r = policy._value(sample_batch[SampleBatch.NEXT_OBS][-1],
+                               sample_batch[SampleBatch.ACTIONS][-1],
+                               sample_batch[SampleBatch.REWARDS][-1],
+                               *next_state)
     batch = compute_advantages(
         sample_batch,
         last_r,
         policy.config["gamma"],
         policy.config["lambda"],
-        use_gae=policy.config["use_gae"],
-    )
+        use_gae=policy.config["use_gae"])
     return batch
 
 
@@ -200,7 +194,8 @@ def clip_gradients(policy, optimizer, loss):
     if policy.config["grad_clip"] is not None:
         grads_and_vars = optimizer.compute_gradients(loss, variables)
         grads = [g for (g, v) in grads_and_vars]
-        policy.grads, _ = tf.clip_by_global_norm(grads, policy.config["grad_clip"])
+        policy.grads, _ = tf.clip_by_global_norm(grads,
+                                                 policy.config["grad_clip"])
         clipped_grads = list(zip(policy.grads, variables))
         return clipped_grads
     else:
@@ -217,8 +212,7 @@ class KLCoeffMixin:
             name="kl_coeff",
             shape=(),
             trainable=False,
-            dtype=tf.float32,
-        )
+            dtype=tf.float32)
 
     def update_kl(self, sampled_kl):
         if sampled_kl > 2.0 * self.kl_target:
@@ -235,16 +229,15 @@ class ValueNetworkMixin:
 
             @make_tf_callable(self.get_session())
             def value(ob, prev_action, prev_reward, *state):
-                model_out, _ = self.model(
-                    {
-                        SampleBatch.CUR_OBS: tf.convert_to_tensor([ob]),
-                        SampleBatch.PREV_ACTIONS: tf.convert_to_tensor([prev_action]),
-                        SampleBatch.PREV_REWARDS: tf.convert_to_tensor([prev_reward]),
-                        "is_training": tf.convert_to_tensor([False]),
-                    },
-                    [tf.convert_to_tensor([s]) for s in state],
-                    tf.convert_to_tensor([1]),
-                )
+                model_out, _ = self.model({
+                    SampleBatch.CUR_OBS: tf.convert_to_tensor([ob]),
+                    SampleBatch.PREV_ACTIONS: tf.convert_to_tensor(
+                        [prev_action]),
+                    SampleBatch.PREV_REWARDS: tf.convert_to_tensor(
+                        [prev_reward]),
+                    "is_training": tf.convert_to_tensor([False]),
+                }, [tf.convert_to_tensor([s]) for s in state],
+                                          tf.convert_to_tensor([1]))
                 return self.model.value_function()[0]
 
         else:
@@ -264,9 +257,8 @@ def setup_config(policy, obs_space, action_space, config):
 def setup_mixins(policy, obs_space, action_space, config):
     ValueNetworkMixin.__init__(policy, obs_space, action_space, config)
     KLCoeffMixin.__init__(policy, config)
-    EntropyCoeffSchedule.__init__(
-        policy, config["entropy_coeff"], config["entropy_coeff_schedule"]
-    )
+    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
+                                  config["entropy_coeff_schedule"])
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
@@ -281,9 +273,6 @@ PPOTFPolicy = build_tf_policy(
     before_init=setup_config,
     before_loss_init=setup_mixins,
     mixins=[
-        LearningRateSchedule,
-        EntropyCoeffSchedule,
-        KLCoeffMixin,
-        ValueNetworkMixin,
-    ],
-)
+        LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+        ValueNetworkMixin
+    ])

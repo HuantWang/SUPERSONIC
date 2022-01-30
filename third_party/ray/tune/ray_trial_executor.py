@@ -77,12 +77,12 @@ class _TrialCleanup:
         logger.debug("Cleaning up futures")
         num_to_keep = int(self.threshold) / 2 if partial else 0
         while len(self._cleanup_map) > num_to_keep:
-            dones, _ = ray.wait(list(self._cleanup_map), timeout=DEFAULT_GET_TIMEOUT)
+            dones, _ = ray.wait(
+                list(self._cleanup_map), timeout=DEFAULT_GET_TIMEOUT)
             if not dones:
                 logger.warning(
                     "Skipping cleanup - trainable.stop did not return in "
-                    "time. Consider making `stop` a faster operation."
-                )
+                    "time. Consider making `stop` a faster operation.")
             else:
                 done = dones[0]
                 del self._cleanup_map[done]
@@ -91,13 +91,11 @@ class _TrialCleanup:
 class RayTrialExecutor(TrialExecutor):
     """An implementation of TrialExecutor based on Ray."""
 
-    def __init__(
-        self,
-        queue_trials=False,
-        reuse_actors=False,
-        ray_auto_init=False,
-        refresh_period=RESOURCE_REFRESH_PERIOD,
-    ):
+    def __init__(self,
+                 queue_trials=False,
+                 reuse_actors=False,
+                 ray_auto_init=False,
+                 refresh_period=RESOURCE_REFRESH_PERIOD):
         super(RayTrialExecutor, self).__init__(queue_trials)
         # Check for if we are launching a trial without resources in kick off
         # autoscaler.
@@ -119,11 +117,9 @@ class RayTrialExecutor(TrialExecutor):
         self._last_resource_refresh = float("-inf")
         self._last_nontrivial_wait = time.time()
         if not ray.is_initialized() and ray_auto_init:
-            logger.info(
-                "Initializing Ray automatically."
-                "For cluster usage or custom Ray initialization, "
-                "call `ray.init(...)` before `tune.run`."
-            )
+            logger.info("Initializing Ray automatically."
+                        "For cluster usage or custom Ray initialization, "
+                        "call `ray.init(...)` before `tune.run`.")
             ray.init()
 
         if ray.is_initialized():
@@ -135,24 +131,22 @@ class RayTrialExecutor(TrialExecutor):
         self.try_checkpoint_metadata(trial)
         remote_logdir = trial.logdir
 
-        if self._reuse_actors and reuse_allowed and self._cached_actor is not None:
-            logger.debug(
-                "Trial %s: Reusing cached runner %s", trial, self._cached_actor
-            )
+        if (self._reuse_actors and reuse_allowed
+                and self._cached_actor is not None):
+            logger.debug("Trial %s: Reusing cached runner %s", trial,
+                         self._cached_actor)
             existing_runner = self._cached_actor
             self._cached_actor = None
             trial.set_runner(existing_runner)
             if not self.reset_trial(trial, trial.config, trial.experiment_tag):
                 raise AbortTrialExecution(
                     "Trainable runner reuse requires reset_config() to be "
-                    "implemented and return True."
-                )
+                    "implemented and return True.")
             return existing_runner
 
         if self._cached_actor:
-            logger.debug(
-                "Cannot reuse cached runner {} for new trial".format(self._cached_actor)
-            )
+            logger.debug("Cannot reuse cached runner {} for new trial".format(
+                self._cached_actor))
             with self._change_working_directory(trial):
                 self._trial_cleanup.add(trial, actor=self._cached_actor)
             self._cached_actor = None
@@ -162,8 +156,8 @@ class RayTrialExecutor(TrialExecutor):
             num_gpus=trial.resources.gpu,
             memory=trial.resources.memory,
             object_store_memory=trial.resources.object_store_memory,
-            resources=trial.resources.custom_resources,
-        )(trial.get_trainable_cls())
+            resources=trial.resources.custom_resources)(
+                trial.get_trainable_cls())
 
         def logger_creator(config):
             # Set the working dir in the remote process, for user file writes
@@ -196,15 +190,15 @@ class RayTrialExecutor(TrialExecutor):
             raise TuneError(
                 "Should not call `train` on PAUSED trial {}. "
                 "This is an internal error - please file an issue "
-                "on https://github.com/ray-project/ray/issues/.".format(str(trial))
-            )
+                "on https://github.com/ray-project/ray/issues/.".format(
+                    str(trial)))
 
         if self._find_item(self._running, trial):
             logging.debug(
                 "Trial {} already has a queued future. Skipping this "
                 "`train` call. This may occur if a trial has "
-                "been unpaused within a scheduler callback.".format(str(trial))
-            )
+                "been unpaused within a scheduler callback.".format(
+                    str(trial)))
             return
 
         assert trial.status == Trial.RUNNING, trial.status
@@ -249,7 +243,8 @@ class RayTrialExecutor(TrialExecutor):
         elif train and not trial.is_restoring:
             self._train(trial)
 
-    def _stop_trial(self, trial, error=False, error_msg=None, stop_logger=True):
+    def _stop_trial(self, trial, error=False, error_msg=None,
+                    stop_logger=True):
         """Stops this trial.
 
         Stops this trial, releasing all allocating resources. If stopping the
@@ -267,7 +262,8 @@ class RayTrialExecutor(TrialExecutor):
         try:
             trial.write_error_log(error_msg)
             if hasattr(trial, "runner") and trial.runner:
-                if not error and self._reuse_actors and self._cached_actor is None:
+                if (not error and self._reuse_actors
+                        and self._cached_actor is None):
                     logger.debug("Reusing actor for %s", trial.runner)
                     self._cached_actor = trial.runner
                 else:
@@ -297,12 +293,14 @@ class RayTrialExecutor(TrialExecutor):
         try:
             self._start_trial(trial, checkpoint, train=train)
         except AbortTrialExecution:
-            logger.exception("Trial %s: Error starting runner, aborting!", trial)
+            logger.exception("Trial %s: Error starting runner, aborting!",
+                             trial)
             time.sleep(2)
             error_msg = traceback.format_exc()
             self._stop_trial(trial, error=True, error_msg=error_msg)
         except Exception:
-            logger.exception("Trial %s: Unexpected error starting runner.", trial)
+            logger.exception("Trial %s: Unexpected error starting runner.",
+                             trial)
             time.sleep(2)
             error_msg = traceback.format_exc()
             self._stop_trial(trial, error=True, error_msg=error_msg)
@@ -317,8 +315,7 @@ class RayTrialExecutor(TrialExecutor):
         """Only returns resources if resources allocated."""
         prior_status = trial.status
         self._stop_trial(
-            trial, error=error, error_msg=error_msg, stop_logger=stop_logger
-        )
+            trial, error=error, error_msg=error_msg, stop_logger=stop_logger)
         if prior_status == Trial.RUNNING:
             logger.debug("Trial %s: Returning resources.", trial)
             self._return_resources(trial.resources)
@@ -359,10 +356,11 @@ class RayTrialExecutor(TrialExecutor):
             with warn_if_slow("reset_config"):
                 try:
                     reset_val = ray.get(
-                        trainable.reset_config.remote(new_config), DEFAULT_GET_TIMEOUT
-                    )
+                        trainable.reset_config.remote(new_config),
+                        DEFAULT_GET_TIMEOUT)
                 except RayTimeoutError:
-                    logger.exception("Trial %s: reset_config timed out.", trial)
+                    logger.exception("Trial %s: reset_config timed out.",
+                                     trial)
                     return False
         return reset_val
 
@@ -413,9 +411,7 @@ class RayTrialExecutor(TrialExecutor):
                 "Over the last {} seconds, the Tune event loop has been "
                 "backlogged processing new results. Consider increasing your "
                 "period of result reporting to improve performance.".format(
-                    BOTTLENECK_WARN_PERIOD_S
-                )
-            )
+                    BOTTLENECK_WARN_PERIOD_S))
 
             self._last_nontrivial_wait = time.time()
         return self._running[result_id]
@@ -441,48 +437,46 @@ class RayTrialExecutor(TrialExecutor):
     def _commit_resources(self, resources):
         committed = self._committed_resources
         all_keys = set(resources.custom_resources).union(
-            set(committed.custom_resources)
-        )
+            set(committed.custom_resources))
 
         custom_resources = {
-            k: committed.get(k) + resources.get_res_total(k) for k in all_keys
+            k: committed.get(k) + resources.get_res_total(k)
+            for k in all_keys
         }
 
         self._committed_resources = Resources(
             committed.cpu + resources.cpu_total(),
             committed.gpu + resources.gpu_total(),
             committed.memory + resources.memory_total(),
-            committed.object_store_memory + resources.object_store_memory_total(),
-            custom_resources=custom_resources,
-        )
+            committed.object_store_memory +
+            resources.object_store_memory_total(),
+            custom_resources=custom_resources)
 
     def _return_resources(self, resources):
         committed = self._committed_resources
 
         all_keys = set(resources.custom_resources).union(
-            set(committed.custom_resources)
-        )
+            set(committed.custom_resources))
 
         custom_resources = {
-            k: committed.get(k) - resources.get_res_total(k) for k in all_keys
+            k: committed.get(k) - resources.get_res_total(k)
+            for k in all_keys
         }
         self._committed_resources = Resources(
             committed.cpu - resources.cpu_total(),
             committed.gpu - resources.gpu_total(),
-            custom_resources=custom_resources,
-        )
+            custom_resources=custom_resources)
 
-        assert (
-            self._committed_resources.is_nonnegative()
-        ), "Resource invalid: {}".format(resources)
+        assert self._committed_resources.is_nonnegative(), (
+            "Resource invalid: {}".format(resources))
 
     def _update_avail_resources(self, num_retries=5):
         resources = None
         for i in range(num_retries):
             if i > 0:
                 logger.warning(
-                    "Cluster resources not detected or are 0. Attempt #" "%s...", i + 1
-                )
+                    "Cluster resources not detected or are 0. Attempt #"
+                    "%s...", i + 1)
                 time.sleep(0.5)
             try:
                 resources = ray.cluster_resources()
@@ -499,19 +493,16 @@ class RayTrialExecutor(TrialExecutor):
             # clients to connect.
             resources.setdefault("CPU", 0)
             resources.setdefault("GPU", 0)
-            logger.warning(
-                "Cluster resources cannot be detected or are 0. "
-                "You can resume this experiment by passing in "
-                "`resume=True` to `run`."
-            )
+            logger.warning("Cluster resources cannot be detected or are 0. "
+                           "You can resume this experiment by passing in "
+                           "`resume=True` to `run`.")
 
         resources = resources.copy()
         num_cpus = resources.pop("CPU", 0)
         num_gpus = resources.pop("GPU", 0)
         memory = ray_constants.from_memory_units(resources.pop("memory", 0))
         object_store_memory = ray_constants.from_memory_units(
-            resources.pop("object_store_memory", 0)
-        )
+            resources.pop("object_store_memory", 0))
         custom_resources = resources
 
         self._avail_resources = Resources(
@@ -519,8 +510,7 @@ class RayTrialExecutor(TrialExecutor):
             int(num_gpus),
             memory=int(memory),
             object_store_memory=int(object_store_memory),
-            custom_resources=custom_resources,
-        )
+            custom_resources=custom_resources)
         self._last_resource_refresh = time.time()
         self._resources_initialized = True
 
@@ -534,21 +524,17 @@ class RayTrialExecutor(TrialExecutor):
         if time.time() - self._last_resource_refresh > self._refresh_period:
             self._update_avail_resources()
 
-        currently_available = Resources.subtract(
-            self._avail_resources, self._committed_resources
-        )
+        currently_available = Resources.subtract(self._avail_resources,
+                                                 self._committed_resources)
 
         have_space = (
             resources.cpu_total() <= currently_available.cpu
             and resources.gpu_total() <= currently_available.gpu
             and resources.memory_total() <= currently_available.memory
-            and resources.object_store_memory_total()
-            <= currently_available.object_store_memory
-            and all(
+            and resources.object_store_memory_total() <=
+            currently_available.object_store_memory and all(
                 resources.get_res_total(res) <= currently_available.get(res)
-                for res in resources.custom_resources
-            )
-        )
+                for res in resources.custom_resources))
 
         if have_space:
             # The assumption right now is that we block all trials if one
@@ -565,8 +551,7 @@ class RayTrialExecutor(TrialExecutor):
                 "may appear to hang until enough resources are added to the "
                 "cluster (e.g., via autoscaling). You can disable this "
                 "behavior by specifying `queue_trials=False` in "
-                "ray.tune.run()."
-            )
+                "ray.tune.run().")
             return True
 
         return False
@@ -574,30 +559,24 @@ class RayTrialExecutor(TrialExecutor):
     def debug_string(self):
         """Returns a human readable message for printing to the console."""
         if self._resources_initialized:
-            status = (
-                "Resources requested: {}/{} CPUs, {}/{} GPUs, "
-                "{}/{} GiB heap, {}/{} GiB objects".format(
-                    self._committed_resources.cpu,
-                    self._avail_resources.cpu,
-                    self._committed_resources.gpu,
-                    self._avail_resources.gpu,
-                    _to_gb(self._committed_resources.memory),
-                    _to_gb(self._avail_resources.memory),
-                    _to_gb(self._committed_resources.object_store_memory),
-                    _to_gb(self._avail_resources.object_store_memory),
-                )
-            )
-            customs = ", ".join(
-                [
-                    "{}/{} {}".format(
-                        self._committed_resources.get_res_total(name),
-                        self._avail_resources.get_res_total(name),
-                        name,
-                    )
-                    for name in self._avail_resources.custom_resources
-                    if not name.startswith(ray.resource_spec.NODE_ID_PREFIX)
-                ]
-            )
+            status = ("Resources requested: {}/{} CPUs, {}/{} GPUs, "
+                      "{}/{} GiB heap, {}/{} GiB objects".format(
+                          self._committed_resources.cpu,
+                          self._avail_resources.cpu,
+                          self._committed_resources.gpu,
+                          self._avail_resources.gpu,
+                          _to_gb(self._committed_resources.memory),
+                          _to_gb(self._avail_resources.memory),
+                          _to_gb(
+                              self._committed_resources.object_store_memory),
+                          _to_gb(self._avail_resources.object_store_memory)))
+            customs = ", ".join([
+                "{}/{} {}".format(
+                    self._committed_resources.get_res_total(name),
+                    self._avail_resources.get_res_total(name), name)
+                for name in self._avail_resources.custom_resources
+                if not name.startswith(ray.resource_spec.NODE_ID_PREFIX)
+            ])
             if customs:
                 status += " ({})".format(customs)
             return status
@@ -607,17 +586,17 @@ class RayTrialExecutor(TrialExecutor):
     def resource_string(self):
         """Returns a string describing the total resources available."""
         if self._resources_initialized:
-            res_str = "{} CPUs, {} GPUs, " "{} GiB heap, {} GiB objects".format(
-                self._avail_resources.cpu,
-                self._avail_resources.gpu,
-                _to_gb(self._avail_resources.memory),
-                _to_gb(self._avail_resources.object_store_memory),
-            )
+            res_str = ("{} CPUs, {} GPUs, "
+                       "{} GiB heap, {} GiB objects".format(
+                           self._avail_resources.cpu,
+                           self._avail_resources.gpu,
+                           _to_gb(self._avail_resources.memory),
+                           _to_gb(self._avail_resources.object_store_memory)))
             if self._avail_resources.custom_resources:
                 custom = ", ".join(
-                    "{} {}".format(self._avail_resources.get_res_total(name), name)
-                    for name in self._avail_resources.custom_resources
-                )
+                    "{} {}".format(
+                        self._avail_resources.get_res_total(name), name)
+                    for name in self._avail_resources.custom_resources)
                 res_str += " ({})".format(custom)
             return res_str
         else:
@@ -674,8 +653,7 @@ class RayTrialExecutor(TrialExecutor):
             return
         if trial.runner is None:
             raise RuntimeError(
-                "Trial {}: Unable to restore - no runner found.".format(trial)
-            )
+                "Trial {}: Unable to restore - no runner found.".format(trial))
         value = checkpoint.value
         if checkpoint.storage == Checkpoint.MEMORY:
             logger.debug("Trial %s: Attempting restore from object", trial)
@@ -691,7 +669,8 @@ class RayTrialExecutor(TrialExecutor):
             elif trial.sync_on_checkpoint:
                 # This provides FT backwards compatibility in the
                 # case where a DurableTrainable is not provided.
-                logger.warning("Trial %s: Reading checkpoint into memory.", trial)
+                logger.warning("Trial %s: Reading checkpoint into memory.",
+                               trial)
                 data_dict = TrainableUtil.pickle_checkpoint(value)
                 with self._change_working_directory(trial):
                     remote = trial.runner.restore_from_object.remote(data_dict)
@@ -700,8 +679,7 @@ class RayTrialExecutor(TrialExecutor):
                     "Pass in `sync_on_checkpoint=True` for driver-based trial"
                     "restoration. Pass in an `upload_dir` and a Trainable "
                     "extending `DurableTrainable` for remote storage-based "
-                    "restoration"
-                )
+                    "restoration")
 
             if block:
                 ray.get(remote)
@@ -719,8 +697,7 @@ class RayTrialExecutor(TrialExecutor):
             with self._change_working_directory(trial):
                 return ray.get(
                     trial.runner.export_model.remote(trial.export_formats),
-                    DEFAULT_GET_TIMEOUT,
-                )
+                    DEFAULT_GET_TIMEOUT)
         return {}
 
     def has_gpus(self):
@@ -750,4 +727,4 @@ class RayTrialExecutor(TrialExecutor):
 
 
 def _to_gb(n_bytes):
-    return round(n_bytes / (1024 ** 3), 2)
+    return round(n_bytes / (1024**3), 2)

@@ -39,8 +39,7 @@ def dataset_creator():
         data,
         batch_size=32,
         max_concurrency=2,
-        download_func=lambda x: (to_mat(x), to_mat(x)),
-    )
+        download_func=lambda x: (to_mat(x), to_mat(x)))
     return dataset
 
 

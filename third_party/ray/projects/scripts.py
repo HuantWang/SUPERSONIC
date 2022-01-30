@@ -45,13 +45,15 @@ CLUSTER_TEMPLATE = os.path.join(_TEMPLATE_DIR, "cluster_template.yaml")
 REQUIREMENTS_TXT_TEMPLATE = os.path.join(_TEMPLATE_DIR, "requirements.txt")
 
 
-@click.group("project", help="[Experimental] Commands working with ray project")
+@click.group(
+    "project", help="[Experimental] Commands working with ray project")
 def project_cli():
     pass
 
 
 @project_cli.command(help="Validate current project spec")
-@click.option("--verbose", help="If set, print the validated file", is_flag=True)
+@click.option(
+    "--verbose", help="If set, print the validated file", is_flag=True)
 def validate(verbose):
     try:
         project = ray.projects.ProjectDefinition(os.getcwd())
@@ -66,16 +68,17 @@ def validate(verbose):
 @project_cli.command(help="Create a new project within current directory")
 @click.argument("project_name")
 @click.option(
-    "--cluster-yaml", help="Path to autoscaler yaml. Created by default", default=None
-)
+    "--cluster-yaml",
+    help="Path to autoscaler yaml. Created by default",
+    default=None)
 @click.option(
-    "--requirements", help="Path to requirements.txt. Created by default", default=None
-)
+    "--requirements",
+    help="Path to requirements.txt. Created by default",
+    default=None)
 def create(project_name, cluster_yaml, requirements):
     if os.path.exists(PROJECT_DIR):
         raise click.ClickException(
-            "Project directory {} already exists.".format(PROJECT_DIR)
-        )
+            "Project directory {} already exists.".format(PROJECT_DIR))
     os.makedirs(PROJECT_DIR)
 
     if cluster_yaml is None:
@@ -99,8 +102,7 @@ def create(project_name, cluster_yaml, requirements):
     if os.path.exists(".git"):
         try:
             repo = subprocess.check_output(
-                "git remote get-url origin".split(" ")
-            ).strip()
+                "git remote get-url origin".split(" ")).strip()
             logger.info("Setting repo URL to %s", repo)
         except subprocess.CalledProcessError:
             pass
@@ -110,16 +112,16 @@ def create(project_name, cluster_yaml, requirements):
         # NOTE(simon):
         # We could use jinja2, which will make the templating part easier.
         project_template = project_template.replace(r"{{name}}", project_name)
-        project_template = project_template.replace(r"{{cluster}}", cluster_yaml)
-        project_template = project_template.replace(r"{{requirements}}", requirements)
+        project_template = project_template.replace(r"{{cluster}}",
+                                                    cluster_yaml)
+        project_template = project_template.replace(r"{{requirements}}",
+                                                    requirements)
         if repo is None:
             project_template = project_template.replace(
-                r"{{repo_string}}", "# repo: {}".format("...")
-            )
+                r"{{repo_string}}", "# repo: {}".format("..."))
         else:
             project_template = project_template.replace(
-                r"{{repo_string}}", "repo: {}".format(repo)
-            )
+                r"{{repo_string}}", "repo: {}".format(repo))
     with open(PROJECT_YAML, "w") as f:
         f.write(project_template)
 
@@ -127,8 +129,7 @@ def create(project_name, cluster_yaml, requirements):
 @click.group(
     "session",
     help="[Experimental] Commands working with sessions, which are "
-    "running instances of a project.",
-)
+    "running instances of a project.")
 def session_cli():
     pass
 
@@ -140,8 +141,7 @@ def load_project_or_throw():
     except (jsonschema.exceptions.ValidationError, ValueError):
         raise click.ClickException(
             "Project file validation failed. Please run "
-            "`ray project validate` to inspect the error."
-        )
+            "`ray project validate` to inspect the error.")
 
 
 class SessionRunner:
@@ -160,14 +160,13 @@ class SessionRunner:
         self.session_name = session_name
 
         # Check for features we don't support right now
-        project_environment = self.project_definition.config.get("environment", {})
-        need_docker = (
-            "dockerfile" in project_environment or "dockerimage" in project_environment
-        )
+        project_environment = self.project_definition.config.get(
+            "environment", {})
+        need_docker = ("dockerfile" in project_environment
+                       or "dockerimage" in project_environment)
         if need_docker:
             raise click.ClickException(
-                "Docker support in session is currently not implemented."
-            )
+                "Docker support in session is currently not implemented.")
 
     def create_cluster(self):
         """Create a cluster that will run the session."""
@@ -193,7 +192,8 @@ class SessionRunner:
 
     def setup_environment(self):
         """Set up the environment of the session."""
-        project_environment = self.project_definition.config.get("environment", {})
+        project_environment = self.project_definition.config.get(
+            "environment", {})
 
         if "requirements" in project_environment:
             requirements_txt = project_environment["requirements"]
@@ -201,8 +201,7 @@ class SessionRunner:
             # Create a temporary requirements_txt in the head node.
             remote_requirements_txt = os.path.join(
                 ray.utils.get_user_temp_dir(),
-                "ray_project_requirements_txt_{}".format(time.time()),
-            )
+                "ray_project_requirements_txt_{}".format(time.time()))
 
             rsync(
                 self.project_definition.cluster_yaml(),
@@ -211,7 +210,8 @@ class SessionRunner:
                 override_cluster_name=self.session_name,
                 down=False,
             )
-            self.execute_command("pip install -r {}".format(remote_requirements_txt))
+            self.execute_command(
+                "pip install -r {}".format(remote_requirements_txt))
 
         if "shell" in project_environment:
             for cmd in project_environment["shell"]:
@@ -282,15 +282,14 @@ def get_session_runs(name, command, parsed_args):
                 wildcard_arg = key
             else:
                 raise click.ClickException(
-                    "More than one wildcard is not supported at the moment"
-                )
+                    "More than one wildcard is not supported at the moment")
 
     if not wildcard_arg:
         session_run = {
             "name": name,
             "command": format_command(command, parsed_args),
             "params": parsed_args,
-            "num_steps": 4,
+            "num_steps": 4
         }
         return [session_run]
     else:
@@ -302,7 +301,7 @@ def get_session_runs(name, command, parsed_args):
                 "name": "{}-{}-{}".format(name, wildcard_arg, val),
                 "command": format_command(command, parsed_args),
                 "params": parsed_args,
-                "num_steps": 4,
+                "num_steps": 4
             }
             session_runs.append(session_run)
         return session_runs
@@ -310,8 +309,7 @@ def get_session_runs(name, command, parsed_args):
 
 @session_cli.command(help="Attach to an existing cluster")
 @click.option(
-    "--screen", is_flag=True, default=False, help="Run the command in screen."
-)
+    "--screen", is_flag=True, default=False, help="Run the command in screen.")
 @click.option("--tmux", help="Attach to tmux session", is_flag=True)
 def attach(screen, tmux):
     project_definition = load_project_or_throw()
@@ -337,25 +335,21 @@ def stop(name):
         project_definition.cluster_yaml(),
         yes=True,
         workers_only=False,
-        override_cluster_name=name,
-    )
+        override_cluster_name=name)
 
 
 @session_cli.command(
     name="start",
-    context_settings=dict(ignore_unknown_options=True,),
-    help="Start a session based on current project config",
-)
+    context_settings=dict(ignore_unknown_options=True, ),
+    help="Start a session based on current project config")
 @click.argument("command", required=False)
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.option(
     "--shell",
     help=(
         "If set, run the command as a raw shell command instead of looking up "
-        "the command in the project config"
-    ),
-    is_flag=True,
-)
+        "the command in the project config"),
+    is_flag=True)
 @click.option("--name", help="A name to tag the session with.", default=None)
 def session_start(command, args, shell, name):
     project_definition = load_project_or_throw()
@@ -367,18 +361,15 @@ def session_start(command, args, shell, name):
     # which should be done before the cluster is started.
     try:
         command, parsed_args, config = project_definition.get_command_info(
-            command, args, shell, wildcards=True
-        )
+            command, args, shell, wildcards=True)
     except ValueError as e:
         raise click.ClickException(e)
     session_runs = get_session_runs(name, command, parsed_args)
 
     if len(session_runs) > 1 and not config.get("tmux", False):
-        logging.info(
-            "Using wildcards with tmux = False would not create "
-            "sessions in parallel, so we are overriding it with "
-            "tmux = True."
-        )
+        logging.info("Using wildcards with tmux = False would not create "
+                     "sessions in parallel, so we are overriding it with "
+                     "tmux = True.")
         config["tmux"] = True
 
     for run in session_runs:
@@ -397,8 +388,8 @@ def session_start(command, args, shell, name):
 
 
 @session_cli.command(
-    name="commands", help="Print available commands for sessions of this project."
-)
+    name="commands",
+    help="Print available commands for sessions of this project.")
 def session_commands():
     project_definition = load_project_or_throw()
     print("Active project: " + project_definition.config["name"])
@@ -407,10 +398,9 @@ def session_commands():
     commands = project_definition.config["commands"]
 
     for command in commands:
-        print('Command "{}":'.format(command["name"]))
+        print("Command \"{}\":".format(command["name"]))
         parser = argparse.ArgumentParser(
-            command["name"], description=command.get("help"), add_help=False
-        )
+            command["name"], description=command.get("help"), add_help=False)
         params = command.get("params", [])
         for param in params:
             name = param.pop("name")
@@ -424,26 +414,23 @@ def session_commands():
 
 @session_cli.command(
     name="execute",
-    context_settings=dict(ignore_unknown_options=True,),
-    help="Execute a command in a session",
-)
+    context_settings=dict(ignore_unknown_options=True, ),
+    help="Execute a command in a session")
 @click.argument("command", required=False)
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.option(
     "--shell",
     help=(
         "If set, run the command as a raw shell command instead of looking up "
-        "the command in the project config"
-    ),
-    is_flag=True,
-)
-@click.option("--name", help="Name of the session to run this command on", default=None)
+        "the command in the project config"),
+    is_flag=True)
+@click.option(
+    "--name", help="Name of the session to run this command on", default=None)
 def session_execute(command, args, shell, name):
     project_definition = load_project_or_throw()
     try:
         command, parsed_args, config = project_definition.get_command_info(
-            command, args, shell, wildcards=False
-        )
+            command, args, shell, wildcards=False)
     except ValueError as e:
         raise click.ClickException(e)
 

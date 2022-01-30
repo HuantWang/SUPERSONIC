@@ -91,7 +91,10 @@ def push_error_to_driver(worker, error_type, message, job_id=None):
     worker.core_worker.push_error(job_id, error_type, message, time.time())
 
 
-def push_error_to_driver_through_redis(redis_client, error_type, message, job_id=None):
+def push_error_to_driver_through_redis(redis_client,
+                                       error_type,
+                                       message,
+                                       job_id=None):
     """Push an error message to the driver to be printed in the background.
 
     Normally the push_error_to_driver function should be used. However, in some
@@ -112,16 +115,12 @@ def push_error_to_driver_through_redis(redis_client, error_type, message, job_id
     assert isinstance(job_id, ray.JobID)
     # Do everything in Python and through the Python Redis client instead
     # of through the raylet.
-    error_data = ray.gcs_utils.construct_error_message(
-        job_id, error_type, message, time.time()
-    )
+    error_data = ray.gcs_utils.construct_error_message(job_id, error_type,
+                                                       message, time.time())
     redis_client.execute_command(
-        "RAY.TABLE_APPEND",
-        ray.gcs_utils.TablePrefix.Value("ERROR_INFO"),
-        ray.gcs_utils.TablePubsub.Value("ERROR_INFO_PUBSUB"),
-        job_id.binary(),
-        error_data,
-    )
+        "RAY.TABLE_APPEND", ray.gcs_utils.TablePrefix.Value("ERROR_INFO"),
+        ray.gcs_utils.TablePubsub.Value("ERROR_INFO_PUBSUB"), job_id.binary(),
+        error_data)
 
 
 def is_cython(obj):
@@ -135,9 +134,8 @@ def is_cython(obj):
         return type(x).__name__ == "cython_function_or_method"
 
     # Check if function or method, respectively
-    return check_cython(obj) or (
-        hasattr(obj, "__func__") and check_cython(obj.__func__)
-    )
+    return check_cython(obj) or \
+        (hasattr(obj, "__func__") and check_cython(obj.__func__))
 
 
 def is_function_or_method(obj):
@@ -214,7 +212,8 @@ def decode(byte_str, allow_none=False):
         return ""
 
     if not isinstance(byte_str, bytes):
-        raise ValueError("The argument {} must be a bytes object.".format(byte_str))
+        raise ValueError(
+            "The argument {} must be a bytes object.".format(byte_str))
     if sys.version_info >= (3, 0):
         return byte_str.decode("ascii")
     else:
@@ -257,7 +256,7 @@ def hex_to_binary(hex_identifier):
 # once we separate `WorkerID` from `UniqueID`.
 def compute_job_id_from_driver(driver_id):
     assert isinstance(driver_id, ray.WorkerID)
-    return ray.JobID(driver_id.binary()[0 : ray.JobID.size()])
+    return ray.JobID(driver_id.binary()[0:ray.JobID.size()])
 
 
 def compute_driver_id_from_job(job_id):
@@ -308,17 +307,10 @@ def set_cuda_visible_devices(gpu_ids):
 
 
 def resources_from_resource_arguments(
-    default_num_cpus,
-    default_num_gpus,
-    default_memory,
-    default_object_store_memory,
-    default_resources,
-    runtime_num_cpus,
-    runtime_num_gpus,
-    runtime_memory,
-    runtime_object_store_memory,
-    runtime_resources,
-):
+        default_num_cpus, default_num_gpus, default_memory,
+        default_object_store_memory, default_resources, runtime_num_cpus,
+        runtime_num_gpus, runtime_memory, runtime_object_store_memory,
+        runtime_resources):
     """Determine a task's resource requirements.
 
     Args:
@@ -353,19 +345,15 @@ def resources_from_resource_arguments(
         resources = {}
 
     if "CPU" in resources or "GPU" in resources:
-        raise ValueError(
-            "The resources dictionary must not " "contain the key 'CPU' or 'GPU'"
-        )
+        raise ValueError("The resources dictionary must not "
+                         "contain the key 'CPU' or 'GPU'")
     elif "memory" in resources or "object_store_memory" in resources:
-        raise ValueError(
-            "The resources dictionary must not "
-            "contain the key 'memory' or 'object_store_memory'"
-        )
+        raise ValueError("The resources dictionary must not "
+                         "contain the key 'memory' or 'object_store_memory'")
 
     assert default_num_cpus is not None
-    resources["CPU"] = (
-        default_num_cpus if runtime_num_cpus is None else runtime_num_cpus
-    )
+    resources["CPU"] = (default_num_cpus
+                        if runtime_num_cpus is None else runtime_num_cpus)
 
     if runtime_num_gpus is not None:
         resources["GPU"] = runtime_num_gpus
@@ -373,13 +361,14 @@ def resources_from_resource_arguments(
         resources["GPU"] = default_num_gpus
 
     memory = default_memory or runtime_memory
-    object_store_memory = default_object_store_memory or runtime_object_store_memory
+    object_store_memory = (default_object_store_memory
+                           or runtime_object_store_memory)
     if memory is not None:
-        resources["memory"] = ray_constants.to_memory_units(memory, round_up=True)
+        resources["memory"] = ray_constants.to_memory_units(
+            memory, round_up=True)
     if object_store_memory is not None:
         resources["object_store_memory"] = ray_constants.to_memory_units(
-            object_store_memory, round_up=True
-        )
+            object_store_memory, round_up=True)
 
     return resources
 
@@ -507,8 +496,7 @@ def check_oversized_pickle(pickled, name, obj_type, worker):
         worker,
         ray_constants.PICKLING_LARGE_OBJECT_PUSH_ERROR,
         warning_message,
-        job_id=worker.current_job_id,
-    )
+        job_id=worker.current_job_id)
 
 
 def is_main_thread():
@@ -519,10 +507,8 @@ def detect_fate_sharing_support_win32():
     global win32_job, win32_AssignProcessToJobObject
     if win32_job is None and sys.platform == "win32":
         import ctypes
-
         try:
             from ctypes.wintypes import BOOL, DWORD, HANDLE, LPVOID, LPCWSTR
-
             kernel32 = ctypes.WinDLL("kernel32")
             kernel32.CreateJobObjectW.argtypes = (LPVOID, LPCWSTR)
             kernel32.CreateJobObjectW.restype = HANDLE
@@ -565,7 +551,8 @@ def detect_fate_sharing_support_win32():
 
             class JOBOBJECT_EXTENDED_LIMIT_INFORMATION(ctypes.Structure):
                 _fields_ = [
-                    ("BasicLimitInformation", JOBOBJECT_BASIC_LIMIT_INFORMATION),
+                    ("BasicLimitInformation",
+                     JOBOBJECT_BASIC_LIMIT_INFORMATION),
                     ("IoInfo", IO_COUNTERS),
                     ("ProcessMemoryLimit", ctypes.c_size_t),
                     ("JobMemoryLimit", ctypes.c_size_t),
@@ -585,16 +572,13 @@ def detect_fate_sharing_support_win32():
             buf.BasicLimitInformation.LimitFlags = (
                 (0 if debug else JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE)
                 | JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
-                | JOB_OBJECT_LIMIT_BREAKAWAY_OK
-            )
+                | JOB_OBJECT_LIMIT_BREAKAWAY_OK)
             infoclass = JobObjectExtendedLimitInformation
             if not kernel32.SetInformationJobObject(
-                job, infoclass, ctypes.byref(buf), ctypes.sizeof(buf)
-            ):
+                    job, infoclass, ctypes.byref(buf), ctypes.sizeof(buf)):
                 job = None
-        win32_AssignProcessToJobObject = (
-            kernel32.AssignProcessToJobObject if kernel32 is not None else False
-        )
+        win32_AssignProcessToJobObject = (kernel32.AssignProcessToJobObject
+                                          if kernel32 is not None else False)
         win32_job = job if job else False
     return bool(win32_job)
 
@@ -604,7 +588,6 @@ def detect_fate_sharing_support_linux():
     if linux_prctl is None and sys.platform.startswith("linux"):
         try:
             from ctypes import c_int, c_ulong, CDLL
-
             prctl = CDLL(None).prctl
             prctl.restype = c_int
             prctl.argtypes = [c_int, c_ulong, c_ulong, c_ulong, c_ulong]
@@ -630,11 +613,9 @@ def set_kill_on_parent_death_linux():
     """
     if detect_fate_sharing_support_linux():
         import signal
-
         PR_SET_PDEATHSIG = 1
         if linux_prctl(PR_SET_PDEATHSIG, signal.SIGKILL, 0, 0, 0) != 0:
             import ctypes
-
             raise OSError(ctypes.get_errno(), "prctl(PR_SET_PDEATHSIG) failed")
     else:
         assert False, "PR_SET_PDEATHSIG used despite being unavailable"
@@ -656,8 +637,8 @@ def set_kill_child_on_death_win32(child_proc):
     if detect_fate_sharing_support_win32():
         if not win32_AssignProcessToJobObject(win32_job, int(child_proc)):
             import ctypes
-
-            raise OSError(ctypes.get_last_error(), "AssignProcessToJobObject() failed")
+            raise OSError(ctypes.get_last_error(),
+                          "AssignProcessToJobObject() failed")
     else:
         assert False, "AssignProcessToJobObject used despite being unavailable"
 

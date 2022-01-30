@@ -14,26 +14,22 @@ class TestPolicy(Policy):
         self.exploration = self._create_exploration()
 
     @override(Policy)
-    def compute_actions(
-        self,
-        obs_batch,
-        state_batches=None,
-        prev_action_batch=None,
-        prev_reward_batch=None,
-        episodes=None,
-        explore=None,
-        timestep=None,
-        **kwargs
-    ):
+    def compute_actions(self,
+                        obs_batch,
+                        state_batches=None,
+                        prev_action_batch=None,
+                        prev_reward_batch=None,
+                        episodes=None,
+                        explore=None,
+                        timestep=None,
+                        **kwargs):
         return np.array([random.choice([0, 1])] * len(obs_batch)), [], {}
 
     @override(Policy)
-    def compute_log_likelihoods(
-        self,
-        actions,
-        obs_batch,
-        state_batches=None,
-        prev_action_batch=None,
-        prev_reward_batch=None,
-    ):
+    def compute_log_likelihoods(self,
+                                actions,
+                                obs_batch,
+                                state_batches=None,
+                                prev_action_batch=None,
+                                prev_reward_batch=None):
         return np.array([random.random()] * len(obs_batch))

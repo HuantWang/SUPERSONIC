@@ -13,8 +13,7 @@ class ActionHandler:
     def handle_kill_action(self, action: dict):
         kill_action = KillAction.parse_obj(action)
         self.dashboard_controller.kill_actor(
-            kill_action.actor_id, kill_action.ip_address, kill_action.port
-        )
+            kill_action.actor_id, kill_action.ip_address, kill_action.port)
 
     def handle_actions(self, actions: typing.List[dict]):
         for action in actions:
@@ -23,10 +22,9 @@ class ActionHandler:
             if action_type == ActionType.KILL_ACTOR:
                 self.handle_kill_action(action)
             else:
-                logger.warning(
-                    "Action type {} has been received, but "
-                    "action handler doesn't know how to handle "
-                    "them. It will skip processing the request. "
-                    "Plesae raise an issue if you see this problem.".format(action_type)
-                )
+                logger.warning("Action type {} has been received, but "
+                               "action handler doesn't know how to handle "
+                               "them. It will skip processing the request. "
+                               "Plesae raise an issue if you see this problem."
+                               .format(action_type))
                 continue

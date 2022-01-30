@@ -10,13 +10,11 @@ from ray.tune.suggest.bayesopt import BayesOptSearch
 
 def easy_objective(config, reporter):
     import time
-
     time.sleep(0.2)
     for i in range(config["iterations"]):
         reporter(
             timesteps_total=i,
-            mean_loss=(config["height"] - 14) ** 2 - abs(config["width"] - 3),
-        )
+            mean_loss=(config["height"] - 14)**2 - abs(config["width"] - 3))
         time.sleep(0.02)
 
 
@@ -25,8 +23,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing"
-    )
+        "--smoke-test", action="store_true", help="Finish quickly for testing")
     args, _ = parser.parse_known_args()
     ray.init()
 
@@ -34,14 +31,25 @@ if __name__ == "__main__":
 
     config = {
         "num_samples": 10 if args.smoke_test else 1000,
-        "config": {"iterations": 100,},
-        "stop": {"timesteps_total": 100},
+        "config": {
+            "iterations": 100,
+        },
+        "stop": {
+            "timesteps_total": 100
+        }
     }
     algo = BayesOptSearch(
         space,
         metric="mean_loss",
         mode="min",
-        utility_kwargs={"kind": "ucb", "kappa": 2.5, "xi": 0.0},
-    )
+        utility_kwargs={
+            "kind": "ucb",
+            "kappa": 2.5,
+            "xi": 0.0
+        })
     scheduler = AsyncHyperBandScheduler(metric="mean_loss", mode="min")
-    run(easy_objective, name="my_exp", search_alg=algo, scheduler=scheduler, **config)
+    run(easy_objective,
+        name="my_exp",
+        search_alg=algo,
+        scheduler=scheduler,
+        **config)

@@ -51,14 +51,9 @@ class HyperBandForBOHB(HyperBandScheduler):
                     cur_bracket = None
                 else:
                     retry = False
-                    cur_bracket = Bracket(
-                        self._time_attr,
-                        self._get_n0(s),
-                        self._get_r0(s),
-                        self._max_t_attr,
-                        self._eta,
-                        s,
-                    )
+                    cur_bracket = Bracket(self._time_attr, self._get_n0(s),
+                                          self._get_r0(s), self._max_t_attr,
+                                          self._eta, s)
                 cur_band.append(cur_bracket)
                 self._state["bracket"] = cur_bracket
 
@@ -86,9 +81,9 @@ class HyperBandForBOHB(HyperBandScheduler):
 
         # MAIN CHANGE HERE!
         statuses = [(t, t.status) for t in bracket._live_trials]
-        if not bracket.filled() or any(
-            status != Trial.PAUSED for t, status in statuses if t is not trial
-        ):
+        if not bracket.filled() or any(status != Trial.PAUSED
+                                       for t, status in statuses
+                                       if t is not trial):
             trial_runner._search_alg.searcher.on_pause(trial.trial_id)
             return TrialScheduler.PAUSE
         action = self._process_bracket(trial_runner, bracket)
@@ -112,18 +107,16 @@ class HyperBandForBOHB(HyperBandScheduler):
             scrubbed = [b for b in hyperband if b is not None]
             for bracket in scrubbed:
                 for trial in bracket.current_trials():
-                    if trial.status == Trial.PENDING and trial_runner.has_resources(
-                        trial.resources
-                    ):
+                    if (trial.status == Trial.PENDING
+                            and trial_runner.has_resources(trial.resources)):
                         return trial
         # MAIN CHANGE HERE!
-        if not any(t.status == Trial.RUNNING for t in trial_runner.get_trials()):
+        if not any(t.status == Trial.RUNNING
+                   for t in trial_runner.get_trials()):
             for hyperband in self._hyperbands:
                 for bracket in hyperband:
-                    if bracket and any(
-                        trial.status == Trial.PAUSED
-                        for trial in bracket.current_trials()
-                    ):
+                    if bracket and any(trial.status == Trial.PAUSED
+                                       for trial in bracket.current_trials()):
                         # This will change the trial state and let the
                         # trial runner retry.
                         self._process_bracket(trial_runner, bracket)

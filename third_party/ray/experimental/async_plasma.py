@@ -7,7 +7,6 @@ from collections import defaultdict
 
 class PlasmaObjectFuture(asyncio.Future):
     """This class is a wrapper for a Future on Plasma."""
-
     pass
 
 
@@ -23,7 +22,8 @@ class PlasmaEventHandler:
     def _complete_future(self, ray_object_id):
         # TODO(ilr): Consider race condition between popping from the
         # waiting_dict and as_future appending to the waiting_dict's list.
-        logger.debug("Completing plasma futures for object id {}".format(ray_object_id))
+        logger.debug(
+            "Completing plasma futures for object id {}".format(ray_object_id))
         if ray_object_id not in self._waiting_dict:
             return
         obj = self._worker.get_objects([ray_object_id], timeout=0)[0]
@@ -34,10 +34,8 @@ class PlasmaEventHandler:
             except asyncio.InvalidStateError:
                 # Avoid issues where process_notifications
                 # and check_immediately both get executed
-                logger.debug(
-                    "Failed to set result for future {}."
-                    "Most likely already set.".format(fut)
-                )
+                logger.debug("Failed to set result for future {}."
+                             "Most likely already set.".format(fut))
 
     def close(self):
         """Clean up this handler."""
@@ -65,10 +63,8 @@ class PlasmaEventHandler:
 
         future = PlasmaObjectFuture(loop=self._loop)
         self._waiting_dict[object_id].append(future)
-        if (
-            not self.check_immediately(object_id)
-            and len(self._waiting_dict[object_id]) == 1
-        ):
+        if not self.check_immediately(object_id) and len(
+                self._waiting_dict[object_id]) == 1:
             # Only subscribe once
             self._worker.core_worker.subscribe_to_plasma_object(object_id)
         return future

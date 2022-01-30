@@ -71,9 +71,8 @@ class CheckpointManager:
                 idempotent.
         """
         self.keep_checkpoints_num = keep_checkpoints_num or float("inf")
-        assert (
-            self.keep_checkpoints_num > 0
-        ), "keep_checkpoints_num must be greater than 0."
+        assert self.keep_checkpoints_num > 0, (
+            "keep_checkpoints_num must be greater than 0.")
         self._checkpoint_score_desc = checkpoint_score_attr.startswith("min-")
         if self._checkpoint_score_desc:
             self._checkpoint_score_attr = checkpoint_score_attr[4:]
@@ -81,7 +80,8 @@ class CheckpointManager:
             self._checkpoint_score_attr = checkpoint_score_attr
 
         self.delete = delete_fn
-        self.newest_persistent_checkpoint = Checkpoint(Checkpoint.PERSISTENT, None)
+        self.newest_persistent_checkpoint = Checkpoint(Checkpoint.PERSISTENT,
+                                                       None)
         self.newest_memory_checkpoint = Checkpoint(Checkpoint.MEMORY, None)
         self._best_checkpoints = []
         self._membership = set()
@@ -91,8 +91,7 @@ class CheckpointManager:
         """Returns the newest checkpoint (based on training iteration)."""
         newest_checkpoint = max(
             [self.newest_persistent_checkpoint, self.newest_memory_checkpoint],
-            key=lambda c: c.result.get(TRAINING_ITERATION, -1),
-        )
+            key=lambda c: c.result.get(TRAINING_ITERATION, -1))
         return newest_checkpoint
 
     def on_checkpoint(self, checkpoint):
@@ -119,11 +118,9 @@ class CheckpointManager:
         try:
             queue_item = QueueItem(self._priority(checkpoint), checkpoint)
         except KeyError:
-            logger.error(
-                "Result dict has no key: {}. "
-                "checkpoint_score_attr must be set to a key in the "
-                "result dict.".format(self._checkpoint_score_attr)
-            )
+            logger.error("Result dict has no key: {}. "
+                         "checkpoint_score_attr must be set to a key in the "
+                         "result dict.".format(self._checkpoint_score_attr))
             return
 
         if len(self._best_checkpoints) < self.keep_checkpoints_num:

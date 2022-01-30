@@ -85,8 +85,7 @@ class halide_rl:
         self.running_reward = 0
         self.num = 0
 
-        # print("zczczczczc")
-        # self.doc2vecmodel = Doc2Vec.load(env_config.get("embedding"))
+
 
     def reset(self):
         """ reset the RL environment.

@@ -16,8 +16,7 @@ class VisionNetwork(Model):
         # Hard deprecate this class. All Models should use the ModelV2
         # API from here on.
         deprecation_warning(
-            "Model->VisionNetwork", "ModelV2->VisionNetwork", error=False
-        )
+            "Model->VisionNetwork", "ModelV2->VisionNetwork", error=False)
         inputs = input_dict["obs"]
         filters = options.get("conv_filters")
         if not filters:
@@ -34,8 +33,7 @@ class VisionNetwork(Model):
                     stride,
                     activation=activation,
                     padding="same",
-                    name="conv{}".format(i),
-                )
+                    name="conv{}".format(i))
             out_size, kernel, stride = filters[-1]
 
             # skip final linear layer
@@ -47,8 +45,7 @@ class VisionNetwork(Model):
                     stride,
                     activation=activation,
                     padding="valid",
-                    name="fc_out",
-                )
+                    name="fc_out")
                 return flatten(fc_out), flatten(fc_out)
 
             fc1 = tf.layers.conv2d(
@@ -58,11 +55,13 @@ class VisionNetwork(Model):
                 stride,
                 activation=activation,
                 padding="valid",
-                name="fc1",
-            )
+                name="fc1")
             fc2 = tf.layers.conv2d(
-                fc1, num_outputs, [1, 1], activation=None, padding="same", name="fc2"
-            )
+                fc1,
+                num_outputs, [1, 1],
+                activation=None,
+                padding="same",
+                name="fc2")
             return flatten(fc2), flatten(fc1)
 
 
@@ -84,9 +83,8 @@ def _get_filter_config(shape):
         return filters_42x42
     else:
         raise ValueError(
-            "No default configuration for obs shape {}".format(shape)
-            + ", you must specify `conv_filters` manually as a model option. "
+            "No default configuration for obs shape {}".format(shape) +
+            ", you must specify `conv_filters` manually as a model option. "
             "Default configurations are only available for inputs of shape "
             "[42, 42, K] and [84, 84, K]. You may alternatively want "
-            "to use a custom model or preprocessor."
-        )
+            "to use a custom model or preprocessor.")

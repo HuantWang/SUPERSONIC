@@ -24,8 +24,7 @@ class sample_from:
 def function(func):
     logger.warning(
         "DeprecationWarning: wrapping {} with tune.function() is no "
-        "longer needed".format(func)
-    )
+        "longer needed".format(func))
     return func
 
 
@@ -51,7 +50,7 @@ def loguniform(min_bound, max_bound, base=10):
     logmax = np.log(max_bound) / np.log(base)
 
     def apply_log(_):
-        return base ** (np.random.uniform(logmin, logmax))
+        return base**(np.random.uniform(logmin, logmax))
 
     return sample_from(apply_log)
 

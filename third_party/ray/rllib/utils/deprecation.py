@@ -19,17 +19,15 @@ def deprecation_warning(old, new=None, error=None):
             If True, throw ValueError.
     """
     msg = "`{}` has been deprecated.{}".format(
-        old, (" Use `{}` instead.".format(new) if new else "")
-    )
+        old, (" Use `{}` instead.".format(new) if new else ""))
 
     if error is True:
         raise ValueError(msg)
     elif error and issubclass(error, Exception):
         raise error(msg)
     else:
-        logger.warning(
-            "DeprecationWarning: " + msg + " This will raise an error in the future!"
-        )
+        logger.warning("DeprecationWarning: " + msg +
+                       " This will raise an error in the future!")
 
 
 def renamed_class(cls, old_name):
@@ -77,7 +75,6 @@ def renamed_function(func, old_name):
 
 def moved_function(func):
     new_location = func.__module__
-    deprecation_warning(
-        "import {}".format(func.__name__), "import {}".format(new_location)
-    )
+    deprecation_warning("import {}".format(func.__name__),
+                        "import {}".format(new_location))
     return func

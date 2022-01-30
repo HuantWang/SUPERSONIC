@@ -12,12 +12,8 @@ from ray.tune.registry import get_trainable_cls
 from ray.tune.syncer import wait_for_sync
 from ray.tune.trial_runner import TrialRunner
 from ray.tune.progress_reporter import CLIReporter, JupyterNotebookReporter
-from ray.tune.schedulers import (
-    HyperBandScheduler,
-    AsyncHyperBandScheduler,
-    FIFOScheduler,
-    MedianStoppingRule,
-)
+from ray.tune.schedulers import (HyperBandScheduler, AsyncHyperBandScheduler,
+                                 FIFOScheduler, MedianStoppingRule)
 from ray.tune.web_server import TuneServer
 
 logger = logging.getLogger(__name__)
@@ -40,11 +36,8 @@ def _make_scheduler(args):
     if args.scheduler in _SCHEDULERS:
         return _SCHEDULERS[args.scheduler](**args.scheduler_config)
     else:
-        raise TuneError(
-            "Unknown scheduler: {}, should be one of {}".format(
-                args.scheduler, _SCHEDULERS.keys()
-            )
-        )
+        raise TuneError("Unknown scheduler: {}, should be one of {}".format(
+            args.scheduler, _SCHEDULERS.keys()))
 
 
 def _check_default_resources_override(run_identifier):
@@ -53,9 +46,8 @@ def _check_default_resources_override(run_identifier):
         return True
     trainable_cls = get_trainable_cls(run_identifier)
     return hasattr(trainable_cls, "default_resource_request") and (
-        trainable_cls.default_resource_request.__code__
-        != Trainable.default_resource_request.__code__
-    )
+        trainable_cls.default_resource_request.__code__ !=
+        Trainable.default_resource_request.__code__)
 
 
 def _report_progress(runner, reporter, done=False):
@@ -73,43 +65,41 @@ def _report_progress(runner, reporter, done=False):
         reporter.report(trials, done, sched_debug_str, executor_debug_str)
 
 
-def run(
-    run_or_experiment,
-    name=None,
-    stop=None,
-    config=None,
-    resources_per_trial=None,
-    num_samples=1,
-    local_dir=None,
-    upload_dir=None,
-    trial_name_creator=None,
-    loggers=None,
-    sync_to_cloud=None,
-    sync_to_driver=None,
-    checkpoint_freq=0,
-    checkpoint_at_end=False,
-    sync_on_checkpoint=True,
-    keep_checkpoints_num=None,
-    checkpoint_score_attr=None,
-    global_checkpoint_period=10,
-    export_formats=None,
-    max_failures=0,
-    fail_fast=False,
-    restore=None,
-    search_alg=None,
-    scheduler=None,
-    with_server=False,
-    server_port=TuneServer.DEFAULT_PORT,
-    verbose=2,
-    progress_reporter=None,
-    resume=False,
-    queue_trials=False,
-    reuse_actors=False,
-    trial_executor=None,
-    raise_on_failed_trial=True,
-    return_trials=False,
-    ray_auto_init=True,
-):
+def run(run_or_experiment,
+        name=None,
+        stop=None,
+        config=None,
+        resources_per_trial=None,
+        num_samples=1,
+        local_dir=None,
+        upload_dir=None,
+        trial_name_creator=None,
+        loggers=None,
+        sync_to_cloud=None,
+        sync_to_driver=None,
+        checkpoint_freq=0,
+        checkpoint_at_end=False,
+        sync_on_checkpoint=True,
+        keep_checkpoints_num=None,
+        checkpoint_score_attr=None,
+        global_checkpoint_period=10,
+        export_formats=None,
+        max_failures=0,
+        fail_fast=False,
+        restore=None,
+        search_alg=None,
+        scheduler=None,
+        with_server=False,
+        server_port=TuneServer.DEFAULT_PORT,
+        verbose=2,
+        progress_reporter=None,
+        resume=False,
+        queue_trials=False,
+        reuse_actors=False,
+        trial_executor=None,
+        raise_on_failed_trial=True,
+        return_trials=False,
+        ray_auto_init=True):
     """Executes training.
 
     Args:
@@ -248,8 +238,7 @@ def run(
     trial_executor = trial_executor or RayTrialExecutor(
         queue_trials=queue_trials,
         reuse_actors=reuse_actors,
-        ray_auto_init=ray_auto_init,
-    )
+        ray_auto_init=ray_auto_init)
     if isinstance(run_or_experiment, list):
         experiments = run_or_experiment
     else:
@@ -277,16 +266,14 @@ def run(
                 checkpoint_score_attr=checkpoint_score_attr,
                 export_formats=export_formats,
                 max_failures=max_failures,
-                restore=restore,
-            )
+                restore=restore)
     else:
         logger.debug("Ignoring some parameters passed into tune.run.")
 
     if sync_to_cloud:
         for exp in experiments:
-            assert (
-                exp.remote_checkpoint_dir
-            ), "Need `upload_dir` if `sync_to_cloud` given."
+            assert exp.remote_checkpoint_dir, (
+                "Need `upload_dir` if `sync_to_cloud` given.")
 
     if fail_fast and max_failures != 0:
         raise ValueError("max_failures must be 0 if fail_fast=True.")
@@ -307,8 +294,7 @@ def run(
         server_port=server_port,
         verbose=bool(verbose > 1),
         fail_fast=fail_fast,
-        trial_executor=trial_executor,
-    )
+        trial_executor=trial_executor)
 
     for exp in experiments:
         runner.add_experiment(exp)
@@ -321,22 +307,21 @@ def run(
 
     # User Warning for GPUs
     if trial_executor.has_gpus():
-        if isinstance(resources_per_trial, dict) and "gpu" in resources_per_trial:
+        if isinstance(resources_per_trial,
+                      dict) and "gpu" in resources_per_trial:
             # "gpu" is manually set.
             pass
         elif _check_default_resources_override(experiments[0].run_identifier):
             # "default_resources" is manually overriden.
             pass
         else:
-            logger.warning(
-                "Tune detects GPUs, but no trials are using GPUs. "
-                "To enable trials to use GPUs, set "
-                "tune.run(resources_per_trial={'gpu': 1}...) "
-                "which allows Tune to expose 1 GPU to each trial. "
-                "You can also override "
-                "`Trainable.default_resource_request` if using the "
-                "Trainable API."
-            )
+            logger.warning("Tune detects GPUs, but no trials are using GPUs. "
+                           "To enable trials to use GPUs, set "
+                           "tune.run(resources_per_trial={'gpu': 1}...) "
+                           "which allows Tune to expose 1 GPU to each trial. "
+                           "You can also override "
+                           "`Trainable.default_resource_request` if using the "
+                           "Trainable API.")
 
     while not runner.is_finished():
         runner.step()
@@ -371,21 +356,19 @@ def run(
     return ExperimentAnalysis(runner.checkpoint_file, trials=trials)
 
 
-def run_experiments(
-    experiments,
-    search_alg=None,
-    scheduler=None,
-    with_server=False,
-    server_port=TuneServer.DEFAULT_PORT,
-    verbose=2,
-    progress_reporter=None,
-    resume=False,
-    queue_trials=False,
-    reuse_actors=False,
-    trial_executor=None,
-    raise_on_failed_trial=True,
-    concurrent=True,
-):
+def run_experiments(experiments,
+                    search_alg=None,
+                    scheduler=None,
+                    with_server=False,
+                    server_port=TuneServer.DEFAULT_PORT,
+                    verbose=2,
+                    progress_reporter=None,
+                    resume=False,
+                    queue_trials=False,
+                    reuse_actors=False,
+                    trial_executor=None,
+                    raise_on_failed_trial=True,
+                    concurrent=True):
     """Runs and blocks until all trials finish.
 
     Examples:
@@ -427,8 +410,7 @@ def run_experiments(
             reuse_actors=reuse_actors,
             trial_executor=trial_executor,
             raise_on_failed_trial=raise_on_failed_trial,
-            return_trials=True,
-        )
+            return_trials=True)
     else:
         trials = []
         for exp in experiments:
@@ -445,6 +427,5 @@ def run_experiments(
                 reuse_actors=reuse_actors,
                 trial_executor=trial_executor,
                 raise_on_failed_trial=raise_on_failed_trial,
-                return_trials=True,
-            )
+                return_trials=True)
         return trials

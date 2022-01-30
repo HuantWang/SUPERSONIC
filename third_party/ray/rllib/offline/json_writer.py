@@ -25,13 +25,11 @@ class JsonWriter(OutputWriter):
     """Writer object that saves experiences in JSON file chunks."""
 
     @PublicAPI
-    def __init__(
-        self,
-        path,
-        ioctx=None,
-        max_file_size=64 * 1024 * 1024,
-        compress_columns=frozenset(["obs", "new_obs"]),
-    ):
+    def __init__(self,
+                 path,
+                 ioctx=None,
+                 max_file_size=64 * 1024 * 1024,
+                 compress_columns=frozenset(["obs", "new_obs"])):
         """Initialize a JsonWriter.
 
         Arguments:
@@ -70,9 +68,9 @@ class JsonWriter(OutputWriter):
         if hasattr(f, "flush"):  # legacy smart_open impls
             f.flush()
         self.bytes_written += len(data)
-        logger.debug(
-            "Wrote {} bytes to {} in {}s".format(len(data), f, time.time() - start)
-        )
+        logger.debug("Wrote {} bytes to {} in {}s".format(
+            len(data), f,
+            time.time() - start))
 
     def _get_file(self):
         if not self.cur_file or self.bytes_written >= self.max_file_size:
@@ -80,17 +78,13 @@ class JsonWriter(OutputWriter):
                 self.cur_file.close()
             timestr = datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
             path = os.path.join(
-                self.path,
-                "output-{}_worker-{}_{}.json".format(
-                    timestr, self.ioctx.worker_index, self.file_index
-                ),
-            )
+                self.path, "output-{}_worker-{}_{}.json".format(
+                    timestr, self.ioctx.worker_index, self.file_index))
             if self.path_is_uri:
                 if smart_open is None:
                     raise ValueError(
                         "You must install the `smart_open` module to write "
-                        "to URIs like {}".format(path)
-                    )
+                        "to URIs like {}".format(path))
                 self.cur_file = smart_open(path, "w")
             else:
                 self.cur_file = open(path, "w")
@@ -118,8 +112,7 @@ def _to_json(batch, compress_columns):
             policy_batches[policy_id] = {}
             for k, v in sub_batch.data.items():
                 policy_batches[policy_id][k] = _to_jsonable(
-                    v, compress=k in compress_columns
-                )
+                    v, compress=k in compress_columns)
         out["policy_batches"] = policy_batches
     else:
         out["type"] = "SampleBatch"

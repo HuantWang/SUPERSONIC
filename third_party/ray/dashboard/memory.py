@@ -6,7 +6,7 @@ from typing import List
 
 import ray
 
-from ray._raylet import TaskID, ActorID, JobID
+from ray._raylet import (TaskID, ActorID, JobID)
 
 # These values are used to calculate if objectIDs are actor handles.
 TASKID_BYTES_SIZE = TaskID.size()
@@ -55,9 +55,8 @@ class ReferenceType:
 
 
 class MemoryTableEntry:
-    def __init__(
-        self, *, object_ref: dict, node_address: str, is_driver: bool, pid: int
-    ):
+    def __init__(self, *, object_ref: dict, node_address: str, is_driver: bool,
+                 pid: int):
         # worker info
         self.is_driver = is_driver
         self.pid = pid
@@ -67,13 +66,13 @@ class MemoryTableEntry:
         self.object_size = int(object_ref.get("objectSize", -1))
         self.call_site = object_ref.get("callSite", "<Unknown>")
         self.object_id = ray.ObjectID(
-            decode_object_id_if_needed(object_ref["objectId"])
-        )
+            decode_object_id_if_needed(object_ref["objectId"]))
 
         # reference info
         self.local_ref_count = int(object_ref.get("localRefCount", 0))
         self.pinned_in_memory = bool(object_ref.get("pinnedInMemory", False))
-        self.submitted_task_ref_count = int(object_ref.get("submittedTaskRefCount", 0))
+        self.submitted_task_ref_count = int(
+            object_ref.get("submittedTaskRefCount", 0))
         self.contained_in_owned = [
             ray.ObjectID(decode_object_id_if_needed(object_id))
             for object_id in object_ref.get("containedInOwned", [])
@@ -83,12 +82,9 @@ class MemoryTableEntry:
     def is_valid(self) -> bool:
         # If the entry doesn't have a reference type or some invalid state,
         # (e.g., no object ID presented), it is considered invalid.
-        if (
-            not self.pinned_in_memory
-            and self.local_ref_count == 0
-            and self.submitted_task_ref_count == 0
-            and len(self.contained_in_owned) == 0
-        ):
+        if (not self.pinned_in_memory and self.local_ref_count == 0
+                and self.submitted_task_ref_count == 0
+                and len(self.contained_in_owned) == 0):
             return False
         elif self.object_id.is_nil():
             return False
@@ -99,7 +95,8 @@ class MemoryTableEntry:
         if group_by_type == GroupByType.NODE_ADDRESS:
             return self.node_address
         else:
-            raise ValueError("group by type {} is invalid.".format(group_by_type))
+            raise ValueError(
+                "group by type {} is invalid.".format(group_by_type))
 
     def _get_reference_type(self) -> str:
         if self._is_object_id_actor_handle():
@@ -124,10 +121,10 @@ class MemoryTableEntry:
         # are not all 'f', that means it is an actor creation
         # task, which is an actor handle.
         random_bits = object_id_hex[:TASKID_RANDOM_BITS_SIZE]
-        actor_random_bits = object_id_hex[
-            TASKID_RANDOM_BITS_SIZE : TASKID_RANDOM_BITS_SIZE + ACTORID_RANDOM_BITS_SIZE
-        ]
-        if random_bits == "f" * 16 and not actor_random_bits == "f" * 8:
+        actor_random_bits = object_id_hex[TASKID_RANDOM_BITS_SIZE:
+                                          TASKID_RANDOM_BITS_SIZE +
+                                          ACTORID_RANDOM_BITS_SIZE]
+        if (random_bits == "f" * 16 and not actor_random_bits == "f" * 8):
             return True
         else:
             return False
@@ -146,7 +143,7 @@ class MemoryTableEntry:
             "contained_in_owned": [
                 object_id.hex() for object_id in self.contained_in_owned
             ],
-            "type": "Driver" if self.is_driver else "Worker",
+            "type": "Driver" if self.is_driver else "Worker"
         }
 
     def __str__(self):
@@ -157,12 +154,10 @@ class MemoryTableEntry:
 
 
 class MemoryTable:
-    def __init__(
-        self,
-        entries: List[MemoryTableEntry],
-        group_by_type: GroupByType = GroupByType.NODE_ADDRESS,
-        sort_by_type: SortingType = SortingType.PID,
-    ):
+    def __init__(self,
+                 entries: List[MemoryTableEntry],
+                 group_by_type: GroupByType = GroupByType.NODE_ADDRESS,
+                 sort_by_type: SortingType = SortingType.PID):
         self.table = entries
         # Group is a list of memory tables grouped by a group key.
         self.group = {}
@@ -218,7 +213,7 @@ class MemoryTable:
             "total_pinned_in_memory": total_pinned_in_memory,
             "total_used_by_pending_task": total_used_by_pending_task,
             "total_captured_in_objects": total_captured_in_objects,
-            "total_actor_handles": total_actor_handles,
+            "total_actor_handles": total_actor_handles
         }
         return self
 
@@ -230,7 +225,8 @@ class MemoryTable:
         elif sorting_type == SortingType.REFERENCE_TYPE:
             self.table.sort(key=lambda entry: entry.reference_type)
         else:
-            raise ValueError("Give sorting type: {} is invalid.".format(sorting_type))
+            raise ValueError(
+                "Give sorting type: {} is invalid.".format(sorting_type))
         return self
 
     def _group_by(self, group_by_type: GroupByType):
@@ -249,8 +245,7 @@ class MemoryTable:
         # Build a group table.
         for group_key, entries in group.items():
             self.group[group_key] = MemoryTable(
-                entries, group_by_type=None, sort_by_type=None
-            )
+                entries, group_by_type=None, sort_by_type=None)
         for group_key, group_memory_table in self.group.items():
             group_memory_table.summarize()
         return self
@@ -261,10 +256,10 @@ class MemoryTable:
             "group": {
                 group_key: {
                     "entries": group_memory_table.get_entries(),
-                    "summary": group_memory_table.summary,
+                    "summary": group_memory_table.summary
                 }
                 for group_key, group_memory_table in self.group.items()
-            },
+            }
         }
 
     def get_entries(self) -> List[dict]:
@@ -292,8 +287,7 @@ def construct_memory_table(workers_info_by_node: dict) -> MemoryTable:
                     object_ref=object_ref,
                     node_address=node_address,
                     is_driver=is_driver,
-                    pid=pid,
-                )
+                    pid=pid)
                 if memory_table_entry.is_valid():
                     memory_table_entries.append(memory_table_entry)
     memory_table = MemoryTable(memory_table_entries)

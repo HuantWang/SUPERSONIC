@@ -11,18 +11,12 @@ from ray.rllib.evaluation.rollout_worker import RolloutWorker
 from ray.rllib.execution.concurrency_ops import Concurrently, Enqueue, Dequeue
 from ray.rllib.execution.metric_ops import StandardMetricsReporting
 from ray.rllib.execution.replay_ops import StoreToReplayBuffer, Replay
-from ray.rllib.execution.rollout_ops import (
-    ParallelRollouts,
-    AsyncGradients,
-    ConcatBatches,
-    StandardizeFields,
-)
-from ray.rllib.execution.train_ops import (
-    TrainOneStep,
-    ComputeGradients,
-    AverageGradients,
-)
-from ray.rllib.execution.replay_buffer import LocalReplayBuffer, ReplayActor
+from ray.rllib.execution.rollout_ops import ParallelRollouts, AsyncGradients, \
+    ConcatBatches, StandardizeFields
+from ray.rllib.execution.train_ops import TrainOneStep, ComputeGradients, \
+    AverageGradients
+from ray.rllib.execution.replay_buffer import LocalReplayBuffer, \
+    ReplayActor
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.util.iter import LocalIterator, from_range
 from ray.util.iter_metrics import SharedMetrics
@@ -36,15 +30,12 @@ def make_workers(n):
     local = RolloutWorker(
         env_creator=lambda _: gym.make("CartPole-v0"),
         policy=PPOTFPolicy,
-        rollout_fragment_length=100,
-    )
+        rollout_fragment_length=100)
     remotes = [
         RolloutWorker.as_remote().remote(
             env_creator=lambda _: gym.make("CartPole-v0"),
             policy=PPOTFPolicy,
-            rollout_fragment_length=100,
-        )
-        for _ in range(n)
+            rollout_fragment_length=100) for _ in range(n)
     ]
     workers = WorkerSet._from_existing(local, remotes)
     return workers
@@ -66,13 +57,15 @@ def test_concurrently_weighted(ray_start_regular_shared):
     a = iter_list([1, 1, 1])
     b = iter_list([2, 2, 2])
     c = iter_list([3, 3, 3])
-    c = Concurrently([a, b, c], mode="round_robin", round_robin_weights=[3, 1, 2])
+    c = Concurrently(
+        [a, b, c], mode="round_robin", round_robin_weights=[3, 1, 2])
     assert c.take(9) == [1, 1, 1, 2, 3, 3, 2, 3, 2]
 
     a = iter_list([1, 1, 1])
     b = iter_list([2, 2, 2])
     c = iter_list([3, 3, 3])
-    c = Concurrently([a, b, c], mode="round_robin", round_robin_weights=[1, 1, "*"])
+    c = Concurrently(
+        [a, b, c], mode="round_robin", round_robin_weights=[1, 1, "*"])
     assert c.take(9) == [1, 2, 3, 3, 3, 1, 2, 1, 2]
 
 
@@ -109,15 +102,12 @@ def test_metrics(ray_start_regular_shared):
     workers.foreach_worker(lambda w: w.sample())
     a = from_range(10, repeat=True).gather_sync()
     b = StandardMetricsReporting(
-        a,
-        workers,
-        {
+        a, workers, {
             "min_iter_time_s": 2.5,
             "timesteps_per_iteration": 0,
             "metrics_smoothing_episodes": 10,
             "collect_metrics_timeout": 10,
-        },
-    )
+        })
 
     start = time.time()
     res1 = next(b)
@@ -221,8 +211,7 @@ def test_store_to_replay_local(ray_start_regular_shared):
         replay_batch_size=100,
         prioritized_replay_alpha=0.6,
         prioritized_replay_beta=0.4,
-        prioritized_replay_eps=0.0001,
-    )
+        prioritized_replay_eps=0.0001)
     assert buf.replay() is None
 
     workers = make_workers(0)
@@ -246,8 +235,7 @@ def test_store_to_replay_actor(ray_start_regular_shared):
         replay_batch_size=100,
         prioritized_replay_alpha=0.6,
         prioritized_replay_beta=0.4,
-        prioritized_replay_eps=0.0001,
-    )
+        prioritized_replay_eps=0.0001)
     assert ray.get(actor.replay.remote()) is None
 
     workers = make_workers(0)
@@ -265,5 +253,4 @@ def test_store_to_replay_actor(ray_start_regular_shared):
 
 if __name__ == "__main__":
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

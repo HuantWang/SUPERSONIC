@@ -1,6 +1,6 @@
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec
-
+import os
 class observation_function:
     """:class:
      The SuperSonic RL components include pre-trained observation functions, such as
@@ -23,7 +23,11 @@ class observation_function:
         self.obsv_size = obsv_size
 
         if self.obs_fun == "Doc2vec":
-            path = "/home/huanting/CG/opt_test/mdp_search/AutoMDP/doc2vec.model.newdata_p23_1106_b.pkl"
+            if os.path.exists("../../../../model/d2v.pkl"):
+                path = "../../../../model/d2v.pkl"
+            else:
+                path = "../../../../../model/d2v.pkl"
+
             observation = np.array(
                 Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
@@ -32,8 +36,11 @@ class observation_function:
 
         if self.obs_fun == "Word2vec":
             self.input = input_obs[0]
+            if os.path.exists("../../../../model/w2v.pkl"):
+                path = "../../../../model/w2v.pkl"
+            else:
+                path = "../../../../../model/w2v.pkl"
             # TODO: preprocess before embedding
-            path = "/home/huanting/CG/opt_test/mdp_search/AutoMDP/doc2vec.model.newdata_p23_1106_b.pkl"
             observation = np.array(
                 Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
@@ -43,7 +50,10 @@ class observation_function:
         if self.obs_fun == "Bert":
             self.input = input_obs[0]
             # TODO: preprocess before embedding
-            path = "/home/huanting/CG/opt_test/mdp_search/AutoMDP/doc2vec.model.newdata_p23_1106_b.pkl"
+            if os.path.exists("../../../../model/bert.pkl"):
+                path = "../../../../model/bert.pkl"
+            else:
+                path = "../../../../../model/bert.pkl"
             observation = np.array(
                 Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)

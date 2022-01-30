@@ -90,18 +90,14 @@ class DragonflySearch(Searcher):
 
     """
 
-    def __init__(
-        self,
-        optimizer,
-        metric="episode_reward_mean",
-        mode="max",
-        points_to_evaluate=None,
-        evaluated_rewards=None,
-        **kwargs
-    ):
-        assert (
-            dragonfly is not None
-        ), """dragonfly must be installed!
+    def __init__(self,
+                 optimizer,
+                 metric="episode_reward_mean",
+                 mode="max",
+                 points_to_evaluate=None,
+                 evaluated_rewards=None,
+                 **kwargs):
+        assert dragonfly is not None, """dragonfly must be installed!
             You can install Dragonfly with the command:
             `pip install dragonfly`."""
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
@@ -115,11 +111,12 @@ class DragonflySearch(Searcher):
             self._initial_points = points_to_evaluate
         # Dragonfly internally maximizes, so "min" => -1
         if mode == "min":
-            self._metric_op = -1.0
+            self._metric_op = -1.
         elif mode == "max":
-            self._metric_op = 1.0
+            self._metric_op = 1.
         self._live_trial_mapping = {}
-        super(DragonflySearch, self).__init__(metric=metric, mode=mode, **kwargs)
+        super(DragonflySearch, self).__init__(
+            metric=metric, mode=mode, **kwargs)
 
     def suggest(self, trial_id):
         if self._initial_points:
@@ -132,9 +129,7 @@ class DragonflySearch(Searcher):
                 logger.warning(
                     "Dragonfly errored when querying. This may be due to a "
                     "higher level of parallelism than supported. Try reducing "
-                    "parallelism in the experiment: %s",
-                    str(exc),
-                )
+                    "parallelism in the experiment: %s", str(exc))
                 return None
         self._live_trial_mapping[trial_id] = suggested_config
         return {"point": suggested_config}
@@ -143,7 +138,8 @@ class DragonflySearch(Searcher):
         """Passes result to Dragonfly unless early terminated or errored."""
         trial_info = self._live_trial_mapping.pop(trial_id)
         if result:
-            self._opt.tell([(trial_info, self._metric_op * result[self._metric])])
+            self._opt.tell([(trial_info,
+                             self._metric_op * result[self._metric])])
 
     def save(self, checkpoint_dir):
         trials_object = (self._initial_points, self._opt)

@@ -10,7 +10,8 @@ class PerWorkerEpsilonGreedy(EpsilonGreedy):
     See Ape-X paper.
     """
 
-    def __init__(self, action_space, *, framework, num_workers, worker_index, **kwargs):
+    def __init__(self, action_space, *, framework, num_workers, worker_index,
+                 **kwargs):
         """Create a PerWorkerEpsilonGreedy exploration class.
 
         Args:
@@ -28,8 +29,8 @@ class PerWorkerEpsilonGreedy(EpsilonGreedy):
                 # From page 5 of https://arxiv.org/pdf/1803.00933.pdf
                 alpha, eps, i = 7, 0.4, worker_index - 1
                 epsilon_schedule = ConstantSchedule(
-                    eps ** (1 + i / float(num_workers - 1) * alpha), framework=framework
-                )
+                    eps**(1 + i / float(num_workers - 1) * alpha),
+                    framework=framework)
             # Local worker should have zero exploration so that eval
             # rollouts run properly.
             else:
@@ -41,5 +42,4 @@ class PerWorkerEpsilonGreedy(EpsilonGreedy):
             framework=framework,
             num_workers=num_workers,
             worker_index=worker_index,
-            **kwargs
-        )
+            **kwargs)

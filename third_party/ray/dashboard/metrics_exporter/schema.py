@@ -59,18 +59,15 @@ class BaseModel:
     @classmethod
     def parse_obj(cls, obj):
         # Validation.
-        assert type(obj) == dict, (
-            "It can only parse dict type object, "
-            "but {} type is given.".format(type(obj))
-        )
+        assert type(obj) == dict, ("It can only parse dict type object, "
+                                   "but {} type is given.".format(type(obj)))
         for field, schema in cls.__schema__.items():
             required, default, arg_type = schema
             if field not in obj:
                 if required:
-                    raise ValidationError(
-                        "{} is required, but doesn't "
-                        "exist in a given object {}".format(field, obj)
-                    )
+                    raise ValidationError("{} is required, but doesn't "
+                                          "exist in a given object {}".format(
+                                              field, obj))
                 else:
                     # Set default value if the field is optional
                     obj[field] = default
@@ -84,14 +81,14 @@ class IngestRequest(BaseModel):
         "node_info": Field(required=True, default=None, type=dict),
         "raylet_info": Field(required=True, default=None, type=dict),
         "tune_info": Field(required=True, default=None, type=dict),
-        "tune_availability": Field(required=True, default=None, type=dict),
+        "tune_availability": Field(required=True, default=None, type=dict)
     }
 
 
 class IngestResponse(BaseModel):
     __schema__ = {
         "succeed": Field(required=True, default=None, type=bool),
-        "actions": Field(required=False, default=[], type=list),
+        "actions": Field(required=False, default=[], type=list)
     }
 
 
@@ -102,7 +99,7 @@ class AuthRequest(BaseModel):
 class AuthResponse(BaseModel):
     __schema__ = {
         "access_token_dashboard": Field(required=True, default=None, type=str),
-        "access_token_ingest": Field(required=True, default=None, type=str),
+        "access_token_ingest": Field(required=True, default=None, type=str)
     }
 
 
@@ -117,5 +114,5 @@ class KillAction(BaseModel):
         "type": Field(required=False, default=ActionType.KILL_ACTOR, type=str),
         "actor_id": Field(required=True, default=None, type=str),
         "ip_address": Field(required=True, default=None, type=str),
-        "port": Field(required=True, default=None, type=int),
+        "port": Field(required=True, default=None, type=int)
     }

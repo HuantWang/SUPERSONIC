@@ -20,21 +20,19 @@ class SACTorchModel(TorchModelV2, nn.Module):
     Note that this class by itself is not a valid model unless you
     implement forward() in a subclass."""
 
-    def __init__(
-        self,
-        obs_space,
-        action_space,
-        num_outputs,
-        model_config,
-        name,
-        actor_hidden_activation="relu",
-        actor_hiddens=(256, 256),
-        critic_hidden_activation="relu",
-        critic_hiddens=(256, 256),
-        twin_q=False,
-        initial_alpha=1.0,
-        target_entropy=None,
-    ):
+    def __init__(self,
+                 obs_space,
+                 action_space,
+                 num_outputs,
+                 model_config,
+                 name,
+                 actor_hidden_activation="relu",
+                 actor_hiddens=(256, 256),
+                 critic_hidden_activation="relu",
+                 critic_hiddens=(256, 256),
+                 twin_q=False,
+                 initial_alpha=1.0,
+                 target_entropy=None):
         """Initialize variables of this model.
 
         Extra model kwargs:
@@ -55,9 +53,8 @@ class SACTorchModel(TorchModelV2, nn.Module):
         forward() should be defined in subclasses of SACModel.
         """
         nn.Module.__init__(self)
-        super(SACTorchModel, self).__init__(
-            obs_space, action_space, num_outputs, model_config, name
-        )
+        super(SACTorchModel, self).__init__(obs_space, action_space,
+                                            num_outputs, model_config, name)
 
         if isinstance(action_space, Discrete):
             self.action_dim = action_space.n
@@ -75,7 +72,8 @@ class SACTorchModel(TorchModelV2, nn.Module):
         self.action_model = nn.Sequential()
         ins = self.num_outputs
         self.obs_ins = ins
-        activation = get_activation_fn(actor_hidden_activation, framework="torch")
+        activation = get_activation_fn(
+            actor_hidden_activation, framework="torch")
         for i, n in enumerate(actor_hiddens):
             self.action_model.add_module(
                 "action_{}".format(i),
@@ -83,9 +81,7 @@ class SACTorchModel(TorchModelV2, nn.Module):
                     ins,
                     n,
                     initializer=torch.nn.init.xavier_uniform_,
-                    activation_fn=activation,
-                ),
-            )
+                    activation_fn=activation))
             ins = n
         self.action_model.add_module(
             "action_out",
@@ -93,13 +89,12 @@ class SACTorchModel(TorchModelV2, nn.Module):
                 ins,
                 self.action_outs,
                 initializer=torch.nn.init.xavier_uniform_,
-                activation_fn=None,
-            ),
-        )
+                activation_fn=None))
 
         # Build the Q-net(s), including target Q-net(s).
         def build_q_net(name_):
-            activation = get_activation_fn(critic_hidden_activation, framework="torch")
+            activation = get_activation_fn(
+                critic_hidden_activation, framework="torch")
             # For continuous actions: Feed obs and actions (concatenated)
             # through the NN. For discrete actions, only obs.
             q_net = nn.Sequential()
@@ -111,9 +106,7 @@ class SACTorchModel(TorchModelV2, nn.Module):
                         ins,
                         n,
                         initializer=torch.nn.init.xavier_uniform_,
-                        activation_fn=activation,
-                    ),
-                )
+                        activation_fn=activation))
                 ins = n
 
             q_net.add_module(
@@ -122,9 +115,7 @@ class SACTorchModel(TorchModelV2, nn.Module):
                     ins,
                     q_outs,
                     initializer=torch.nn.init.xavier_uniform_,
-                    activation_fn=None,
-                ),
-            )
+                    activation_fn=None))
             return q_net
 
         self.q_net = build_q_net("q")
@@ -134,23 +125,22 @@ class SACTorchModel(TorchModelV2, nn.Module):
             self.twin_q_net = None
 
         self.log_alpha = torch.tensor(
-            data=[np.log(initial_alpha)], dtype=torch.float32, requires_grad=True
-        )
+            data=[np.log(initial_alpha)],
+            dtype=torch.float32,
+            requires_grad=True)
 
         # Auto-calculate the target entropy.
         if target_entropy is None or target_entropy == "auto":
             # See hyperparams in [2] (README.md).
             if self.discrete:
                 target_entropy = 0.98 * np.array(
-                    -np.log(1.0 / action_space.n), dtype=np.float32
-                )
+                    -np.log(1.0 / action_space.n), dtype=np.float32)
             # See [1] (README.md).
             else:
                 target_entropy = -np.prod(action_space.shape)
 
         self.target_entropy = torch.tensor(
-            data=[target_entropy], dtype=torch.float32, requires_grad=False
-        )
+            data=[target_entropy], dtype=torch.float32, requires_grad=False)
 
     def get_q_values(self, model_out, actions=None):
         """Return the Q estimates for the most recent forward pass.
@@ -215,6 +205,5 @@ class SACTorchModel(TorchModelV2, nn.Module):
     def q_variables(self):
         """Return the list of variables for Q / twin Q nets."""
 
-        return list(self.q_net.parameters()) + (
-            list(self.twin_q_net.parameters()) if self.twin_q_net else []
-        )
+        return list(self.q_net.parameters()) + \
+            (list(self.twin_q_net.parameters()) if self.twin_q_net else [])

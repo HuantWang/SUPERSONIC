@@ -6,17 +6,16 @@ tf = try_import_tf()
 def huber_loss(x, delta=1.0):
     """Reference: https://en.wikipedia.org/wiki/Huber_loss"""
     return tf.where(
-        tf.abs(x) < delta, tf.square(x) * 0.5, delta * (tf.abs(x) - 0.5 * delta)
-    )
+        tf.abs(x) < delta,
+        tf.square(x) * 0.5, delta * (tf.abs(x) - 0.5 * delta))
 
 
 def reduce_mean_ignore_inf(x, axis):
     """Same as tf.reduce_mean() but ignores -inf values."""
     mask = tf.not_equal(x, tf.float32.min)
     x_zeroed = tf.where(mask, x, tf.zeros_like(x))
-    return tf.reduce_sum(x_zeroed, axis) / tf.reduce_sum(
-        tf.cast(mask, tf.float32), axis
-    )
+    return (tf.reduce_sum(x_zeroed, axis) / tf.reduce_sum(
+        tf.cast(mask, tf.float32), axis))
 
 
 def minimize_and_clip(optimizer, objective, var_list, clip_val=10.0):
@@ -75,16 +74,16 @@ def make_tf_callable(session_or_none, dynamic_shape=False):
                         for i, v in enumerate(args):
                             if dynamic_shape:
                                 if len(v.shape) > 0:
-                                    shape = (None,) + v.shape[1:]
+                                    shape = (None, ) + v.shape[1:]
                                 else:
                                     shape = ()
                             else:
                                 shape = v.shape
                             placeholders.append(
                                 tf.placeholder(
-                                    dtype=v.dtype, shape=shape, name="arg_{}".format(i)
-                                )
-                            )
+                                    dtype=v.dtype,
+                                    shape=shape,
+                                    name="arg_{}".format(i)))
                         symbolic_out[0] = fn(*placeholders)
                 feed_dict = dict(zip(placeholders, args))
                 ret = session_or_none.run(symbolic_out[0], feed_dict)
@@ -116,6 +115,6 @@ def scope_vars(scope, trainable_only=False):
       list of variables in `scope`.
     """
     return tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES if trainable_only else tf.GraphKeys.VARIABLES,
-        scope=scope if isinstance(scope, str) else scope.name,
-    )
+        tf.GraphKeys.TRAINABLE_VARIABLES
+        if trainable_only else tf.GraphKeys.VARIABLES,
+        scope=scope if isinstance(scope, str) else scope.name)

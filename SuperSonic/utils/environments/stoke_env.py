@@ -91,6 +91,7 @@ class stoke_rl:
             action_function=env_config.get("action_function"),
             reward_function=env_config.get("reward_function"),
         )
+        self.sql_path = env_config.get("sql_path")
         self.action_space = Discrete(9)
         self.observation_space = Dict(
             {
@@ -137,7 +138,7 @@ class stoke_rl:
             lock_s.release()
         try:
             conn = sqlite3.connect(
-                "/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db"
+                self.sql_path
             )
             c = conn.cursor()
             sql = "INSERT INTO STOKE (TIME, RESULT, REWARD) \
@@ -147,6 +148,7 @@ class stoke_rl:
             )
             conn.commit()
             conn.close()
+
         except Exception as e:
             print(e)
 

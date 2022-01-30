@@ -17,16 +17,14 @@ from ray.serve.utils import logger
 
 
 class Query:
-    def __init__(
-        self,
-        request_args,
-        request_kwargs,
-        request_context,
-        request_slo_ms,
-        call_method="__call__",
-        shard_key=None,
-        async_future=None,
-    ):
+    def __init__(self,
+                 request_args,
+                 request_kwargs,
+                 request_context,
+                 request_slo_ms,
+                 call_method="__call__",
+                 shard_key=None,
+                 async_future=None):
         self.request_args = request_args
         self.request_kwargs = request_kwargs
         self.request_context = request_context
@@ -61,14 +59,12 @@ class Query:
         return self.request_slo_ms < other.request_slo_ms
 
     def __repr__(self):
-        return "<Query args={} kwargs={}>".format(
-            self.request_args, self.request_kwargs
-        )
+        return "<Query args={} kwargs={}>".format(self.request_args,
+                                                  self.request_kwargs)
 
 
-def _make_future_unwrapper(
-    client_futures: List[asyncio.Future], host_future: asyncio.Future
-):
+def _make_future_unwrapper(client_futures: List[asyncio.Future],
+                           host_future: asyncio.Future):
     """Distribute the result of host_future to each of client_future"""
     for client_future in client_futures:
         # Keep a reference to host future so the host future won't get
@@ -160,27 +156,23 @@ class Router:
         self.num_router_requests = self.metric_client.new_counter(
             "num_router_requests",
             description="Number of requests processed by the router.",
-            label_names=("endpoint",),
-        )
+            label_names=("endpoint", ))
         self.num_error_endpoint_request = self.metric_client.new_counter(
             "num_error_endpoint_requests",
-            description=(
-                "Number of requests errored when getting result " "for endpoint."
-            ),
-            label_names=("endpoint",),
-        )
+            description=("Number of requests errored when getting result "
+                         "for endpoint."),
+            label_names=("endpoint", ))
         self.num_error_backend_request = self.metric_client.new_counter(
             "num_error_backend_requests",
-            description=(
-                "Number of requests errored when getting result " "from backend."
-            ),
-            label_names=("backend",),
-        )
+            description=("Number of requests errored when getting result "
+                         "from backend."),
+            label_names=("backend", ))
 
     def is_ready(self):
         return True
 
-    async def enqueue_request(self, request_meta, *request_args, **request_kwargs):
+    async def enqueue_request(self, request_meta, *request_args,
+                              **request_kwargs):
         endpoint = request_meta.endpoint
         logger.debug("Received a request for endpoint {}".format(endpoint))
         self.num_router_requests.labels(endpoint=endpoint).add()
@@ -199,8 +191,7 @@ class Router:
             request_slo_ms,
             call_method=request_meta.call_method,
             shard_key=request_meta.shard_key,
-            async_future=asyncio.get_event_loop().create_future(),
-        )
+            async_future=asyncio.get_event_loop().create_future())
         async with self.flush_lock:
             self.endpoint_queues[endpoint].appendleft(query)
             self.flush_endpoint_queue(endpoint)
@@ -249,7 +240,8 @@ class Router:
                 pass
 
     async def set_traffic(self, endpoint, traffic_dict):
-        logger.debug("Setting traffic for endpoint %s to %s", endpoint, traffic_dict)
+        logger.debug("Setting traffic for endpoint %s to %s", endpoint,
+                     traffic_dict)
         async with self.flush_lock:
             self.traffic[endpoint] = RandomEndpointPolicy(traffic_dict)
             self.flush_endpoint_queue(endpoint)
@@ -264,9 +256,8 @@ class Router:
                 del self.traffic[endpoint]
 
     async def set_backend_config(self, backend, config):
-        logger.debug(
-            "Setting backend config for " "backend {} to {}.".format(backend, config)
-        )
+        logger.debug("Setting backend config for "
+                     "backend {} to {}.".format(backend, config))
         async with self.flush_lock:
             self.backend_info[backend] = config
 
@@ -287,8 +278,7 @@ class Router:
         if endpoint not in self.traffic:
             return
         backends_to_flush = self.traffic[endpoint].flush(
-            self.endpoint_queues[endpoint], self.backend_queues
-        )
+            self.endpoint_queues[endpoint], self.backend_queues)
         self.flush_backend_queues(backends_to_flush)
 
     # Flushes the specified backend queues and assigns work to workers.
@@ -305,20 +295,16 @@ class Router:
             buffer_queue = self.backend_queues[backend]
             worker_queue = self.worker_queues[backend]
 
-            logger.debug(
-                "Assigning queries for backend {} with buffer "
-                "queue size {} and worker queue size {}".format(
-                    backend, len(buffer_queue), len(worker_queue)
-                )
-            )
+            logger.debug("Assigning queries for backend {} with buffer "
+                         "queue size {} and worker queue size {}".format(
+                             backend, len(buffer_queue), len(worker_queue)))
 
             max_batch_size = None
             if backend in self.backend_info:
                 max_batch_size = self.backend_info[backend].max_batch_size
 
-            self._assign_query_to_worker(
-                backend, buffer_queue, worker_queue, max_batch_size
-            )
+            self._assign_query_to_worker(backend, buffer_queue, worker_queue,
+                                         max_batch_size)
 
     async def _do_query(self, backend, backend_replica_tag, req):
         # If the worker died, this will be a RayActorError. Just return it and
@@ -335,9 +321,11 @@ class Router:
         logger.debug("Got result in {:.2f}s".format(time.time() - start))
         return result
 
-    def _assign_query_to_worker(
-        self, backend, buffer_queue, worker_queue, max_batch_size=None
-    ):
+    def _assign_query_to_worker(self,
+                                backend,
+                                buffer_queue,
+                                worker_queue,
+                                max_batch_size=None):
 
         while len(buffer_queue) and len(worker_queue):
             backend_replica_tag = worker_queue.pop()
@@ -349,13 +337,14 @@ class Router:
             if max_batch_size is None:  # No batching
                 request = buffer_queue.pop(0)
                 future = asyncio.get_event_loop().create_task(
-                    self._do_query(backend, backend_replica_tag, request)
-                )
+                    self._do_query(backend, backend_replica_tag, request))
                 # chaining satisfies request.async_future with future result.
                 asyncio.futures._chain_future(future, request.async_future)
             else:
                 real_batch_size = min(len(buffer_queue), max_batch_size)
-                requests = [buffer_queue.pop(0) for _ in range(real_batch_size)]
+                requests = [
+                    buffer_queue.pop(0) for _ in range(real_batch_size)
+                ]
 
                 # split requests by method type
                 requests_group = defaultdict(list)
@@ -364,11 +353,8 @@ class Router:
 
                 for group in requests_group.values():
                     future = asyncio.get_event_loop().create_task(
-                        self._do_query(backend, backend_replica_tag, group)
-                    )
+                        self._do_query(backend, backend_replica_tag, group))
                     future.add_done_callback(
                         _make_future_unwrapper(
                             client_futures=[req.async_future for req in group],
-                            host_future=future,
-                        )
-                    )
+                            host_future=future))

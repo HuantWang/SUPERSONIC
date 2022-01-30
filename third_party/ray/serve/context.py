@@ -5,7 +5,6 @@ from ray.serve.exceptions import RayServeException
 
 class TaskContext(IntEnum):
     """TaskContext constants for queue.enqueue method"""
-
     Web = 1
     Python = 2
 

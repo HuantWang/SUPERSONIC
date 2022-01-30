@@ -6,7 +6,8 @@ from ray.rllib.models.action_dist import ActionDistribution
 from ray.rllib.utils import try_import_tree
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.utils.numpy import SMALL_NUMBER, MIN_LOG_NN_OUTPUT, MAX_LOG_NN_OUTPUT
+from ray.rllib.utils.numpy import SMALL_NUMBER, MIN_LOG_NN_OUTPUT, \
+    MAX_LOG_NN_OUTPUT
 from ray.rllib.utils.spaces.space_utils import get_base_struct_from_space
 from ray.rllib.utils.torch_ops import atanh
 
@@ -54,10 +55,12 @@ class TorchCategorical(TorchDistributionWrapper):
     @override(ActionDistribution)
     def __init__(self, inputs, model=None, temperature=1.0):
         if temperature != 1.0:
-            assert temperature > 0.0, "Categorical `temperature` must be > 0.0!"
+            assert temperature > 0.0, \
+                "Categorical `temperature` must be > 0.0!"
             inputs /= temperature
         super().__init__(inputs, model)
-        self.dist = torch.distributions.categorical.Categorical(logits=self.inputs)
+        self.dist = torch.distributions.categorical.Categorical(
+            logits=self.inputs)
 
     @override(ActionDistribution)
     def deterministic_sample(self):
@@ -100,7 +103,8 @@ class TorchMultiCategorical(TorchDistributionWrapper):
         # # If tensor is provided, unstack it into list.
         if isinstance(actions, torch.Tensor):
             actions = torch.unbind(actions, dim=1)
-        logps = torch.stack([cat.log_prob(act) for cat, act in zip(self.cats, actions)])
+        logps = torch.stack(
+            [cat.log_prob(act) for cat, act in zip(self.cats, actions)])
         return torch.sum(logps, dim=0)
 
     @override(ActionDistribution)
@@ -215,23 +219,21 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
         # Get log-prob for squashed Gaussian.
         unsquashed_values_tanhd = torch.tanh(unsquashed_values)
         log_prob = log_prob_gaussian - torch.sum(
-            torch.log(1 - unsquashed_values_tanhd ** 2 + SMALL_NUMBER), dim=-1
-        )
+            torch.log(1 - unsquashed_values_tanhd**2 + SMALL_NUMBER), dim=-1)
         return log_prob
 
     def _squash(self, raw_values):
         # Returned values are within [low, high] (including `low` and `high`).
-        squashed = ((torch.tanh(raw_values) + 1.0) / 2.0) * (
-            self.high - self.low
-        ) + self.low
+        squashed = ((torch.tanh(raw_values) + 1.0) / 2.0) * \
+            (self.high - self.low) + self.low
         return torch.clamp(squashed, self.low, self.high)
 
     def _unsquash(self, values):
-        normed_values = (values - self.low) / (self.high - self.low) * 2.0 - 1.0
+        normed_values = (values - self.low) / (self.high - self.low) * 2.0 - \
+                        1.0
         # Stabilize input to atanh.
-        save_normed_values = torch.clamp(
-            normed_values, -1.0 + SMALL_NUMBER, 1.0 - SMALL_NUMBER
-        )
+        save_normed_values = torch.clamp(normed_values, -1.0 + SMALL_NUMBER,
+                                         1.0 - SMALL_NUMBER)
         unsquashed = atanh(save_normed_values)
         return unsquashed
 
@@ -254,13 +256,15 @@ class TorchBeta(TorchDistributionWrapper):
     def __init__(self, inputs, model, low=0.0, high=1.0):
         super().__init__(inputs, model)
         # Stabilize input parameters (possibly coming from a linear layer).
-        self.inputs = torch.clamp(self.inputs, log(SMALL_NUMBER), -log(SMALL_NUMBER))
+        self.inputs = torch.clamp(self.inputs, log(SMALL_NUMBER),
+                                  -log(SMALL_NUMBER))
         self.inputs = torch.log(torch.exp(self.inputs) + 1.0) + 1.0
         self.low = low
         self.high = high
         alpha, beta = torch.chunk(self.inputs, 2, dim=-1)
         # Note: concentration0==beta, concentration1=alpha (!)
-        self.dist = torch.distributions.Beta(concentration1=alpha, concentration0=beta)
+        self.dist = torch.distributions.Beta(
+            concentration1=alpha, concentration0=beta)
 
     @override(ActionDistribution)
     def deterministic_sample(self):
@@ -321,7 +325,8 @@ class TorchMultiActionDistribution(TorchDistributionWrapper):
     """Action distribution that operates on multiple, possibly nested actions.
     """
 
-    def __init__(self, inputs, model, *, child_distributions, input_lens, action_space):
+    def __init__(self, inputs, model, *, child_distributions, input_lens,
+                 action_space):
         """Initializes a TorchMultiActionDistribution object.
 
         Args:
@@ -348,10 +353,8 @@ class TorchMultiActionDistribution(TorchDistributionWrapper):
         flat_child_distributions = tree.flatten(child_distributions)
         split_inputs = torch.split(inputs, input_lens, dim=1)
         self.flat_child_distributions = tree.map_structure(
-            lambda dist, input_: dist(input_, model),
-            flat_child_distributions,
-            list(split_inputs),
-        )
+            lambda dist, input_: dist(input_, model), flat_child_distributions,
+            list(split_inputs))
 
     @override(ActionDistribution)
     def logp(self, x):
@@ -378,17 +381,16 @@ class TorchMultiActionDistribution(TorchDistributionWrapper):
 
         # Remove extra categorical dimension and take the logp of each
         # component.
-        flat_logps = tree.map_structure(map_, split_x, self.flat_child_distributions)
+        flat_logps = tree.map_structure(map_, split_x,
+                                        self.flat_child_distributions)
 
         return functools.reduce(lambda a, b: a + b, flat_logps)
 
     @override(ActionDistribution)
     def kl(self, other):
         kl_list = [
-            d.kl(o)
-            for d, o in zip(
-                self.flat_child_distributions, other.flat_child_distributions
-            )
+            d.kl(o) for d, o in zip(self.flat_child_distributions,
+                                    other.flat_child_distributions)
         ]
         return functools.reduce(lambda a, b: a + b, kl_list)
 
@@ -399,19 +401,16 @@ class TorchMultiActionDistribution(TorchDistributionWrapper):
 
     @override(ActionDistribution)
     def sample(self):
-        child_distributions = tree.unflatten_as(
-            self.action_space_struct, self.flat_child_distributions
-        )
+        child_distributions = tree.unflatten_as(self.action_space_struct,
+                                                self.flat_child_distributions)
         return tree.map_structure(lambda s: s.sample(), child_distributions)
 
     @override(ActionDistribution)
     def deterministic_sample(self):
-        child_distributions = tree.unflatten_as(
-            self.action_space_struct, self.flat_child_distributions
-        )
-        return tree.map_structure(
-            lambda s: s.deterministic_sample(), child_distributions
-        )
+        child_distributions = tree.unflatten_as(self.action_space_struct,
+                                                self.flat_child_distributions)
+        return tree.map_structure(lambda s: s.deterministic_sample(),
+                                  child_distributions)
 
     @override(TorchDistributionWrapper)
     def sampled_action_logp(self):

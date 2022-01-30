@@ -4,14 +4,9 @@ from ray.rllib.agents.sac.sac_tf_policy import SACTFPolicy
 from ray.rllib.utils.deprecation import deprecation_warning, DEPRECATED_VALUE
 
 OPTIMIZER_SHARED_CONFIGS = [
-    "buffer_size",
-    "prioritized_replay",
-    "prioritized_replay_alpha",
-    "prioritized_replay_beta",
-    "prioritized_replay_eps",
-    "rollout_fragment_length",
-    "train_batch_size",
-    "learning_starts",
+    "buffer_size", "prioritized_replay", "prioritized_replay_alpha",
+    "prioritized_replay_beta", "prioritized_replay_eps",
+    "rollout_fragment_length", "train_batch_size", "learning_starts"
 ]
 
 # yapf: disable
@@ -130,7 +125,6 @@ DEFAULT_CONFIG = with_common_config({
 def get_policy_class(config):
     if config["framework"] == "torch":
         from ray.rllib.agents.sac.sac_torch_policy import SACTorchPolicy
-
         return SACTorchPolicy
     else:
         return SACTFPolicy
@@ -143,21 +137,18 @@ def validate_config(config):
 
     # Use same keys as for standard Trainer "model" config.
     for model in ["Q_model", "policy_model"]:
-        if config[model].get("hidden_activation", DEPRECATED_VALUE) != DEPRECATED_VALUE:
+        if config[model].get("hidden_activation", DEPRECATED_VALUE) != \
+                DEPRECATED_VALUE:
             deprecation_warning(
                 "{}.hidden_activation".format(model),
                 "{}.fcnet_activation".format(model),
-                error=True,
-            )
-        if (
-            config[model].get("hidden_layer_sizes", DEPRECATED_VALUE)
-            != DEPRECATED_VALUE
-        ):
+                error=True)
+        if config[model].get("hidden_layer_sizes", DEPRECATED_VALUE) != \
+                DEPRECATED_VALUE:
             deprecation_warning(
                 "{}.hidden_layer_sizes".format(model),
                 "{}.fcnet_hiddens".format(model),
-                error=True,
-            )
+                error=True)
 
 
 SACTrainer = GenericOffPolicyTrainer.with_updates(

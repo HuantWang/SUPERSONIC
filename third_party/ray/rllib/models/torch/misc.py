@@ -9,7 +9,8 @@ torch, nn = try_import_torch()
 def normc_initializer(std=1.0):
     def initializer(tensor):
         tensor.data.normal_(0, 1)
-        tensor.data *= std / torch.sqrt(tensor.data.pow(2).sum(1, keepdim=True))
+        tensor.data *= std / torch.sqrt(
+            tensor.data.pow(2).sum(1, keepdim=True))
 
     return initializer
 
@@ -35,9 +36,9 @@ def valid_padding(in_size, filter_size, stride_size):
     out_width = np.ceil(float(in_width) / float(stride_width))
 
     pad_along_height = int(
-        ((out_height - 1) * stride_height + filter_height - in_height)
-    )
-    pad_along_width = int(((out_width - 1) * stride_width + filter_width - in_width))
+        ((out_height - 1) * stride_height + filter_height - in_height))
+    pad_along_width = int(
+        ((out_width - 1) * stride_width + filter_width - in_width))
     pad_top = pad_along_height // 2
     pad_bottom = pad_along_height - pad_top
     pad_left = pad_along_width // 2
@@ -51,17 +52,16 @@ class SlimConv2d(nn.Module):
     """Simple mock of tf.slim Conv2d"""
 
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel,
-        stride,
-        padding,
-        # Defaulting these to nn.[..] will break soft torch import.
-        initializer="default",
-        activation_fn="default",
-        bias_init=0,
-    ):
+            self,
+            in_channels,
+            out_channels,
+            kernel,
+            stride,
+            padding,
+            # Defaulting these to nn.[..] will break soft torch import.
+            initializer="default",
+            activation_fn="default",
+            bias_init=0):
         super(SlimConv2d, self).__init__()
         layers = []
         if padding:
@@ -87,9 +87,12 @@ class SlimConv2d(nn.Module):
 class SlimFC(nn.Module):
     """Simple PyTorch version of `linear` function"""
 
-    def __init__(
-        self, in_size, out_size, initializer=None, activation_fn=None, bias_init=0.0
-    ):
+    def __init__(self,
+                 in_size,
+                 out_size,
+                 initializer=None,
+                 activation_fn=None,
+                 bias_init=0.0):
         super(SlimFC, self).__init__()
         layers = []
         linear = nn.Linear(in_size, out_size)
@@ -110,9 +113,11 @@ class AppendBiasLayer(nn.Module):
 
     def __init__(self, num_bias_vars):
         super().__init__()
-        self.log_std = torch.nn.Parameter(torch.as_tensor([0.0] * num_bias_vars))
+        self.log_std = torch.nn.Parameter(
+            torch.as_tensor([0.0] * num_bias_vars))
         self.register_parameter("log_std", self.log_std)
 
     def forward(self, x):
-        out = torch.cat([x, self.log_std.unsqueeze(0).repeat([len(x), 1])], axis=1)
+        out = torch.cat(
+            [x, self.log_std.unsqueeze(0).repeat([len(x), 1])], axis=1)
         return out

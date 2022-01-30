@@ -40,9 +40,8 @@ class TrialExecutor:
         if trial.status == status:
             logger.debug("Trial %s: Status %s unchanged.", trial, trial.status)
         else:
-            logger.debug(
-                "Trial %s: Changing status from %s to %s.", trial, trial.status, status
-            )
+            logger.debug("Trial %s: Changing status from %s to %s.", trial,
+                         trial.status, status)
         trial.set_status(status)
         if status in [Trial.TERMINATED, Trial.ERROR]:
             self.try_checkpoint_metadata(trial)
@@ -54,13 +53,15 @@ class TrialExecutor:
             trial (Trial): Trial to checkpoint.
         """
         if trial.checkpoint.storage == Checkpoint.MEMORY:
-            logger.debug("Trial %s: Not saving data for memory checkpoint.", trial)
+            logger.debug("Trial %s: Not saving data for memory checkpoint.",
+                         trial)
             return
         try:
             logger.debug("Trial %s: Saving trial metadata.", trial)
             self._cached_trial_state[trial.trial_id] = trial.__getstate__()
         except Exception:
-            logger.exception("Trial %s: Error checkpointing trial metadata.", trial)
+            logger.exception("Trial %s: Error checkpointing trial metadata.",
+                             trial)
 
     def get_checkpoints(self):
         """Returns a copy of mapping of the trial ID to pickled metadata."""
@@ -68,9 +69,8 @@ class TrialExecutor:
 
     def has_resources(self, resources):
         """Returns whether this runner has at least the specified resources."""
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "has_resources() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "has_resources() method")
 
     def start_trial(self, trial, checkpoint=None, train=True):
         """Starts the trial restoring from checkpoint if checkpoint is provided.
@@ -81,9 +81,8 @@ class TrialExecutor:
             of trial.
             train (bool): Whether or not to start training.
         """
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "start_trial() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "start_trial() method")
 
     def stop_trial(self, trial, error=False, error_msg=None, stop_logger=True):
         """Stops the trial.
@@ -97,9 +96,8 @@ class TrialExecutor:
             error_msg (str): Optional error message.
             stop_logger (bool): Whether to shut down the trial logger.
         """
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "stop_trial() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "stop_trial() method")
 
     def continue_training(self, trial):
         """Continues the training of this trial."""
@@ -147,9 +145,8 @@ class TrialExecutor:
 
     def get_running_trials(self):
         """Returns all running trials."""
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "get_running_trials() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "get_running_trials() method")
 
     def on_step_begin(self, trial_runner):
         """A hook called before running one step of the trial event loop."""
@@ -166,24 +163,19 @@ class TrialExecutor:
             if trial.status == Trial.PENDING:
                 if not self.has_resources(trial.resources):
                     raise TuneError(
-                        (
-                            "Insufficient cluster resources to launch trial: "
-                            "trial requested {} but the cluster has only {}. "
-                            "Pass `queue_trials=True` in "
-                            "ray.tune.run() or on the command "
-                            "line to queue trials until the cluster scales "
-                            "up or resources become available. {}"
-                        ).format(
-                            trial.resources.summary_string(),
-                            self.resource_string(),
-                            trial.get_trainable_cls().resource_help(trial.config),
-                        )
-                    )
+                        ("Insufficient cluster resources to launch trial: "
+                         "trial requested {} but the cluster has only {}. "
+                         "Pass `queue_trials=True` in "
+                         "ray.tune.run() or on the command "
+                         "line to queue trials until the cluster scales "
+                         "up or resources become available. {}").format(
+                             trial.resources.summary_string(),
+                             self.resource_string(),
+                             trial.get_trainable_cls().resource_help(
+                                 trial.config)))
             elif trial.status == Trial.PAUSED:
-                raise TuneError(
-                    "There are paused trials, but no more pending "
-                    "trials with sufficient resources."
-                )
+                raise TuneError("There are paused trials, but no more pending "
+                                "trials with sufficient resources.")
 
     def get_next_available_trial(self):
         """Blocking call that waits until one result is ready.
@@ -234,9 +226,8 @@ class TrialExecutor:
         Returns:
             False if error occurred, otherwise return True.
         """
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "restore() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "restore() method")
 
     def save(self, trial, storage=Checkpoint.PERSISTENT, result=None):
         """Saves training state of this trial to a checkpoint.
@@ -252,9 +243,8 @@ class TrialExecutor:
         Returns:
             A Checkpoint object.
         """
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide " "save() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "save() method")
 
     def export_trial_if_needed(self, trial):
         """Exports model of this trial based on trial.export_formats.
@@ -265,10 +255,8 @@ class TrialExecutor:
         Returns:
             A dict that maps ExportFormats to successfully exported models.
         """
-        raise NotImplementedError(
-            "Subclasses of TrialExecutor must provide "
-            "export_trial_if_needed() method"
-        )
+        raise NotImplementedError("Subclasses of TrialExecutor must provide "
+                                  "export_trial_if_needed() method")
 
     def has_gpus(self):
         """Returns True if GPUs are detected on the cluster."""

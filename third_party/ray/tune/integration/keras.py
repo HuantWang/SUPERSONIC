@@ -20,7 +20,6 @@ class TuneReporterCallback(keras.callbacks.Callback):
 
     def on_batch_end(self, batch, logs=None):
         from ray import tune
-
         logs = logs or {}
         if not self.freq == "batch":
             return
@@ -35,7 +34,6 @@ class TuneReporterCallback(keras.callbacks.Callback):
 
     def on_epoch_end(self, batch, logs=None):
         from ray import tune
-
         logs = logs or {}
         if not self.freq == "epoch":
             return

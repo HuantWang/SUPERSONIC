@@ -30,5 +30,4 @@ TS_CONFIG = with_common_config({
 # yapf: enable
 
 LinTSTrainer = build_trainer(
-    name="LinTS", default_config=TS_CONFIG, default_policy=BanditPolicy
-)
+    name="LinTS", default_config=TS_CONFIG, default_policy=BanditPolicy)

@@ -19,17 +19,18 @@ from ray.rllib.offline.json_writer import _to_json
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.test_utils import framework_iterator
 
-SAMPLES = SampleBatch(
-    {
-        "actions": np.array([1, 2, 3, 4]),
-        "obs": np.array([4, 5, 6, 7]),
-        "eps_id": [1, 1, 2, 3],
-    }
-)
+SAMPLES = SampleBatch({
+    "actions": np.array([1, 2, 3, 4]),
+    "obs": np.array([4, 5, 6, 7]),
+    "eps_id": [1, 1, 2, 3],
+})
 
 
 def make_sample_batch(i):
-    return SampleBatch({"actions": np.array([i, i, i]), "obs": np.array([i, i, i])})
+    return SampleBatch({
+        "actions": np.array([i, i, i]),
+        "obs": np.array([i, i, i])
+    })
 
 
 class AgentIOTest(unittest.TestCase):
@@ -46,8 +47,7 @@ class AgentIOTest(unittest.TestCase):
                 "output": output + (fw if output != "logdir" else ""),
                 "rollout_fragment_length": 250,
                 "framework": fw,
-            },
-        )
+            })
         agent.train()
         return agent
 
@@ -62,7 +62,8 @@ class AgentIOTest(unittest.TestCase):
         """Test special value 'logdir' as Agent's output."""
         for fw in framework_iterator():
             agent = self.writeOutputs("logdir", fw)
-            self.assertEqual(len(glob.glob(agent.logdir + "/output-*.json")), 1)
+            self.assertEqual(
+                len(glob.glob(agent.logdir + "/output-*.json")), 1)
 
     def testAgentInputDir(self):
         for fw in framework_iterator(frameworks=("torch", "tf")):
@@ -73,8 +74,7 @@ class AgentIOTest(unittest.TestCase):
                     "input": self.test_dir + fw,
                     "input_evaluation": [],
                     "framework": fw,
-                },
-            )
+                })
             result = agent.train()
             self.assertEqual(result["timesteps_total"], 250)  # read from input
             self.assertTrue(np.isnan(result["episode_reward_mean"]))
@@ -111,8 +111,7 @@ class AgentIOTest(unittest.TestCase):
                     "input_evaluation": [],
                     "postprocess_inputs": True,  # adds back 'advantages'
                     "framework": fw,
-                },
-            )
+                })
 
             result = agent.train()
             self.assertEqual(result["timesteps_total"], 250)  # read from input
@@ -127,8 +126,7 @@ class AgentIOTest(unittest.TestCase):
                     "input": self.test_dir + fw,
                     "input_evaluation": ["simulation"],
                     "framework": fw,
-                },
-            )
+                })
             for _ in range(50):
                 result = agent.train()
                 if not np.isnan(result["episode_reward_mean"]):
@@ -146,8 +144,7 @@ class AgentIOTest(unittest.TestCase):
                     "input_evaluation": [],
                     "rollout_fragment_length": 99,
                     "framework": fw,
-                },
-            )
+                })
             result = agent.train()
             self.assertEqual(result["timesteps_total"], 250)  # read from input
             self.assertTrue(np.isnan(result["episode_reward_mean"]))
@@ -158,19 +155,20 @@ class AgentIOTest(unittest.TestCase):
             agent = PGTrainer(
                 env="CartPole-v0",
                 config={
-                    "input": {self.test_dir + fw: 0.1, "sampler": 0.9,},
+                    "input": {
+                        self.test_dir + fw: 0.1,
+                        "sampler": 0.9,
+                    },
                     "train_batch_size": 2000,
                     "input_evaluation": [],
                     "framework": fw,
-                },
-            )
+                })
             result = agent.train()
             self.assertTrue(not np.isnan(result["episode_reward_mean"]))
 
     def testMultiAgent(self):
-        register_env(
-            "multi_agent_cartpole", lambda _: MultiAgentCartPole({"num_agents": 10})
-        )
+        register_env("multi_agent_cartpole",
+                     lambda _: MultiAgentCartPole({"num_agents": 10}))
         single_env = gym.make("CartPole-v0")
 
         def gen_policy():
@@ -190,12 +188,11 @@ class AgentIOTest(unittest.TestCase):
                             "policy_2": gen_policy(),
                         },
                         "policy_mapping_fn": (
-                            lambda agent_id: random.choice(["policy_1", "policy_2"])
-                        ),
+                            lambda agent_id: random.choice(
+                                ["policy_1", "policy_2"])),
                     },
                     "framework": fw,
-                },
-            )
+                })
             pg.train()
             self.assertEqual(len(os.listdir(self.test_dir)), 1)
 
@@ -213,12 +210,11 @@ class AgentIOTest(unittest.TestCase):
                             "policy_2": gen_policy(),
                         },
                         "policy_mapping_fn": (
-                            lambda agent_id: random.choice(["policy_1", "policy_2"])
-                        ),
+                            lambda agent_id: random.choice(
+                                ["policy_1", "policy_2"])),
                     },
                     "framework": fw,
-                },
-            )
+                })
             for _ in range(50):
                 result = pg.train()
                 if not np.isnan(result["episode_reward_mean"]):
@@ -239,8 +235,7 @@ class JsonIOTest(unittest.TestCase):
     def test_write_simple(self):
         ioctx = IOContext(self.test_dir, {}, 0, None)
         writer = JsonWriter(
-            self.test_dir, ioctx, max_file_size=1000, compress_columns=["obs"]
-        )
+            self.test_dir, ioctx, max_file_size=1000, compress_columns=["obs"])
         self.assertEqual(len(os.listdir(self.test_dir)), 0)
         writer.write(SAMPLES)
         writer.write(SAMPLES)
@@ -252,8 +247,7 @@ class JsonIOTest(unittest.TestCase):
             "file://" + self.test_dir,
             ioctx,
             max_file_size=1000,
-            compress_columns=["obs"],
-        )
+            compress_columns=["obs"])
         self.assertEqual(len(os.listdir(self.test_dir)), 0)
         writer.write(SAMPLES)
         writer.write(SAMPLES)
@@ -262,8 +256,7 @@ class JsonIOTest(unittest.TestCase):
     def test_write_paginate(self):
         ioctx = IOContext(self.test_dir, {}, 0, None)
         writer = JsonWriter(
-            self.test_dir, ioctx, max_file_size=5000, compress_columns=["obs"]
-        )
+            self.test_dir, ioctx, max_file_size=5000, compress_columns=["obs"])
         self.assertEqual(len(os.listdir(self.test_dir)), 0)
         for _ in range(100):
             writer.write(SAMPLES)
@@ -273,20 +266,14 @@ class JsonIOTest(unittest.TestCase):
         #                12 or 13: Mac locally.
         # Reasons: Different compressions, file-size interpretations,
         #  json writers?
-        assert num_files in [
-            2,
-            7,
-            12,
-            13,
-        ], "Expected 2|7|12|13 files, but found {} ({})".format(
-            num_files, os.listdir(self.test_dir)
-        )
+        assert num_files in [2, 7, 12, 13], \
+            "Expected 2|7|12|13 files, but found {} ({})". \
+            format(num_files, os.listdir(self.test_dir))
 
     def test_read_write(self):
         ioctx = IOContext(self.test_dir, {}, 0, None)
         writer = JsonWriter(
-            self.test_dir, ioctx, max_file_size=5000, compress_columns=["obs"]
-        )
+            self.test_dir, ioctx, max_file_size=5000, compress_columns=["obs"])
         for i in range(100):
             writer.write(make_sample_batch(i))
         reader = JsonReader(self.test_dir + "/*.json")
@@ -310,13 +297,11 @@ class JsonIOTest(unittest.TestCase):
         with open(self.test_dir + "/f2", "w") as f:
             f.write(_to_json(make_sample_batch(1), []))
             f.write("\n")
-        reader = JsonReader(
-            [
-                self.test_dir + "/empty",
-                self.test_dir + "/f1",
-                "file://" + self.test_dir + "/f2",
-            ]
-        )
+        reader = JsonReader([
+            self.test_dir + "/empty",
+            self.test_dir + "/f1",
+            "file://" + self.test_dir + "/f2",
+        ])
         seen_a = set()
         for i in range(100):
             batch = reader.next()
@@ -334,7 +319,9 @@ class JsonIOTest(unittest.TestCase):
             f.write(_to_json(make_sample_batch(3), []))
             f.write("\n")
             f.write("{..corrupted_json_record")
-        reader = JsonReader([self.test_dir + "/f1",])
+        reader = JsonReader([
+            self.test_dir + "/f1",
+        ])
         seen_a = set()
         for i in range(10):
             batch = reader.next()
@@ -343,7 +330,9 @@ class JsonIOTest(unittest.TestCase):
 
     def test_abort_on_all_empty_inputs(self):
         open(self.test_dir + "/empty", "w").close()
-        reader = JsonReader([self.test_dir + "/empty",])
+        reader = JsonReader([
+            self.test_dir + "/empty",
+        ])
         self.assertRaises(ValueError, lambda: reader.next())
         with open(self.test_dir + "/empty1", "w") as f:
             for _ in range(100):
@@ -351,12 +340,14 @@ class JsonIOTest(unittest.TestCase):
         with open(self.test_dir + "/empty2", "w") as f:
             for _ in range(100):
                 f.write("\n")
-        reader = JsonReader([self.test_dir + "/empty1", self.test_dir + "/empty2",])
+        reader = JsonReader([
+            self.test_dir + "/empty1",
+            self.test_dir + "/empty2",
+        ])
         self.assertRaises(ValueError, lambda: reader.next())
 
 
 if __name__ == "__main__":
     import pytest
     import sys
-
     sys.exit(pytest.main(["-v", __file__]))

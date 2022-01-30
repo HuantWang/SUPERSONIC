@@ -68,7 +68,7 @@ WSGI_APPLICATION = "ray.tune.automlboard.frontend.wsgi.application"
 
 DB_ENGINE_NAME_MAP = {
     "mysql": "django.db.backends.mysql",
-    "sqllite": "django.db.backends.sqlite3",
+    "sqllite": "django.db.backends.sqlite3"
 }
 
 
@@ -81,7 +81,10 @@ def lookup_db_engine(name):
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 if not os.environ.get("AUTOMLBOARD_DB_ENGINE", None):
     DATABASES = {
-        "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "automlboard.db",}
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "automlboard.db",
+        }
     }
 else:
     DATABASES = {
@@ -91,7 +94,7 @@ else:
             "USER": os.environ["AUTOMLBOARD_DB_USER"],
             "PASSWORD": os.environ["AUTOMLBOARD_DB_PASSWORD"],
             "HOST": os.environ["AUTOMLBOARD_DB_HOST"],
-            "PORT": os.environ["AUTOMLBOARD_DB_PORT"],
+            "PORT": os.environ["AUTOMLBOARD_DB_PORT"]
         }
     }
 
@@ -101,10 +104,18 @@ else:
 VALIDATION_PREFIX = "django.contrib.auth.password_validation."
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": VALIDATION_PREFIX + "UserAttributeSimilarityValidator",},
-    {"NAME": VALIDATION_PREFIX + "MinimumLengthValidator",},
-    {"NAME": VALIDATION_PREFIX + "CommonPasswordValidator",},
-    {"NAME": VALIDATION_PREFIX + "NumericPasswordValidator",},
+    {
+        "NAME": VALIDATION_PREFIX + "UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": VALIDATION_PREFIX + "MinimumLengthValidator",
+    },
+    {
+        "NAME": VALIDATION_PREFIX + "CommonPasswordValidator",
+    },
+    {
+        "NAME": VALIDATION_PREFIX + "NumericPasswordValidator",
+    },
 ]
 
 # Internationalization
@@ -124,9 +135,10 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static").replace("\\", "/"),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static").replace("\\", "/"), )
 
 # automlboard settings
 AUTOMLBOARD_LOG_DIR = os.environ.get("AUTOMLBOARD_LOGDIR", None)
-AUTOMLBOARD_RELOAD_INTERVAL = os.environ.get("AUTOMLBOARD_RELOAD_INTERVAL", None)
+AUTOMLBOARD_RELOAD_INTERVAL = os.environ.get("AUTOMLBOARD_RELOAD_INTERVAL",
+                                             None)
 AUTOMLBOARD_LOG_LEVEL = os.environ.get("AUTOMLBOARD_LOGLEVEL", None)

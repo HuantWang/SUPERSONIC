@@ -37,17 +37,15 @@ class MedianStoppingRule(FIFOScheduler):
             resumed and allowed to run FIFO.
     """
 
-    def __init__(
-        self,
-        time_attr="time_total_s",
-        reward_attr=None,
-        metric="episode_reward_mean",
-        mode="max",
-        grace_period=60.0,
-        min_samples_required=3,
-        min_time_slice=0,
-        hard_stop=True,
-    ):
+    def __init__(self,
+                 time_attr="time_total_s",
+                 reward_attr=None,
+                 metric="episode_reward_mean",
+                 mode="max",
+                 grace_period=60.0,
+                 min_samples_required=3,
+                 min_time_slice=0,
+                 hard_stop=True):
         assert mode in ["min", "max"], "`mode` must be 'min' or 'max'!"
         if reward_attr is not None:
             mode = "max"
@@ -55,8 +53,7 @@ class MedianStoppingRule(FIFOScheduler):
             logger.warning(
                 "`reward_attr` is deprecated and will be removed in a future "
                 "version of Tune. "
-                "Setting `metric={}` and `mode=max`.".format(reward_attr)
-            )
+                "Setting `metric={}` and `mode=max`.".format(reward_attr))
         FIFOScheduler.__init__(self)
         self._stopped_trials = set()
         self._grace_period = grace_period
@@ -106,18 +103,13 @@ class MedianStoppingRule(FIFOScheduler):
             logger.debug(
                 "MedianStoppingRule: insufficient samples={} to evaluate "
                 "trial {} at t={}. {}".format(
-                    len(trials), trial.trial_id, time, action_str
-                )
-            )
+                    len(trials), trial.trial_id, time, action_str))
             return action
 
         median_result = self._median_result(trials, time)
         best_result = self._best_result(trial)
-        logger.debug(
-            "Trial {} best res={} vs median res={} at t={}".format(
-                trial, best_result, median_result, time
-            )
-        )
+        logger.debug("Trial {} best res={} vs median res={} at t={}".format(
+            trial, best_result, median_result, time))
 
         if self._compare_op(median_result, best_result) != best_result:
             logger.debug("MedianStoppingRule: early stopping {}".format(trial))
@@ -134,22 +126,19 @@ class MedianStoppingRule(FIFOScheduler):
 
     def debug_string(self):
         return "Using MedianStoppingRule: num_stopped={}.".format(
-            len(self._stopped_trials)
-        )
+            len(self._stopped_trials))
 
     def _on_insufficient_samples(self, trial_runner, trial, time):
         pause = time - self._last_pause[trial] > self._min_time_slice
         pause = pause and [
-            t
-            for t in trial_runner.get_trials()
+            t for t in trial_runner.get_trials()
             if t.status in (Trial.PENDING, Trial.PAUSED)
         ]
         return TrialScheduler.PAUSE if pause else TrialScheduler.CONTINUE
 
     def _trials_beyond_time(self, time):
         trials = [
-            trial
-            for trial in self._results
+            trial for trial in self._results
             if self._results[trial][-1][self._time_attr] >= time
         ]
         return trials
@@ -162,7 +151,8 @@ class MedianStoppingRule(FIFOScheduler):
         # TODO(ekl) we could do interpolation to be more precise, but for now
         # assume len(results) is large and the time diffs are roughly equal
         scoped_results = [
-            r for r in results if self._grace_period <= r[self._time_attr] <= time
+            r for r in results
+            if self._grace_period <= r[self._time_attr] <= time
         ]
         return np.mean([r[self._metric] for r in scoped_results])
 

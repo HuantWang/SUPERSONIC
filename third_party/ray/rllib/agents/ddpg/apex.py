@@ -1,5 +1,6 @@
 from ray.rllib.agents.dqn.apex import apex_execution_plan
-from ray.rllib.agents.ddpg.ddpg import DDPGTrainer, DEFAULT_CONFIG as DDPG_CONFIG
+from ray.rllib.agents.ddpg.ddpg import DDPGTrainer, \
+    DEFAULT_CONFIG as DDPG_CONFIG
 
 APEX_DDPG_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
     DDPG_CONFIG,  # see also the options in ddpg.py, which are also supported
@@ -7,9 +8,11 @@ APEX_DDPG_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
         "optimizer": {
             "max_weight_sync_delay": 400,
             "num_replay_buffer_shards": 4,
-            "debug": False,
+            "debug": False
         },
-        "exploration_config": {"type": "PerWorkerOrnsteinUhlenbeckNoise"},
+        "exploration_config": {
+            "type": "PerWorkerOrnsteinUhlenbeckNoise"
+        },
         "n_step": 3,
         "num_gpus": 0,
         "num_workers": 32,
@@ -27,5 +30,4 @@ APEX_DDPG_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
 ApexDDPGTrainer = DDPGTrainer.with_updates(
     name="APEX_DDPG",
     default_config=APEX_DDPG_DEFAULT_CONFIG,
-    execution_plan=apex_execution_plan,
-)
+    execution_plan=apex_execution_plan)

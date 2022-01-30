@@ -55,6 +55,7 @@ class csr_rl:
                     :param env_config: including  "state_function", "action_function", "reward_function", "observation_space"
                 """
         # self.init_from_env_config(env_config)
+        self.sql_path = env_config.get("sql_path")
         self.benchmarks = env_config.get("benchmark")
         self.log_path = env_config.get("log_path")
         self.pass_path = env_config.get("pass_path")
@@ -109,9 +110,10 @@ class csr_rl:
         :param action: An action, or a sequence of actions. When multiple
                 actions are provided the observation and reward are returned after
                 running all of the actions.
-
         :return: A tuple of observation, observation_mask, score, done, and info.
         """
+
+
         used_time = time.time() - self.time
         benchmarks = self.benchmarks.split("/")[-1]
         with open(f"{self.pass_path}/{benchmarks}_pass.txt", "a+") as f:
@@ -122,12 +124,11 @@ class csr_rl:
                 f"time={used_time:.3},action_len={len(self.env.actions)},episode_reward={self.env.episode_reward:.3%},reward_all={self.view:.3%}\r\n"
             )
         try:
-
             conn = sqlite3.connect(
-                "/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db"
+                self.sql_path
             )
             c = conn.cursor()
-            sql = "INSERT INTO CSR (TIME, BENCHMARK, RESULT, REWARD) \
+            sql = "INSERT or IGNORE INTO CSR (TIME, BENCHMARK, RESULT, REWARD) \
                             VALUES (?, ?, ?, ?)"
             # print("time",round(time.time() - self.time))
             c.execute(
@@ -139,12 +140,13 @@ class csr_rl:
                     self.env.episode_reward,
                 ),
             )
-
             conn.commit()
             conn.close()
+
         except Exception as e:
-            # print("11111111111111111111111111111")
             print(e)
+
+
 
         obs, rew, done, info = self.env.step(action)
 
