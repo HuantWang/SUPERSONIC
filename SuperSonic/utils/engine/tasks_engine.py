@@ -382,7 +382,7 @@ class TaskEngine:
         if self.tasks=="CSR":
             CSR(policy).main()
 
-def createDB(db_path = "SuperSonic/SQL/supersonic.db"):
+def createDB(db_path = "../SQL/supersonic.db"):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     # result,action history,reward,execution outputs
@@ -414,23 +414,29 @@ class Tvm:
     """
     def __init__(self, policy):
         # database
-        createDB("SuperSonic/SQL/supersonic.db")
+        self.sql_path = os.path.abspath('../SQL/supersonic.db')
+        createDB(self.sql_path)
         # init paramete:r
+
+
         self.RLAlgo = None
         self.target = "localhost:50061"
-        self.log_path = "tasks/tvm/zjq/logs"
-        self.obs_file = ("tasks/tvm/zjq/record/finish.txt")
-        self.tvm_path = "tasks/tvm/zjq/grpc/"
         self.environment_path = SuperSonic.utils.environments.rltvm_env.RLClient
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
         self.experiment = "tvm"
-        self.local_dir = "SuperSonic/logs/model_save"
+
+
+        self.log_path = "../../tasks/CSR/result"
+        self.obs_file = ("../../tasks/tvm/zjq/record/finish.txt")
+        self.tvm_path = "../../tasks/tvm/zjq/grpc/"
+        self.local_dir = "../../SuperSonic/logs/model_save"
         self.deadline = 50
         stopper = {"time_total_s": self.deadline}
         self.task_config = {
+            "sql_path": self.sql_path,
             "target": self.target,
             "log_path": self.log_path,
             "obs_file": self.obs_file,
@@ -459,7 +465,7 @@ class Tvm:
         # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
-        conn = sqlite3.connect("SuperSonic/SQL/supersonic.db")
+        conn = sqlite3.connect("../SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):

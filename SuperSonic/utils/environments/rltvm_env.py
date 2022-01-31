@@ -1,7 +1,6 @@
 import grpc
-import schedule_pb2
-import schedule_pb2_grpc
-
+from SuperSonic.service import schedule_pb2
+from SuperSonic.service import schedule_pb2_grpc
 # 因为 RPC 应该长时间运行，考虑到性能，还需要用到并发的库。
 import time  # 设置系统延时,
 from concurrent import futures

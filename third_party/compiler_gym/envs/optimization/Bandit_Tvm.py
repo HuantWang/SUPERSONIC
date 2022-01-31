@@ -73,7 +73,7 @@ class BanditTvmEnv(gym.Env):
     def generate_reward(self, action):
         """ feedback the reward."""
         # the path to save execution performance
-        DocSave = "SuperSonic/logs/model_save"
+        DocSave = "../../SuperSonic/logs/model_save"
 
         # Delete dir
         if os.path.exists(DocSave):
@@ -95,7 +95,7 @@ class BanditTvmEnv(gym.Env):
             data = json.load(f)
         reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
 
-        conn = sqlite3.connect("SuperSonic/SQL/supersonic.db")
+        conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
                                                               VALUES (?, ?, ?, ?)"

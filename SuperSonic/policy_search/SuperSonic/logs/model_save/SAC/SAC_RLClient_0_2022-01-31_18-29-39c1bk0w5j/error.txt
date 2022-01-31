@@ -1,0 +1,69 @@
+Failure # 1 (occurred at 2022-01-31_18-29-44)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(_InactiveRpcError): [36mray::SAC.train()[39m (pid=22125, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 500, in train
+    raise e
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 486, in train
+    result = Trainable.train(self)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 261, in train
+    result = self._train()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 132, in _train
+    return self._train_exec_impl()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 170, in _train_exec_impl
+    res = next(self.train_exec_impl)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 731, in __next__
+    return next(self.built_iterator)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 814, in apply_filter
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 1047, in build_union
+    item = next(it)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 731, in __next__
+    return next(self.built_iterator)
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/util/iter.py", line 744, in apply_foreach
+    for item in it:
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/execution/rollout_ops.py", line 70, in sampler
+    yield workers.local_worker().sample()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/rollout_worker.py", line 528, in sample
+    batches = [self.input_reader.next()]
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 59, in next
+    batches = [self.get_data()]
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 164, in get_data
+    item = next(self.rollout_provider)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/sampler.py", line 518, in _env_runner
+    base_env.send_actions(actions_to_send)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/env/base_env.py", line 329, in send_actions
+    self.vector_env.vector_step(action_vector)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/env/vector_env.py", line 136, in vector_step
+    obs, r, done, info = self.envs[i].step(actions[i])
+  File "/home/huanting/SuperSonic/SuperSonic/utils/environments/rltvm_env.py", line 73, in step
+    response = stub.GetTvm(
+  File "/home/huanting/anaconda3/envs/compiler_gym/lib/python3.8/site-packages/grpc/_channel.py", line 923, in __call__
+    return _end_unary_response_blocking(state, call, False, None)
+  File "/home/huanting/anaconda3/envs/compiler_gym/lib/python3.8/site-packages/grpc/_channel.py", line 826, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses"
+	debug_error_string = "{"created":"@1643624984.217045206","description":"Failed to pick subchannel","file":"src/core/ext/filters/client_channel/client_channel.cc","file_line":4142,"referenced_errors":[{"created":"@1643624984.217044205","description":"failed to connect to all addresses","file":"src/core/ext/filters/client_channel/lb_policy/pick_first/pick_first.cc","file_line":397,"grpc_status":14}]}"
+>
+
