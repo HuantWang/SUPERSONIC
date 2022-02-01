@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial.AutoTvm.Env_register &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial.CSR.Env_register" href="CSR.html" />
+    <link rel="prev" title="Tutorial.Halide.Env_register" href="Halide.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial.AutoTvm.Env_register</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tvmenv">TvmEnv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bandittvmenv">BanditTvmEnv</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tutorial.AutoTvm.Env_register</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/case_study/TVM.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="tutorial-autotvm-env-register">
+<h1>Tutorial.AutoTvm.Env_register<a class="headerlink" href="#tutorial-autotvm-env-register" title="Permalink to this headline">¶</a></h1>
+<p>Neural Network Code Generation environment uses a <code class="xref py py-class docutils literal notranslate"><span class="pre">TvmEnv</span></code> to register a base environment. Policy search module uses A
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BanditTvmEnv</span></code> to register a base environment.</p>
+<div class="contents local topic" id="neural-network-code-generation-environment-classes">
+<p class="topic-title">Neural Network Code Generation Environment Classes:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#tvmenv" id="id1">TvmEnv</a></p></li>
+<li><p><a class="reference internal" href="#bandittvmenv" id="id2">BanditTvmEnv</a></p></li>
+</ul>
+</div>
+<section id="tvmenv">
+<h2><a class="toc-backref" href="#id1">TvmEnv</a><a class="headerlink" href="#tvmenv" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="compiler_gym.envs.optimization.TvmEnv">
+<em class="property">class </em><code class="sig-prename descclassname">compiler_gym.envs.optimization.</code><code class="sig-name descname">TvmEnv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state_function</span></em>, <em class="sig-param"><span class="n">action_function</span></em>, <em class="sig-param"><span class="n">reward_function</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>A :class:</dt><dd><p>STOKE is a stochastic optimizer and program synthesizer for the x86-64 instruction set.
+This classical compiler optimization task finds a valid code sequence to maximize the performance
+of a loop-free sequence of instructions. Superoptimizaiton is an expensive
+optimization technique as the number of possible configurations grows exponentially as
+the instruction count to be optimized increases.</p>
+</dd>
+<dt>Source:</dt><dd><p>This environment corresponds to the version of the STOKE
+described by stanfordPL. (<a class="reference external" href="https://github.com/StanfordPL/stoke">https://github.com/StanfordPL/stoke</a>)
+paper link: <a class="reference external" href="https://raw.githubusercontent.com/StanfordPL/stoke/develop/docs/papers/asplos13.pdf">https://raw.githubusercontent.com/StanfordPL/stoke/develop/docs/papers/asplos13.pdf</a></p>
+</dd>
+<dt>Observation:</dt><dd><p>Type: Box(100)
+Optimized code will be convert to vectors by different embedding approaches,
+e.g. Word2vec, Doc2vec, CodeBert …</p>
+</dd>
+<dt>Actions:</dt><dd><p>Type: Discrete(9)
+NUm      Action      Description
+0        add_nops        Adds one extra nop instruction into the rewrite.
+1        delete      Deletes one instruction at random.
+2        instruction Replaces an instruction with another one chosen at random.
+3        opcode      Replaces an instruction’s opcode with a new one that takes operands of the same type.
+4        operand         Replaces an operand of one instruction with another.
+5        rotate      Formerly “resize”. Moves an instruction from one basic block to another, and shifts all the instructions in between.
+6        local_swap      Takes two instructions in the same basic block and swaps them.
+7        global_swap Takes two instructions in the entire program and swaps them.
+8        weighted        Selects from among several other transforms at random.</p>
+</dd>
+<dt>Reward:</dt><dd><p>In all cases, lower cost is better. We combine the value of correctness with other values we want to optimize for.
+Name        Description
+binsize     The size (in bytes) of the assembled rewrite using the x64asm library.
+correctness     How “correct” the rewrite’s output appears. Very configurable.
+size        The number of instructions in the assembled rewrite.
+latency     A poor-man’s estimate of the rewrite latency, in clock cycles, based on the per-opcode latency table in src/cost/tables.
+measured        An estimate of running time by counting the number of instructions actually executed on the testcases. Good for loops and algorithmic improvements.
+sseavx      Returns ‘1’ if both avx and sse instructions are used (this is usually bad!), and ‘0’ otherwise. Often used with a multiplier like correctness + 1000*sseavx
+nongoal     Returns ‘1’ if the code (after minimization) is found to be equivalent to one in –non_goal. Can also be used with a multiplier.</p>
+</dd>
+<dt>Starting State:</dt><dd><p>All observations are assigned a uniform random value in [-1..1]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override close in your subclass to perform any necessary cleanup.</p>
+<p>Environments will automatically close() themselves when
+garbage collected or when the program exits.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.get_obs">
+<code class="sig-name descname">get_obs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action_history</span></em>, <em class="sig-param"><span class="n">state_code</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.get_obs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.get_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>feedback the observation with method “observation_function”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action_history</strong> – This is the action history in past few steps.</p></li>
+<li><p><strong>state_code</strong> – The X86 code after executing specific action.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return an embedding vector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.get_reward">
+<code class="sig-name descname">get_reward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reward_function</span></em>, <em class="sig-param"><span class="n">reward</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.get_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.get_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate reward with method “reward_function”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action</strong> – What will agent do in next step.</p></li>
+<li><p><strong>reward</strong> – Describe how the agent “ought” to behave.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a reward score after calculating.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.render">
+<code class="sig-name descname">render</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'human'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.render"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the environment.</p>
+<p>The set of supported modes varies per environment. (And some
+environments do not support rendering at all.) By convention,
+if mode is:</p>
+<ul class="simple">
+<li><p>human: render to the current display or terminal and
+return nothing. Usually for human consumption.</p></li>
+<li><p>rgb_array: Return an numpy.ndarray with shape (x, y, 3),
+representing RGB values for an x-by-y pixel image, suitable
+for turning into a video.</p></li>
+<li><p>ansi: Return a string (str) or StringIO.StringIO containing a
+terminal-style text representation. The text can include newlines
+and ANSI escape sequences (e.g. for colors).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>Make sure that your class’s metadata ‘render.modes’ key includes</dt><dd><p>the list of supported modes. It’s recommended to call super()
+in implementations to use the functionality of this method.</p>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the mode to render with</p>
+</dd>
+</dl>
+<p>Example:</p>
+<dl>
+<dt>class MyEnv(Env):</dt><dd><p>metadata = {‘render.modes’: [‘human’, ‘rgb_array’]}</p>
+<dl class="simple">
+<dt>def render(self, mode=’human’):</dt><dd><dl class="simple">
+<dt>if mode == ‘rgb_array’:</dt><dd><p>return np.array(…) # return RGB frame suitable for video</p>
+</dd>
+<dt>elif mode == ‘human’:</dt><dd><p>… # pop up a window and render</p>
+</dd>
+<dt>else:</dt><dd><p>super(MyEnv, self).render(mode=mode) # just raise an exception</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset the RL environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.TvmEnv.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em>, <em class="sig-param"><span class="n">state_code</span></em>, <em class="sig-param"><span class="n">reward</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Tvm.html#TvmEnv.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.TvmEnv.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action</strong> – An action, or a sequence of actions. When multiple
+actions are provided the observation and reward are returned after
+running all of the actions.</p></li>
+<li><p><strong>reward</strong> – A reward, to describe how the agent “ought” to behave.</p></li>
+<li><p><strong>state_code</strong> – The X86 code after executing specific action.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of observation, reward, done, and info. Observation and
+reward are None if default observation/reward is not set. If done is
+True, observation and reward may also be None (e.g. because the
+service failed).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="bandittvmenv">
+<h2><a class="toc-backref" href="#id2">BanditTvmEnv</a><a class="headerlink" href="#bandittvmenv" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv">
+<em class="property">class </em><code class="sig-prename descclassname">compiler_gym.envs.optimization.</code><code class="sig-name descname">BanditTvmEnv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>A :class:</dt><dd><p>we formulate RL component search as a multi-armed bandit (MAB) problem.</p>
+</dd>
+<dt>Observation:</dt><dd><p>Type: Box(20)
+By default, the meta-optimizer runs each client RL for past few exploration</p>
+</dd>
+</dl>
+<p>steps during a trial to allow it to converge before taking the
+observation. We use the 20 most recently chosen policy architectures as the state.
+Actions:</p>
+<blockquote>
+<div><p>Type: Discrete(n)
+Given a budget of 𝑛 candidate RL component configurations (or slot machines)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Reward:</dt><dd><p>We then use the most frequently chosen policy architecture as the outcome of policy search.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override close in your subclass to perform any necessary cleanup.</p>
+<p>Environments will automatically close() themselves when
+garbage collected or when the program exits.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.generate_reward">
+<code class="sig-name descname">generate_reward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.generate_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.generate_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>feedback the reward.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.get_observation">
+<code class="sig-name descname">get_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.get_observation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.get_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>feedback the observation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.render">
+<code class="sig-name descname">render</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'human'</span></em>, <em class="sig-param"><span class="n">close</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.render"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the environment.</p>
+<p>The set of supported modes varies per environment. (And some
+environments do not support rendering at all.) By convention,
+if mode is:</p>
+<ul class="simple">
+<li><p>human: render to the current display or terminal and
+return nothing. Usually for human consumption.</p></li>
+<li><p>rgb_array: Return an numpy.ndarray with shape (x, y, 3),
+representing RGB values for an x-by-y pixel image, suitable
+for turning into a video.</p></li>
+<li><p>ansi: Return a string (str) or StringIO.StringIO containing a
+terminal-style text representation. The text can include newlines
+and ANSI escape sequences (e.g. for colors).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>Make sure that your class’s metadata ‘render.modes’ key includes</dt><dd><p>the list of supported modes. It’s recommended to call super()
+in implementations to use the functionality of this method.</p>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the mode to render with</p>
+</dd>
+</dl>
+<p>Example:</p>
+<dl>
+<dt>class MyEnv(Env):</dt><dd><p>metadata = {‘render.modes’: [‘human’, ‘rgb_array’]}</p>
+<dl class="simple">
+<dt>def render(self, mode=’human’):</dt><dd><dl class="simple">
+<dt>if mode == ‘rgb_array’:</dt><dd><p>return np.array(…) # return RGB frame suitable for video</p>
+</dd>
+<dt>elif mode == ‘human’:</dt><dd><p>… # pop up a window and render</p>
+</dd>
+<dt>else:</dt><dd><p>super(MyEnv, self).render(mode=mode) # just raise an exception</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset the RL environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.seed">
+<code class="sig-name descname">seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the seed for this env’s random number generator(s).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some environments use multiple pseudorandom number generators.
+We want to capture all such seeds used in order to ensure that
+there aren’t accidental correlations between multiple generators.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Returns the list of seeds used in this env’s random</dt><dd><p>number generators. The first value in the list should be the
+“main” seed, or the value which a reproducer should pass to
+‘seed’. Often, the main seed equals the provided ‘seed’, but
+this won’t be true if seed=None, for example.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list&lt;bigint&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="compiler_gym.envs.optimization.BanditTvmEnv.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compiler_gym/envs/optimization/Bandit_Tvm.html#BanditTvmEnv.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#compiler_gym.envs.optimization.BanditTvmEnv.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> – An action, or a sequence of actions. When multiple
+actions are provided the observation and reward are returned after
+running all of the actions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of observation, reward, done, and info. Observation and
+reward are None if default observation/reward is not set. If done is
+True, observation and reward may also be None (e.g. because the
+service failed).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="CSR.html" class="btn btn-neutral float-right" title="Tutorial.CSR.Env_register" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Halide.html" class="btn btn-neutral float-left" title="Tutorial.Halide.Env_register" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

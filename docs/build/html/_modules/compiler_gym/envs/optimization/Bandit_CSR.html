@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>compiler_gym.envs.optimization.Bandit_CSR &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>compiler_gym.envs.optimization.Bandit_CSR</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for compiler_gym.envs.optimization.Bandit_CSR</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">from</span> <span class="nn">gym.utils</span> <span class="kn">import</span> <span class="n">seeding</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">spaces</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.action</span> <span class="kn">import</span> <span class="n">action_functions</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.reward</span> <span class="kn">import</span> <span class="n">reward_function</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">SuperSonic.utils.engine.tasks_engine</span> <span class="k">as</span> <span class="nn">start_engine</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">from</span> <span class="nn">third_party</span> <span class="kn">import</span> <span class="n">rm_port</span>
+
+
+<div class="viewcode-block" id="BanditCSREnv"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv">[docs]</a><span class="k">class</span> <span class="nc">BanditCSREnv</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                       we formulate RL component search as a multi-armed bandit (MAB) problem.</span>
+<span class="sd">    Observation:</span>
+<span class="sd">        Type: Box(20)</span>
+<span class="sd">        By default, the meta-optimizer runs each client RL for past few exploration</span>
+<span class="sd">    steps during a trial to allow it to converge before taking the</span>
+<span class="sd">    observation. We use the 20 most recently chosen policy architectures as the state.</span>
+<span class="sd">    Actions:</span>
+<span class="sd">        Type: Discrete(n)</span>
+<span class="sd">        Given a budget of 𝑛 candidate RL component configurations (or slot machines)</span>
+<span class="sd">    Reward:</span>
+<span class="sd">        We then use the most frequently chosen policy architecture as the outcome of policy search.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise with an environment.</span>
+<span class="sd">        :param policy: The candidate policy list.</span>
+<span class="sd">        :param data: The program that programer intend to optimize.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_policy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bandits</span> <span class="o">=</span> <span class="n">policy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">policy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bandits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+            <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>  <span class="c1">#</span>
+        <span class="c1"># self.observation_space = spaces.Discrete(1)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BanditCSREnv.seed"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.seed">[docs]</a>    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="n">seeding</span><span class="o">.</span><span class="n">np_random</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">seed</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BanditCSREnv.get_observation"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.get_observation">[docs]</a>    <span class="k">def</span> <span class="nf">get_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; feedback the observation.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)))</span>
+            <span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation</span></div>
+
+<div class="viewcode-block" id="BanditCSREnv.generate_reward"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.generate_reward">[docs]</a>    <span class="k">def</span> <span class="nf">generate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; feedback the reward.&quot;&quot;&quot;</span>
+        <span class="c1"># the path to save execution performance</span>
+        <span class="n">DocSave</span> <span class="o">=</span> <span class="s2">&quot;../../SuperSonic/logs/model_save&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;result.json&quot;</span>
+
+        <span class="c1"># Delete dir</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">DocSave</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">DocSave</span><span class="p">)</span>
+
+        <span class="n">exist_policy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_policy</span><span class="p">[</span><span class="n">action</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exist_policy:</span><span class="si">{</span><span class="n">exist_policy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">start_engine</span><span class="o">.</span><span class="n">CSR</span><span class="p">(</span><span class="n">exist_policy</span><span class="p">)</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+
+        <span class="c1"># load loss from json</span>
+
+        <span class="k">for</span> <span class="n">relpath</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">DocSave</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">relpath</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;checkpoints&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;last_result&quot;</span><span class="p">][</span><span class="s2">&quot;episode_reward_max&quot;</span><span class="p">]</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;../../SuperSonic/SQL/supersonic.db&quot;</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) </span><span class="se">\</span>
+<span class="s2">                                                              VALUES (?, ?, ?, ?)&quot;</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="s2">&quot;CSR&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">reward</span><span class="p">))</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">reward</span></div>
+
+
+<div class="viewcode-block" id="BanditCSREnv.step"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take a step.</span>
+
+<span class="sd">                        :param action: An action, or a sequence of actions. When multiple</span>
+<span class="sd">                            actions are provided the observation and reward are returned after</span>
+<span class="sd">                            running all of the actions.</span>
+
+<span class="sd">                        :return: A tuple of observation, reward, done, and info. Observation and</span>
+<span class="sd">                            reward are None if default observation/reward is not set. If done is</span>
+<span class="sd">                            True, observation and reward may also be None (e.g. because the</span>
+<span class="sd">                            service failed).</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_reward</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_observation</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+
+        <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span>  <span class="c1">#</span></div>
+
+<div class="viewcode-block" id="BanditCSREnv.reset"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; reset the RL environment.</span>
+<span class="sd">                        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>  <span class="c1">#</span></div>
+
+<div class="viewcode-block" id="BanditCSREnv.render"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="BanditCSREnv.close"><a class="viewcode-back" href="../../../../case_study/CSR.html#compiler_gym.envs.optimization.BanditCSREnv.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

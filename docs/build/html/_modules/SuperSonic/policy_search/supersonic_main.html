@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.policy_search.supersonic_main &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>SuperSonic.policy_search.supersonic_main</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for SuperSonic.policy_search.supersonic_main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module defines how to search policy strategy&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">SuperSonic.policy_definition.policy_define</span> <span class="k">as</span> <span class="nn">policy_define</span>
+<span class="kn">import</span> <span class="nn">policy_search.util.policy_search</span> <span class="k">as</span> <span class="nn">policy_search</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.utils.engine.tasks_engine</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--xpid&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;MultiTaskPopArt&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Experiment id (default: None).&quot;</span>
+<span class="p">)</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--task&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;Stoke&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The task you want to optimize&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Training settings.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--disable_checkpoint&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Disable saving checkpoint.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--savedir&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;~/logs/supersonic&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Root dir where experiment data will be saved.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--num_actors&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of actors per environment (default: 4).&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--batch_size&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Learner batch size.&quot;</span>
+<span class="p">)</span>  <span class="c1"># steps</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--unroll_length&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The unroll length (time dimension).&quot;</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># steps</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--num_learner_threads&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--num_threads&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number learner threads.&quot;</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># steps</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--disable_cuda&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Disable CUDA.&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--num_actions&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of actions.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--use_lstm&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use LSTM in agent model.&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--agent_type&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;resnet&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The type of network to use for the agent.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--frame_height&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">84</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Height to which frames are rescaled.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--frame_width&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">84</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Width to which frames are rescaled.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--aaa_input_format&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;gray_stack&quot;</span><span class="p">,</span>
+    <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gray_stack&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb_last&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb_stack&quot;</span><span class="p">],</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Color format of the frames as input for the AAA.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--use_popart&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use PopArt Layer.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Loss settings.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--entropy_cost&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0006</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Entropy cost/multiplier.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--baseline_cost&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Baseline cost/multiplier.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--discounting&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Discounting factor.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--reward_clipping&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;abs_one&quot;</span><span class="p">,</span>
+    <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;abs_one&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">],</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Reward clipping.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Optimizer settings.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--learning_rate&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.00048</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;LR&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Learning rate.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--alpha&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;RMSProp smoothing constant.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--momentum&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;RMSProp momentum.&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--epsilon&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;RMSProp epsilon.&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--grad_norm_clipping&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Global gradient norm clip.&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Misc settings.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--write_profiler_trace&quot;</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Collect and write a profiler trace &quot;</span> <span class="s2">&quot;for chrome://tracing/.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--save_model_every_nsteps&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Save model every n steps&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--beta&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;PopArt parameter&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test settings.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--num_episodes&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of episodes for Testing.&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--actions&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use given action sequence.&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># yapf: enable</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--num_buffers&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;32&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;num_buffers&quot;</span><span class="p">)</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--env&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;BanditCSREnv-v0&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Task environments&quot;</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--steps&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of steps&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s2">&quot;--total_steps&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Total environment steps to train for.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--Policy&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Policy&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--Dataset&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Dataset&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;../../tasks/CSR/DATA&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input Data Path and split to train/valid&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PolSearch_main"><a class="viewcode-back" href="../../../supersonic/policy_search.html#SuperSonic.policy_search.supersonic_main.PolSearch_main">[docs]</a><span class="k">class</span> <span class="nc">PolSearch_main</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;:class:</span>
+<span class="sd">    This is a inferface to call start_engine to search policy.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flags</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">=</span><span class="n">flags</span>
+
+<div class="viewcode-block" id="PolSearch_main.start_engine"><a class="viewcode-back" href="../../../supersonic/policy_search.html#SuperSonic.policy_search.supersonic_main.PolSearch_main.start_engine">[docs]</a>    <span class="k">def</span> <span class="nf">start_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calling to policy_search() invokes SuperSonic meta-optimizer, where the developer can also limit the number of trials spent on client RL searching.</span>
+<span class="sd">          using policy_define.SuperOptimizer() to define policy strategies and split dataset.</span>
+<span class="sd">          using policy_search.train() to search best policy for objective task.</span>
+<span class="sd">          finally, using CSR(bestpolicy).main() to deploy best policy strategy and optimize the program.&quot;&quot;&quot;</span>
+
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M%S&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">Policy</span> <span class="o">=</span> <span class="n">policy_define</span><span class="o">.</span><span class="n">SuperOptimizer</span><span class="p">(</span>
+            <span class="n">StateFunctions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Word2vec&quot;</span><span class="p">,</span> <span class="s2">&quot;Doc2vec&quot;</span><span class="p">,</span> <span class="s2">&quot;Bert&quot;</span><span class="p">],</span>
+            <span class="n">RewardFunctions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">],</span>
+            <span class="n">RLAlgorithms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MCTS&quot;</span><span class="p">,</span> <span class="s2">&quot;PPO&quot;</span><span class="p">,</span> <span class="s2">&quot;DQN&quot;</span><span class="p">,</span> <span class="s2">&quot;QLearning&quot;</span><span class="p">],</span>
+            <span class="n">ActionFunctions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">],</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">PolicyDefined</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">policy_define</span><span class="o">.</span><span class="n">SuperOptimizer</span><span class="p">(</span>
+            <span class="n">datapath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">datapath</span>
+            <span class="c1"># datapath=&quot;../../tasks/stoke/example/hacker&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">cross_valid</span><span class="p">()</span>
+
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;--env </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;--savedir </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;--total_steps </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">steps</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;--batch_size 32 &quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">bestpolicy</span> <span class="o">=</span> <span class="n">policy_search</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The best policy strategy is&quot;</span><span class="p">,</span> <span class="n">bestpolicy</span><span class="p">)</span>
+
+        <span class="c1">#TODO:tune parameters</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting to run the best policy for your task&quot;</span><span class="p">)</span></div></div>
+
+        <span class="c1"># TaskEngine(bestpolicy,tasks_name=&#39;Stoke&#39;).run()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">PolSearch_main</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span><span class="o">.</span><span class="n">start_engine</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

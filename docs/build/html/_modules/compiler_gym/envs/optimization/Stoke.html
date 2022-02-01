@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>compiler_gym.envs.optimization.Stoke &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>compiler_gym.envs.optimization.Stoke</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for compiler_gym.envs.optimization.Stoke</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Facebook, Inc. and its affiliates.</span>
+<span class="c1">#</span>
+<span class="c1"># This source code is licensed under the MIT license found in the</span>
+<span class="c1"># LICENSE file in the root directory of this source tree.</span>
+<span class="sd">&quot;&quot;&quot;This module defines environments for STOKE&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">from</span> <span class="nn">gym.utils</span> <span class="kn">import</span> <span class="n">seeding</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.action</span> <span class="kn">import</span> <span class="n">action_functions</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.observation</span> <span class="kn">import</span> <span class="n">observation_function</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.reward</span> <span class="kn">import</span> <span class="n">reward_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<div class="viewcode-block" id="StokeEnv"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv">[docs]</a><span class="k">class</span> <span class="nc">StokeEnv</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A :class:</span>
+<span class="sd">        STOKE is a stochastic optimizer and program synthesizer for the x86-64 instruction set.</span>
+<span class="sd">        This classical compiler optimization task finds a valid code sequence to maximize the performance</span>
+<span class="sd">        of a loop-free sequence of instructions. Superoptimizaiton is an expensive</span>
+<span class="sd">        optimization technique as the number of possible configurations grows exponentially as</span>
+<span class="sd">        the instruction count to be optimized increases.</span>
+
+<span class="sd">    Source:</span>
+<span class="sd">        This environment corresponds to the version of the STOKE</span>
+<span class="sd">        described by stanfordPL. (https://github.com/StanfordPL/stoke)</span>
+<span class="sd">        paper link: https://raw.githubusercontent.com/StanfordPL/stoke/develop/docs/papers/asplos13.pdf</span>
+
+<span class="sd">    Observation:</span>
+<span class="sd">        Type: Box(100)</span>
+<span class="sd">        Optimized code will be convert to vectors by different embedding approaches,</span>
+<span class="sd">        e.g. Word2vec, Doc2vec, CodeBert ...</span>
+
+<span class="sd">    Actions:</span>
+<span class="sd">        Type: Discrete(9)</span>
+<span class="sd">        NUm      Action      Description</span>
+<span class="sd">        0        add_nops	 Adds one extra nop instruction into the rewrite.</span>
+<span class="sd">        1        delete	     Deletes one instruction at random.</span>
+<span class="sd">        2        instruction Replaces an instruction with another one chosen at random.</span>
+<span class="sd">        3        opcode	     Replaces an instruction&#39;s opcode with a new one that takes operands of the same type.</span>
+<span class="sd">        4        operand	 Replaces an operand of one instruction with another.</span>
+<span class="sd">        5        rotate	     Formerly &quot;resize&quot;. Moves an instruction from one basic block to another, and shifts all the instructions in between.</span>
+<span class="sd">        6        local_swap	 Takes two instructions in the same basic block and swaps them.</span>
+<span class="sd">        7        global_swap Takes two instructions in the entire program and swaps them.</span>
+<span class="sd">        8        weighted	 Selects from among several other transforms at random.</span>
+
+<span class="sd">    Reward:</span>
+<span class="sd">        In all cases, lower cost is better. We combine the value of correctness with other values we want to optimize for.</span>
+<span class="sd">        Name	    Description</span>
+<span class="sd">        binsize	    The size (in bytes) of the assembled rewrite using the x64asm library.</span>
+<span class="sd">        correctness	How &quot;correct&quot; the rewrite&#39;s output appears. Very configurable.</span>
+<span class="sd">        size	    The number of instructions in the assembled rewrite.</span>
+<span class="sd">        latency	    A poor-man&#39;s estimate of the rewrite latency, in clock cycles, based on the per-opcode latency table in src/cost/tables.</span>
+<span class="sd">        measured	An estimate of running time by counting the number of instructions actually executed on the testcases. Good for loops and algorithmic improvements.</span>
+<span class="sd">        sseavx	    Returns &#39;1&#39; if both avx and sse instructions are used (this is usually bad!), and &#39;0&#39; otherwise. Often used with a multiplier like correctness + 1000*sseavx</span>
+<span class="sd">        nongoal	    Returns &#39;1&#39; if the code (after minimization) is found to be equivalent to one in --non_goal. Can also be used with a multiplier.</span>
+
+<span class="sd">    Starting State:</span>
+<span class="sd">        All observations are assigned a uniform random value in [-1..1]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">state_function</span><span class="p">,</span> <span class="n">action_function</span><span class="p">,</span> <span class="n">reward_function</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Defines the reinforcement leaning environment. Initialise with an environment.</span>
+
+<span class="sd">        :param state_function:  a state function that can summarize the program after each action as a</span>
+<span class="sd">                                finite feature vector.</span>
+<span class="sd">        :param action_function: an action function that can discrete set of actions or transformations that can be applied</span>
+<span class="sd">                                to a program, such as passes in a compiler</span>
+<span class="sd">        :param reward_function: a reward function that reports the quality of the actions taken so far.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_function</span> <span class="o">=</span> <span class="n">state_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_function</span> <span class="o">=</span> <span class="n">action_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span> <span class="o">=</span> <span class="n">reward_function</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interleave_action_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_low</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_high</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">action_functions</span><span class="p">()</span><span class="o">.</span><span class="n">init_actions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interleave_action_length</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_low</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_high</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_function</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StokeEnv.get_reward"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.get_reward">[docs]</a>    <span class="k">def</span> <span class="nf">get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">reward</span><span class="p">,</span><span class="n">reward_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate reward with method &quot;reward_function&quot;.</span>
+
+<span class="sd">            :param action: What will agent do in next step.</span>
+<span class="sd">            :param reward: Describe how the agent &quot;ought&quot; to behave.</span>
+<span class="sd">            :return: return a reward score after calculating.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="n">reward_function</span><span class="p">()</span><span class="o">.</span><span class="n">get_rew</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span><span class="n">reward_function</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">reward</span></div>
+
+<div class="viewcode-block" id="StokeEnv.get_obs"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.get_obs">[docs]</a>    <span class="k">def</span> <span class="nf">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_history</span><span class="p">,</span> <span class="n">state_code</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; feedback the observation with method &quot;observation_function&quot;.</span>
+
+<span class="sd">            :param action_history: This is the action history in past few steps.</span>
+<span class="sd">            :param state_code: The X86 code after executing specific action.</span>
+<span class="sd">            :return: return an embedding vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_code</span> <span class="o">=</span> <span class="n">state_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state_code</span><span class="p">]</span>
+        <span class="n">observation</span> <span class="o">=</span> <span class="n">observation_function</span><span class="p">()</span><span class="o">.</span><span class="n">get_observation</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_function</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">observation</span></div>
+
+<div class="viewcode-block" id="StokeEnv.step"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">state_code</span><span class="p">,</span> <span class="n">reward</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take a step.</span>
+
+<span class="sd">            :param action: An action, or a sequence of actions. When multiple</span>
+<span class="sd">                    actions are provided the observation and reward are returned after</span>
+<span class="sd">                    running all of the actions.</span>
+<span class="sd">            :param reward: A reward, to describe how the agent &quot;ought&quot; to behave.</span>
+<span class="sd">            :param state_code: The X86 code after executing specific action.</span>
+<span class="sd">            :return: A tuple of observation, reward, done, and info. Observation and</span>
+<span class="sd">                    reward are None if default observation/reward is not set. If done is</span>
+<span class="sd">                    True, observation and reward may also be None (e.g. because the</span>
+<span class="sd">                    service failed).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">action</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) invalid&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">action</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">action</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">state_code</span><span class="p">)</span>  <span class="c1"># update observation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">obs</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">rew</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reward</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="p">)</span>  <span class="c1"># update reward</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">rew</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+<div class="viewcode-block" id="StokeEnv.reset"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; reset the RL environment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span></div>
+
+<div class="viewcode-block" id="StokeEnv.render"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="StokeEnv.close"><a class="viewcode-back" href="../../../../case_study/Stoke.html#compiler_gym.envs.optimization.StokeEnv.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#     env = StokeEnv(&quot;Doc2vec&quot;,&quot;transform&quot;,&quot;hamming&quot;)</span>
+<span class="c1">#     env.reset()</span>
+<span class="c1">#     env.step(env.action_space.sample())</span>
+<span class="c1">#     print(env.state)</span>
+<span class="c1">#     env.step(env.action_space.sample())</span>
+<span class="c1">#     print(env.state)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

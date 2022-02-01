@@ -1,0 +1,703 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.utils &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial.Halide.Env_register" href="../case_study/Halide.html" />
+    <link rel="prev" title="SuperSonic.policy_search" href="policy_search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SuperSonic.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#taskengine">TaskEngine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimizing-image-pipelines">Optimizing Image Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#neural-network-code-generation-reduction">Neural Network Code Generation Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-size">Code Size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#superoptimization">Superoptimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimizing-image-pipelines-rl-environments">Optimizing Image Pipelines RL Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#neural-network-code-generation-reduction-rl-environments">Neural Network Code Generation Reduction RL Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-size-reduction-rl-environments">Code Size Reduction RL Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#superoptimization-rl-environments">Superoptimization RL Environments</a></li>
+</ul>
+</li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>SuperSonic.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/supersonic/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="supersonic-utils">
+<h1>SuperSonic.utils<a class="headerlink" href="#supersonic-utils" title="Permalink to this headline">¶</a></h1>
+<p>SuperSonic uses
+A <a class="reference internal" href="#SuperSonic.utils.engine.tasks_engine.TaskEngine" title="SuperSonic.utils.engine.tasks_engine.TaskEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskEngine</span></code></a> to call run() to deployment specific policy to</p>
+<blockquote>
+<div><p>objective task.</p>
+</div></blockquote>
+<p>A <a class="reference internal" href="#SuperSonic.utils.engine.tasks_engine.Halide" title="SuperSonic.utils.engine.tasks_engine.Halide"><code class="xref py py-class docutils literal notranslate"><span class="pre">Halide</span></code></a>,
+to start agent and environment. To apply a tuned RL,
+SuperSonic creates a session to apply a standard RL loop to optimize the input program by using the chosen RL
+exploration algorithms to select an action for a given state.
+Using <code class="xref py py-class docutils literal notranslate"><span class="pre">stoke_rl</span></code>,
+to register a RL environment.</p>
+<div class="contents local topic" id="supersonic-tasks-policy-search">
+<p class="topic-title">SuperSonic Tasks Policy Search:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#taskengine" id="id1">TaskEngine</a></p></li>
+<li><p><a class="reference internal" href="#optimizing-image-pipelines" id="id2">Optimizing Image Pipelines</a></p></li>
+<li><p><a class="reference internal" href="#neural-network-code-generation-reduction" id="id3">Neural Network Code Generation Reduction</a></p></li>
+<li><p><a class="reference internal" href="#code-size" id="id4">Code Size</a></p></li>
+<li><p><a class="reference internal" href="#superoptimization" id="id5">Superoptimization</a></p></li>
+<li><p><a class="reference internal" href="#optimizing-image-pipelines-rl-environments" id="id6">Optimizing Image Pipelines RL Environments</a></p></li>
+<li><p><a class="reference internal" href="#neural-network-code-generation-reduction-rl-environments" id="id7">Neural Network Code Generation Reduction RL Environments</a></p></li>
+<li><p><a class="reference internal" href="#code-size-reduction-rl-environments" id="id8">Code Size Reduction RL Environments</a></p></li>
+<li><p><a class="reference internal" href="#superoptimization-rl-environments" id="id9">Superoptimization RL Environments</a></p></li>
+</ul>
+</div>
+<section id="taskengine">
+<h2><a class="toc-backref" href="#id1">TaskEngine</a><a class="headerlink" href="#taskengine" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.engine.tasks_engine.TaskEngine">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.engine.tasks_engine.</code><code class="sig-name descname">TaskEngine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em>, <em class="sig-param"><span class="n">tasks_name</span><span class="o">=</span><span class="default_value">'Stoke'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#TaskEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.TaskEngine" title="Permalink to this definition">¶</a></dt>
+<dd><p>A :class: An interface to run specific Task environment and agent.</p>
+</dd></dl>
+
+</section>
+<section id="optimizing-image-pipelines">
+<h2><a class="toc-backref" href="#id2">Optimizing Image Pipelines</a><a class="headerlink" href="#optimizing-image-pipelines" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.engine.tasks_engine.Halide">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.engine.tasks_engine.</code><code class="sig-name descname">Halide</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Halide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Halide" title="Permalink to this definition">¶</a></dt>
+<dd><p>A :class:
+A interface to run Halide.
+To apply a tuned RL, SuperSonic creates a session to
+apply a standard RL loop to optimize the input program
+by using the chosen RL exploration algorithms to select an action for a given state.</p>
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Halide.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Halide.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Halide.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>To start RL agent with specific policy strategy and parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Halide.sql">
+<code class="sig-name descname">sql</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Halide.sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Halide.sql" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Halide.startserve">
+<code class="sig-name descname">startserve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Halide.startserve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Halide.startserve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start server, to start environment and measurement engine (For a given schedulingtemplate,
+the measurement engine invokes the user-supplied run function to compile and execute the program
+in the target environment.)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="neural-network-code-generation-reduction">
+<h2><a class="toc-backref" href="#id3">Neural Network Code Generation Reduction</a><a class="headerlink" href="#neural-network-code-generation-reduction" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.engine.tasks_engine.Tvm">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.engine.tasks_engine.</code><code class="sig-name descname">Tvm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Tvm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Tvm" title="Permalink to this definition">¶</a></dt>
+<dd><p>A :class:
+A interface to run TVM.
+To apply a tuned RL, SuperSonic creates a session to
+apply a standard RL loop to optimize the input program
+by using the chosen RL exploration algorithms to select an action for a given state.
+attention: tvm as server in there!</p>
+</dd></dl>
+
+</section>
+<section id="code-size">
+<h2><a class="toc-backref" href="#id4">Code Size</a><a class="headerlink" href="#code-size" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.engine.tasks_engine.CSR">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.engine.tasks_engine.</code><code class="sig-name descname">CSR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#CSR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.CSR" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.CSR.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#CSR.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.CSR.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>To start RL agent with specific policy strategy and parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.CSR.sql">
+<code class="sig-name descname">sql</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#CSR.sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.CSR.sql" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database connection</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="superoptimization">
+<h2><a class="toc-backref" href="#id5">Superoptimization</a><a class="headerlink" href="#superoptimization" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.engine.tasks_engine.Stoke">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.engine.tasks_engine.</code><code class="sig-name descname">Stoke</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">policy</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Stoke"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Stoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>A :class:
+A interface to run Stoke.
+To apply a tuned RL, SuperSonic creates a session to
+apply a standard RL loop to optimize the input program
+by using the chosen RL exploration algorithms to select an action for a given state.</p>
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Stoke.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Stoke.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Stoke.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>To start RL agent with specific policy strategy and parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Stoke.sql">
+<code class="sig-name descname">sql</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Stoke.sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Stoke.sql" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.engine.tasks_engine.Stoke.startclient">
+<code class="sig-name descname">startclient</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/engine/tasks_engine.html#Stoke.startclient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.engine.tasks_engine.Stoke.startclient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start client, to start environment and measurement engine (For a given optimization option,
+the measurement engine invokes the user-supplied run function to compile and execute the program</p>
+<blockquote>
+<div><p>in the target environment.)</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="optimizing-image-pipelines-rl-environments">
+<h2><a class="toc-backref" href="#id6">Optimizing Image Pipelines RL Environments</a><a class="headerlink" href="#optimizing-image-pipelines-rl-environments" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.environments.Halide_env.</code><code class="sig-name descname">halide_rl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env_config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>A :class:</dt><dd><p>Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages.
+This task builds upon Halide version 10. Our evaluation uses ten Halide applications that have been heavily tested on the Halide
+compiler. We measure the execution time of each benchmark when processing three image datasets provided by the Halide benchmark suite.
+The benchmarks are optimized to run on a multi-core CPU.</p>
+</dd>
+<dt>Source:</dt><dd><p>This environment corresponds to the version of the Halide. (<a class="reference external" href="https://github.com/halide/Halide">https://github.com/halide/Halide</a>)
+paper link: <a class="reference external" href="https://people.csail.mit.edu/jrk/halide-pldi13.pdf">https://people.csail.mit.edu/jrk/halide-pldi13.pdf</a></p>
+</dd>
+<dt>Observation:</dt><dd><p>Type: Box(100)
+Pipeline’s schedule will be convert to vectors by different embedding approaches,
+e.g. Word2vec, Doc2vec, CodeBert …</p>
+</dd>
+<dt>Actions:</dt><dd><p>Type: Discrete(4)
+Num      Action      Description
+0        adding      Adds an optimization to the stage.
+1        removing    Removes an optimization to the stage.
+2        decreasing  Decreases the value (by one) of an enabled parameterized option.
+3        increasing  Increases the value (by one) of an enabled parameterized option.</p>
+</dd>
+<dt>Reward:</dt><dd><p>In all cases, lower cost is better. We measure the execution time of each benchmark when processing three image
+datasets provided by the Halide benchmark suite.</p>
+</dd>
+<dt>Starting State:</dt><dd><p>All observations are assigned a uniform random value in [-1..1]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl.get_state">
+<code class="sig-name descname">get_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl.get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl.get_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns actor state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>current environment and reward</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl.init_from_env_config">
+<code class="sig-name descname">init_from_env_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env_config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl.init_from_env_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl.init_from_env_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the reinforcement leaning environment. Initialise with an environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>env_config</strong> – including  “state_function”, “action_function”, “reward_function”, “observation_space”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset the RL environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl.set_state">
+<code class="sig-name descname">set_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl.set_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set policy to specific state and action mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> – Current reward and environments</p>
+</dd>
+</dl>
+<p>:return</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Halide_env.halide_rl.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Halide_env.html#halide_rl.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Halide_env.halide_rl.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> – An action, or a sequence of actions. When multiple
+actions are provided the observation and reward are returned after
+running all of the actions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of observation, observation_mask, score, done, and info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="neural-network-code-generation-reduction-rl-environments">
+<h2><a class="toc-backref" href="#id7">Neural Network Code Generation Reduction RL Environments</a><a class="headerlink" href="#neural-network-code-generation-reduction-rl-environments" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.environments.AutoTvm_env.autotvm_rl">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.environments.AutoTvm_env.</code><code class="sig-name descname">autotvm_rl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env_config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/AutoTvm_env.html#autotvm_rl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/AutoTvm_env.html#autotvm_rl.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the environment to an initial state and returns an initial
+observation.</p>
+<p>Note that this function should not reset the environment’s random
+number generator(s); random variables in the environment’s state should
+be sampled independently between multiple calls to <cite>reset()</cite>. In other
+words, each call of <cite>reset()</cite> should yield an environment suitable for
+a new episode, independent of previous episodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the initial observation.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>observation (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/AutoTvm_env.html#autotvm_rl.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run one timestep of the environment’s dynamics. When end of
+episode is reached, you are responsible for calling <cite>reset()</cite>
+to reset this environment’s state.</p>
+<p>Accepts an action and returns a tuple (observation, reward, done, info).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a>) – an action provided by the agent</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>agent’s observation of the current environment
+reward (float) : amount of reward returned after previous action
+done (bool): whether the episode has ended, in which case further step() calls will return undefined results
+info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>observation (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="code-size-reduction-rl-environments">
+<h2><a class="toc-backref" href="#id8">Code Size Reduction RL Environments</a><a class="headerlink" href="#code-size-reduction-rl-environments" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.environments.CSR_env.csr_rl">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.environments.CSR_env.</code><code class="sig-name descname">csr_rl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env_config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/CSR_env.html#csr_rl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.CSR_env.csr_rl" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>A :class:</dt><dd><p>This task is concerned with determining the LLVM passes and their order to minimize the code size.
+Following the setup of CompilerGym, we compute the code size reduction by measuring the ratio of
+LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.
+This metric is platform-independent and deterministic.</p>
+</dd>
+<dt>Source:</dt><dd><p>This environment is following the setup of CompilerGym(<a class="reference external" href="https://github.com/facebookresearch/CompilerGym">https://github.com/facebookresearch/CompilerGym</a>).</p>
+</dd>
+<dt>Observation:</dt><dd><p>Type: Box(0, 9223372036854775807, (56,), int64)
+The Autophase observation space is a 56-dimension integer feature vector summarizing the static LLVM-IR representation.
+It is described in ‘AutoPhase: Juggling HLS phase orderings in random forests with deep reinforcement learning’.
+paper link: <a class="reference external" href="https://proceedings.mlsys.org/paper/2020/file/4e732ced3463d06de0ca9a15b6153677-Paper.pdf">https://proceedings.mlsys.org/paper/2020/file/4e732ced3463d06de0ca9a15b6153677-Paper.pdf</a></p>
+</dd>
+<dt>Actions:</dt><dd><p>Type: Discrete(123)
+Num      Action                         Description
+0        -add-discriminators            Add DWARF path discriminators.
+1        -adce                          Aggressive Dead Code Elimination.
+2        -aggressive-instcombine        Combine pattern based expressions.
+3        -alignment-from-assumptions    Replaces an instruction’s opcode with a new one that takes operands of the same type.
+4        -always-inline                 Inliner for always_inline functions.
+… …</p>
+<p>120      -strip                         Strip all symbols from a module.
+121      -tailcallelim                  Tail Call Elimination.
+122      -mergereturn                   Unify function exit nodes.</p>
+</dd>
+<dt>Reward:</dt><dd><p>In all cases, lower code size is better. We compute the code size reduction by measuring the ratio of
+LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.</p>
+</dd>
+<dt>Starting State:</dt><dd><p>All observations are assigned a uniform random value in [-1..1]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.CSR_env.csr_rl.get_state">
+<code class="sig-name descname">get_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/CSR_env.html#csr_rl.get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.CSR_env.csr_rl.get_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns actor state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>current environment and reward</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.CSR_env.csr_rl.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/CSR_env.html#csr_rl.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.CSR_env.csr_rl.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset the RL environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.CSR_env.csr_rl.set_state">
+<code class="sig-name descname">set_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/CSR_env.html#csr_rl.set_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.CSR_env.csr_rl.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set policy to specific state and action mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> – Current reward and environments</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>state and action mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.CSR_env.csr_rl.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/CSR_env.html#csr_rl.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.CSR_env.csr_rl.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> – An action, or a sequence of actions. When multiple
+actions are provided the observation and reward are returned after
+running all of the actions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of observation, observation_mask, score, done, and info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="superoptimization-rl-environments">
+<h2><a class="toc-backref" href="#id9">Superoptimization RL Environments</a><a class="headerlink" href="#superoptimization-rl-environments" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="SuperSonic.utils.environments.Stoke_env.stoke_rl">
+<em class="property">class </em><code class="sig-prename descclassname">SuperSonic.utils.environments.Stoke_env.</code><code class="sig-name descname">stoke_rl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env_config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Stoke_env.html#stoke_rl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Stoke_env.stoke_rl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>A :class:</dt><dd><p>STOKE is a stochastic optimizer and program synthesizer for the x86-64 instruction set.
+This classical compiler optimization task finds a valid code sequence to maximize the performance
+of a loop-free sequence of instructions. Superoptimizaiton is an expensive
+optimization technique as the number of possible configurations grows exponentially as
+the instruction count to be optimized increases.</p>
+</dd>
+<dt>Source:</dt><dd><p>This environment corresponds to the version of the STOKE
+described by stanfordPL. (<a class="reference external" href="https://github.com/StanfordPL/stoke">https://github.com/StanfordPL/stoke</a>)
+paper link: <a class="reference external" href="https://raw.githubusercontent.com/StanfordPL/stoke/develop/docs/papers/asplos13.pdf">https://raw.githubusercontent.com/StanfordPL/stoke/develop/docs/papers/asplos13.pdf</a></p>
+</dd>
+<dt>Observation:</dt><dd><p>Type: Box(100)
+Optimized code will be convert to vectors by different embedding approaches,
+e.g. Word2vec, Doc2vec, CodeBert …</p>
+</dd>
+<dt>Actions:</dt><dd><p>Type: Discrete(9)
+NUm      Action      Description
+0        add_nops        Adds one extra nop instruction into the rewrite.
+1        delete      Deletes one instruction at random.
+2        instruction Replaces an instruction with another one chosen at random.
+3        opcode      Replaces an instruction’s opcode with a new one that takes operands of the same type.
+4        operand         Replaces an operand of one instruction with another.
+5        rotate      Formerly “resize”. Moves an instruction from one basic block to another, and shifts all the instructions in between.
+6        local_swap      Takes two instructions in the same basic block and swaps them.
+7        global_swap Takes two instructions in the entire program and swaps them.
+8        weighted        Selects from among several other transforms at random.</p>
+</dd>
+<dt>Reward:</dt><dd><p>In all cases, lower cost is better. We combine the value of correctness with other values we want to optimize for.
+Name        Description
+binsize     The size (in bytes) of the assembled rewrite using the x64asm library.
+correctness     How “correct” the rewrite’s output appears. Very configurable.
+size        The number of instructions in the assembled rewrite.
+latency     A poor-man’s estimate of the rewrite latency, in clock cycles, based on the per-opcode latency table in src/cost/tables.
+measured        An estimate of running time by counting the number of instructions actually executed on the testcases. Good for loops and algorithmic improvements.
+sseavx      Returns ‘1’ if both avx and sse instructions are used (this is usually bad!), and ‘0’ otherwise. Often used with a multiplier like correctness + 1000*sseavx
+nongoal     Returns ‘1’ if the code (after minimization) is found to be equivalent to one in –non_goal. Can also be used with a multiplier.</p>
+</dd>
+<dt>Starting State:</dt><dd><p>All observations are assigned a uniform random value in [-1..1]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Stoke_env.stoke_rl.get_state">
+<code class="sig-name descname">get_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Stoke_env.html#stoke_rl.get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Stoke_env.stoke_rl.get_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns actor state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>current environment and reward</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Stoke_env.stoke_rl.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Stoke_env.html#stoke_rl.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Stoke_env.stoke_rl.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset the RL environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Stoke_env.stoke_rl.set_state">
+<code class="sig-name descname">set_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Stoke_env.html#stoke_rl.set_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Stoke_env.stoke_rl.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set policy to specific state and action mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> – Current reward and environments</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>state and action mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="SuperSonic.utils.environments.Stoke_env.stoke_rl.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/SuperSonic/utils/environments/Stoke_env.html#stoke_rl.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SuperSonic.utils.environments.Stoke_env.stoke_rl.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> – An action, or a sequence of actions. When multiple
+actions are provided the observation and reward are returned after
+running all of the actions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of observation, observation_mask, score, done, and info.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../case_study/Halide.html" class="btn btn-neutral float-right" title="Tutorial.Halide.Env_register" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="policy_search.html" class="btn btn-neutral float-left" title="SuperSonic.policy_search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
