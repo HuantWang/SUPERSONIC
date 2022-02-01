@@ -23,10 +23,10 @@ for applying reinforcement learning to compiler optimizations.
    :maxdepth: 3
    :caption: Tutorial Reference
 
-   tasks/Stoke
-   tasks/Halide
-   tasks/TVM
-   tasks/CSR
+   case_study/Halide
+   case_study/TVM
+   case_study/CSR
+   case_study/Stoke
 
 Indices and tables
 ==================

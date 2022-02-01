@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # NeuroVectorizer RL Environment
 # client
-class RLClient(gym.Env):
+class autotvm_rl(gym.Env):
     def __init__(self, env_config):
         self.env = gym.make(
             "Tvm-v0",

@@ -1,5 +1,5 @@
 import SuperSonic.utils.environments.Halide_env
-import SuperSonic.utils.environments.stoke_env
+import SuperSonic.utils.environments.Stoke_env
 import SuperSonic.utils.environments.CSR_env
 import sqlite3
 import os
@@ -7,7 +7,7 @@ import re
 import time
 from ray.tune import Stopper
 from SuperSonic.policy_definition.Algorithm import *
-import SuperSonic.utils.environments.rltvm_env
+import SuperSonic.utils.environments.AutoTvm_env
 from third_party.rm_port import kill_pid
 
 
@@ -75,6 +75,27 @@ class CustomStopper(Stopper):
     def stop_all(self):
         """Returns whether to stop trials and prevent new ones from starting."""
         return self.should_stop
+
+def createDB(db_path = "../SQL/supersonic.db"):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    # result,action history,reward,execution outputs
+    try:
+        c.execute(
+            """CREATE TABLE STOKE
+                        (
+                        TIME         FLOAT       NOT NULL,
+                        RESULT        TEXT    NOT NULL,
+                        REWARD        FLOAT  NOT NULL,
+                        PRIMARY KEY ('TIME'));"""
+        )
+
+        print("Table created successfully")
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
 
 class Halide:
     """A :class:
@@ -168,59 +189,35 @@ class Halide:
         Halide.startserve(self)
         Halide.run(self)
 
-class Stoke:
+class Tvm:
     """A :class:
-         A interface to run Stoke.
+         A interface to run TVM.
          To apply a tuned RL, SuperSonic creates a session to
          apply a standard RL loop to optimize the input program
          by using the chosen RL exploration algorithms to select an action for a given state.
+         attention: tvm as server in there!
     """
-
     def __init__(self, policy):
-        """ Defines the reinforcement leaning environment. Initialise with an environment and construct a database.
-
-        :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
-        methods.
-        """
         # database
         self.sql_path = os.path.abspath('../SQL/supersonic.db')
-        conn = sqlite3.connect(self.sql_path)
-        c = conn.cursor()
-        # result,action history,reward,execution outputs
-        try:
-            c.execute(
-                """CREATE TABLE STOKE
-                           (
-                           TIME         FLOAT       NOT NULL,
-                           RESULT        TEXT    NOT NULL,
-                           REWARD        FLOAT  NOT NULL,
-                           PRIMARY KEY ('TIME'));"""
-            )
-            print("Table created successfully")
-        except:
-            pass
-        conn.commit()
-        conn.close()
+        createDB(self.sql_path)
+        # init paramete:r
 
-        # init parameter
 
         self.RLAlgo = None
-        self.target = "localhost:50055"
+        self.target = "localhost:50061"
+        self.environment_path = SuperSonic.utils.environments.AutoTvm_env.autotvm_rl
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
-        self.environment_path = SuperSonic.utils.environments.stoke_env.stoke_rl
-        self.experiment = "stoke"
+        self.experiment = "tvm"
 
 
-
-        self.log_path = os.path.abspath("../../tasks/Stoke/result")
-        self.obs_file = os.path.abspath("../../tasks/stoke/example/record/finish.txt")
-
-        self.stoke_path = os.path.abspath("../../tasks/stoke/example/p04")
-        self.local_dir = os.path.abspath('../../SuperSonic/logs/model_save')
-
+        self.log_path = "../../tasks/CSR/result"
+        self.obs_file = ("../../tasks/tvm/zjq/record/finish.txt")
+        self.tvm_path = "../../tasks/tvm/zjq/grpc/"
+        self.local_dir = "../../SuperSonic/logs/model_save"
         self.deadline = 50
         stopper = {"time_total_s": self.deadline}
         self.task_config = {
@@ -229,7 +226,7 @@ class Stoke:
             "log_path": self.log_path,
             "obs_file": self.obs_file,
             "stop": stopper,
-            "stoke_path": self.stoke_path,
+            "tvm_path": self.tvm_path,
             "state_function": self.state_function,
             "action_function": self.action_function,
             "reward_function": self.reward_function,
@@ -238,40 +235,36 @@ class Stoke:
             "local_dir": self.local_dir,
         }
 
-    def startclient(self):
-        """ Start client, to start environment and measurement engine (For a given optimization option,
-        the measurement engine invokes the user-supplied run function to compile and execute the program
-         in the target environment.)
-        """
+    # run child process for starting server of tvm
+    def startTVMServer(self):
         os.system(f"rm {self.obs_file}")  # clean the observation file
-        self.RLAlgo = RLAlgorithms(self.task_config)
+        print(self.task_config)
         print(f"{self.obs_file}")
+        kill_pid("50061")
         self.child = subprocess.Popen(
-            f"cd {self.stoke_path} && python run_synch.py {self.stoke_path} {self.obs_file}",
+            f"cd {self.tvm_path} && python schedule.server.py {self.tvm_path} {self.obs_file}",
             shell=True,
         )
+
         print("Child Finished")
+        # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
-        """ Database connection"""
         conn = sqlite3.connect("../SQL/supersonic.db")
         print("Opened database successfully")
 
     def run(self):
-        """ To start RL agent with specific policy strategy and parameters"""
         if os.path.exists(self.obs_file):
             os.system(f"rm {self.obs_file}")
-        try:
-            RLAlgorithms().Algorithms(
-                self.algorithm, self.task_config, self.environment_path
-            )
-        except Exception as e:
-            print(e)
-            print("finish stoke")
+
+        RLAlgorithms().Algorithms(
+            self.algorithm, self.task_config, self.environment_path
+        )
 
     def main(self):
-        Stoke.sql(self)
-        Stoke.run(self)
+        self.sql()
+        self.startTVMServer()
+        self.run()
 
 class CSR:
     def __init__(self, policy):
@@ -360,6 +353,111 @@ class CSR:
         # CSR.startserve(self)
         CSR.run(self)
 
+class Stoke:
+    """A :class:
+         A interface to run Stoke.
+         To apply a tuned RL, SuperSonic creates a session to
+         apply a standard RL loop to optimize the input program
+         by using the chosen RL exploration algorithms to select an action for a given state.
+    """
+
+    def __init__(self, policy):
+        """ Defines the reinforcement leaning environment. Initialise with an environment and construct a database.
+
+        :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
+        methods.
+        """
+        # database
+        self.sql_path = os.path.abspath('../SQL/supersonic.db')
+        conn = sqlite3.connect(self.sql_path)
+        c = conn.cursor()
+        # result,action history,reward,execution outputs
+        try:
+            c.execute(
+                """CREATE TABLE STOKE
+                           (
+                           TIME         FLOAT       NOT NULL,
+                           RESULT        TEXT    NOT NULL,
+                           REWARD        FLOAT  NOT NULL,
+                           PRIMARY KEY ('TIME'));"""
+            )
+            print("Table created successfully")
+        except:
+            pass
+        conn.commit()
+        conn.close()
+
+        # init parameter
+
+        self.RLAlgo = None
+        self.target = "localhost:50055"
+        self.state_function = policy["StatList"]
+        self.action_function = policy["ActList"]
+        self.reward_function = policy["RewList"]
+        self.algorithm = policy["AlgList"]
+        self.environment_path = SuperSonic.utils.environments.Stoke_env.stoke_rl
+        self.experiment = "stoke"
+
+
+
+        self.log_path = os.path.abspath("../../tasks/Stoke/result")
+        self.obs_file = os.path.abspath("../../tasks/stoke/example/record/finish.txt")
+
+        self.stoke_path = os.path.abspath("../../tasks/stoke/example/p04")
+        self.local_dir = os.path.abspath('../../SuperSonic/logs/model_save')
+
+        self.deadline = 50
+        stopper = {"time_total_s": self.deadline}
+        self.task_config = {
+            "sql_path": self.sql_path,
+            "target": self.target,
+            "log_path": self.log_path,
+            "obs_file": self.obs_file,
+            "stop": stopper,
+            "stoke_path": self.stoke_path,
+            "state_function": self.state_function,
+            "action_function": self.action_function,
+            "reward_function": self.reward_function,
+            "algorithm": self.algorithm,
+            "experiment": self.experiment,
+            "local_dir": self.local_dir,
+        }
+
+    def startclient(self):
+        """ Start client, to start environment and measurement engine (For a given optimization option,
+        the measurement engine invokes the user-supplied run function to compile and execute the program
+         in the target environment.)
+        """
+        os.system(f"rm {self.obs_file}")  # clean the observation file
+        self.RLAlgo = RLAlgorithms(self.task_config)
+        print(f"{self.obs_file}")
+        self.child = subprocess.Popen(
+            f"cd {self.stoke_path} && python run_synch.py {self.stoke_path} {self.obs_file}",
+            shell=True,
+        )
+        print("Child Finished")
+
+    def sql(self):
+        """ Database connection"""
+        conn = sqlite3.connect("../SQL/supersonic.db")
+        print("Opened database successfully")
+
+    def run(self):
+        """ To start RL agent with specific policy strategy and parameters"""
+        if os.path.exists(self.obs_file):
+            os.system(f"rm {self.obs_file}")
+        try:
+            RLAlgorithms().Algorithms(
+                self.algorithm, self.task_config, self.environment_path
+            )
+        except Exception as e:
+            print(e)
+            print("finish stoke")
+
+    def main(self):
+        Stoke.sql(self)
+        Stoke.run(self)
+
 class TaskEngine:
     """A :class: An interface to run specific Task environment and agent.
 
@@ -381,119 +479,16 @@ class TaskEngine:
             Halide(policy).main()
         if self.tasks=="CSR":
             CSR(policy).main()
-
-def createDB(db_path = "../SQL/supersonic.db"):
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    # result,action history,reward,execution outputs
-    try:
-        c.execute(
-            """CREATE TABLE STOKE
-                        (
-                        TIME         FLOAT       NOT NULL,
-                        RESULT        TEXT    NOT NULL,
-                        REWARD        FLOAT  NOT NULL,
-                        PRIMARY KEY ('TIME'));"""
-        )
-
-        print("Table created successfully")
-    except:
-        pass
-
-    conn.commit()
-    conn.close()
+        if self.tasks=="CSR":
+            Tvm(policy).main()
 
 
-class Tvm:
-    """A :class:
-         A interface to run TVM.
-         To apply a tuned RL, SuperSonic creates a session to
-         apply a standard RL loop to optimize the input program
-         by using the chosen RL exploration algorithms to select an action for a given state.
-         attention: tvm as server in there!
-    """
-    def __init__(self, policy):
-        # database
-        self.sql_path = os.path.abspath('../SQL/supersonic.db')
-        createDB(self.sql_path)
-        # init paramete:r
 
 
-        self.RLAlgo = None
-        self.target = "localhost:50061"
-        self.environment_path = SuperSonic.utils.environments.rltvm_env.RLClient
-        self.state_function = policy["StatList"]
-        self.action_function = policy["ActList"]
-        self.reward_function = policy["RewList"]
-        self.algorithm = policy["AlgList"]
-        self.experiment = "tvm"
 
 
-        self.log_path = "../../tasks/CSR/result"
-        self.obs_file = ("../../tasks/tvm/zjq/record/finish.txt")
-        self.tvm_path = "../../tasks/tvm/zjq/grpc/"
-        self.local_dir = "../../SuperSonic/logs/model_save"
-        self.deadline = 50
-        stopper = {"time_total_s": self.deadline}
-        self.task_config = {
-            "sql_path": self.sql_path,
-            "target": self.target,
-            "log_path": self.log_path,
-            "obs_file": self.obs_file,
-            "stop": stopper,
-            "tvm_path": self.tvm_path,
-            "state_function": self.state_function,
-            "action_function": self.action_function,
-            "reward_function": self.reward_function,
-            "algorithm": self.algorithm,
-            "experiment": self.experiment,
-            "local_dir": self.local_dir,
-        }
 
-    # run child process for starting server of tvm
-    def startTVMServer(self):
-        os.system(f"rm {self.obs_file}")  # clean the observation file
-        print(self.task_config)
-        print(f"{self.obs_file}")
-        kill_pid("50061")
-        self.child = subprocess.Popen(
-            f"cd {self.tvm_path} && python schedule.server.py {self.tvm_path} {self.obs_file}",
-            shell=True,
-        )
 
-        print("Child Finished")
-        # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
-
-    def sql(self):
-        conn = sqlite3.connect("../SQL/supersonic.db")
-        print("Opened database successfully")
-
-    def run(self):
-        if os.path.exists(self.obs_file):
-            os.system(f"rm {self.obs_file}")
-
-        RLAlgorithms().Algorithms(
-            self.algorithm, self.task_config, self.environment_path
-        )
-
-    def main(self):
-        self.sql()
-        self.startTVMServer()
-        self.run()
-
-def tvmMain():
-    print("start tvm")
-    policy = {
-        "StatList": "Actionhistory",
-         "ActList": "Doc2vec",
-         "RewList": "weight",
-         "AlgList": "DQN",
-    }
-
-    Tvm(policy).main()
-
-if __name__ == "__main__":
-    tvmMain()
 
 # if __name__ == "__main__":
 #     '''
@@ -538,3 +533,13 @@ if __name__ == "__main__":
 #     # CSR.sql()
 #     # CSR.startclient()
 #     # CSR.run()
+
+    # print("start tvm")
+    # policy = {
+    #     "StatList": "Actionhistory",
+    #      "ActList": "Doc2vec",
+    #      "RewList": "weight",
+    #      "AlgList": "DQN",
+    # }
+    #
+    # Tvm(policy).main()

@@ -34,7 +34,6 @@ No. We think that the the gym and ray provide useful abstraction for sequential
 decision making. You may use any technique you wish to explore the optimization
 space.
 
-
 When does a compiler enviornment consider an episode “done”?
 ------------------------------------------------------------
 
@@ -43,20 +42,3 @@ rewrite rules, it is up to the user to decide when no more improvement can be
 achieved from further rewrites.
 The only exception is if the compiler crashes, or the code ends up in an
 unexpected state - we have to abort. This happens.
-
-
-How do I run this on my own program?
-------------------------------------
-
-
-
-
-I want to add a new program representation / reward signal. How do I do that?
------------------------------------------------------------------------------
-
-
-
-
-Should I always try different MDP strategies?
---------------------------------------
-
