@@ -29,5 +29,5 @@ See [artifact_evaluation](https://github.com/NWU-NISL-Optimization/SuperSonic/tr
 ## Contributing
 
 We welcome contributions to SuperSonic. If you are interested in contributing please see
-[this document]().
+[this document](https://github.com/HuantWang/SUPERSONIC/blob/master/CONTRIBUTING.md).
 
