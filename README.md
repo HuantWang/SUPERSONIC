@@ -28,7 +28,7 @@ Given an RL search space defined by the Supersonic Python API, the Supersonic me
 ## Installation
 
 Supersonic builds upon:
--	Python >= 3.6 
+-	Python == 3.8 
 -	[CompilerGym](https://github.com/facebookresearch/CompilerGym) 
 -	[Ray](https://docs.ray.io/en/latest/rllib.html)
 	
@@ -41,7 +41,7 @@ See [INSTALL.md](INSTALL.md) for further details.
 
 ## Useage
 
-See [artifact_evaluation](https://github.com/NWU-NISL-Optimization/SuperSonic/tree/AE/artifact_evaluation) for an out-of-the-box demo of Supersonic.
+See [artifact_evaluation](https://github.com/HuantWang/SUPERSONIC/blob/master/AE.md) for an out-of-the-box demo of Supersonic.
 
 
 ## Contributing
