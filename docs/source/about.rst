@@ -1,7 +1,7 @@
 About
 =====
 
-SuperSonic, a new open-source framework to allow compiler developers to integrate
+SuperSonic is a library to allow compiler developers to integrate
 RL into compilers easily, regardless of their RL expertise. SuperSonic supports
 customizable RL architecture compositions to target a wide range of optimization
 tasks. A key feature of SuperSonic is the use of deep RL and multi-task learning
