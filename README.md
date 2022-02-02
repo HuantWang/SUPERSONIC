@@ -27,12 +27,21 @@ Given an RL search space defined by the Supersonic Python API, the Supersonic me
 
 ## Installation
 
-SUPERSONIC builds upon [CompilerGym](https://github.com/facebookresearch/CompilerGym) and [Ray](https://docs.ray.io/en/latest/rllib.html), which require Python >= 3.6. The binary works on Linux (on Ubuntu 18.04, Fedora 28, Debian 10 or newer equivalents).
+Supersonic builds upon:
+-	Python >= 3.6 
+-	[CompilerGym](https://github.com/facebookresearch/CompilerGym) 
+-	[Ray](https://docs.ray.io/en/latest/rllib.html), which require Python >= 3.6.
+	
+The system was tested on the following operating systems:
+- Ubuntu 18.04
+- Fedora 28
+- Debian 10
+
 See [INSTALL.md](INSTALL.md) for further details.
 
-## Resource
+## Useage
 
-See [artifact_evaluation](https://github.com/NWU-NISL-Optimization/SuperSonic/tree/AE/artifact_evaluation) for the supporting artifact of the paper.
+See [artifact_evaluation](https://github.com/NWU-NISL-Optimization/SuperSonic/tree/AE/artifact_evaluation) for an out-of-the-box demo of Supersonic.
 
 
 ## Contributing
