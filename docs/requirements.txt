@@ -5,3 +5,6 @@ sphinxemoji
 pydantic>=1.8.0
 numpy>=1.19.3
 gym>=0.18.0
+scikit-learn==0.24.2
+gensim==3.6.0
+google-api-python-client
