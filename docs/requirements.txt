@@ -47,7 +47,7 @@ pandas==1.0.5
 dm-tree==0.1.6
 gensim==3.6.0
 ray
-"ray[tune]"
-"ray[rllib]"
-"ray[serve]"
+ray[tune]
+ray[rllib]
+ray[serve]
 google-api-python-client
