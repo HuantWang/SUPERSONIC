@@ -1,6 +1,6 @@
 ## SUPERSONIC
 
-![SUPERSONIC](https://github.com/NWU-NISL-Optimization/SuperSonic/blob/AE/img/overview_00.jpg)
+![SUPERSONIC](https://github.com/HuantWang/SUPERSONIC/blob/master/docs/source/_static/img/overview.png)
 
 SUPERSONIC is a tool to automate RL policy searching and tuning. Within SUPERSONIC, a policy architecture consists of an exploration algorithm to drive the RL agent to choose actions, a reward function for computing the expected reward based on past observations of the environment (e.g., resulting execution time of a code transformation), a method for modeling the environment state (e.g., a DNN or a linear function).
 
