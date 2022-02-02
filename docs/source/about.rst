@@ -2,7 +2,7 @@ About
 =====
 
 SuperSonic is a library to allow compiler developers to integrate
-RL into compilers easily, regardless of their RL expertise. SuperSonic supports
+reinforcement learning (RL) into compilers easily, regardless of their RL expertise. SuperSonic supports
 customizable RL architecture compositions to target a wide range of optimization
 tasks. A key feature of SuperSonic is the use of deep RL and multi-task learning
 techniques to develop a meta-optimizer to automatically find and tune the right RL
