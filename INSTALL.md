@@ -67,7 +67,7 @@ $ export CLANG=<path_to_llvm>/bin/clang
 
 ## 1.2. grpc
 
-We use gRPC to connected our stoke-mcts system, so we have to build the gRPC first. The version of gRPC we used is **v1.12.0**. [Download]<https://> and build the **protoc** and **grpc** with your package.
+We use gRPC to connected our stoke-mcts system, so we have to build the gRPC first. The version of gRPC we used is **v1.12.0**. [Download]<https://github.com/grpc/grpc/releases/tag/v1.12.0> and build the **protoc** and **grpc** with your package.
 
 #### ***Note: using different GCC version to install your GRPC***
 
@@ -76,7 +76,7 @@ We use gRPC to connected our stoke-mcts system, so we have to build the gRPC fir
 |   Optimizing Image Pipelines   |     7.5     |
 | Neural Network Code Generation |     7.5     |
 |      Code Size Reduction       |     7.5     |
-|       Super-optimization       |     3.9     |
+|       Super-optimization       |     4.9     |
 
 We provide a script `changeGRPC.sh` to help user to change their GCC and GRPC version quickly when they want to start different use cases.  Using our script to control your package version：
 
@@ -85,7 +85,7 @@ We provide a script `changeGRPC.sh` to help user to change their GCC and GRPC ve
 $ gcc -v
 # change gcc version
 $ sudo update-alternatives --config gcc
-# change g++ version
+# change g++ version (optional)
 $ sudo update-alternatives --config g++
 # recompile GPRC with different gcc version
 $ cd <path_to_changeGRPC.sh> && sudo ./changeGRPC.sh <path_to_grpc>
@@ -128,15 +128,13 @@ Or install with [source code zip](https://github.com/halide/Halide/releases/tag/
 $ echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path_to_libhalide.so>' >> ~/.bashrc
 ```
 
-#### A.1.3 Test
+#### A.1.3 RUN
 
-Test with code：
+Run with code：
 
 ```shell 
-TODO.
+$ python supersonic_main.py --env BanditHalideEnv-v0 --datapath <path_to_halidebenchmarks>
 ```
-
-
 
 ## B. Case Study: Neural Network Code Generation
 
@@ -155,15 +153,13 @@ $ export TVM_HOME="/<path_to_tvm>/tvm"
 $ export PYTHONPATH=$TVM_HOME/python:${PYTHONPATH}
 ```
 
-#### B.1.2 Test
+#### B.1.2 RUN
 
-Test with code：
+Run with code：
 
 ```shell 
-TODO.
+python supersonic_main.py --env BanditTvmEnv-v0 --datapath <path_to_tvmbenchmarks>
 ```
-
-
 
 ## C. Case Study: Code Size Reduction
 
@@ -178,10 +174,8 @@ Our evaluation is based on CompilerGym v0.1.8. Our framework has insert the envi
 Test with code：
 
 ```shell 
-TODO.
+python supersonic_main.py --env BanditCSREnv-v0 --datapath <path_to_csrbenchmarks>
 ```
-
-
 
 ## D. Case Study: Super-optimization
 
@@ -213,11 +207,11 @@ $ echo <grpc_src_path>/ >> <python_site-package>/SS.pth
 $ echo <opt>/ >> <python_site-package>/SS.pth
 ```
 
-#### D.1.3 Test
+#### D.1.3 RUN
 
-Test with code：
+Run with code：
 
 ```shell 
-TODO.
+python supersonic_main.py --env BanditStokeEnv-v0 --datapath <path_to_stokebenchmarks>
 ```
 
