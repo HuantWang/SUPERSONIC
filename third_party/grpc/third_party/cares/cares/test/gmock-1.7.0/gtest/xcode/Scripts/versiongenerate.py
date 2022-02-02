@@ -53,15 +53,15 @@ import sys
 import re
 
 # Read the command line argument (the output directory for Version.h)
-if len(sys.argv) < 3:
-    print "Usage: versiongenerate.py input_dir output_dir"
-    sys.exit(1)
+if (len(sys.argv) < 3):
+  print "Usage: versiongenerate.py input_dir output_dir"
+  sys.exit(1)
 else:
-    input_dir = sys.argv[1]
-    output_dir = sys.argv[2]
+  input_dir = sys.argv[1]
+  output_dir = sys.argv[2]
 
 # Read the first 1024 characters of the configure.ac file
-config_file = open("%s/configure.ac" % input_dir, "r")
+config_file = open("%s/configure.ac" % input_dir, 'r')
 buffer_size = 1024
 opening_string = config_file.read(buffer_size)
 config_file.close()
@@ -72,7 +72,8 @@ config_file.close()
 #     brackets(e.g. "[1.0.1]") between "AC_INIT(" and ")". Do not be greedy
 #     (*? is the non-greedy flag) since that would pull in everything between
 #     the first "(" and the last ")" in the file.
-version_expression = re.compile(r"AC_INIT\(.*?\[(\d+)\.(\d+)\.(\d+)\].*?\)", re.DOTALL)
+version_expression = re.compile(r"AC_INIT\(.*?\[(\d+)\.(\d+)\.(\d+)\].*?\)",
+                                re.DOTALL)
 version_values = version_expression.search(opening_string)
 major_version = version_values.group(1)
 minor_version = version_values.group(2)
@@ -93,13 +94,7 @@ file_data = """//
 #define GTEST_VERSIONINFO_SHORT %s.%s
 #define GTEST_VERSIONINFO_LONG %s.%s.%s
 
-""" % (
-    major_version,
-    minor_version,
-    major_version,
-    minor_version,
-    fix_version,
-)
-version_file = open("%s/Version.h" % output_dir, "w")
+""" % (major_version, minor_version, major_version, minor_version, fix_version)
+version_file = open("%s/Version.h" % output_dir, 'w')
 version_file.write(file_data)
 version_file.close()

@@ -20,87 +20,94 @@ import sys
 
 
 if len(sys.argv) < 2:
-    print("Please provide at least one source file name as argument.")
-    sys.exit()
+  print("Please provide at least one source file name as argument.")
+  sys.exit()
 
 for file_name in sys.argv[1:]:
 
-    print("Modifying format of {file} comments in place...".format(file=file_name,))
+  print("Modifying format of {file} comments in place...".format(
+      file=file_name,
+  ))
 
-    # Input
 
-    with open(file_name, "r") as input_file:
-        lines = input_file.readlines()
+  # Input
 
-    def peek():
-        return lines[0]
+  with open(file_name, "r") as input_file:
+    lines = input_file.readlines()
 
-    def read_line():
-        return lines.pop(0)
+  def peek():
+    return lines[0]
 
-    def more_input_available():
-        return lines
+  def read_line():
+    return lines.pop(0)
 
-    # Output
+  def more_input_available():
+    return lines
 
-    output_lines = []
 
-    def write(line):
-        output_lines.append(line)
+  # Output
 
-    def flush_output():
-        with open(file_name, "w") as output_file:
-            for line in output_lines:
-                output_file.write(line)
+  output_lines = []
 
-    # Pattern matching
+  def write(line):
+    output_lines.append(line)
 
-    comment_regex = r"^(\s*)//\s(.*)$"
+  def flush_output():
+    with open(file_name, "w") as output_file:
+      for line in output_lines:
+        output_file.write(line)
 
-    def is_comment(line):
-        return re.search(comment_regex, line)
 
-    def isnt_comment(line):
-        return not is_comment(line)
+  # Pattern matching
 
-    def next_line(predicate):
-        return more_input_available() and predicate(peek())
+  comment_regex = r'^(\s*)//\s(.*)$'
 
-    # Transformation
+  def is_comment(line):
+    return re.search(comment_regex, line)
 
-    def indentation_of(line):
-        match = re.search(comment_regex, line)
-        return match.group(1)
+  def isnt_comment(line):
+    return not is_comment(line)
 
-    def content(line):
-        match = re.search(comment_regex, line)
-        return match.group(2)
+  def next_line(predicate):
+    return more_input_available() and predicate(peek())
 
-    def format_as_block(comment_block):
-        if len(comment_block) == 0:
-            return []
 
-        indent = indentation_of(comment_block[0])
+  # Transformation
 
-        if len(comment_block) == 1:
-            return [indent + "/** " + content(comment_block[0]) + " */\n"]
+  def indentation_of(line):
+    match = re.search(comment_regex, line)
+    return match.group(1)
 
-        block = ["/**"] + [" * " + content(line) for line in comment_block] + [" */"]
-        return [indent + line.rstrip() + "\n" for line in block]
+  def content(line):
+    match = re.search(comment_regex, line)
+    return match.group(2)
 
-    # Main algorithm
+  def format_as_block(comment_block):
+    if len(comment_block) == 0:
+      return []
 
-    while more_input_available():
-        while next_line(isnt_comment):
-            write(read_line())
+    indent = indentation_of(comment_block[0])
 
-        comment_block = []
-        # Get all lines in the same comment block. We could restrict the indentation
-        # to be the same as the first line of the block, but it's probably ok.
-        while next_line(is_comment):
-            comment_block.append(read_line())
+    if len(comment_block) == 1:
+      return [indent + "/** " + content(comment_block[0]) + " */\n"]
 
-        for line in format_as_block(comment_block):
-            write(line)
+    block = ["/**"] + [" * " + content(line) for line in comment_block] + [" */"]
+    return [indent + line.rstrip() + "\n" for line in block]
 
-    flush_output()
+
+  # Main algorithm
+
+  while more_input_available():
+    while next_line(isnt_comment):
+      write(read_line())
+
+    comment_block = []
+    # Get all lines in the same comment block. We could restrict the indentation
+    # to be the same as the first line of the block, but it's probably ok.
+    while (next_line(is_comment)):
+      comment_block.append(read_line())
+
+    for line in format_as_block(comment_block):
+      write(line)
+
+  flush_output()

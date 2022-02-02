@@ -32,19 +32,20 @@ _classic_spawn = ccompiler.CCompiler.spawn
 
 def _commandfile_spawn(self, command):
     command_length = sum([len(arg) for arg in command])
-    if os.name == "nt" and command_length > MAX_COMMAND_LENGTH:
+    if os.name == 'nt' and command_length > MAX_COMMAND_LENGTH:
         # Even if this command doesn't support the @command_file, it will
         # fail as is so we try blindly
-        print("Command line length exceeded, using command file")
-        print(" ".join(command))
+        print('Command line length exceeded, using command file')
+        print(' '.join(command))
         temporary_directory = tempfile.mkdtemp()
-        command_filename = os.path.abspath(os.path.join(temporary_directory, "command"))
-        with open(command_filename, "w") as command_file:
+        command_filename = os.path.abspath(
+            os.path.join(temporary_directory, 'command'))
+        with open(command_filename, 'w') as command_file:
             escaped_args = [
-                '"' + arg.replace("\\", "\\\\") + '"' for arg in command[1:]
+                '"' + arg.replace('\\', '\\\\') + '"' for arg in command[1:]
             ]
-            command_file.write(" ".join(escaped_args))
-        modified_command = command[:1] + ["@{}".format(command_filename)]
+            command_file.write(' '.join(escaped_args))
+        modified_command = command[:1] + ['@{}'.format(command_filename)]
         try:
             _classic_spawn(self, modified_command)
         finally:

@@ -30,11 +30,12 @@ _TIMEOUT = 60 * 60 * 24
 
 
 class GenericStub(object):
+
     def __init__(self, channel):
-        self.UnaryCall = channel.unary_unary("/grpc.testing.BenchmarkService/UnaryCall")
+        self.UnaryCall = channel.unary_unary(
+            '/grpc.testing.BenchmarkService/UnaryCall')
         self.StreamingCall = channel.stream_stream(
-            "/grpc.testing.BenchmarkService/StreamingCall"
-        )
+            '/grpc.testing.BenchmarkService/StreamingCall')
 
 
 class BenchmarkClient:
@@ -44,31 +45,30 @@ class BenchmarkClient:
 
     def __init__(self, server, config, hist):
         # Create the stub
-        if config.HasField("security_params"):
-            creds = grpc.ssl_channel_credentials(resources.test_root_certificates())
+        if config.HasField('security_params'):
+            creds = grpc.ssl_channel_credentials(
+                resources.test_root_certificates())
             channel = test_common.test_secure_channel(
-                server, creds, config.security_params.server_host_override
-            )
+                server, creds, config.security_params.server_host_override)
         else:
             channel = grpc.insecure_channel(server)
 
         # waits for the channel to be ready before we start sending messages
         grpc.channel_ready_future(channel).result()
 
-        if config.payload_config.WhichOneof("payload") == "simple_params":
+        if config.payload_config.WhichOneof('payload') == 'simple_params':
             self._generic = False
-            self._stub = benchmark_service_pb2_grpc.BenchmarkServiceStub(channel)
+            self._stub = benchmark_service_pb2_grpc.BenchmarkServiceStub(
+                channel)
             payload = messages_pb2.Payload(
-                body="\0" * config.payload_config.simple_params.req_size
-            )
+                body='\0' * config.payload_config.simple_params.req_size)
             self._request = messages_pb2.SimpleRequest(
                 payload=payload,
-                response_size=config.payload_config.simple_params.resp_size,
-            )
+                response_size=config.payload_config.simple_params.resp_size)
         else:
             self._generic = True
             self._stub = GenericStub(channel)
-            self._request = "\0" * config.payload_config.bytebuf_params.req_size
+            self._request = '\0' * config.payload_config.bytebuf_params.req_size
 
         self._hist = hist
         self._response_callbacks = []
@@ -95,11 +95,11 @@ class BenchmarkClient:
 
 
 class UnarySyncBenchmarkClient(BenchmarkClient):
+
     def __init__(self, server, config, hist):
         super(UnarySyncBenchmarkClient, self).__init__(server, config, hist)
         self._pool = futures.ThreadPoolExecutor(
-            max_workers=config.outstanding_rpcs_per_channel
-        )
+            max_workers=config.outstanding_rpcs_per_channel)
 
     def send_request(self):
         # Send requests in seperate threads to support multiple outstanding rpcs
@@ -118,13 +118,13 @@ class UnarySyncBenchmarkClient(BenchmarkClient):
 
 
 class UnaryAsyncBenchmarkClient(BenchmarkClient):
+
     def send_request(self):
         # Use the Future callback api to support multiple outstanding rpcs
         start_time = time.time()
         response_future = self._stub.UnaryCall.future(self._request, _TIMEOUT)
         response_future.add_done_callback(
-            lambda resp: self._response_received(start_time, resp)
-        )
+            lambda resp: self._response_received(start_time, resp))
 
     def _response_received(self, start_time, resp):
         resp.result()
@@ -136,6 +136,7 @@ class UnaryAsyncBenchmarkClient(BenchmarkClient):
 
 
 class _SyncStream(object):
+
     def __init__(self, stub, generic, request, handle_response):
         self._stub = stub
         self._generic = generic
@@ -151,11 +152,12 @@ class _SyncStream(object):
 
     def start(self):
         self._is_streaming = True
-        response_stream = self._stub.StreamingCall(self._request_generator(), _TIMEOUT)
+        response_stream = self._stub.StreamingCall(self._request_generator(),
+                                                   _TIMEOUT)
         for _ in response_stream:
             self._handle_response(
-                self, time.time() - self._send_time_queue.get_nowait()
-            )
+                self,
+                time.time() - self._send_time_queue.get_nowait())
 
     def stop(self):
         self._is_streaming = False
@@ -170,13 +172,14 @@ class _SyncStream(object):
 
 
 class StreamingSyncBenchmarkClient(BenchmarkClient):
+
     def __init__(self, server, config, hist):
         super(StreamingSyncBenchmarkClient, self).__init__(server, config, hist)
         self._pool = futures.ThreadPoolExecutor(
-            max_workers=config.outstanding_rpcs_per_channel
-        )
+            max_workers=config.outstanding_rpcs_per_channel)
         self._streams = [
-            _SyncStream(self._stub, self._generic, self._request, self._handle_response)
+            _SyncStream(self._stub, self._generic, self._request,
+                        self._handle_response)
             for _ in xrange(config.outstanding_rpcs_per_channel)
         ]
         self._curr_stream = 0

@@ -35,31 +35,29 @@ import six
 
 # Lookup table for utf8
 _cescape_utf8_to_str = [chr(i) for i in range(0, 256)]
-_cescape_utf8_to_str[9] = r"\t"  # optional escape
-_cescape_utf8_to_str[10] = r"\n"  # optional escape
-_cescape_utf8_to_str[13] = r"\r"  # optional escape
+_cescape_utf8_to_str[9] = r'\t'  # optional escape
+_cescape_utf8_to_str[10] = r'\n'  # optional escape
+_cescape_utf8_to_str[13] = r'\r'  # optional escape
 _cescape_utf8_to_str[39] = r"\'"  # optional escape
 
-_cescape_utf8_to_str[34] = r"\""  # necessary escape
-_cescape_utf8_to_str[92] = r"\\"  # necessary escape
+_cescape_utf8_to_str[34] = r'\"'  # necessary escape
+_cescape_utf8_to_str[92] = r'\\'  # necessary escape
 
 # Lookup table for non-utf8, with necessary escapes at (o >= 127 or o < 32)
-_cescape_byte_to_str = (
-    [r"\%03o" % i for i in range(0, 32)]
-    + [chr(i) for i in range(32, 127)]
-    + [r"\%03o" % i for i in range(127, 256)]
-)
-_cescape_byte_to_str[9] = r"\t"  # optional escape
-_cescape_byte_to_str[10] = r"\n"  # optional escape
-_cescape_byte_to_str[13] = r"\r"  # optional escape
+_cescape_byte_to_str = ([r'\%03o' % i for i in range(0, 32)] +
+                        [chr(i) for i in range(32, 127)] +
+                        [r'\%03o' % i for i in range(127, 256)])
+_cescape_byte_to_str[9] = r'\t'  # optional escape
+_cescape_byte_to_str[10] = r'\n'  # optional escape
+_cescape_byte_to_str[13] = r'\r'  # optional escape
 _cescape_byte_to_str[39] = r"\'"  # optional escape
 
-_cescape_byte_to_str[34] = r"\""  # necessary escape
-_cescape_byte_to_str[92] = r"\\"  # necessary escape
+_cescape_byte_to_str[34] = r'\"'  # necessary escape
+_cescape_byte_to_str[92] = r'\\'  # necessary escape
 
 
 def CEscape(text, as_utf8):
-    """Escape a bytes string for use in an ascii protocol buffer.
+  """Escape a bytes string for use in an ascii protocol buffer.
 
   text.encode('string_escape') does not seem to satisfy our needs as it
   encodes unprintable characters using two-digit hex escapes whereas our
@@ -73,41 +71,37 @@ def CEscape(text, as_utf8):
   Returns:
     Escaped string
   """
-    # PY3 hack: make Ord work for str and bytes:
-    # //platforms/networking/data uses unicode here, hence basestring.
-    Ord = ord if isinstance(text, six.string_types) else lambda x: x
-    if as_utf8:
-        return "".join(_cescape_utf8_to_str[Ord(c)] for c in text)
-    return "".join(_cescape_byte_to_str[Ord(c)] for c in text)
+  # PY3 hack: make Ord work for str and bytes:
+  # //platforms/networking/data uses unicode here, hence basestring.
+  Ord = ord if isinstance(text, six.string_types) else lambda x: x
+  if as_utf8:
+    return ''.join(_cescape_utf8_to_str[Ord(c)] for c in text)
+  return ''.join(_cescape_byte_to_str[Ord(c)] for c in text)
 
 
-_CUNESCAPE_HEX = re.compile(r"(\\+)x([0-9a-fA-F])(?![0-9a-fA-F])")
-_cescape_highbit_to_str = [chr(i) for i in range(0, 127)] + [
-    r"\%03o" % i for i in range(127, 256)
-]
+_CUNESCAPE_HEX = re.compile(r'(\\+)x([0-9a-fA-F])(?![0-9a-fA-F])')
+_cescape_highbit_to_str = ([chr(i) for i in range(0, 127)] +
+                           [r'\%03o' % i for i in range(127, 256)])
 
 
 def CUnescape(text):
-    """Unescape a text string with C-style escape sequences to UTF-8 bytes."""
+  """Unescape a text string with C-style escape sequences to UTF-8 bytes."""
 
-    def ReplaceHex(m):
-        # Only replace the match if the number of leading back slashes is odd. i.e.
-        # the slash itself is not escaped.
-        if len(m.group(1)) & 1:
-            return m.group(1) + "x0" + m.group(2)
-        return m.group(0)
+  def ReplaceHex(m):
+    # Only replace the match if the number of leading back slashes is odd. i.e.
+    # the slash itself is not escaped.
+    if len(m.group(1)) & 1:
+      return m.group(1) + 'x0' + m.group(2)
+    return m.group(0)
 
-    # This is required because the 'string_escape' encoding doesn't
-    # allow single-digit hex escapes (like '\xf').
-    result = _CUNESCAPE_HEX.sub(ReplaceHex, text)
+  # This is required because the 'string_escape' encoding doesn't
+  # allow single-digit hex escapes (like '\xf').
+  result = _CUNESCAPE_HEX.sub(ReplaceHex, text)
 
-    if str is bytes:  # PY2
-        return result.decode("string_escape")
-    result = "".join(_cescape_highbit_to_str[ord(c)] for c in result)
-    return (
-        result.encode("ascii").decode(  # Make it bytes to allow decode.
-            "unicode_escape"
-        )
-        # Make it bytes again to return the proper type.
-        .encode("raw_unicode_escape")
-    )
+  if str is bytes:  # PY2
+    return result.decode('string_escape')
+  result = ''.join(_cescape_highbit_to_str[ord(c)] for c in result)
+  return (result.encode('ascii')  # Make it bytes to allow decode.
+          .decode('unicode_escape')
+          # Make it bytes again to return the proper type.
+          .encode('raw_unicode_escape'))

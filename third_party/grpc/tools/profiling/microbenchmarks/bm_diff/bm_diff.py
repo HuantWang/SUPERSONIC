@@ -21,7 +21,7 @@ import bm_speedup
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), ".."))
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 import bm_json
 
 import json
@@ -34,7 +34,7 @@ verbose = False
 
 
 def _median(ary):
-    assert len(ary)
+    assert (len(ary))
     ary = sorted(ary)
     n = len(ary)
     if n % 2 == 0:
@@ -44,60 +44,61 @@ def _median(ary):
 
 
 def _args():
-    argp = argparse.ArgumentParser(description="Perform diff on microbenchmarks")
+    argp = argparse.ArgumentParser(
+        description='Perform diff on microbenchmarks')
     argp.add_argument(
-        "-t",
-        "--track",
+        '-t',
+        '--track',
         choices=sorted(bm_constants._INTERESTING),
-        nargs="+",
+        nargs='+',
         default=sorted(bm_constants._INTERESTING),
-        help="Which metrics to track",
-    )
+        help='Which metrics to track')
     argp.add_argument(
-        "-b",
-        "--benchmarks",
-        nargs="+",
+        '-b',
+        '--benchmarks',
+        nargs='+',
         choices=bm_constants._AVAILABLE_BENCHMARK_TESTS,
         default=bm_constants._AVAILABLE_BENCHMARK_TESTS,
-        help="Which benchmarks to run",
-    )
+        help='Which benchmarks to run')
     argp.add_argument(
-        "-l",
-        "--loops",
+        '-l',
+        '--loops',
         type=int,
         default=20,
-        help="Number of times to loops the benchmarks. Must match what was passed to bm_run.py",
+        help=
+        'Number of times to loops the benchmarks. Must match what was passed to bm_run.py'
     )
     argp.add_argument(
-        "-r", "--regex", type=str, default="", help="Regex to filter benchmarks run"
-    )
-    argp.add_argument("--counters", dest="counters", action="store_true")
-    argp.add_argument("--no-counters", dest="counters", action="store_false")
+        '-r',
+        '--regex',
+        type=str,
+        default="",
+        help='Regex to filter benchmarks run')
+    argp.add_argument('--counters', dest='counters', action='store_true')
+    argp.add_argument('--no-counters', dest='counters', action='store_false')
     argp.set_defaults(counters=True)
-    argp.add_argument("-n", "--new", type=str, help="New benchmark name")
-    argp.add_argument("-o", "--old", type=str, help="Old benchmark name")
+    argp.add_argument('-n', '--new', type=str, help='New benchmark name')
+    argp.add_argument('-o', '--old', type=str, help='Old benchmark name')
     argp.add_argument(
-        "-v", "--verbose", type=bool, help="Print details of before/after"
-    )
+        '-v', '--verbose', type=bool, help='Print details of before/after')
     args = argp.parse_args()
     global verbose
-    if args.verbose:
-        verbose = True
+    if args.verbose: verbose = True
     assert args.new
     assert args.old
     return args
 
 
 def _maybe_print(str):
-    if verbose:
-        print str
+    if verbose: print str
 
 
 class Benchmark:
+
     def __init__(self):
         self.samples = {
             True: collections.defaultdict(list),
-            False: collections.defaultdict(list),
+            False: collections.defaultdict(list)
         }
         self.final = {}
 
@@ -110,24 +111,21 @@ class Benchmark:
         for f in sorted(track):
             new = self.samples[True][f]
             old = self.samples[False][f]
-            if not new or not old:
-                continue
+            if not new or not old: continue
             mdn_diff = abs(_median(new) - _median(old))
-            _maybe_print(
-                "%s: %s=%r %s=%r mdn_diff=%r"
-                % (f, new_name, new, old_name, old, mdn_diff)
-            )
+            _maybe_print('%s: %s=%r %s=%r mdn_diff=%r' %
+                         (f, new_name, new, old_name, old, mdn_diff))
             s = bm_speedup.speedup(new, old, 1e-5)
             if abs(s) > 3:
-                if mdn_diff > 0.5 or "trickle" in f:
-                    self.final[f] = "%+d%%" % s
+                if mdn_diff > 0.5 or 'trickle' in f:
+                    self.final[f] = '%+d%%' % s
         return self.final.keys()
 
     def skip(self):
         return not self.final
 
     def row(self, flds):
-        return [self.final[f] if f in self.final else "" for f in flds]
+        return [self.final[f] if f in self.final else '' for f in flds]
 
 
 def _read_json(filename, badjson_files, nonexistant_files):
@@ -152,7 +150,7 @@ def _read_json(filename, badjson_files, nonexistant_files):
 
 
 def fmt_dict(d):
-    return "".join(["    " + k + ": " + str(d[k]) + "\n" for k in d])
+    return ''.join(["    " + k + ": " + str(d[k]) + "\n" for k in d])
 
 
 def diff(bms, loops, regex, track, old, new, counters):
@@ -162,53 +160,37 @@ def diff(bms, loops, regex, track, old, new, counters):
     nonexistant_files = {}
     for bm in bms:
         for loop in range(0, loops):
-            for line in subprocess.check_output(
-                [
-                    "bm_diff_%s/opt/%s" % (old, bm),
-                    "--benchmark_list_tests",
-                    "--benchmark_filter=%s" % regex,
-                ]
-            ).splitlines():
-                stripped_line = (
-                    line.strip()
-                    .replace("/", "_")
-                    .replace("<", "_")
-                    .replace(">", "_")
-                    .replace(", ", "_")
-                )
-                js_new_opt = _read_json(
-                    "%s.%s.opt.%s.%d.json" % (bm, stripped_line, new, loop),
-                    badjson_files,
-                    nonexistant_files,
-                )
-                js_old_opt = _read_json(
-                    "%s.%s.opt.%s.%d.json" % (bm, stripped_line, old, loop),
-                    badjson_files,
-                    nonexistant_files,
-                )
+            for line in subprocess.check_output([
+                    'bm_diff_%s/opt/%s' % (old, bm), '--benchmark_list_tests',
+                    '--benchmark_filter=%s' % regex
+            ]).splitlines():
+                stripped_line = line.strip().replace("/", "_").replace(
+                    "<", "_").replace(">", "_").replace(", ", "_")
+                js_new_opt = _read_json('%s.%s.opt.%s.%d.json' %
+                                        (bm, stripped_line, new, loop),
+                                        badjson_files, nonexistant_files)
+                js_old_opt = _read_json('%s.%s.opt.%s.%d.json' %
+                                        (bm, stripped_line, old, loop),
+                                        badjson_files, nonexistant_files)
                 if counters:
-                    js_new_ctr = _read_json(
-                        "%s.%s.counters.%s.%d.json" % (bm, stripped_line, new, loop),
-                        badjson_files,
-                        nonexistant_files,
-                    )
-                    js_old_ctr = _read_json(
-                        "%s.%s.counters.%s.%d.json" % (bm, stripped_line, old, loop),
-                        badjson_files,
-                        nonexistant_files,
-                    )
+                    js_new_ctr = _read_json('%s.%s.counters.%s.%d.json' %
+                                            (bm, stripped_line, new, loop),
+                                            badjson_files, nonexistant_files)
+                    js_old_ctr = _read_json('%s.%s.counters.%s.%d.json' %
+                                            (bm, stripped_line, old, loop),
+                                            badjson_files, nonexistant_files)
                 else:
                     js_new_ctr = None
                     js_old_ctr = None
 
                 for row in bm_json.expand_json(js_new_ctr, js_new_opt):
-                    name = row["cpp_name"]
-                    if name.endswith("_mean") or name.endswith("_stddev"):
+                    name = row['cpp_name']
+                    if name.endswith('_mean') or name.endswith('_stddev'):
                         continue
                     benchmarks[name].add_sample(track, row, True)
                 for row in bm_json.expand_json(js_old_ctr, js_old_opt):
-                    name = row["cpp_name"]
-                    if name.endswith("_mean") or name.endswith("_stddev"):
+                    name = row['cpp_name']
+                    if name.endswith('_mean') or name.endswith('_stddev'):
                         continue
                     benchmarks[name].add_sample(track, row, False)
 
@@ -218,41 +200,30 @@ def diff(bms, loops, regex, track, old, new, counters):
         really_interesting.update(bm.process(track, new, old))
     fields = [f for f in track if f in really_interesting]
 
-    headers = ["Benchmark"] + fields
+    headers = ['Benchmark'] + fields
     rows = []
     for name in sorted(benchmarks.keys()):
-        if benchmarks[name].skip():
-            continue
+        if benchmarks[name].skip(): continue
         rows.append([name] + benchmarks[name].row(fields))
     note = None
     if len(badjson_files):
-        note = "Corrupt JSON data (indicates timeout or crash): \n%s" % fmt_dict(
-            badjson_files
-        )
+        note = 'Corrupt JSON data (indicates timeout or crash): \n%s' % fmt_dict(
+            badjson_files)
     if len(nonexistant_files):
         if note:
-            note += "\n\nMissing files (indicates new benchmark): \n%s" % fmt_dict(
-                nonexistant_files
-            )
+            note += '\n\nMissing files (indicates new benchmark): \n%s' % fmt_dict(
+                nonexistant_files)
         else:
-            note = "\n\nMissing files (indicates new benchmark): \n%s" % fmt_dict(
-                nonexistant_files
-            )
+            note = '\n\nMissing files (indicates new benchmark): \n%s' % fmt_dict(
+                nonexistant_files)
     if rows:
-        return tabulate.tabulate(rows, headers=headers, floatfmt="+.2f"), note
+        return tabulate.tabulate(rows, headers=headers, floatfmt='+.2f'), note
     else:
         return None, note
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = _args()
-    diff, note = diff(
-        args.benchmarks,
-        args.loops,
-        args.regex,
-        args.track,
-        args.old,
-        args.new,
-        args.counters,
-    )
-    print ("%s\n%s" % (note, diff if diff else "No performance differences"))
+    diff, note = diff(args.benchmarks, args.loops, args.regex, args.track,
+                      args.old, args.new, args.counters)
+    print('%s\n%s' % (note, diff if diff else "No performance differences"))

@@ -40,18 +40,17 @@ the generated code can be more appropriate for the implementation in use
 and can avoid unnecessary layers of indirection.
 """
 
-__author__ = "petar@google.com (Petar Petrov)"
+__author__ = 'petar@google.com (Petar Petrov)'
 
 
 class RpcException(Exception):
-    """Exception raised on failed blocking RPC method call."""
-
-    pass
+  """Exception raised on failed blocking RPC method call."""
+  pass
 
 
 class Service(object):
 
-    """Abstract base interface for protocol-buffer-based RPC services.
+  """Abstract base interface for protocol-buffer-based RPC services.
 
   Services themselves are abstract classes (implemented either by servers or as
   stubs), but they subclass this base interface. The methods of this
@@ -59,12 +58,13 @@ class Service(object):
   its exact type at compile time (analogous to the Message interface).
   """
 
-    def GetDescriptor():
-        """Retrieves this service's descriptor."""
-        raise NotImplementedError
+  def GetDescriptor():
+    """Retrieves this service's descriptor."""
+    raise NotImplementedError
 
-    def CallMethod(self, method_descriptor, rpc_controller, request, done):
-        """Calls a method of the service specified by method_descriptor.
+  def CallMethod(self, method_descriptor, rpc_controller,
+                 request, done):
+    """Calls a method of the service specified by method_descriptor.
 
     If "done" is None then the call is blocking and the response
     message will be returned directly.  Otherwise the call is asynchronous
@@ -88,10 +88,10 @@ class Service(object):
       Further details about the failure can be found by querying the
       RpcController.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def GetRequestClass(self, method_descriptor):
-        """Returns the class of the request message for the specified method.
+  def GetRequestClass(self, method_descriptor):
+    """Returns the class of the request message for the specified method.
 
     CallMethod() requires that the request is of a particular subclass of
     Message. GetRequestClass() gets the default instance of this required
@@ -103,21 +103,21 @@ class Service(object):
       request.ParseFromString(input)
       service.CallMethod(method, request, callback)
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def GetResponseClass(self, method_descriptor):
-        """Returns the class of the response message for the specified method.
+  def GetResponseClass(self, method_descriptor):
+    """Returns the class of the response message for the specified method.
 
     This method isn't really needed, as the RpcChannel's CallMethod constructs
     the response protocol message. It's provided anyway in case it is useful
     for the caller to know the response type in advance.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
 
 class RpcController(object):
 
-    """An RpcController mediates a single method call.
+  """An RpcController mediates a single method call.
 
   The primary purpose of the controller is to provide a way to manipulate
   settings specific to the RPC implementation and to find out about RPC-level
@@ -127,32 +127,32 @@ class RpcController(object):
   advanced features (e.g. deadline propagation).
   """
 
-    # Client-side methods below
+  # Client-side methods below
 
-    def Reset(self):
-        """Resets the RpcController to its initial state.
+  def Reset(self):
+    """Resets the RpcController to its initial state.
 
     After the RpcController has been reset, it may be reused in
     a new call. Must not be called while an RPC is in progress.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def Failed(self):
-        """Returns true if the call failed.
+  def Failed(self):
+    """Returns true if the call failed.
 
     After a call has finished, returns true if the call failed.  The possible
     reasons for failure depend on the RPC implementation.  Failed() must not
     be called before a call has finished.  If Failed() returns true, the
     contents of the response message are undefined.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def ErrorText(self):
-        """If Failed is true, returns a human-readable description of the error."""
-        raise NotImplementedError
+  def ErrorText(self):
+    """If Failed is true, returns a human-readable description of the error."""
+    raise NotImplementedError
 
-    def StartCancel(self):
-        """Initiate cancellation.
+  def StartCancel(self):
+    """Initiate cancellation.
 
     Advises the RPC system that the caller desires that the RPC call be
     canceled.  The RPC system may cancel it immediately, may wait awhile and
@@ -160,12 +160,12 @@ class RpcController(object):
     canceled, the "done" callback will still be called and the RpcController
     will indicate that the call failed at that time.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    # Server-side methods below
+  # Server-side methods below
 
-    def SetFailed(self, reason):
-        """Sets a failure reason.
+  def SetFailed(self, reason):
+    """Sets a failure reason.
 
     Causes Failed() to return true on the client side.  "reason" will be
     incorporated into the message returned by ErrorText().  If you find
@@ -173,19 +173,19 @@ class RpcController(object):
     should incorporate it into your response protocol buffer and should
     NOT call SetFailed().
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def IsCanceled(self):
-        """Checks if the client cancelled the RPC.
+  def IsCanceled(self):
+    """Checks if the client cancelled the RPC.
 
     If true, indicates that the client canceled the RPC, so the server may
     as well give up on replying to it.  The server should still call the
     final "done" callback.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
-    def NotifyOnCancel(self, callback):
-        """Sets a callback to invoke on cancel.
+  def NotifyOnCancel(self, callback):
+    """Sets a callback to invoke on cancel.
 
     Asks that the given callback be called when the RPC is canceled.  The
     callback will always be called exactly once.  If the RPC completes without
@@ -195,12 +195,12 @@ class RpcController(object):
 
     NotifyOnCancel() must be called no more than once per request.
     """
-        raise NotImplementedError
+    raise NotImplementedError
 
 
 class RpcChannel(object):
 
-    """Abstract interface for an RPC channel.
+  """Abstract interface for an RPC channel.
 
   An RpcChannel represents a communication line to a service which can be used
   to call that service's methods.  The service may be running on another
@@ -214,14 +214,13 @@ class RpcChannel(object):
     service.MyMethod(controller, request, callback)
   """
 
-    def CallMethod(
-        self, method_descriptor, rpc_controller, request, response_class, done
-    ):
-        """Calls the method identified by the descriptor.
+  def CallMethod(self, method_descriptor, rpc_controller,
+                 request, response_class, done):
+    """Calls the method identified by the descriptor.
 
     Call the given method of the remote service.  The signature of this
     procedure looks the same as Service.CallMethod(), but the requirements
     are less strict in one important way:  the request object doesn't have to
     be of any specific class as long as its descriptor is method.input_type.
     """
-        raise NotImplementedError
+    raise NotImplementedError

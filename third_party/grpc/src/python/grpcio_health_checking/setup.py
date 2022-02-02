@@ -27,7 +27,7 @@ import grpc_version
 class _NoOpCommand(setuptools.Command):
     """No-op command."""
 
-    description = ""
+    description = ''
     user_options = []
 
     def initialize_options(self):
@@ -41,56 +41,55 @@ class _NoOpCommand(setuptools.Command):
 
 
 CLASSIFIERS = [
-    "Development Status :: 5 - Production/Stable",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.4",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "License :: OSI Approved :: Apache Software License",
+    'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'License :: OSI Approved :: Apache Software License',
 ]
 
 PACKAGE_DIRECTORIES = {
-    "": ".",
+    '': '.',
 }
 
 INSTALL_REQUIRES = (
-    "protobuf>=3.5.2.post1",
-    "grpcio>={version}".format(version=grpc_version.VERSION),
+    'protobuf>=3.5.2.post1',
+    'grpcio>={version}'.format(version=grpc_version.VERSION),
 )
 
 try:
     import health_commands as _health_commands
-
     # we are in the build environment, otherwise the above import fails
-    SETUP_REQUIRES = ("grpcio-tools=={version}".format(version=grpc_version.VERSION),)
+    SETUP_REQUIRES = (
+        'grpcio-tools=={version}'.format(version=grpc_version.VERSION),)
     COMMAND_CLASS = {
         # Run preprocess from the repository *before* doing any packaging!
-        "preprocess": _health_commands.CopyProtoModules,
-        "build_package_protos": _health_commands.BuildPackageProtos,
+        'preprocess': _health_commands.CopyProtoModules,
+        'build_package_protos': _health_commands.BuildPackageProtos,
     }
 except ImportError:
     SETUP_REQUIRES = ()
     COMMAND_CLASS = {
         # wire up commands to no-op not to break the external dependencies
-        "preprocess": _NoOpCommand,
-        "build_package_protos": _NoOpCommand,
+        'preprocess': _NoOpCommand,
+        'build_package_protos': _NoOpCommand,
     }
 
 setuptools.setup(
-    name="grpcio-health-checking",
+    name='grpcio-health-checking',
     version=grpc_version.VERSION,
-    description="Standard Health Checking Service for gRPC",
-    author="The gRPC Authors",
-    author_email="grpc-io@googlegroups.com",
-    url="https://grpc.io",
-    license="Apache License 2.0",
+    description='Standard Health Checking Service for gRPC',
+    author='The gRPC Authors',
+    author_email='grpc-io@googlegroups.com',
+    url='https://grpc.io',
+    license='Apache License 2.0',
     classifiers=CLASSIFIERS,
     package_dir=PACKAGE_DIRECTORIES,
-    packages=setuptools.find_packages("."),
+    packages=setuptools.find_packages('.'),
     install_requires=INSTALL_REQUIRES,
     setup_requires=SETUP_REQUIRES,
-    cmdclass=COMMAND_CLASS,
-)
+    cmdclass=COMMAND_CLASS)

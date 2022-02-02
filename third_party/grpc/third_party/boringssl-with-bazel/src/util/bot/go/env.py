@@ -19,7 +19,7 @@ Or it can be used to wrap a command:
 $ ./env.py go version
 """
 
-assert __name__ == "__main__"
+assert __name__ == '__main__'
 
 import imp
 import os
@@ -28,23 +28,22 @@ import sys
 
 # Do not want to mess with sys.path, load the module directly.
 bootstrap = imp.load_source(
-    "bootstrap", os.path.join(os.path.dirname(__file__), "bootstrap.py")
-)
+    'bootstrap', os.path.join(os.path.dirname(__file__), 'bootstrap.py'))
 
 old = os.environ.copy()
 new = bootstrap.prepare_go_environ()
 
 if len(sys.argv) == 1:
-    for key, value in sorted(new.iteritems()):
-        if old.get(key) != value:
-            print 'export %s="%s"' % (key, value)
+  for key, value in sorted(new.iteritems()):
+    if old.get(key) != value:
+      print 'export %s="%s"' % (key, value)
 else:
-    exe = sys.argv[1]
-    if exe == "python":
-        exe = sys.executable
-    else:
-        # Help Windows to find the executable in new PATH, do it only when
-        # executable is referenced by name (and not by path).
-        if os.sep not in exe:
-            exe = bootstrap.find_executable(exe, [bootstrap.WORKSPACE])
-    sys.exit(subprocess.call([exe] + sys.argv[2:], env=new))
+  exe = sys.argv[1]
+  if exe == 'python':
+    exe = sys.executable
+  else:
+    # Help Windows to find the executable in new PATH, do it only when
+    # executable is referenced by name (and not by path).
+    if os.sep not in exe:
+      exe = bootstrap.find_executable(exe, [bootstrap.WORKSPACE])
+  sys.exit(subprocess.call([exe] + sys.argv[2:], env=new))

@@ -28,21 +28,19 @@ class SanityTest(unittest.TestCase):
     def testTestsJsonUpToDate(self):
         """Autodiscovers all test suites and checks that tests.json is up to date"""
         loader = tests.Loader()
-        loader.loadTestsFromNames(["tests"])
-        test_suite_names = sorted(
-            {
-                test_case_class.id().rsplit(".", 1)[0]
-                for test_case_class in tests._loader.iterate_suite_cases(loader.suite)
-            }
-        )
+        loader.loadTestsFromNames(['tests'])
+        test_suite_names = sorted({
+            test_case_class.id().rsplit('.', 1)[0]
+            for test_case_class in tests._loader.iterate_suite_cases(
+                loader.suite)
+        })
 
-        tests_json_string = pkg_resources.resource_string("tests", "tests.json")
-        tests_json = json.loads(
-            tests_json_string.decode() if six.PY3 else tests_json_string
-        )
+        tests_json_string = pkg_resources.resource_string('tests', 'tests.json')
+        tests_json = json.loads(tests_json_string.decode()
+                                if six.PY3 else tests_json_string)
 
         self.assertSequenceEqual(tests_json, test_suite_names)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

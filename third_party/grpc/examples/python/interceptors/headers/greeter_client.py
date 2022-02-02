@@ -24,14 +24,13 @@ import header_manipulator_client_interceptor
 
 def run():
     header_adder_interceptor = header_manipulator_client_interceptor.header_adder_interceptor(
-        "one-time-password", "42"
-    )
-    channel = grpc.insecure_channel("localhost:50051")
+        'one-time-password', '42')
+    channel = grpc.insecure_channel('localhost:50051')
     channel = grpc.intercept_channel(channel, header_adder_interceptor)
     stub = helloworld_pb2_grpc.GreeterStub(channel)
-    response = stub.SayHello(helloworld_pb2.HelloRequest(name="you"))
+    response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
     print("Greeter client received: " + response.message)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run()

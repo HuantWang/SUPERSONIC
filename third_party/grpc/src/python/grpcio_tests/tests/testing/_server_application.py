@@ -30,24 +30,25 @@ class FirstServiceServicer(services_pb2_grpc.FirstServiceServicer):
             return _application_common.UNARY_UNARY_RESPONSE
         else:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Something is wrong with your request!")
+            context.set_details('Something is wrong with your request!')
             return services_pb2.Down()
 
     def UnStre(self, request, context):
         if _application_common.UNARY_STREAM_REQUEST != request:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Something is wrong with your request!")
+            context.set_details('Something is wrong with your request!')
         return
         yield services_pb2.Strange()  # pylint: disable=unreachable
 
     def StreUn(self, request_iterator, context):
-        context.send_initial_metadata(
-            (("server_application_metadata_key", "Hi there!",),)
-        )
+        context.send_initial_metadata(((
+            'server_application_metadata_key',
+            'Hi there!',
+        ),))
         for request in request_iterator:
             if request != _application_common.STREAM_UNARY_REQUEST:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Something is wrong with your request!")
+                context.set_details('Something is wrong with your request!')
                 return services_pb2.Strange()
             elif not context.is_active():
                 return services_pb2.Strange()
@@ -58,7 +59,7 @@ class FirstServiceServicer(services_pb2_grpc.FirstServiceServicer):
         for request in request_iterator:
             if request != _application_common.STREAM_STREAM_REQUEST:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Something is wrong with your request!")
+                context.set_details('Something is wrong with your request!')
                 return
             elif not context.is_active():
                 return

@@ -33,30 +33,30 @@ def _threshold_for_count_below(buckets, boundaries, count_below):
         # should lie
         lower_bound = boundaries[lower_idx]
         upper_bound = boundaries[lower_idx + 1]
-        return upper_bound - (upper_bound - lower_bound) * (
-            count_so_far - count_below
-        ) / float(buckets[lower_idx])
+        return (upper_bound - (upper_bound - lower_bound) *
+                (count_so_far - count_below) / float(buckets[lower_idx]))
 
 
 def percentile(buckets, pctl, boundaries):
-    return _threshold_for_count_below(buckets, boundaries, sum(buckets) * pctl / 100.0)
+    return _threshold_for_count_below(buckets, boundaries,
+                                      sum(buckets) * pctl / 100.0)
 
 
 def counter(core_stats, name):
-    for stat in core_stats["metrics"]:
-        if stat["name"] == name:
-            return int(stat.get("count", 0))
+    for stat in core_stats['metrics']:
+        if stat['name'] == name:
+            return int(stat.get('count', 0))
 
 
-Histogram = collections.namedtuple("Histogram", "buckets boundaries")
+Histogram = collections.namedtuple('Histogram', 'buckets boundaries')
 
 
 def histogram(core_stats, name):
-    for stat in core_stats["metrics"]:
-        if stat["name"] == name:
+    for stat in core_stats['metrics']:
+        if stat['name'] == name:
             buckets = []
             boundaries = []
-            for b in stat["histogram"]["buckets"]:
-                buckets.append(int(b.get("count", 0)))
-                boundaries.append(int(b.get("start", 0)))
+            for b in stat['histogram']['buckets']:
+                buckets.append(int(b.get('count', 0)))
+                boundaries.append(int(b.get('start', 0)))
     return Histogram(buckets=buckets, boundaries=boundaries)

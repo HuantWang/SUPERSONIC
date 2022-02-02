@@ -24,30 +24,25 @@ from grpc import _common
 from grpc.framework.foundation import callable_util
 
 _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE = (
-    'Exception calling connectivity future "done" callback!'
-)
+    'Exception calling connectivity future "done" callback!')
 
 
 class RpcMethodHandler(
-    collections.namedtuple(
-        "_RpcMethodHandler",
-        (
-            "request_streaming",
-            "response_streaming",
-            "request_deserializer",
-            "response_serializer",
-            "unary_unary",
-            "unary_stream",
-            "stream_unary",
-            "stream_stream",
-        ),
-    ),
-    grpc.RpcMethodHandler,
-):
+        collections.namedtuple('_RpcMethodHandler', (
+            'request_streaming',
+            'response_streaming',
+            'request_deserializer',
+            'response_serializer',
+            'unary_unary',
+            'unary_stream',
+            'stream_unary',
+            'stream_stream',
+        )), grpc.RpcMethodHandler):
     pass
 
 
 class DictionaryGenericHandler(grpc.ServiceRpcHandler):
+
     def __init__(self, service, method_handlers):
         self._name = service
         self._method_handlers = {
@@ -63,6 +58,7 @@ class DictionaryGenericHandler(grpc.ServiceRpcHandler):
 
 
 class _ChannelReadyFuture(grpc.Future):
+
     def __init__(self, channel):
         self._condition = threading.Condition()
         self._channel = channel
@@ -91,7 +87,8 @@ class _ChannelReadyFuture(grpc.Future):
 
     def _update(self, connectivity):
         with self._condition:
-            if not self._cancelled and connectivity is grpc.ChannelConnectivity.READY:
+            if (not self._cancelled and
+                    connectivity is grpc.ChannelConnectivity.READY):
                 self._matured = True
                 self._channel.unsubscribe(self._update)
                 self._condition.notify_all()
@@ -102,8 +99,7 @@ class _ChannelReadyFuture(grpc.Future):
 
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
-                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self
-            )
+                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)
 
     def cancel(self):
         with self._condition:
@@ -118,8 +114,7 @@ class _ChannelReadyFuture(grpc.Future):
 
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
-                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self
-            )
+                done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)
 
     def cancelled(self):
         with self._condition:

@@ -20,21 +20,21 @@ import grpc
 import six
 
 INVOCATION_INITIAL_METADATA = (
-    ("0", "abc"),
-    ("1", "def"),
-    ("2", "ghi"),
+    ('0', 'abc'),
+    ('1', 'def'),
+    ('2', 'ghi'),
 )
 SERVICE_INITIAL_METADATA = (
-    ("3", "jkl"),
-    ("4", "mno"),
-    ("5", "pqr"),
+    ('3', 'jkl'),
+    ('4', 'mno'),
+    ('5', 'pqr'),
 )
 SERVICE_TERMINAL_METADATA = (
-    ("6", "stu"),
-    ("7", "vwx"),
-    ("8", "yza"),
+    ('6', 'stu'),
+    ('7', 'vwx'),
+    ('8', 'yza'),
 )
-DETAILS = "test details"
+DETAILS = 'test details'
 
 
 def metadata_transmitted(original_metadata, transmitted_metadata):
@@ -92,11 +92,10 @@ def test_secure_channel(target, channel_credentials, server_host_override):
     An implementations.Channel to the remote host through which RPCs may be
       conducted.
   """
-    channel = grpc.secure_channel(
-        target,
-        channel_credentials,
-        (("grpc.ssl_target_name_override", server_host_override,),),
-    )
+    channel = grpc.secure_channel(target, channel_credentials, ((
+        'grpc.ssl_target_name_override',
+        server_host_override,
+    ),))
     return channel
 
 
@@ -107,5 +106,4 @@ def test_server(max_workers=10):
      """
     return grpc.server(
         futures.ThreadPoolExecutor(max_workers=max_workers),
-        options=(("grpc.so_reuseport", 0),),
-    )
+        options=(('grpc.so_reuseport', 0),))

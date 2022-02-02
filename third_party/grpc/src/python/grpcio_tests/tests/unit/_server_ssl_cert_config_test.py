@@ -49,45 +49,38 @@ CA_1_PEM = resources.cert_hier_1_root_ca_cert()
 CA_2_PEM = resources.cert_hier_2_root_ca_cert()
 
 CLIENT_KEY_1_PEM = resources.cert_hier_1_client_1_key()
-CLIENT_CERT_CHAIN_1_PEM = (
-    resources.cert_hier_1_client_1_cert() + resources.cert_hier_1_intermediate_ca_cert()
-)
+CLIENT_CERT_CHAIN_1_PEM = (resources.cert_hier_1_client_1_cert() +
+                           resources.cert_hier_1_intermediate_ca_cert())
 
 CLIENT_KEY_2_PEM = resources.cert_hier_2_client_1_key()
-CLIENT_CERT_CHAIN_2_PEM = (
-    resources.cert_hier_2_client_1_cert() + resources.cert_hier_2_intermediate_ca_cert()
-)
+CLIENT_CERT_CHAIN_2_PEM = (resources.cert_hier_2_client_1_cert() +
+                           resources.cert_hier_2_intermediate_ca_cert())
 
 SERVER_KEY_1_PEM = resources.cert_hier_1_server_1_key()
-SERVER_CERT_CHAIN_1_PEM = (
-    resources.cert_hier_1_server_1_cert() + resources.cert_hier_1_intermediate_ca_cert()
-)
+SERVER_CERT_CHAIN_1_PEM = (resources.cert_hier_1_server_1_cert() +
+                           resources.cert_hier_1_intermediate_ca_cert())
 
 SERVER_KEY_2_PEM = resources.cert_hier_2_server_1_key()
-SERVER_CERT_CHAIN_2_PEM = (
-    resources.cert_hier_2_server_1_cert() + resources.cert_hier_2_intermediate_ca_cert()
-)
+SERVER_CERT_CHAIN_2_PEM = (resources.cert_hier_2_server_1_cert() +
+                           resources.cert_hier_2_intermediate_ca_cert())
 
 # for use with the CertConfigFetcher. Roughly a simple custom mock
 # implementation
-Call = collections.namedtuple("Call", ["did_raise", "returned_cert_config"])
+Call = collections.namedtuple('Call', ['did_raise', 'returned_cert_config'])
 
 
 def _create_client_stub(
-    port,
-    expect_success,
-    root_certificates=None,
-    private_key=None,
-    certificate_chain=None,
+        port,
+        expect_success,
+        root_certificates=None,
+        private_key=None,
+        certificate_chain=None,
 ):
-    channel = grpc.secure_channel(
-        "localhost:{}".format(port),
-        grpc.ssl_channel_credentials(
-            root_certificates=root_certificates,
-            private_key=private_key,
-            certificate_chain=certificate_chain,
-        ),
-    )
+    channel = grpc.secure_channel('localhost:{}'.format(port),
+                                  grpc.ssl_channel_credentials(
+                                      root_certificates=root_certificates,
+                                      private_key=private_key,
+                                      certificate_chain=certificate_chain))
     if expect_success:
         # per Nathaniel: there's some robustness issue if we start
         # using a channel without waiting for it to be actually ready
@@ -96,6 +89,7 @@ def _create_client_stub(
 
 
 class CertConfigFetcher(object):
+
     def __init__(self):
         self._lock = threading.Lock()
         self._calls = []
@@ -109,9 +103,9 @@ class CertConfigFetcher(object):
             self._cert_config = None
 
     def configure(self, should_raise, cert_config):
-        assert not (
-            should_raise and cert_config
-        ), "should not specify both should_raise and a cert_config at the same time"
+        assert not (should_raise and cert_config), (
+            "should not specify both should_raise and a cert_config at the same time"
+        )
         with self._lock:
             self._should_raise = should_raise
             self._cert_config = cert_config
@@ -124,13 +118,15 @@ class CertConfigFetcher(object):
         with self._lock:
             if self._should_raise:
                 self._calls.append(Call(True, None))
-                raise ValueError("just for fun, should not affect the test")
+                raise ValueError('just for fun, should not affect the test')
             else:
                 self._calls.append(Call(False, self._cert_config))
                 return self._cert_config
 
 
-class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase)):
+class _ServerSSLCertReloadTest(
+        six.with_metaclass(abc.ABCMeta, unittest.TestCase)):
+
     def __init__(self, *args, **kwargs):
         super(_ServerSSLCertReloadTest, self).__init__(*args, **kwargs)
         self.server = None
@@ -143,19 +139,17 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
     def setUp(self):
         self.server = test_common.test_server()
         services_pb2_grpc.add_FirstServiceServicer_to_server(
-            _server_application.FirstServiceServicer(), self.server
-        )
+            _server_application.FirstServiceServicer(), self.server)
         switch_cert_on_client_num = 10
         initial_cert_config = grpc.ssl_server_certificate_configuration(
-            [(SERVER_KEY_1_PEM, SERVER_CERT_CHAIN_1_PEM)], root_certificates=CA_2_PEM
-        )
+            [(SERVER_KEY_1_PEM, SERVER_CERT_CHAIN_1_PEM)],
+            root_certificates=CA_2_PEM)
         self.cert_config_fetcher = CertConfigFetcher()
         server_credentials = grpc.dynamic_ssl_server_credentials(
             initial_cert_config,
             self.cert_config_fetcher,
-            require_client_authentication=self.require_client_auth(),
-        )
-        self.port = self.server.add_secure_port("[::]:0", server_credentials)
+            require_client_authentication=self.require_client_auth())
+        self.port = self.server.add_secure_port('[::]:0', server_credentials)
         self.server.start()
 
     def tearDown(self):
@@ -173,24 +167,20 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
         else:
             with self.assertRaises(grpc.RpcError) as exception_context:
                 client_stub.UnUn(request)
-            self.assertEqual(
-                exception_context.exception.code(), grpc.StatusCode.UNAVAILABLE
-            )
+            self.assertEqual(exception_context.exception.code(),
+                             grpc.StatusCode.UNAVAILABLE)
 
-    def _do_one_shot_client_rpc(
-        self,
-        expect_success,
-        root_certificates=None,
-        private_key=None,
-        certificate_chain=None,
-    ):
+    def _do_one_shot_client_rpc(self,
+                                expect_success,
+                                root_certificates=None,
+                                private_key=None,
+                                certificate_chain=None):
         client_stub = _create_client_stub(
             self.port,
             expect_success,
             root_certificates=root_certificates,
             private_key=private_key,
-            certificate_chain=certificate_chain,
-        )
+            certificate_chain=certificate_chain)
         self._perform_rpc(client_stub, expect_success)
         del client_stub
 
@@ -201,8 +191,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
@@ -216,14 +205,13 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             False,
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertIsNone(call.returned_cert_config, "i= {}".format(i))
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertIsNone(call.returned_cert_config, 'i= {}'.format(i))
 
         # should work again...
         self.cert_config_fetcher.reset()
@@ -232,8 +220,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertTrue(actual_calls[0].did_raise)
@@ -248,13 +235,12 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             not self.require_client_auth(),
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_1_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_1_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_1_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertIsNone(call.returned_cert_config, "i= {}".format(i))
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertIsNone(call.returned_cert_config, 'i= {}'.format(i))
 
         # should work again...
         self.cert_config_fetcher.reset()
@@ -263,8 +249,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
@@ -278,8 +263,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         self._perform_rpc(persistent_client_stub_A, True)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
@@ -293,8 +277,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         self._perform_rpc(persistent_client_stub_B, True)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
@@ -304,22 +287,22 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
         # moment of truth!! client should reject server because the
         # server switch cert...
         cert_config = grpc.ssl_server_certificate_configuration(
-            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)], root_certificates=CA_1_PEM
-        )
+            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)],
+            root_certificates=CA_1_PEM)
         self.cert_config_fetcher.reset()
         self.cert_config_fetcher.configure(False, cert_config)
         self._do_one_shot_client_rpc(
             False,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertEqual(call.returned_cert_config, cert_config, "i= {}".format(i))
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertEqual(call.returned_cert_config, cert_config,
+                             'i= {}'.format(i))
 
         # now should work again...
         self.cert_config_fetcher.reset()
@@ -328,8 +311,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             True,
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_1_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_1_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_1_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
@@ -342,13 +324,12 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             not self.require_client_auth(),
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertIsNone(call.returned_cert_config, "i= {}".format(i))
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertIsNone(call.returned_cert_config, 'i= {}'.format(i))
 
         # here client should reject server...
         self.cert_config_fetcher.reset()
@@ -357,13 +338,12 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
             False,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertIsNone(call.returned_cert_config, "i= {}".format(i))
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertIsNone(call.returned_cert_config, 'i= {}'.format(i))
 
         # persistent clients should continue to work
         self.cert_config_fetcher.reset()
@@ -380,6 +360,7 @@ class _ServerSSLCertReloadTest(six.with_metaclass(abc.ABCMeta, unittest.TestCase
 
 
 class ServerSSLCertConfigFetcherParamsChecks(unittest.TestCase):
+
     def test_check_on_initial_config(self):
         with self.assertRaises(TypeError):
             grpc.dynamic_ssl_server_credentials(None, str)
@@ -388,8 +369,8 @@ class ServerSSLCertConfigFetcherParamsChecks(unittest.TestCase):
 
     def test_check_on_config_fetcher(self):
         cert_config = grpc.ssl_server_certificate_configuration(
-            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)], root_certificates=CA_1_PEM
-        )
+            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)],
+            root_certificates=CA_1_PEM)
         with self.assertRaises(TypeError):
             grpc.dynamic_ssl_server_credentials(cert_config, None)
         with self.assertRaises(TypeError):
@@ -397,6 +378,7 @@ class ServerSSLCertConfigFetcherParamsChecks(unittest.TestCase):
 
 
 class ServerSSLCertReloadTestWithClientAuth(_ServerSSLCertReloadTest):
+
     def require_client_auth(self):
         return True
 
@@ -404,6 +386,7 @@ class ServerSSLCertReloadTestWithClientAuth(_ServerSSLCertReloadTest):
 
 
 class ServerSSLCertReloadTestWithoutClientAuth(_ServerSSLCertReloadTest):
+
     def require_client_auth(self):
         return False
 
@@ -428,21 +411,19 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
     def setUp(self):
         self.server = test_common.test_server()
         services_pb2_grpc.add_FirstServiceServicer_to_server(
-            _server_application.FirstServiceServicer(), self.server
-        )
+            _server_application.FirstServiceServicer(), self.server)
         self.cert_config_A = grpc.ssl_server_certificate_configuration(
-            [(SERVER_KEY_1_PEM, SERVER_CERT_CHAIN_1_PEM)], root_certificates=CA_2_PEM
-        )
+            [(SERVER_KEY_1_PEM, SERVER_CERT_CHAIN_1_PEM)],
+            root_certificates=CA_2_PEM)
         self.cert_config_B = grpc.ssl_server_certificate_configuration(
-            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)], root_certificates=CA_1_PEM
-        )
+            [(SERVER_KEY_2_PEM, SERVER_CERT_CHAIN_2_PEM)],
+            root_certificates=CA_1_PEM)
         self.cert_config_fetcher = CertConfigFetcher()
         server_credentials = grpc.dynamic_ssl_server_credentials(
             self.cert_config_A,
             self.cert_config_fetcher,
-            require_client_authentication=True,
-        )
-        self.port = self.server.add_secure_port("[::]:0", server_credentials)
+            require_client_authentication=True)
+        self.port = self.server.add_secure_port('[::]:0', server_credentials)
         self.server.start()
 
     def test_cert_config_reuse(self):
@@ -454,12 +435,12 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
-        self.assertEqual(actual_calls[0].returned_cert_config, self.cert_config_A)
+        self.assertEqual(actual_calls[0].returned_cert_config,
+                         self.cert_config_A)
 
         # fail with A
         self.cert_config_fetcher.reset()
@@ -468,16 +449,14 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             False,
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_1_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_1_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_1_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertEqual(
-                call.returned_cert_config, self.cert_config_A, "i= {}".format(i)
-            )
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertEqual(call.returned_cert_config, self.cert_config_A,
+                             'i= {}'.format(i))
 
         # succeed again with A
         self.cert_config_fetcher.reset()
@@ -486,12 +465,12 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             True,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
-        self.assertEqual(actual_calls[0].returned_cert_config, self.cert_config_A)
+        self.assertEqual(actual_calls[0].returned_cert_config,
+                         self.cert_config_A)
 
         # succeed with B
         self.cert_config_fetcher.reset()
@@ -500,12 +479,12 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             True,
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_1_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_1_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_1_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
-        self.assertEqual(actual_calls[0].returned_cert_config, self.cert_config_B)
+        self.assertEqual(actual_calls[0].returned_cert_config,
+                         self.cert_config_B)
 
         # fail with B
         self.cert_config_fetcher.reset()
@@ -514,16 +493,14 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             False,
             root_certificates=CA_1_PEM,
             private_key=CLIENT_KEY_2_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_2_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_2_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertGreaterEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
         for i, call in enumerate(actual_calls):
-            self.assertFalse(call.did_raise, "i= {}".format(i))
-            self.assertEqual(
-                call.returned_cert_config, self.cert_config_B, "i= {}".format(i)
-            )
+            self.assertFalse(call.did_raise, 'i= {}'.format(i))
+            self.assertEqual(call.returned_cert_config, self.cert_config_B,
+                             'i= {}'.format(i))
 
         # succeed again with B
         self.cert_config_fetcher.reset()
@@ -532,13 +509,13 @@ class ServerSSLCertReloadTestCertConfigReuse(_ServerSSLCertReloadTest):
             True,
             root_certificates=CA_2_PEM,
             private_key=CLIENT_KEY_1_PEM,
-            certificate_chain=CLIENT_CERT_CHAIN_1_PEM,
-        )
+            certificate_chain=CLIENT_CERT_CHAIN_1_PEM)
         actual_calls = self.cert_config_fetcher.getCalls()
         self.assertEqual(len(actual_calls), 1)
         self.assertFalse(actual_calls[0].did_raise)
-        self.assertEqual(actual_calls[0].returned_cert_config, self.cert_config_B)
+        self.assertEqual(actual_calls[0].returned_cert_config,
+                         self.cert_config_B)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

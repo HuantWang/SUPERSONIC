@@ -24,21 +24,21 @@ from tests.interop import server
 from tests.unit import test_common
 
 
-class InsecureIntraopTest(_intraop_test_case.IntraopTestCase, unittest.TestCase):
+class InsecureIntraopTest(_intraop_test_case.IntraopTestCase,
+                          unittest.TestCase):
+
     def setUp(self):
         self.server = test_common.test_server()
-        test_pb2_grpc.add_TestServiceServicer_to_server(
-            methods.TestService(), self.server
-        )
-        port = self.server.add_insecure_port("[::]:0")
+        test_pb2_grpc.add_TestServiceServicer_to_server(methods.TestService(),
+                                                        self.server)
+        port = self.server.add_insecure_port('[::]:0')
         self.server.start()
         self.stub = test_pb2_grpc.TestServiceStub(
-            grpc.insecure_channel("localhost:{}".format(port))
-        )
+            grpc.insecure_channel('localhost:{}'.format(port)))
 
     def tearDown(self):
         self.server.stop(None)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

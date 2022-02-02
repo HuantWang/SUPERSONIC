@@ -24,26 +24,22 @@ import subprocess
 # Find the root of the git tree
 #
 
-git_root = (
-    subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
-    .decode("utf-8")
-    .strip()
-)
+git_root = (subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
+            .decode('utf-8').strip())
 
 #
 # Parse command line arguments
 #
 
-default_out = os.path.join(git_root, ".github", "CODEOWNERS")
+default_out = os.path.join(git_root, '.github', 'CODEOWNERS')
 
-argp = argparse.ArgumentParser("Generate .github/CODEOWNERS file")
+argp = argparse.ArgumentParser('Generate .github/CODEOWNERS file')
 argp.add_argument(
-    "--out",
-    "-o",
+    '--out',
+    '-o',
     type=str,
     default=default_out,
-    help="Output file (default %s)" % default_out,
-)
+    help='Output file (default %s)' % default_out)
 args = argp.parse_args()
 
 #
@@ -51,17 +47,17 @@ args = argp.parse_args()
 #
 
 owners_files = [
-    os.path.join(root, "OWNERS")
+    os.path.join(root, 'OWNERS')
     for root, dirs, files in os.walk(git_root)
-    if "OWNERS" in files
+    if 'OWNERS' in files
 ]
 
 #
 # Parse owners files
 #
 
-Owners = collections.namedtuple("Owners", "parent directives dir")
-Directive = collections.namedtuple("Directive", "who globs")
+Owners = collections.namedtuple('Owners', 'parent directives dir')
+Directive = collections.namedtuple('Directive', 'who globs')
 
 
 def parse_owners(filename):
@@ -72,19 +68,17 @@ def parse_owners(filename):
     for line in src:
         line = line.strip()
         # line := directive | comment
-        if not line:
-            continue
-        if line[0] == "#":
-            continue
+        if not line: continue
+        if line[0] == '#': continue
         # it's a directive
         directive = None
-        if line == "set noparent":
+        if line == 'set noparent':
             parent = False
-        elif line == "*":
-            directive = Directive(who="*", globs=[])
-        elif " " in line:
-            (who, globs) = line.split(" ", 1)
-            globs_list = [glob for glob in globs.split(" ") if glob]
+        elif line == '*':
+            directive = Directive(who='*', globs=[])
+        elif ' ' in line:
+            (who, globs) = line.split(' ', 1)
+            globs_list = [glob for glob in globs.split(' ') if glob]
             directive = Directive(who=who, globs=globs_list)
         else:
             directive = Directive(who=line, globs=[])
@@ -93,14 +87,12 @@ def parse_owners(filename):
     return Owners(
         parent=parent,
         directives=directives,
-        dir=os.path.relpath(os.path.dirname(filename), git_root),
-    )
+        dir=os.path.relpath(os.path.dirname(filename), git_root))
 
 
 owners_data = sorted(
     [parse_owners(filename) for filename in owners_files],
-    key=operator.attrgetter("dir"),
-)
+    key=operator.attrgetter('dir'))
 
 #
 # Modify owners so that parented OWNERS files point to the actual
@@ -113,13 +105,11 @@ for owners in owners_data:
         best_parent = None
         best_parent_score = None
         for possible_parent in owners_data:
-            if possible_parent is owners:
-                continue
+            if possible_parent is owners: continue
             rel = os.path.relpath(owners.dir, possible_parent.dir)
             # '..' ==> we had to walk up from possible_parent to get to owners
             #      ==> not a parent
-            if ".." in rel:
-                continue
+            if '..' in rel: continue
             depth = len(rel.split(os.sep))
             if not best_parent or depth < best_parent_score:
                 best_parent = possible_parent
@@ -138,7 +128,7 @@ owners_data = new_owners_data
 
 
 def full_dir(rules_dir, sub_path):
-    return os.path.join(rules_dir, sub_path) if rules_dir != "." else sub_path
+    return os.path.join(rules_dir, sub_path) if rules_dir != '.' else sub_path
 
 
 # glob using git
@@ -147,14 +137,11 @@ gg_cache = {}
 
 def git_glob(glob):
     global gg_cache
-    if glob in gg_cache:
-        return gg_cache[glob]
+    if glob in gg_cache: return gg_cache[glob]
     r = set(
-        subprocess.check_output(["git", "ls-files", os.path.join(git_root, glob)])
-        .decode("utf-8")
-        .strip()
-        .splitlines()
-    )
+        subprocess.check_output(
+            ['git', 'ls-files', os.path.join(git_root, glob)]).decode('utf-8')
+        .strip().splitlines())
     gg_cache[glob] = r
     return r
 
@@ -163,15 +150,16 @@ def expand_directives(root, directives):
     globs = collections.OrderedDict()
     # build a table of glob --> owners
     for directive in directives:
-        for glob in directive.globs or ["**"]:
+        for glob in directive.globs or ['**']:
             if glob not in globs:
                 globs[glob] = []
             if directive.who not in globs[glob]:
                 globs[glob].append(directive.who)
     # expand owners for intersecting globs
     sorted_globs = sorted(
-        globs.keys(), key=lambda g: len(git_glob(full_dir(root, g))), reverse=True
-    )
+        globs.keys(),
+        key=lambda g: len(git_glob(full_dir(root, g))),
+        reverse=True)
     out_globs = collections.OrderedDict()
     for glob_add in sorted_globs:
         who_add = globs[glob_add]
@@ -192,8 +180,7 @@ def expand_directives(root, directives):
 
 
 def add_parent_to_globs(parent, globs, globs_dir):
-    if not parent:
-        return
+    if not parent: return
     for owners in owners_data:
         if owners.dir == parent:
             owners_globs = expand_directives(owners.dir, owners.directives)
@@ -204,9 +191,8 @@ def add_parent_to_globs(parent, globs, globs_dir):
                     intersect = files_parent.intersection(files_child)
                     gglob_who_orig = gglob_who.copy()
                     if intersect:
-                        for f in sorted(
-                            files_child
-                        ):  # sorted to ensure merge stability
+                        for f in sorted(files_child
+                                       ):  # sorted to ensure merge stability
                             if f not in intersect:
                                 who = gglob_who_orig.copy()
                                 globs[os.path.relpath(f, start=globs_dir)] = who
@@ -215,15 +201,15 @@ def add_parent_to_globs(parent, globs, globs_dir):
                                 gglob_who.append(who)
             add_parent_to_globs(owners.parent, globs, globs_dir)
             return
-    assert False
+    assert (False)
 
 
 todo = owners_data.copy()
 done = set()
-with open(args.out, "w") as out:
-    out.write("# Auto-generated by the tools/mkowners/mkowners.py tool\n")
-    out.write("# Uses OWNERS files in different modules throughout the\n")
-    out.write("# repository as the source of truth for module ownership.\n")
+with open(args.out, 'w') as out:
+    out.write('# Auto-generated by the tools/mkowners/mkowners.py tool\n')
+    out.write('# Uses OWNERS files in different modules throughout the\n')
+    out.write('# repository as the source of truth for module ownership.\n')
     written_globs = []
     while todo:
         head, *todo = todo
@@ -247,6 +233,7 @@ with open(args.out, "w") as out:
                     # affected differently by this rule and CODEOWNERS is order dependent
                     break
             if not skip:
-                out.write("/%s %s\n" % (full_dir(head.dir, glob), " ".join(owners)))
+                out.write('/%s %s\n' % (full_dir(head.dir, glob),
+                                        ' '.join(owners)))
                 written_globs.append((glob, owners, head.dir))
         done.add(head.dir)

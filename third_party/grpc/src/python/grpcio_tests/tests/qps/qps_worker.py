@@ -26,23 +26,22 @@ from tests.unit import test_common
 def run_worker_server(port):
     server = test_common.test_server()
     servicer = worker_server.WorkerServer()
-    worker_service_pb2_grpc.add_WorkerServiceServicer_to_server(servicer, server)
-    server.add_insecure_port("[::]:{}".format(port))
+    worker_service_pb2_grpc.add_WorkerServiceServicer_to_server(
+        servicer, server)
+    server.add_insecure_port('[::]:{}'.format(port))
     server.start()
     servicer.wait_for_quit()
     server.stop(0)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="gRPC Python performance testing worker"
-    )
+        description='gRPC Python performance testing worker')
     parser.add_argument(
-        "--driver_port",
+        '--driver_port',
         type=int,
-        dest="port",
-        help="The port the worker should listen on",
-    )
+        dest='port',
+        help='The port the worker should listen on')
     args = parser.parse_args()
 
     run_worker_server(args.port)

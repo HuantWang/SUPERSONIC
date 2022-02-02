@@ -43,15 +43,15 @@ class Outcome(six.with_metaclass(abc.ABCMeta)):
 
 
 class _EasyOutcome(
-    collections.namedtuple("_EasyOutcome", ["kind", "return_value", "exception"]),
-    Outcome,
-):
+        collections.namedtuple('_EasyOutcome',
+                               ['kind', 'return_value', 'exception']), Outcome):
     """A trivial implementation of Outcome."""
 
 
 def _call_logging_exceptions(behavior, message, *args, **kwargs):
     try:
-        return _EasyOutcome(Outcome.Kind.RETURNED, behavior(*args, **kwargs), None)
+        return _EasyOutcome(Outcome.Kind.RETURNED, behavior(*args, **kwargs),
+                            None)
     except Exception as e:  # pylint: disable=broad-except
         logging.exception(message)
         return _EasyOutcome(Outcome.Kind.RAISED, None, e)

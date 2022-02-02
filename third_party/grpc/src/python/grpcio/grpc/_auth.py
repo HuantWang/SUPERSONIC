@@ -20,11 +20,12 @@ import grpc
 
 
 def _sign_request(callback, token, error):
-    metadata = (("authorization", "Bearer {}".format(token)),)
+    metadata = (('authorization', 'Bearer {}'.format(token)),)
     callback(metadata, error)
 
 
 def _create_get_token_callback(callback):
+
     def get_token_callback(future):
         try:
             access_token = future.result().access_token
@@ -45,17 +46,17 @@ class GoogleCallCredentials(grpc.AuthMetadataPlugin):
 
         # Hack to determine if these are JWT creds and we need to pass
         # additional_claims when getting a token
-        self._is_jwt = (
-            "additional_claims" in inspect.getargspec(credentials.get_access_token).args
-        )
+        self._is_jwt = 'additional_claims' in inspect.getargspec(
+            credentials.get_access_token).args
 
     def __call__(self, context, callback):
         # MetadataPlugins cannot block (see grpc.beta.interfaces.py)
         if self._is_jwt:
             future = self._pool.submit(
                 self._credentials.get_access_token,
-                additional_claims={"aud": context.service_url},
-            )
+                additional_claims={
+                    'aud': context.service_url
+                })
         else:
             future = self._pool.submit(self._credentials.get_access_token)
         future.add_done_callback(_create_get_token_callback(callback))

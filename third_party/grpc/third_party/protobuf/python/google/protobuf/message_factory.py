@@ -37,7 +37,7 @@ message_classes = message_factory.GetMessages(iterable_of_file_descriptors)
 my_proto_instance = message_classes['some.proto.package.MessageName']()
 """
 
-__author__ = "matthewtoia@google.com (Matt Toia)"
+__author__ = 'matthewtoia@google.com (Matt Toia)'
 
 from google.protobuf import descriptor_pool
 from google.protobuf import message
@@ -45,17 +45,17 @@ from google.protobuf import reflection
 
 
 class MessageFactory(object):
-    """Factory for creating Proto2 messages from descriptors in a pool."""
+  """Factory for creating Proto2 messages from descriptors in a pool."""
 
-    def __init__(self, pool=None):
-        """Initializes a new factory."""
-        self.pool = pool or descriptor_pool.DescriptorPool()
+  def __init__(self, pool=None):
+    """Initializes a new factory."""
+    self.pool = pool or descriptor_pool.DescriptorPool()
 
-        # local cache of all classes built from protobuf descriptors
-        self._classes = {}
+    # local cache of all classes built from protobuf descriptors
+    self._classes = {}
 
-    def GetPrototype(self, descriptor):
-        """Builds a proto2 message class based on the passed in descriptor.
+  def GetPrototype(self, descriptor):
+    """Builds a proto2 message class based on the passed in descriptor.
 
     Passing a descriptor with a fully qualified name matching a previous
     invocation will cause the same class to be returned.
@@ -66,29 +66,28 @@ class MessageFactory(object):
     Returns:
       A class describing the passed in descriptor.
     """
-        if descriptor not in self._classes:
-            descriptor_name = descriptor.name
-            if str is bytes:  # PY2
-                descriptor_name = descriptor.name.encode("ascii", "ignore")
-            result_class = reflection.GeneratedProtocolMessageType(
-                descriptor_name,
-                (message.Message,),
-                {"DESCRIPTOR": descriptor, "__module__": None},
-            )
-            # If module not set, it wrongly points to the reflection.py module.
-            self._classes[descriptor] = result_class
-            for field in descriptor.fields:
-                if field.message_type:
-                    self.GetPrototype(field.message_type)
-            for extension in result_class.DESCRIPTOR.extensions:
-                if extension.containing_type not in self._classes:
-                    self.GetPrototype(extension.containing_type)
-                extended_class = self._classes[extension.containing_type]
-                extended_class.RegisterExtension(extension)
-        return self._classes[descriptor]
+    if descriptor not in self._classes:
+      descriptor_name = descriptor.name
+      if str is bytes:  # PY2
+        descriptor_name = descriptor.name.encode('ascii', 'ignore')
+      result_class = reflection.GeneratedProtocolMessageType(
+          descriptor_name,
+          (message.Message,),
+          {'DESCRIPTOR': descriptor, '__module__': None})
+          # If module not set, it wrongly points to the reflection.py module.
+      self._classes[descriptor] = result_class
+      for field in descriptor.fields:
+        if field.message_type:
+          self.GetPrototype(field.message_type)
+      for extension in result_class.DESCRIPTOR.extensions:
+        if extension.containing_type not in self._classes:
+          self.GetPrototype(extension.containing_type)
+        extended_class = self._classes[extension.containing_type]
+        extended_class.RegisterExtension(extension)
+    return self._classes[descriptor]
 
-    def GetMessages(self, files):
-        """Gets all the messages from a specified file.
+  def GetMessages(self, files):
+    """Gets all the messages from a specified file.
 
     This will find and resolve dependencies, failing if the descriptor
     pool cannot satisfy them.
@@ -101,34 +100,34 @@ class MessageFactory(object):
       any dependent messages as well as any messages defined in the same file as
       a specified message.
     """
-        result = {}
-        for file_name in files:
-            file_desc = self.pool.FindFileByName(file_name)
-            for desc in file_desc.message_types_by_name.values():
-                result[desc.full_name] = self.GetPrototype(desc)
+    result = {}
+    for file_name in files:
+      file_desc = self.pool.FindFileByName(file_name)
+      for desc in file_desc.message_types_by_name.values():
+        result[desc.full_name] = self.GetPrototype(desc)
 
-            # While the extension FieldDescriptors are created by the descriptor pool,
-            # the python classes created in the factory need them to be registered
-            # explicitly, which is done below.
-            #
-            # The call to RegisterExtension will specifically check if the
-            # extension was already registered on the object and either
-            # ignore the registration if the original was the same, or raise
-            # an error if they were different.
+      # While the extension FieldDescriptors are created by the descriptor pool,
+      # the python classes created in the factory need them to be registered
+      # explicitly, which is done below.
+      #
+      # The call to RegisterExtension will specifically check if the
+      # extension was already registered on the object and either
+      # ignore the registration if the original was the same, or raise
+      # an error if they were different.
 
-            for extension in file_desc.extensions_by_name.values():
-                if extension.containing_type not in self._classes:
-                    self.GetPrototype(extension.containing_type)
-                extended_class = self._classes[extension.containing_type]
-                extended_class.RegisterExtension(extension)
-        return result
+      for extension in file_desc.extensions_by_name.values():
+        if extension.containing_type not in self._classes:
+          self.GetPrototype(extension.containing_type)
+        extended_class = self._classes[extension.containing_type]
+        extended_class.RegisterExtension(extension)
+    return result
 
 
 _FACTORY = MessageFactory()
 
 
 def GetMessages(file_protos):
-    """Builds a dictionary of all the messages available in a set of files.
+  """Builds a dictionary of all the messages available in a set of files.
 
   Args:
     file_protos: Iterable of FileDescriptorProto to build messages out of.
@@ -138,17 +137,15 @@ def GetMessages(file_protos):
     any dependent messages as well as any messages defined in the same file as
     a specified message.
   """
-    # The cpp implementation of the protocol buffer library requires to add the
-    # message in topological order of the dependency graph.
-    file_by_name = {file_proto.name: file_proto for file_proto in file_protos}
-
-    def _AddFile(file_proto):
-        for dependency in file_proto.dependency:
-            if dependency in file_by_name:
-                # Remove from elements to be visited, in order to cut cycles.
-                _AddFile(file_by_name.pop(dependency))
-        _FACTORY.pool.Add(file_proto)
-
-    while file_by_name:
-        _AddFile(file_by_name.popitem()[1])
-    return _FACTORY.GetMessages([file_proto.name for file_proto in file_protos])
+  # The cpp implementation of the protocol buffer library requires to add the
+  # message in topological order of the dependency graph.
+  file_by_name = {file_proto.name: file_proto for file_proto in file_protos}
+  def _AddFile(file_proto):
+    for dependency in file_proto.dependency:
+      if dependency in file_by_name:
+        # Remove from elements to be visited, in order to cut cycles.
+        _AddFile(file_by_name.pop(dependency))
+    _FACTORY.pool.Add(file_proto)
+  while file_by_name:
+    _AddFile(file_by_name.popitem()[1])
+  return _FACTORY.GetMessages([file_proto.name for file_proto in file_protos])

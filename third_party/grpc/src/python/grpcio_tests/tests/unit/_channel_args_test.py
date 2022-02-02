@@ -19,26 +19,28 @@ import grpc
 
 
 class TestPointerWrapper(object):
+
     def __int__(self):
         return 123456
 
 
 TEST_CHANNEL_ARGS = (
-    ("arg1", b"bytes_val"),
-    ("arg2", "str_val"),
-    ("arg3", 1),
-    (b"arg4", "str_val"),
-    ("arg6", TestPointerWrapper()),
+    ('arg1', b'bytes_val'),
+    ('arg2', 'str_val'),
+    ('arg3', 1),
+    (b'arg4', 'str_val'),
+    ('arg6', TestPointerWrapper()),
 )
 
 
 class ChannelArgsTest(unittest.TestCase):
+
     def test_client(self):
-        grpc.insecure_channel("localhost:8080", options=TEST_CHANNEL_ARGS)
+        grpc.insecure_channel('localhost:8080', options=TEST_CHANNEL_ARGS)
 
     def test_server(self):
         grpc.server(None, options=TEST_CHANNEL_ARGS)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -73,15 +73,15 @@ class Outcome(object):
     class Kind(enum.Enum):
         """Ways in which an operation can terminate."""
 
-        COMPLETED = "completed"
-        CANCELLED = "cancelled"
-        EXPIRED = "expired"
-        LOCAL_SHUTDOWN = "local shutdown"
-        REMOTE_SHUTDOWN = "remote shutdown"
-        RECEPTION_FAILURE = "reception failure"
-        TRANSMISSION_FAILURE = "transmission failure"
-        LOCAL_FAILURE = "local failure"
-        REMOTE_FAILURE = "remote failure"
+        COMPLETED = 'completed'
+        CANCELLED = 'cancelled'
+        EXPIRED = 'expired'
+        LOCAL_SHUTDOWN = 'local shutdown'
+        REMOTE_SHUTDOWN = 'remote shutdown'
+        RECEPTION_FAILURE = 'reception failure'
+        TRANSMISSION_FAILURE = 'transmission failure'
+        LOCAL_FAILURE = 'local failure'
+        REMOTE_FAILURE = 'remote failure'
 
 
 class Completion(six.with_metaclass(abc.ABCMeta)):
@@ -153,9 +153,11 @@ class Operator(six.with_metaclass(abc.ABCMeta)):
     """An interface through which to participate in an operation."""
 
     @abc.abstractmethod
-    def advance(
-        self, initial_metadata=None, payload=None, completion=None, allowance=None
-    ):
+    def advance(self,
+                initial_metadata=None,
+                payload=None,
+                completion=None,
+                allowance=None):
         """Progresses the operation.
 
     Args:
@@ -206,9 +208,9 @@ class Subscription(six.with_metaclass(abc.ABCMeta)):
     @enum.unique
     class Kind(enum.Enum):
 
-        NONE = "none"
-        TERMINATION_ONLY = "termination only"
-        FULL = "full"
+        NONE = 'none'
+        TERMINATION_ONLY = 'termination only'
+        FULL = 'full'
 
 
 class Servicer(six.with_metaclass(abc.ABCMeta)):
@@ -272,17 +274,15 @@ class End(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def operate(
-        self,
-        group,
-        method,
-        subscription,
-        timeout,
-        initial_metadata=None,
-        payload=None,
-        completion=None,
-        protocol_options=None,
-    ):
+    def operate(self,
+                group,
+                method,
+                subscription,
+                timeout,
+                initial_metadata=None,
+                payload=None,
+                completion=None,
+                protocol_options=None):
         """Commences an operation.
 
     Args:

@@ -15,6 +15,7 @@
 
 
 class Bunch(dict):
+
     def __init__(self, d):
         dict.__init__(self, d)
         self.__dict__.update(d)
@@ -40,8 +41,7 @@ def merge_json(dst, add):
     if isinstance(dst, dict) and isinstance(add, dict):
         for k, v in add.items():
             if k in dst:
-                if k == "#":
-                    continue
+                if k == '#': continue
                 merge_json(dst[k], v)
             else:
                 dst[k] = v
@@ -49,6 +49,5 @@ def merge_json(dst, add):
         dst.extend(add)
     else:
         raise Exception(
-            "Tried to merge incompatible objects %s %s\n\n%r\n\n%r"
-            % (type(dst).__name__, type(add).__name__, dst, add)
-        )
+            'Tried to merge incompatible objects %s %s\n\n%r\n\n%r' %
+            (type(dst).__name__, type(add).__name__, dst, add))

@@ -17,7 +17,8 @@ import grpc
 from grpc.beta import implementations
 
 
-def not_really_secure_channel(host, port, channel_credentials, server_host_override):
+def not_really_secure_channel(host, port, channel_credentials,
+                              server_host_override):
     """Creates an insecure Channel to a remote host.
 
   Args:
@@ -31,10 +32,9 @@ def not_really_secure_channel(host, port, channel_credentials, server_host_overr
     An implementations.Channel to the remote host through which RPCs may be
       conducted.
   """
-    target = "%s:%d" % (host, port)
-    channel = grpc.secure_channel(
-        target,
-        channel_credentials,
-        (("grpc.ssl_target_name_override", server_host_override,),),
-    )
+    target = '%s:%d' % (host, port)
+    channel = grpc.secure_channel(target, channel_credentials, ((
+        'grpc.ssl_target_name_override',
+        server_host_override,
+    ),))
     return implementations.Channel(channel)

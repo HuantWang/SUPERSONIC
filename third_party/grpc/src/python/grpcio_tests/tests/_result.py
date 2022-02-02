@@ -27,11 +27,9 @@ from tests import _loader
 
 
 class CaseResult(
-    collections.namedtuple(
-        "CaseResult",
-        ["id", "name", "kind", "stdout", "stderr", "skip_reason", "traceback"],
-    )
-):
+        collections.namedtuple('CaseResult', [
+            'id', 'name', 'kind', 'stdout', 'stderr', 'skip_reason', 'traceback'
+        ])):
     """A serializable result of a single test case.
 
   Attributes:
@@ -49,25 +47,23 @@ class CaseResult(
   """
 
     class Kind(object):
-        UNTESTED = "untested"
-        RUNNING = "running"
-        ERROR = "error"
-        FAILURE = "failure"
-        SUCCESS = "success"
-        SKIP = "skip"
-        EXPECTED_FAILURE = "expected failure"
-        UNEXPECTED_SUCCESS = "unexpected success"
+        UNTESTED = 'untested'
+        RUNNING = 'running'
+        ERROR = 'error'
+        FAILURE = 'failure'
+        SUCCESS = 'success'
+        SKIP = 'skip'
+        EXPECTED_FAILURE = 'expected failure'
+        UNEXPECTED_SUCCESS = 'unexpected success'
 
-    def __new__(
-        cls,
-        id=None,
-        name=None,
-        kind=None,
-        stdout=None,
-        stderr=None,
-        skip_reason=None,
-        traceback=None,
-    ):
+    def __new__(cls,
+                id=None,
+                name=None,
+                kind=None,
+                stdout=None,
+                stderr=None,
+                skip_reason=None,
+                traceback=None):
         """Helper keyword constructor for the namedtuple.
 
     See this class' attributes for information on the arguments."""
@@ -91,19 +87,16 @@ class CaseResult(
             pass
         else:
             assert False
-        return super(cls, CaseResult).__new__(
-            cls, id, name, kind, stdout, stderr, skip_reason, traceback
-        )
+        return super(cls, CaseResult).__new__(cls, id, name, kind, stdout,
+                                              stderr, skip_reason, traceback)
 
-    def updated(
-        self,
-        name=None,
-        kind=None,
-        stdout=None,
-        stderr=None,
-        skip_reason=None,
-        traceback=None,
-    ):
+    def updated(self,
+                name=None,
+                kind=None,
+                stdout=None,
+                stderr=None,
+                skip_reason=None,
+                traceback=None):
         """Get a new validated CaseResult with the fields updated.
 
     See this class' attributes for information on the arguments."""
@@ -120,8 +113,7 @@ class CaseResult(
             stdout=stdout,
             stderr=stderr,
             skip_reason=skip_reason,
-            traceback=traceback,
-        )
+            traceback=traceback)
 
 
 class AugmentedResult(unittest.TestResult):
@@ -161,54 +153,49 @@ class AugmentedResult(unittest.TestResult):
         super(AugmentedResult, self).startTest(test)
         case_id = self.id_map(test)
         self.cases[case_id] = CaseResult(
-            id=case_id, name=test.id(), kind=CaseResult.Kind.RUNNING
-        )
+            id=case_id, name=test.id(), kind=CaseResult.Kind.RUNNING)
 
     def addError(self, test, error):
         """See unittest.TestResult.addError."""
         super(AugmentedResult, self).addError(test, error)
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            kind=CaseResult.Kind.ERROR, traceback=error
-        )
+            kind=CaseResult.Kind.ERROR, traceback=error)
 
     def addFailure(self, test, error):
         """See unittest.TestResult.addFailure."""
         super(AugmentedResult, self).addFailure(test, error)
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            kind=CaseResult.Kind.FAILURE, traceback=error
-        )
+            kind=CaseResult.Kind.FAILURE, traceback=error)
 
     def addSuccess(self, test):
         """See unittest.TestResult.addSuccess."""
         super(AugmentedResult, self).addSuccess(test)
         case_id = self.id_map(test)
-        self.cases[case_id] = self.cases[case_id].updated(kind=CaseResult.Kind.SUCCESS)
+        self.cases[case_id] = self.cases[case_id].updated(
+            kind=CaseResult.Kind.SUCCESS)
 
     def addSkip(self, test, reason):
         """See unittest.TestResult.addSkip."""
         super(AugmentedResult, self).addSkip(test, reason)
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            kind=CaseResult.Kind.SKIP, skip_reason=reason
-        )
+            kind=CaseResult.Kind.SKIP, skip_reason=reason)
 
     def addExpectedFailure(self, test, error):
         """See unittest.TestResult.addExpectedFailure."""
         super(AugmentedResult, self).addExpectedFailure(test, error)
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            kind=CaseResult.Kind.EXPECTED_FAILURE, traceback=error
-        )
+            kind=CaseResult.Kind.EXPECTED_FAILURE, traceback=error)
 
     def addUnexpectedSuccess(self, test):
         """See unittest.TestResult.addUnexpectedSuccess."""
         super(AugmentedResult, self).addUnexpectedSuccess(test)
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            kind=CaseResult.Kind.UNEXPECTED_SUCCESS
-        )
+            kind=CaseResult.Kind.UNEXPECTED_SUCCESS)
 
     def set_output(self, test, stdout, stderr):
         """Set the output attributes for the CaseResult corresponding to a test.
@@ -220,8 +207,7 @@ class AugmentedResult(unittest.TestResult):
     """
         case_id = self.id_map(test)
         self.cases[case_id] = self.cases[case_id].updated(
-            stdout=stdout.decode(), stderr=stderr.decode()
-        )
+            stdout=stdout.decode(), stderr=stderr.decode())
 
     def augmented_results(self, filter):
         """Convenience method to retrieve filtered case results.
@@ -229,9 +215,9 @@ class AugmentedResult(unittest.TestResult):
     Args:
       filter (callable): A unary predicate to filter over CaseResult objects.
     """
-        return (
-            self.cases[case_id] for case_id in self.cases if filter(self.cases[case_id])
-        )
+        return (self.cases[case_id]
+                for case_id in self.cases
+                if filter(self.cases[case_id]))
 
 
 class CoverageResult(AugmentedResult):
@@ -268,20 +254,19 @@ class CoverageResult(AugmentedResult):
         super(CoverageResult, self).stopTestRun()
         # TODO(atash): Dig deeper into why the following line fails to properly
         # combine coverage data from the Cython plugin.
-        # coverage.Coverage().combine()
+        #coverage.Coverage().combine()
 
 
 class _Colors(object):
     """Namespaced constants for terminal color magic numbers."""
-
-    HEADER = "\033[95m"
-    INFO = "\033[94m"
-    OK = "\033[92m"
-    WARN = "\033[93m"
-    FAIL = "\033[91m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-    END = "\033[0m"
+    HEADER = '\033[95m'
+    INFO = '\033[94m'
+    OK = '\033[92m'
+    WARN = '\033[93m'
+    FAIL = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
 
 
 class TerminalResult(CoverageResult):
@@ -301,7 +286,8 @@ class TerminalResult(CoverageResult):
     def startTestRun(self):
         """See unittest.TestResult.startTestRun."""
         super(TerminalResult, self).startTestRun()
-        self.out.write(_Colors.HEADER + "Testing gRPC Python...\n" + _Colors.END)
+        self.out.write(
+            _Colors.HEADER + 'Testing gRPC Python...\n' + _Colors.END)
 
     def stopTestRun(self):
         """See unittest.TestResult.stopTestRun."""
@@ -313,48 +299,42 @@ class TerminalResult(CoverageResult):
         """See unittest.TestResult.addError."""
         super(TerminalResult, self).addError(test, error)
         self.out.write(
-            _Colors.FAIL + "ERROR         {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.FAIL + 'ERROR         {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
     def addFailure(self, test, error):
         """See unittest.TestResult.addFailure."""
         super(TerminalResult, self).addFailure(test, error)
         self.out.write(
-            _Colors.FAIL + "FAILURE       {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.FAIL + 'FAILURE       {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
     def addSuccess(self, test):
         """See unittest.TestResult.addSuccess."""
         super(TerminalResult, self).addSuccess(test)
         self.out.write(
-            _Colors.OK + "SUCCESS       {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.OK + 'SUCCESS       {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
     def addSkip(self, test, reason):
         """See unittest.TestResult.addSkip."""
         super(TerminalResult, self).addSkip(test, reason)
         self.out.write(
-            _Colors.INFO + "SKIP          {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.INFO + 'SKIP          {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
     def addExpectedFailure(self, test, error):
         """See unittest.TestResult.addExpectedFailure."""
         super(TerminalResult, self).addExpectedFailure(test, error)
         self.out.write(
-            _Colors.INFO + "FAILURE_OK    {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.INFO + 'FAILURE_OK    {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
     def addUnexpectedSuccess(self, test):
         """See unittest.TestResult.addUnexpectedSuccess."""
         super(TerminalResult, self).addUnexpectedSuccess(test)
         self.out.write(
-            _Colors.INFO + "UNEXPECTED_OK {}\n".format(test.id()) + _Colors.END
-        )
+            _Colors.INFO + 'UNEXPECTED_OK {}\n'.format(test.id()) + _Colors.END)
         self.out.flush()
 
 
@@ -386,105 +366,61 @@ def summary(result):
     assert isinstance(result, AugmentedResult)
     untested = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.UNTESTED
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.UNTESTED))
     running = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.RUNNING
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.RUNNING))
     failures = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.FAILURE
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.FAILURE))
     errors = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.ERROR
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.ERROR))
     successes = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.SUCCESS
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.SUCCESS))
     skips = list(
         result.augmented_results(
-            lambda case_result: case_result.kind is CaseResult.Kind.SKIP
-        )
-    )
+            lambda case_result: case_result.kind is CaseResult.Kind.SKIP))
     expected_failures = list(
         result.augmented_results(
             lambda case_result: case_result.kind is CaseResult.Kind.EXPECTED_FAILURE
-        )
-    )
+        ))
     unexpected_successes = list(
         result.augmented_results(
             lambda case_result: case_result.kind is CaseResult.Kind.UNEXPECTED_SUCCESS
-        )
-    )
+        ))
     running_names = [case.name for case in running]
-    finished_count = (
-        len(failures)
-        + len(errors)
-        + len(successes)
-        + len(expected_failures)
-        + len(unexpected_successes)
-    )
-    statistics = (
-        "{finished} tests finished:\n"
-        "\t{successful} successful\n"
-        "\t{unsuccessful} unsuccessful\n"
-        "\t{skipped} skipped\n"
-        "\t{expected_fail} expected failures\n"
-        "\t{unexpected_successful} unexpected successes\n"
-        "Interrupted Tests:\n"
-        "\t{interrupted}\n".format(
-            finished=finished_count,
-            successful=len(successes),
-            unsuccessful=(len(failures) + len(errors)),
-            skipped=len(skips),
-            expected_fail=len(expected_failures),
-            unexpected_successful=len(unexpected_successes),
-            interrupted=str(running_names),
-        )
-    )
-    tracebacks = "\n\n".join(
-        [
-            (
-                _Colors.FAIL
-                + "{test_name}"
-                + _Colors.END
-                + "\n"
-                + _Colors.BOLD
-                + "traceback:"
-                + _Colors.END
-                + "\n"
-                + "{traceback}\n"
-                + _Colors.BOLD
-                + "stdout:"
-                + _Colors.END
-                + "\n"
-                + "{stdout}\n"
-                + _Colors.BOLD
-                + "stderr:"
-                + _Colors.END
-                + "\n"
-                + "{stderr}\n"
-            ).format(
-                test_name=result.name,
-                traceback=_traceback_string(*result.traceback),
-                stdout=result.stdout,
-                stderr=result.stderr,
-            )
-            for result in itertools.chain(failures, errors)
-        ]
-    )
-    notes = "Unexpected successes: {}\n".format(
-        [result.name for result in unexpected_successes]
-    )
-    return statistics + "\nErrors/Failures: \n" + tracebacks + "\n" + notes
+    finished_count = (len(failures) + len(errors) + len(successes) +
+                      len(expected_failures) + len(unexpected_successes))
+    statistics = ('{finished} tests finished:\n'
+                  '\t{successful} successful\n'
+                  '\t{unsuccessful} unsuccessful\n'
+                  '\t{skipped} skipped\n'
+                  '\t{expected_fail} expected failures\n'
+                  '\t{unexpected_successful} unexpected successes\n'
+                  'Interrupted Tests:\n'
+                  '\t{interrupted}\n'.format(
+                      finished=finished_count,
+                      successful=len(successes),
+                      unsuccessful=(len(failures) + len(errors)),
+                      skipped=len(skips),
+                      expected_fail=len(expected_failures),
+                      unexpected_successful=len(unexpected_successes),
+                      interrupted=str(running_names)))
+    tracebacks = '\n\n'.join(
+        [(_Colors.FAIL + '{test_name}' + _Colors.END + '\n' + _Colors.BOLD +
+          'traceback:' + _Colors.END + '\n' + '{traceback}\n' + _Colors.BOLD +
+          'stdout:' + _Colors.END + '\n' + '{stdout}\n' + _Colors.BOLD +
+          'stderr:' + _Colors.END + '\n' + '{stderr}\n').format(
+              test_name=result.name,
+              traceback=_traceback_string(*result.traceback),
+              stdout=result.stdout,
+              stderr=result.stderr)
+         for result in itertools.chain(failures, errors)])
+    notes = 'Unexpected successes: {}\n'.format(
+        [result.name for result in unexpected_successes])
+    return statistics + '\nErrors/Failures: \n' + tracebacks + '\n' + notes
 
 
 def jenkins_junit_xml(result):
@@ -497,13 +433,19 @@ def jenkins_junit_xml(result):
     ElementTree.ElementTree: The XML tree.
   """
     assert isinstance(result, AugmentedResult)
-    root = ElementTree.Element("testsuites")
-    suite = ElementTree.SubElement(root, "testsuite", {"name": "Python gRPC tests",})
+    root = ElementTree.Element('testsuites')
+    suite = ElementTree.SubElement(root, 'testsuite', {
+        'name': 'Python gRPC tests',
+    })
     for case in result.cases.values():
         if case.kind is CaseResult.Kind.SUCCESS:
-            ElementTree.SubElement(suite, "testcase", {"name": case.name,})
+            ElementTree.SubElement(suite, 'testcase', {
+                'name': case.name,
+            })
         elif case.kind in (CaseResult.Kind.ERROR, CaseResult.Kind.FAILURE):
-            case_xml = ElementTree.SubElement(suite, "testcase", {"name": case.name,})
-            error_xml = ElementTree.SubElement(case_xml, "error", {})
-            error_xml.text = "".format(case.stderr, case.traceback)
+            case_xml = ElementTree.SubElement(suite, 'testcase', {
+                'name': case.name,
+            })
+            error_xml = ElementTree.SubElement(case_xml, 'error', {})
+            error_xml.text = ''.format(case.stderr, case.traceback)
     return ElementTree.ElementTree(element=root)

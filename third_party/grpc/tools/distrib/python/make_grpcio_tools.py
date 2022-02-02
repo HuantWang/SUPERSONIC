@@ -56,31 +56,35 @@ COMMIT_HASH_PREFIX = 'PROTOBUF_SUBMODULE_VERSION="'
 COMMIT_HASH_SUFFIX = '"'
 
 # Bazel query result prefix for expected source files in protobuf.
-PROTOBUF_CC_PREFIX = "//:src/"
-PROTOBUF_PROTO_PREFIX = "//:src/"
+PROTOBUF_CC_PREFIX = '//:src/'
+PROTOBUF_PROTO_PREFIX = '//:src/'
 
 GRPC_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
-)
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
-GRPC_PYTHON_ROOT = os.path.join(GRPC_ROOT, "tools", "distrib", "python", "grpcio_tools")
+GRPC_PYTHON_ROOT = os.path.join(GRPC_ROOT, 'tools', 'distrib', 'python',
+                                'grpcio_tools')
 
-GRPC_PYTHON_PROTOBUF_RELATIVE_ROOT = os.path.join("third_party", "protobuf", "src")
+GRPC_PYTHON_PROTOBUF_RELATIVE_ROOT = os.path.join('third_party', 'protobuf',
+                                                  'src')
 GRPC_PROTOBUF = os.path.join(GRPC_ROOT, GRPC_PYTHON_PROTOBUF_RELATIVE_ROOT)
-GRPC_PROTOBUF_SUBMODULE_ROOT = os.path.join(GRPC_ROOT, "third_party", "protobuf")
-GRPC_PROTOC_PLUGINS = os.path.join(GRPC_ROOT, "src", "compiler")
-GRPC_PYTHON_PROTOBUF = os.path.join(GRPC_PYTHON_ROOT, "third_party", "protobuf", "src")
-GRPC_PYTHON_PROTOC_PLUGINS = os.path.join(
-    GRPC_PYTHON_ROOT, "grpc_root", "src", "compiler"
-)
-GRPC_PYTHON_PROTOC_LIB_DEPS = os.path.join(GRPC_PYTHON_ROOT, "protoc_lib_deps.py")
+GRPC_PROTOBUF_SUBMODULE_ROOT = os.path.join(GRPC_ROOT, 'third_party',
+                                            'protobuf')
+GRPC_PROTOC_PLUGINS = os.path.join(GRPC_ROOT, 'src', 'compiler')
+GRPC_PYTHON_PROTOBUF = os.path.join(GRPC_PYTHON_ROOT, 'third_party', 'protobuf',
+                                    'src')
+GRPC_PYTHON_PROTOC_PLUGINS = os.path.join(GRPC_PYTHON_ROOT, 'grpc_root', 'src',
+                                          'compiler')
+GRPC_PYTHON_PROTOC_LIB_DEPS = os.path.join(GRPC_PYTHON_ROOT,
+                                           'protoc_lib_deps.py')
 
-GRPC_INCLUDE = os.path.join(GRPC_ROOT, "include")
-GRPC_PYTHON_INCLUDE = os.path.join(GRPC_PYTHON_ROOT, "grpc_root", "include")
+GRPC_INCLUDE = os.path.join(GRPC_ROOT, 'include')
+GRPC_PYTHON_INCLUDE = os.path.join(GRPC_PYTHON_ROOT, 'grpc_root', 'include')
 
-BAZEL_DEPS = os.path.join(GRPC_ROOT, "tools", "distrib", "python", "bazel_deps.sh")
-BAZEL_DEPS_PROTOC_LIB_QUERY = "//:protoc_lib"
-BAZEL_DEPS_COMMON_PROTOS_QUERY = "//:well_known_protos"
+BAZEL_DEPS = os.path.join(GRPC_ROOT, 'tools', 'distrib', 'python',
+                          'bazel_deps.sh')
+BAZEL_DEPS_PROTOC_LIB_QUERY = '//:protoc_lib'
+BAZEL_DEPS_COMMON_PROTOS_QUERY = '//:well_known_protos'
 
 
 def protobuf_submodule_commit_hash():
@@ -88,7 +92,7 @@ def protobuf_submodule_commit_hash():
      checked out."""
     cwd = os.getcwd()
     os.chdir(GRPC_PROTOBUF_SUBMODULE_ROOT)
-    output = subprocess.check_output(["git", "rev-parse", "HEAD"])
+    output = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
     os.chdir(cwd)
     return output.splitlines()[0].strip()
 
@@ -103,15 +107,15 @@ def get_deps():
      `out_file`."""
     cc_files_output = bazel_query(BAZEL_DEPS_PROTOC_LIB_QUERY)
     cc_files = [
-        name[len(PROTOBUF_CC_PREFIX) :]
+        name[len(PROTOBUF_CC_PREFIX):]
         for name in cc_files_output
-        if name.endswith(".cc") and name.startswith(PROTOBUF_CC_PREFIX)
+        if name.endswith('.cc') and name.startswith(PROTOBUF_CC_PREFIX)
     ]
     proto_files_output = bazel_query(BAZEL_DEPS_COMMON_PROTOS_QUERY)
     proto_files = [
-        name[len(PROTOBUF_PROTO_PREFIX) :]
+        name[len(PROTOBUF_PROTO_PREFIX):]
         for name in proto_files_output
-        if name.endswith(".proto") and name.startswith(PROTOBUF_PROTO_PREFIX)
+        if name.endswith('.proto') and name.startswith(PROTOBUF_PROTO_PREFIX)
     ]
     commit_hash = protobuf_submodule_commit_hash()
     deps_file_content = DEPS_FILE_CONTENT.format(
@@ -119,14 +123,13 @@ def get_deps():
         proto_files=proto_files,
         cc_include=repr(GRPC_PYTHON_PROTOBUF_RELATIVE_ROOT),
         proto_include=repr(GRPC_PYTHON_PROTOBUF_RELATIVE_ROOT),
-        commit_hash=COMMIT_HASH_PREFIX + commit_hash + COMMIT_HASH_SUFFIX,
-    )
+        commit_hash=COMMIT_HASH_PREFIX + commit_hash + COMMIT_HASH_SUFFIX)
     return deps_file_content
 
 
 def long_path(path):
-    if os.name == "nt":
-        return "\\\\?\\" + path
+    if os.name == 'nt':
+        return '\\\\?\\' + path
     else:
         return path
 
@@ -134,23 +137,22 @@ def long_path(path):
 def main():
     os.chdir(GRPC_ROOT)
 
-    for source, target in [
-        (GRPC_PROTOBUF, GRPC_PYTHON_PROTOBUF),
-        (GRPC_PROTOC_PLUGINS, GRPC_PYTHON_PROTOC_PLUGINS),
-        (GRPC_INCLUDE, GRPC_PYTHON_INCLUDE),
-    ]:
+    for source, target in [(GRPC_PROTOBUF, GRPC_PYTHON_PROTOBUF),
+                           (GRPC_PROTOC_PLUGINS, GRPC_PYTHON_PROTOC_PLUGINS),
+                           (GRPC_INCLUDE, GRPC_PYTHON_INCLUDE)]:
         for source_dir, _, files in os.walk(source):
             target_dir = os.path.abspath(
-                os.path.join(target, os.path.relpath(source_dir, source))
-            )
+                os.path.join(target, os.path.relpath(source_dir, source)))
             try:
                 os.makedirs(target_dir)
             except OSError as error:
                 if error.errno != errno.EEXIST:
                     raise
             for relative_file in files:
-                source_file = os.path.abspath(os.path.join(source_dir, relative_file))
-                target_file = os.path.abspath(os.path.join(target_dir, relative_file))
+                source_file = os.path.abspath(
+                    os.path.join(source_dir, relative_file))
+                target_file = os.path.abspath(
+                    os.path.join(target_dir, relative_file))
                 shutil.copyfile(source_file, target_file)
 
     try:
@@ -163,9 +165,9 @@ def main():
         traceback.print_exc(file=sys.stderr)
         return
     # If we successfully got the dependencies, truncate and rewrite the deps file.
-    with open(GRPC_PYTHON_PROTOC_LIB_DEPS, "w") as deps_file:
+    with open(GRPC_PYTHON_PROTOC_LIB_DEPS, 'w') as deps_file:
         deps_file.write(protoc_lib_deps_content)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

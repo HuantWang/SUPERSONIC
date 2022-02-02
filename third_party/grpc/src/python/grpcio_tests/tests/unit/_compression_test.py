@@ -21,24 +21,27 @@ from grpc import _grpcio_metadata
 from tests.unit import test_common
 from tests.unit.framework.common import test_constants
 
-_UNARY_UNARY = "/test/UnaryUnary"
-_STREAM_STREAM = "/test/StreamStream"
+_UNARY_UNARY = '/test/UnaryUnary'
+_STREAM_STREAM = '/test/StreamStream'
 
 
 def handle_unary(request, servicer_context):
-    servicer_context.send_initial_metadata([("grpc-internal-encoding-request", "gzip")])
+    servicer_context.send_initial_metadata([('grpc-internal-encoding-request',
+                                             'gzip')])
     return request
 
 
 def handle_stream(request_iterator, servicer_context):
     # TODO(issue:#6891) We should be able to remove this loop,
     # and replace with return; yield
-    servicer_context.send_initial_metadata([("grpc-internal-encoding-request", "gzip")])
+    servicer_context.send_initial_metadata([('grpc-internal-encoding-request',
+                                             'gzip')])
     for request in request_iterator:
         yield request
 
 
 class _MethodHandler(grpc.RpcMethodHandler):
+
     def __init__(self, request_streaming, response_streaming):
         self.request_streaming = request_streaming
         self.response_streaming = response_streaming
@@ -55,6 +58,7 @@ class _MethodHandler(grpc.RpcMethodHandler):
 
 
 class _GenericHandler(grpc.GenericRpcHandler):
+
     def service(self, handler_call_details):
         if handler_call_details.method == _UNARY_UNARY:
             return _MethodHandler(False, False)
@@ -65,23 +69,23 @@ class _GenericHandler(grpc.GenericRpcHandler):
 
 
 class CompressionTest(unittest.TestCase):
+
     def setUp(self):
         self._server = test_common.test_server()
         self._server.add_generic_rpc_handlers((_GenericHandler(),))
-        self._port = self._server.add_insecure_port("[::]:0")
+        self._port = self._server.add_insecure_port('[::]:0')
         self._server.start()
 
     def testUnary(self):
-        request = b"\x00" * 100
+        request = b'\x00' * 100
 
         # Client -> server compressed through default client channel compression
         # settings. Server -> client compressed via server-side metadata setting.
         # TODO(https://github.com/grpc/grpc/issues/4078): replace the "1" integer
         # literal with proper use of the public API.
         compressed_channel = grpc.insecure_channel(
-            "localhost:%d" % self._port,
-            options=[("grpc.default_compression_algorithm", 1)],
-        )
+            'localhost:%d' % self._port,
+            options=[('grpc.default_compression_algorithm', 1)])
         multi_callable = compressed_channel.unary_unary(_UNARY_UNARY)
         response = multi_callable(request)
         self.assertEqual(request, response)
@@ -91,29 +95,26 @@ class CompressionTest(unittest.TestCase):
         # TODO(https://github.com/grpc/grpc/issues/4078): replace the "0" integer
         # literal with proper use of the public API.
         uncompressed_channel = grpc.insecure_channel(
-            "localhost:%d" % self._port,
-            options=[("grpc.default_compression_algorithm", 0)],
-        )
+            'localhost:%d' % self._port,
+            options=[('grpc.default_compression_algorithm', 0)])
         multi_callable = compressed_channel.unary_unary(_UNARY_UNARY)
         response = multi_callable(
-            request, metadata=[("grpc-internal-encoding-request", "gzip")]
-        )
+            request, metadata=[('grpc-internal-encoding-request', 'gzip')])
         self.assertEqual(request, response)
 
     def testStreaming(self):
-        request = b"\x00" * 100
+        request = b'\x00' * 100
 
         # TODO(https://github.com/grpc/grpc/issues/4078): replace the "1" integer
         # literal with proper use of the public API.
         compressed_channel = grpc.insecure_channel(
-            "localhost:%d" % self._port,
-            options=[("grpc.default_compression_algorithm", 1)],
-        )
+            'localhost:%d' % self._port,
+            options=[('grpc.default_compression_algorithm', 1)])
         multi_callable = compressed_channel.stream_stream(_STREAM_STREAM)
         call = multi_callable(iter([request] * test_constants.STREAM_LENGTH))
         for response in call:
             self.assertEqual(request, response)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

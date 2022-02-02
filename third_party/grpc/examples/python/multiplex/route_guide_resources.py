@@ -32,8 +32,6 @@ def read_route_guide_database():
                 name=item["name"],
                 location=route_guide_pb2.Point(
                     latitude=item["location"]["latitude"],
-                    longitude=item["location"]["longitude"],
-                ),
-            )
+                    longitude=item["location"]["longitude"]))
             feature_list.append(feature)
     return feature_list

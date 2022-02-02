@@ -25,23 +25,22 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import grpc_version
 
 PACKAGE_DIRECTORIES = {
-    "": ".",
+    '': '.',
 }
 
 INSTALL_REQUIRES = (
-    "protobuf>=3.5.2.post1",
-    "grpcio>={version}".format(version=grpc_version.VERSION),
+    'protobuf>=3.5.2.post1',
+    'grpcio>={version}'.format(version=grpc_version.VERSION),
 )
 
 setuptools.setup(
-    name="grpcio-testing",
+    name='grpcio-testing',
     version=grpc_version.VERSION,
-    license="Apache License 2.0",
-    description="Testing utilities for gRPC Python",
-    author="The gRPC Authors",
-    author_email="grpc-io@googlegroups.com",
-    url="https://grpc.io",
+    license='Apache License 2.0',
+    description='Testing utilities for gRPC Python',
+    author='The gRPC Authors',
+    author_email='grpc-io@googlegroups.com',
+    url='https://grpc.io',
     package_dir=PACKAGE_DIRECTORIES,
-    packages=setuptools.find_packages("."),
-    install_requires=INSTALL_REQUIRES,
-)
+    packages=setuptools.find_packages('.'),
+    install_requires=INSTALL_REQUIRES)

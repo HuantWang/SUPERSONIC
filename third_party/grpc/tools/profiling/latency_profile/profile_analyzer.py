@@ -30,26 +30,29 @@ TIME_FROM_STACK_START = object()
 TIME_TO_STACK_END = object()
 TIME_FROM_LAST_IMPORTANT = object()
 
-argp = argparse.ArgumentParser(description="Process output of basic_prof builds")
-argp.add_argument("--source", default="latency_trace.txt", type=str)
-argp.add_argument("--fmt", choices=tabulate.tabulate_formats, default="simple")
-argp.add_argument("--out", default="-", type=str)
+argp = argparse.ArgumentParser(
+    description='Process output of basic_prof builds')
+argp.add_argument('--source', default='latency_trace.txt', type=str)
+argp.add_argument('--fmt', choices=tabulate.tabulate_formats, default='simple')
+argp.add_argument('--out', default='-', type=str)
 args = argp.parse_args()
 
 
 class LineItem(object):
+
     def __init__(self, line, indent):
-        self.tag = line["tag"]
+        self.tag = line['tag']
         self.indent = indent
-        self.start_time = line["t"]
+        self.start_time = line['t']
         self.end_time = None
-        self.important = line["imp"]
-        self.filename = line["file"]
-        self.fileline = line["line"]
+        self.important = line['imp']
+        self.filename = line['file']
+        self.fileline = line['line']
         self.times = {}
 
 
 class ScopeBuilder(object):
+
     def __init__(self, call_stack_builder, line):
         self.call_stack_builder = call_stack_builder
         self.indent = len(call_stack_builder.stk)
@@ -63,31 +66,26 @@ class ScopeBuilder(object):
         self.call_stack_builder.lines.append(line_item)
 
     def finish(self, line):
-        assert line["tag"] == self.top_line.tag, (
-            "expected %s, got %s; thread=%s; t0=%f t1=%f"
-            % (
-                self.top_line.tag,
-                line["tag"],
-                line["thd"],
-                self.top_line.start_time,
-                line["t"],
-            )
-        )
-        final_time_stamp = line["t"]
+        assert line['tag'] == self.top_line.tag, (
+            'expected %s, got %s; thread=%s; t0=%f t1=%f' %
+            (self.top_line.tag, line['tag'], line['thd'],
+             self.top_line.start_time, line['t']))
+        final_time_stamp = line['t']
         assert self.top_line.end_time is None
         self.top_line.end_time = final_time_stamp
-        self.top_line.important = self.top_line.important or line["imp"]
+        self.top_line.important = self.top_line.important or line['imp']
         assert SELF_TIME not in self.top_line.times
-        self.top_line.times[SELF_TIME] = final_time_stamp - self.top_line.start_time
-        for line in self.call_stack_builder.lines[self.first_child_pos :]:
+        self.top_line.times[
+            SELF_TIME] = final_time_stamp - self.top_line.start_time
+        for line in self.call_stack_builder.lines[self.first_child_pos:]:
             if TIME_FROM_SCOPE_START not in line.times:
-                line.times[TIME_FROM_SCOPE_START] = (
-                    line.start_time - self.top_line.start_time
-                )
+                line.times[
+                    TIME_FROM_SCOPE_START] = line.start_time - self.top_line.start_time
                 line.times[TIME_TO_SCOPE_END] = final_time_stamp - line.end_time
 
 
 class CallStackBuilder(object):
+
     def __init__(self):
         self.stk = []
         self.signature = hashlib.md5()
@@ -101,37 +99,38 @@ class CallStackBuilder(object):
         for line in self.lines:
             line.times[TIME_FROM_STACK_START] = line.start_time - start_time
             line.times[TIME_TO_STACK_END] = end_time - line.end_time
-            line.times[TIME_FROM_LAST_IMPORTANT] = line.start_time - last_important
+            line.times[
+                TIME_FROM_LAST_IMPORTANT] = line.start_time - last_important
             if line.important:
                 last_important = line.end_time
         last_important = end_time
 
     def add(self, line):
-        line_type = line["type"]
+        line_type = line['type']
         self.signature.update(line_type)
-        self.signature.update(line["tag"])
-        if line_type == "{":
+        self.signature.update(line['tag'])
+        if line_type == '{':
             self.stk.append(ScopeBuilder(self, line))
             return False
-        elif line_type == "}":
+        elif line_type == '}':
             assert self.stk, (
-                "expected non-empty stack for closing %s; thread=%s; t=%f"
-                % (line["tag"], line["thd"], line["t"])
-            )
+                'expected non-empty stack for closing %s; thread=%s; t=%f' %
+                (line['tag'], line['thd'], line['t']))
             self.stk.pop().finish(line)
             if not self.stk:
                 self.finish()
                 return True
             return False
-        elif line_type == "." or line_type == "!":
+        elif line_type == '.' or line_type == '!':
             if self.stk:
                 self.stk[-1].mark(line)
             return False
         else:
-            raise Exception("Unknown line type: '%s'" % line_type)
+            raise Exception('Unknown line type: \'%s\'' % line_type)
 
 
 class CallStack(object):
+
     def __init__(self, initial_call_stack_builder):
         self.count = 1
         self.signature = initial_call_stack_builder.signature
@@ -165,7 +164,7 @@ with open(args.source) as f:
     for line in f:
         lines += 1
         inf = json.loads(line)
-        thd = inf["thd"]
+        thd = inf['thd']
         cs = builder[thd]
         if cs.add(inf):
             if cs.signature in call_stacks:
@@ -175,7 +174,8 @@ with open(args.source) as f:
             del builder[thd]
 time_taken = time.time() - start
 
-call_stacks = sorted(call_stacks.values(), key=lambda cs: cs.count, reverse=True)
+call_stacks = sorted(
+    call_stacks.values(), key=lambda cs: cs.count, reverse=True)
 total_stacks = 0
 for cs in call_stacks:
     total_stacks += cs.count
@@ -204,64 +204,61 @@ def percentile(N, percent, key=lambda x: x):
 
 
 def tidy_tag(tag):
-    if tag[0:10] == "GRPC_PTAG_":
+    if tag[0:10] == 'GRPC_PTAG_':
         return tag[10:]
     return tag
 
 
 def time_string(values):
     num_values = len(values)
-    return "%.1f/%.1f/%.1f" % (
-        1e6 * percentile(values, 0.5),
-        1e6 * percentile(values, 0.9),
-        1e6 * percentile(values, 0.99),
-    )
+    return '%.1f/%.1f/%.1f' % (1e6 * percentile(values, 0.5),
+                               1e6 * percentile(values, 0.9),
+                               1e6 * percentile(values, 0.99))
 
 
 def time_format(idx):
+
     def ent(line, idx=idx):
         if idx in line.times:
             return time_string(line.times[idx])
-        return ""
+        return ''
 
     return ent
 
 
-BANNER = {"simple": "Count: %(count)d", "html": "<h1>Count: %(count)d</h1>"}
+BANNER = {'simple': 'Count: %(count)d', 'html': '<h1>Count: %(count)d</h1>'}
 
 FORMAT = [
-    ("TAG", lambda line: ".." * line.indent + tidy_tag(line.tag)),
-    (
-        "LOC",
-        lambda line: "%s:%d"
-        % (line.filename[line.filename.rfind("/") + 1 :], line.fileline),
+    ('TAG', lambda line: '..' * line.indent + tidy_tag(line.tag)),
+    ('LOC',
+     lambda line: '%s:%d' % (line.filename[line.filename.rfind('/') + 1:], line.fileline)
     ),
-    ("IMP", lambda line: "*" if line.important else ""),
-    ("FROM_IMP", time_format(TIME_FROM_LAST_IMPORTANT)),
-    ("FROM_STACK_START", time_format(TIME_FROM_STACK_START)),
-    ("SELF", time_format(SELF_TIME)),
-    ("TO_STACK_END", time_format(TIME_TO_STACK_END)),
-    ("FROM_SCOPE_START", time_format(TIME_FROM_SCOPE_START)),
-    ("SELF", time_format(SELF_TIME)),
-    ("TO_SCOPE_END", time_format(TIME_TO_SCOPE_END)),
+    ('IMP', lambda line: '*' if line.important else ''),
+    ('FROM_IMP', time_format(TIME_FROM_LAST_IMPORTANT)),
+    ('FROM_STACK_START', time_format(TIME_FROM_STACK_START)),
+    ('SELF', time_format(SELF_TIME)),
+    ('TO_STACK_END', time_format(TIME_TO_STACK_END)),
+    ('FROM_SCOPE_START', time_format(TIME_FROM_SCOPE_START)),
+    ('SELF', time_format(SELF_TIME)),
+    ('TO_SCOPE_END', time_format(TIME_TO_SCOPE_END)),
 ]
 
 out = sys.stdout
-if args.out != "-":
-    out = open(args.out, "w")
+if args.out != '-':
+    out = open(args.out, 'w')
 
-if args.fmt == "html":
-    print >> out, "<html>"
-    print >> out, "<head>"
-    print >> out, "<title>Profile Report</title>"
-    print >> out, "</head>"
+if args.fmt == 'html':
+    print >> out, '<html>'
+    print >> out, '<head>'
+    print >> out, '<title>Profile Report</title>'
+    print >> out, '</head>'
 
 accounted_for = 0
 for cs in call_stacks:
-    print >> out, "\n"
+    print >> out, '\n'
     if args.fmt in BANNER:
         print >> out, BANNER[args.fmt] % {
-            "count": cs.count,
+            'count': cs.count,
         }
     header, _ = zip(*FORMAT)
     table = []
@@ -272,8 +269,8 @@ for cs in call_stacks:
         table.append(fields)
     print >> out, tabulate.tabulate(table, header, tablefmt=args.fmt)
     accounted_for += cs.count
-    if accounted_for > 0.99 * total_stacks:
+    if accounted_for > .99 * total_stacks:
         break
 
-if args.fmt == "html":
-    print "</html>"
+if args.fmt == 'html':
+    print '</html>'

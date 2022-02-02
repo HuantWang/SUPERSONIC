@@ -25,10 +25,11 @@ _MANY = 10000
 # eventually run what needs to be run (and risk timing out) or declare
 # that the scheduler didn't schedule work reasonably fast enough. We
 # choose the latter for this test.
-_PATHOLOGICAL_SCHEDULING = "pathological thread scheduling!"
+_PATHOLOGICAL_SCHEDULING = 'pathological thread scheduling!'
 
 
 class _TimeNoter(object):
+
     def __init__(self, time):
         self._condition = threading.Condition()
         self._time = time
@@ -44,6 +45,7 @@ class _TimeNoter(object):
 
 
 class TimeTest(object):
+
     def test_sleep_for(self):
         start_time = self._time.time()
         self._time.sleep_for(_QUANTUM)
@@ -100,14 +102,11 @@ class TimeTest(object):
 
         for test_event in test_events:
             possibly_cancelled_futures[test_event] = self._time.call_in(
-                test_event.set, _QUANTUM * (2 + random.random())
-            )
+                test_event.set, _QUANTUM * (2 + random.random()))
         for _ in range(_MANY):
             background_noise_futures.append(
-                self._time.call_in(
-                    threading.Event().set, _QUANTUM * 1000 * random.random()
-                )
-            )
+                self._time.call_in(threading.Event().set,
+                                   _QUANTUM * 1000 * random.random()))
         self._time.sleep_for(_QUANTUM)
         cancelled = set()
         for test_event, test_future in possibly_cancelled_futures.items():
@@ -116,9 +115,8 @@ class TimeTest(object):
         self._time.sleep_for(_QUANTUM * 3)
 
         for test_event in test_events:
-            (self.assertFalse if test_event in cancelled else self.assertTrue)(
-                test_event.is_set()
-            )
+            (self.assertFalse if test_event in cancelled else
+             self.assertTrue)(test_event.is_set())
         for background_noise_future in background_noise_futures:
             background_noise_future.cancel()
 
@@ -151,14 +149,17 @@ class TimeTest(object):
 
 
 class StrictRealTimeTest(TimeTest, unittest.TestCase):
+
     def setUp(self):
         self._time = grpc_testing.strict_real_time()
 
 
 class StrictFakeTimeTest(TimeTest, unittest.TestCase):
+
     def setUp(self):
-        self._time = grpc_testing.strict_fake_time(random.randint(0, int(time.time())))
+        self._time = grpc_testing.strict_fake_time(
+            random.randint(0, int(time.time())))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)
