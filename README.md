@@ -4,7 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/supersonic/badge/?version=latest)](https://supersonic.readthedocs.io/en/latest/?badge=latest)
 
 <div align="center">
- <img src="docs/source/_static/img/logo.png" width="417px" height="100px">
+ <img src="docs/source/_static/img/logo.png">
 </div>
 
 <p align="center">
