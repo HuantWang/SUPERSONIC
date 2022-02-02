@@ -3,8 +3,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../third_party'))
-sys.path.insert(0, os.path.abspath('../../third_party/compiler_gym'))
-sys.path.insert(0, os.path.abspath('../../third_party/ray'))
 sys.path.insert(0, os.path.abspath('../../SuperSonic'))
 # -- Project information
 project = "SuperSonic"
