@@ -15,7 +15,6 @@
 import argparse
 import logging
 import os
-import pprint
 import threading
 import time
 import timeit
@@ -50,7 +49,7 @@ parser.add_argument("--xpid", default='MultiTaskPopArt',
 # Training settings.
 parser.add_argument("--disable_checkpoint", action="store_true",
                     help="Disable saving checkpoint.")
-parser.add_argument("--savedir", default="/home/huanting/SuperSonic/SuperSonic/logs",
+parser.add_argument("--savedir", default="./logs",
                     help="Root dir where experiment data will be saved.")
 parser.add_argument("--num_actors", default=1, type=int, metavar="N",
                     help="Number of actors per environment (default: 4).")
@@ -262,7 +261,6 @@ def act(
     except Exception as e:
         logging.error("Exception in worker process %i", actor_index)
         traceback.print_exc()
-        print()
         raise e
 
 def get_batch(
@@ -790,15 +788,15 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
             else:
                 mean_return = ""
             total_loss = stats.get("total_loss", float("inf"))
-            print("steps", step)
-            logging.info(
-                "Steps %i @ %.1f SPS. Loss %f. %sStats:\n%s",
-                end_step,
-                sps,
-                total_loss,
-                mean_return,
-                pprint.pformat(stats),
-            )
+            # print("steps", step)
+            # logging.info(
+            #     "Steps %i @ %.1f SPS. Loss %f. %sStats:\n%s",
+            #     end_step,
+            #     sps,
+            #     total_loss,
+            #     mean_return,
+            #     pprint.pformat(stats),
+            # )
     except KeyboardInterrupt:
         gradient_tracker.print_total()
         return  # Try joining actors then quit.

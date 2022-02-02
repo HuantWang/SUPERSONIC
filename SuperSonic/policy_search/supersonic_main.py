@@ -22,7 +22,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--savedir",
-    default="~/logs/supersonic",
+    default="./logs/supersonic",
     help="Root dir where experiment data will be saved.",
 )
 parser.add_argument(
@@ -142,6 +142,7 @@ parser.add_argument(
 parser.add_argument("--Policy", help="Policy")
 parser.add_argument("--Dataset", help="Dataset")
 parser.add_argument("--datapath",default="../../tasks/CSR/DATA", help="Input Data Path and split to train/valid")
+parser.add_argument("--mode",default="train", help="train or test")
 
 class PolSearch_main:
     """:class:
@@ -190,9 +191,25 @@ class PolSearch_main:
 
         print("starting to run the best policy for your task")
 
-        # TaskEngine(bestpolicy,tasks_name='Stoke').run()
-
+    def test_engine(self,
+        policy = {
+        "StatList": "Doc2vec",
+         "ActList": "Doc2vec",
+         "RewList": "weight",
+         "AlgList": "DQN",
+    }
+                    ):
+        """Calling to TaskEngine().run() to test environments for different tasks"""
+        TaskEngine(self).run(policy)
 
 if __name__ == "__main__":
     flags = parser.parse_args()
-    PolSearch_main(flags).start_engine()
+    if flags.mode == 'test':
+        PolSearch_main(flags).test_engine(policy={
+        "StatList": "Doc2vec",
+         "ActList": "Doc2vec",
+         "RewList": "weight",
+         "AlgList": "DQN",
+    })
+    else:
+        PolSearch_main(flags).start_engine()

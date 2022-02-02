@@ -133,7 +133,7 @@ $ echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path_to_libhalide.so>' >> ~/.ba
 Run with code：
 
 ```shell 
-$ python supersonic_main.py --env BanditHalideEnv-v0 --datapath <path_to_halidebenchmarks>
+$ python supersonic_main.py --task Halide  --mode test
 ```
 
 ## B. Case Study: Neural Network Code Generation
@@ -158,7 +158,7 @@ $ export PYTHONPATH=$TVM_HOME/python:${PYTHONPATH}
 Run with code：
 
 ```shell 
-python supersonic_main.py --env BanditTvmEnv-v0 --datapath <path_to_tvmbenchmarks>
+$ python supersonic_main.py --task Tvm  --mode test
 ```
 
 ## C. Case Study: Code Size Reduction
@@ -174,7 +174,7 @@ Our evaluation is based on CompilerGym v0.1.8. Our framework has insert the envi
 Test with code：
 
 ```shell 
-python supersonic_main.py --env BanditCSREnv-v0 --datapath <path_to_csrbenchmarks>
+$ python supersonic_main.py --task CSR  --mode test
 ```
 
 ## D. Case Study: Super-optimization
@@ -212,6 +212,6 @@ $ echo <opt>/ >> <python_site-package>/SS.pth
 Run with code：
 
 ```shell 
-python supersonic_main.py --env BanditStokeEnv-v0 --datapath <path_to_stokebenchmarks>
+$ python supersonic_main.py --task Stoke  --mode test
 ```
 

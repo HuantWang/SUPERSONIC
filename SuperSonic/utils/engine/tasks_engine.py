@@ -44,7 +44,6 @@ class CustomStopper(Stopper):
         :param obs_file: the shared file location.
         """
         self.obs_file = obs_file
-        print("enter stop")
         self.should_stop = False
         self._start = time.time()
         self._deadline = 80
@@ -130,7 +129,6 @@ class Halide:
 
         conn.commit()
         conn.close()
-        print("halide halide halide")
 
         self.state_function = policy["StatList"]
         self.action_function = policy["ActList"]
@@ -171,7 +169,7 @@ class Halide:
         self.child = subprocess.Popen(
             f"cd {self.halide_path} && ./grpc-halide", shell=True,
         )
-        print(f"id = {self.algorithm_id},input_image = {self.input_image}")
+        # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
         """ Database connection"""
@@ -238,16 +236,14 @@ class Tvm:
     # run child process for starting server of tvm
     def startTVMServer(self):
         os.system(f"rm {self.obs_file}")  # clean the observation file
-        print(self.task_config)
-        print(f"{self.obs_file}")
+        # print(self.task_config)
+        # print(f"{self.obs_file}")
         kill_pid("50061")
         self.child = subprocess.Popen(
             f"cd {self.tvm_path} && python schedule.server.py {self.tvm_path} {self.obs_file}",
             shell=True,
         )
-
         print("Child Finished")
-        # print(f"id = {self.algorithm_id},input_image = {self.input_image}")
 
     def sql(self):
         conn = sqlite3.connect("../SQL/supersonic.db")
@@ -275,7 +271,7 @@ class CSR:
                  the current compiler pass sequence.
                 """
         # database
-        # rootpath = os.path.abspath('../SQL/supersonic.db')  # 获取上级路径
+        # rootpath = os.path.abspath('../SQL/supersonic.db')
         # print(rootpath)
         # print("!!!!!!!!!!!!!!!!!!!!!!!!!")
         self.sql_path = os.path.abspath('../SQL/supersonic.db')
@@ -343,10 +339,6 @@ class CSR:
         RLAlgorithms().Algorithms(
             self.algorithm, self.task_config, self.environment_path
         )
-        # try:
-        #     RLAlgorithms().Algorithms(self.algorithm,self.task_config, self.environment_path)
-        # except :
-        #     print("finish csr")
 
     def main(self):
         # CSR.sql(self)
@@ -430,7 +422,7 @@ class Stoke:
         """
         os.system(f"rm {self.obs_file}")  # clean the observation file
         self.RLAlgo = RLAlgorithms(self.task_config)
-        print(f"{self.obs_file}")
+        # print(f"{self.obs_file}")
         self.child = subprocess.Popen(
             f"cd {self.stoke_path} && python run_synch.py {self.stoke_path} {self.obs_file}",
             shell=True,
@@ -452,7 +444,6 @@ class Stoke:
             )
         except Exception as e:
             print(e)
-            print("finish stoke")
 
     def main(self):
         Stoke.sql(self)
@@ -479,7 +470,7 @@ class TaskEngine:
             Halide(policy).main()
         if self.tasks=="CSR":
             CSR(policy).main()
-        if self.tasks=="CSR":
+        if self.tasks=="Tvm":
             Tvm(policy).main()
 
 
@@ -490,23 +481,22 @@ class TaskEngine:
 
 
 
-# if __name__ == "__main__":
-#     '''
-#     #halide
-#
-#     policy = {
-#         "StatList": "Actionhistory",
-#         "ActList": "map",
-#         "RewList": "weight",
-#         "AlgList": "PPO",
-#     }
-#     Halide(policy).main()
-#     #Halide = Halide(policy)
-#     #Halide.sql()
-#     #Halide.startserve()
-#     #Halide.run()
-#    '''
-    #stoke
+if __name__ == "__main__":
+
+    #halide
+    policy = {
+        "StatList": "Actionhistory",
+        "ActList": "map",
+        "RewList": "weight",
+        "AlgList": "PPO",
+    }
+    Halide(policy).main()
+    #Halide = Halide(policy)
+    #Halide.sql()
+    #Halide.startserve()
+    #Halide.run()
+
+
     # print("start stoke")
     # policy = {
     #     "StatList": "Actionhistory",
@@ -518,21 +508,21 @@ class TaskEngine:
     #         #Stoke.sql()
     #         #Stoke.startclient()
     # Stoke(policy).main()
-#
-#     #csr
-#
-#     # print("start CSR")
-#     # policy = {
-#     #     "StatList": "Doc2vec",
-#     #     "ActList": "Doc2vec",
-#     #     "RewList": "weight",
-#     #     "AlgList": "DQN",
-#     # }
-#     # CSR(policy).main()
-#     # CSR(policy).main()
-#     # CSR.sql()
-#     # CSR.startclient()
-#     # CSR.run()
+
+    #csr
+
+    # print("start CSR")
+    # policy = {
+    #     "StatList": "Doc2vec",
+    #     "ActList": "Doc2vec",
+    #     "RewList": "weight",
+    #     "AlgList": "DQN",
+    # }
+    # CSR(policy).main()
+    # CSR(policy).main()
+    # CSR.sql()
+    # CSR.startclient()
+    # CSR.run()
 
     # print("start tvm")
     # policy = {
