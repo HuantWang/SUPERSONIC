@@ -30,7 +30,7 @@ Given an RL search space defined by the Supersonic Python API, the Supersonic me
 Supersonic builds upon:
 -	Python >= 3.6 
 -	[CompilerGym](https://github.com/facebookresearch/CompilerGym) 
--	[Ray](https://docs.ray.io/en/latest/rllib.html), which require Python >= 3.6.
+-	[Ray](https://docs.ray.io/en/latest/rllib.html)
 	
 The system was tested on the following operating systems:
 - Ubuntu 18.04
