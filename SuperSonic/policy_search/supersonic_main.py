@@ -13,7 +13,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--task", default="Stoke", help="The task you want to optimize"
+    "--task", default="CSR", help="The task you want to optimize"
 )
 
 # Training settings.
@@ -197,19 +197,23 @@ class PolSearch_main:
          "ActList": "Doc2vec",
          "RewList": "weight",
          "AlgList": "DQN",
-    }
+    }, task = 'CSR'
                     ):
         """Calling to TaskEngine().run() to test environments for different tasks"""
-        TaskEngine(self).run(policy)
+        TaskEngine(self).run(policy,task)
 
 if __name__ == "__main__":
     flags = parser.parse_args()
-    if flags.mode == 'test':
-        PolSearch_main(flags).test_engine(policy={
+    PolSearch_main(flags).test_engine(policy={
         "StatList": "Doc2vec",
-         "ActList": "Doc2vec",
-         "RewList": "weight",
-         "AlgList": "DQN",
-    })
-    else:
-        PolSearch_main(flags).start_engine()
+        "ActList": "Doc2vec",
+        "RewList": "weight",
+        "AlgList": "ES",}, task=flags.task)
+    # if flags.mode == 'test':
+    #     PolSearch_main(flags).test_engine(policy={
+    #         "StatList": "Doc2vec",
+    #         "ActList": "Doc2vec",
+    #         "RewList": "weight",
+    #         "AlgList": "A3C",},task=flags.task)
+    # else:
+    #     PolSearch_main(flags).start_engine()

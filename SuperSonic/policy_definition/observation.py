@@ -21,28 +21,29 @@ class observation_function:
         self.input = input_obs[0]
         self.obs_fun = obs_fun
         self.obsv_size = obsv_size
+        if os.path.exists("../../../../model/d2v.pkl"):
+            self.path = "../../../../model/d2v.pkl"
+        elif os.path.exists("../../../../../model/d2v.pkl"):
+            self.path = "../../../../../model/d2v.pkl"
+        elif os.path.exists("../model/d2v.pkl"):
+            self.path = "../model/d2v.pkl"
 
         if self.obs_fun == "Doc2vec":
-            if os.path.exists("../../../../model/d2v.pkl"):
-                path = "../../../../model/d2v.pkl"
-            else:
-                path = "../../../../../model/d2v.pkl"
+            # rootpath = os.path.abspath('./')
+            # print(rootpath)
+            # print("!!!!!!!!!!!!!!!!!!!!!!!!!")
 
             observation = np.array(
-                Doc2Vec.load(path)
+                Doc2Vec.load(self.path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
 
         if self.obs_fun == "Word2vec":
             self.input = input_obs[0]
-            if os.path.exists("../../../../model/w2v.pkl"):
-                path = "../../../../model/w2v.pkl"
-            else:
-                path = "../../../../../model/w2v.pkl"
             # TODO: preprocess before embedding
             observation = np.array(
-                Doc2Vec.load(path)
+                Doc2Vec.load(self.path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
@@ -50,12 +51,8 @@ class observation_function:
         if self.obs_fun == "Bert":
             self.input = input_obs[0]
             # TODO: preprocess before embedding
-            if os.path.exists("../../../../model/bert.pkl"):
-                path = "../../../../model/bert.pkl"
-            else:
-                path = "../../../../../model/bert.pkl"
             observation = np.array(
-                Doc2Vec.load(path)
+                Doc2Vec.load(self.path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]

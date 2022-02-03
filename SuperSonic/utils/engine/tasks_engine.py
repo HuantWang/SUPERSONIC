@@ -453,24 +453,24 @@ class TaskEngine:
     """A :class: An interface to run specific Task environment and agent.
 
             """
-    def __init__(self, policy, tasks_name="Stoke"):
+    def __init__(self, policy):
         """An interface to start environment and agent.
 
         :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
             methods.
         :param tasks_name: The task developer intend to optimize.
             """
-        self.tasks=tasks_name
+
         self.policy = policy
 
-    def run(self,policy):
-        if self.tasks=="Stoke":
+    def run(self,policy,task='CSR'):
+        if task=="Stoke":
             Stoke(policy).main()
-        if self.tasks=="Halide":
+        if task=="Halide":
             Halide(policy).main()
-        if self.tasks=="CSR":
+        if task=="CSR":
             CSR(policy).main()
-        if self.tasks=="Tvm":
+        if task=="Tvm":
             Tvm(policy).main()
 
 

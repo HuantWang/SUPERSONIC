@@ -1,0 +1,28 @@
+Failure # 1 (occurred at 2022-02-03_19-08-51)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::APPO.train()[39m (pid=77126, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 407, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 442, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 445, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 90, in __init__
+    Trainer.__init__(self, config, env, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 450, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 175, in __init__
+    self._setup(copy.deepcopy(self.config))
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 561, in _setup
+    self.config = Trainer.merge_trainer_configs(self._default_config,
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 954, in merge_trainer_configs
+    return deep_update(config1, config2, cls._allow_unknown_configs,
+  File "/home/huanting/SuperSonic/third_party/ray/tune/utils/util.py", line 181, in deep_update
+    raise Exception("Unknown config parameter `{}` ".format(k))
+Exception: Unknown config parameter `sgd_minibatch_size`
+

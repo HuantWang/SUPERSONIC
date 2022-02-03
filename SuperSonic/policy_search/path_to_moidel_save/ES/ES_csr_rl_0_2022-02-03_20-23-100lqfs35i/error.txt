@@ -1,0 +1,26 @@
+Failure # 1 (occurred at 2022-02-03_20-23-12)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ValueError): [36mray::ESTrainer.train()[39m (pid=99304, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 407, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 442, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 445, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 450, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 175, in __init__
+    self._setup(copy.deepcopy(self.config))
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 623, in _setup
+    self._init(self.config, self.env_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/es/es.py", line 185, in _init
+    validate_config(config)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/es/es.py", line 174, in validate_config
+    raise ValueError("`num_workers` must be > 0 for ES!")
+ValueError: `num_workers` must be > 0 for ES!
+
