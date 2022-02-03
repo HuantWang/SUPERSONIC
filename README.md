@@ -28,7 +28,7 @@ Given an RL search space defined by the Supersonic Python API, the Supersonic me
 ## Installation
 
 Supersonic builds upon:
--	Python == 3.8 
+-	Python v3.8 
 -	[CompilerGym](https://github.com/facebookresearch/CompilerGym) 
 -	[Ray](https://docs.ray.io/en/latest/rllib.html)
 	
