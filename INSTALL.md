@@ -1,6 +1,6 @@
 # Installation
 
-SUPERSONIC was tested with Python 3.8, CompilerGym 0.1.8, ray 0.8.6, Ubuntu 18.04.
+SUPERSONIC was tested with Python 3.8, CompilerGym 0.1.8, ray 0.8.6 and Ubuntu 18.04.
 
 ## DOCKER (TODO.)
 
