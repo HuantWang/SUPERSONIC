@@ -13,7 +13,7 @@
 <p align="center">
   <i>
     Check
-    <a href="https://supersonic.readthedocs.io/en/latest/index.html">the website</a>
+    <a href="http://1.14.76.177:7033/index.html">the website</a>
     for more information.
   </i>
 </p>
