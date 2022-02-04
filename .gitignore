@@ -157,3 +157,4 @@ cython_debug/
 
 # add by zjq
 SuperSonic/logs/*
+SuperSonic/SQL/*
