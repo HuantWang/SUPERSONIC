@@ -115,12 +115,12 @@ class BanditCSREnv(gym.Env):
         self.actions.append(action)
         reward = self.generate_reward(action)
         obs = self.get_observation(action)
-
+        print("obs",obs)
         print("action", action)
 
         done = True
 
-        return [0], reward, done, self.info  #
+        return obs, reward, done, self.info  #
 
     def reset(self):
         """ reset the RL environment.

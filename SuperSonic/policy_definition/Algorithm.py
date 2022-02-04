@@ -4,6 +4,8 @@ from ray import tune
 from ray.tune.logger import TBXLogger, CSVLogger, JsonLogger
 import subprocess
 import third_party.contrib.alpha_zero.models.custom_torch_models
+from ray.rllib import _register_all
+_register_all()
 
 class RLAlgorithms:
     """:class:
@@ -28,7 +30,6 @@ class RLAlgorithms:
         self.num_sgd_iter = 20
 
         # ray.init(num_cpus=self.ray_num_cpus, ignore_reinit_error=True)
-
 
     def MCTS(self, task_config, environment_path):
         """
@@ -476,6 +477,116 @@ class RLAlgorithms:
         )
         ray.shutdown(exiting_interpreter=False)
 
+    def MARWIL(self, task_config, environment_path):
+        """
+                 PPO, An interface to start RL agent with PPO algorithm.
+                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.
+                 Paper （https://arxiv.org/abs/1707.06347）
+
+                :param task_config: The task_config, parameters passed to RL agent.
+                :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+                """
+
+        if task_config.get("experiment") == "stoke":
+            self.child = subprocess.Popen(
+                f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
+                shell=True,
+            )
+
+        tune.run(
+            "MARWIL",  # 内置算法PPO
+            checkpoint_freq=1,
+            stop={"training_iteration": self.training_iteration},
+            max_failures=0,
+            reuse_actors=True,
+            checkpoint_at_end=True,
+            local_dir=self.local_dir,
+            config={
+                "env": environment_path,
+                "env_config": task_config,
+                # "lr": self.lr,
+                # "train_batch_size": self.train_batch_size,
+                # "num_workers": self.num_workers,
+                # "rollout_fragment_length": self.rollout_fragment_length,
+            },
+            loggers=[TBXLogger],
+        )
+        ray.shutdown(exiting_interpreter=False)
+
+    def PG(self, task_config, environment_path):
+        """
+                 PPO, An interface to start RL agent with PPO algorithm.
+                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.
+                 Paper （https://arxiv.org/abs/1707.06347）
+
+                :param task_config: The task_config, parameters passed to RL agent.
+                :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+                """
+
+        if task_config.get("experiment") == "stoke":
+            self.child = subprocess.Popen(
+                f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
+                shell=True,
+            )
+
+        tune.run(
+            "PG",  # 内置算法PPO
+            checkpoint_freq=1,
+            stop={"training_iteration": self.training_iteration},
+            max_failures=0,
+            reuse_actors=True,
+            checkpoint_at_end=True,
+            local_dir=self.local_dir,
+            config={
+                "env": environment_path,
+                "env_config": task_config,
+                "lr": self.lr,
+                "train_batch_size": self.train_batch_size,
+                "num_workers": self.num_workers,
+                "rollout_fragment_length": self.rollout_fragment_length,
+            },
+            loggers=[TBXLogger],
+        )
+        ray.shutdown(exiting_interpreter=False)
+
+    def SimpleQ(self, task_config, environment_path):
+        """
+                 PPO, An interface to start RL agent with PPO algorithm.
+                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.
+                 Paper （https://arxiv.org/abs/1707.06347）
+
+                :param task_config: The task_config, parameters passed to RL agent.
+                :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+                """
+
+        if task_config.get("experiment") == "stoke":
+            self.child = subprocess.Popen(
+                f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
+                shell=True,
+            )
+
+        tune.run(
+            "SimpleQ",  # 内置算法PPO
+            checkpoint_freq=1,
+            stop={"training_iteration": self.training_iteration},
+            max_failures=0,
+            reuse_actors=True,
+            checkpoint_at_end=True,
+            local_dir=self.local_dir,
+            config={
+                "env": environment_path,
+                "env_config": task_config,
+                "lr": self.lr,
+                "num_workers": self.num_workers,
+                "rollout_fragment_length": self.rollout_fragment_length,
+            },
+            loggers=[TBXLogger],
+        )
+        ray.shutdown(exiting_interpreter=False)
+
     def Algorithms(self, policy_algorithm, task_config, environment_path):
         """
         Algorithms, using to call different RL algorithms
@@ -505,3 +616,9 @@ class RLAlgorithms:
             RLAlgorithms().BC(task_config, environment_path)
         if policy_algorithm == "ES":
             RLAlgorithms().ES(task_config, environment_path)
+        if policy_algorithm == "MARWIL":
+            RLAlgorithms().MARWIL(task_config, environment_path)
+        if policy_algorithm == "PG":
+            RLAlgorithms().PG(task_config, environment_path)
+        if policy_algorithm == "SimpleQ":
+            RLAlgorithms().SimpleQ(task_config, environment_path)

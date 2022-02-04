@@ -120,7 +120,7 @@ parser.add_argument("--beta", default=0.0001, type=float, help="PopArt parameter
 
 # Test settings.
 parser.add_argument(
-    "--num_episodes", default=100, type=int, help="Number of episodes for Testing."
+    "--num_episodes", default=2, type=int, help="Number of episodes for Testing."
 )
 parser.add_argument("--actions", help="Use given action sequence.")
 
@@ -131,10 +131,10 @@ parser.add_argument("--num_buffers", type=int, default="32", help="num_buffers")
 parser.add_argument(
     "--env", type=str, default="BanditCSREnv-v0", help="Task environments"
 )
-parser.add_argument("--steps", type=int, default=100000, help="Number of steps")
+parser.add_argument("--steps", type=int, default=2, help="Number of steps")
 parser.add_argument(
     "--total_steps",
-    default=50,
+    default=2,
     type=int,
     metavar="T",
     help="Total environment steps to train for.",
@@ -183,9 +183,10 @@ class PolSearch_main:
             f"--total_steps {self.flags.steps} "
             "--batch_size 32 "
         )
-
         bestpolicy = policy_search.train(self.flags)
-        print("The best policy strategy is", bestpolicy)
+
+        return bestpolicy
+
 
         #TODO:tune parameters
 
@@ -202,18 +203,41 @@ class PolSearch_main:
         """Calling to TaskEngine().run() to test environments for different tasks"""
         TaskEngine(self).run(policy,task)
 
+    def conf_engine(self,
+        policy = {
+        "StatList": "Doc2vec",
+         "ActList": "Doc2vec",
+         "RewList": "weight",
+         "AlgList": "DQN",
+    }, task = 'CSR'
+                    ):
+        """Calling to TaskEngine().run() to test environments for different tasks"""
+        best_config=TaskEngine(self).Config(policy,task)
+
+        return best_config
+
 if __name__ == "__main__":
     flags = parser.parse_args()
-    PolSearch_main(flags).test_engine(policy={
-        "StatList": "Doc2vec",
-        "ActList": "Doc2vec",
-        "RewList": "weight",
-        "AlgList": "ES",}, task=flags.task)
-    # if flags.mode == 'test':
-    #     PolSearch_main(flags).test_engine(policy={
-    #         "StatList": "Doc2vec",
-    #         "ActList": "Doc2vec",
-    #         "RewList": "weight",
-    #         "AlgList": "A3C",},task=flags.task)
-    # else:
-    #     PolSearch_main(flags).start_engine()
+    # PolSearch_main(flags).test_engine(policy={
+    #     "StatList": "Doc2vec",
+    #     "ActList": "Doc2vec",
+    #     "RewList": "weight",
+    #     "AlgList": "RandomAgent",}, task=flags.task)
+    if flags.mode == 'deploy':
+        PolSearch_main(flags).test_engine(policy={
+            "StatList": "Doc2vec",
+            "ActList": "Doc2vec",
+            "RewList": "weight",
+            "AlgList": "PPO",},task=flags.task)
+    else:
+        #policy search
+        # bestpolicy=PolSearch_main(flags).start_engine()
+        # print("The best policy strategy is", bestpolicy)
+        #policy deploy
+        # PolSearch_main(flags).test_engine(policy=bestpolicy,task=flags.task)
+        best_config=PolSearch_main(flags).conf_engine(policy={
+            "StatList": "Doc2vec",
+            "ActList": "Doc2vec",
+            "RewList": "weight",
+            "AlgList": "PPO",},task=flags.task)
+        print("a")

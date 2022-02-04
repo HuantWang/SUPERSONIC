@@ -1,0 +1,42 @@
+Failure # 1 (occurred at 2022-02-04_03-15-25)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(UnsupportedSpaceException): [36mray::TD3.train()[39m (pid=129386, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 407, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 442, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 445, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 90, in __init__
+    Trainer.__init__(self, config, env, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 450, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 175, in __init__
+    self._setup(copy.deepcopy(self.config))
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 623, in _setup
+    self._init(self.config, self.env_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer_template.py", line 113, in _init
+    self.workers = self._make_workers(env_creator, self._policy,
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 691, in _make_workers
+    return WorkerSet(
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/worker_set.py", line 58, in __init__
+    self._local_worker = self._make_worker(
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/worker_set.py", line 245, in _make_worker
+    worker = cls(
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/rollout_worker.py", line 379, in __init__
+    self._build_policy_map(policy_dict, policy_config)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/evaluation/rollout_worker.py", line 937, in _build_policy_map
+    policy_map[name] = cls(obs_space, act_space, merged_conf)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/policy/tf_policy_template.py", line 128, in __init__
+    DynamicTFPolicy.__init__(
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/policy/dynamic_tf_policy.py", line 156, in __init__
+    self.model = make_model(self, obs_space, action_space, config)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/ddpg/ddpg_tf_policy.py", line 46, in build_ddpg_models
+    raise UnsupportedSpaceException(
+ray.rllib.utils.error.UnsupportedSpaceException: Action space Discrete(123) is not supported for DDPG.
+

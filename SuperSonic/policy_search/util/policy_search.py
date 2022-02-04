@@ -111,7 +111,7 @@ parser.add_argument("--beta", default=0.0001, type=float,
                     help="PopArt parameter")
 
 # Test settings.
-parser.add_argument("--num_episodes", default=100, type=int,
+parser.add_argument("--num_episodes", default=2, type=int,
                     help="Number of episodes for Testing.")
 parser.add_argument("--actions",
                     help="Use given action sequence.")

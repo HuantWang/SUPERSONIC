@@ -1,0 +1,29 @@
+Failure # 1 (occurred at 2022-02-04_03-22-01)
+Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trial_runner.py", line 468, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/huanting/SuperSonic/third_party/ray/worker.py", line 1474, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ImportError): [36mray::_AgentImportFailed.train()[39m (pid=1174, ip=192.168.188.130)
+  File "python/ray/_raylet.pyx", line 407, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 442, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 445, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 446, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 400, in ray._raylet.execute_task.function_executor
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/trainer.py", line 450, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/huanting/SuperSonic/third_party/ray/tune/trainable.py", line 175, in __init__
+    self._setup(copy.deepcopy(self.config))
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/mock.py", line 129, in _setup
+    raise ImportError(trace)
+ImportError: Traceback (most recent call last):
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/registry.py", line 124, in get_agent_class
+    return _get_agent_class(alg)
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/agents/registry.py", line 134, in _get_agent_class
+    return CONTRIBUTED_ALGORITHMS[alg]()
+  File "/home/huanting/SuperSonic/third_party/ray/rllib/contrib/registry.py", line 5, in _import_random_agent
+    from ray.rllib.contrib.random_agent.random_agent import RandomAgent
+ModuleNotFoundError: No module named 'ray.rllib.contrib.random_agent'
+

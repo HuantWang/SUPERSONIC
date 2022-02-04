@@ -125,7 +125,7 @@ class BanditTvmEnv(gym.Env):
         obs = self.get_observation(action)
         done = True
 
-        return [0], reward, done, self.info
+        return obs, reward, done, self.info
 
     def reset(self):
         """ reset the RL environment.

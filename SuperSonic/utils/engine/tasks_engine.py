@@ -9,7 +9,7 @@ from ray.tune import Stopper
 from SuperSonic.policy_definition.Algorithm import *
 import SuperSonic.utils.environments.AutoTvm_env
 from third_party.rm_port import kill_pid
-
+from .config_search import ConfigSearch
 
 class TimeStopper(Stopper):
     """A :class: An interface for implementing a Tune experiment stopper.
@@ -210,8 +210,6 @@ class Tvm:
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
         self.experiment = "tvm"
-
-
         self.log_path = "../../tasks/CSR/result"
         self.obs_file = ("../../tasks/tvm/zjq/record/finish.txt")
         self.tvm_path = "../../tasks/tvm/zjq/grpc/"
@@ -339,6 +337,10 @@ class CSR:
         RLAlgorithms().Algorithms(
             self.algorithm, self.task_config, self.environment_path
         )
+
+    def Config(self):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path)
+        return best_config
 
     def main(self):
         # CSR.sql(self)
@@ -473,6 +475,18 @@ class TaskEngine:
         if task=="Tvm":
             Tvm(policy).main()
 
+    def Config(self,policy,task='CSR'):
+        if task=="Stoke":
+            best_config=Stoke(policy).Config()
+        if task=="Halide":
+            best_config=Halide(policy).Config()
+        if task=="CSR":
+            best_config=CSR(policy).Config()
+        if task=="Tvm":
+            best_config=Tvm(policy).Config()
+
+        return best_config
+
 
 
 
@@ -490,7 +504,8 @@ if __name__ == "__main__":
         "RewList": "weight",
         "AlgList": "PPO",
     }
-    Halide(policy).main()
+    CSR(policy).Config(policy)
+    # Halide(policy).main()
     #Halide = Halide(policy)
     #Halide.sql()
     #Halide.startserve()
