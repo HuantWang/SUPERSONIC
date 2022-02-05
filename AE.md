@@ -74,27 +74,29 @@ Estimated time: xx minutes
 
 - [ ] ### **ChengZhang**
 
-## Evaluation: Section V.C
+## Evaluation: Section `V.C`
 
-- **For AMD:**
+- **`For AMD`:**
 
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
-```
-
-Estimated time: xx minutes
-
-- **For Intel:**
-
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
+```shell
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/tvm_main.py  --env BanditTvmEnv-v0
+(docker) $ python SuperSonic/policy_search/tvm_test.py
 ```
 
-Estimated time: xx minutes
+Estimated time: 180 minutes
 
-- [ ] ### **JiaqiZhao**
+- **`For Intel`:**
+
+```shell
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/tvm_main.py  --env BanditTvmEnv-v0
+(docker) $ python SuperSonic/policy_search/tvm_test.py
+```
+
+Estimated time: 180 minutes
+
+````
 
 ## Evaluation: Section V.D
 
