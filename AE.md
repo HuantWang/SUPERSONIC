@@ -34,45 +34,73 @@ Run the script to reproduce the results in Section V.A.
 
 - **For AMD:**
 
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "../../tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+
+# Concatenate the result file with the original data file
+(docker) $ stoke search --config tasks/stoke/example/hacker/p01/replace.conf
+
+# computer running time
+(docker) $ python tasks/stoke/example/hacker/p01/RunTime.py 100000000 tasks/stoke/example/hacker/p01
+(docker) $ Python tasks/stoke/example/hacker/p01/Calculate.py tasks/stoke/example/hacker/p01speedup
 ```
 
 Estimated time: xx minutes
 
 - **For Intel:**
 
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "../../tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+
+# Concatenate the result file with the original data file
+(docker) $stoke search --config tasks/stoke/example/hacker/p01/replace.conf
+
+# computer running time
+(docker) $ python tasks/stoke/example/hacker/p01/RunTime.py 100000000 tasks/stoke/example/hacker/p01
+(docker) $ Python tasks/stoke/example/hacker/p01/Calculate.py tasks/stoke/example/hacker/p01speedup
 ```
 
 Estimated time: xx minutes
-
-- [ ] ### **ChengZhang**
 
 ## Evaluation: Section V.B
 
 - **For AMD:**
 
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0 --mode policy --steps 1 --total_steps 70
+
+# computer running time
+#The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
+(docker) $ cd <SUPERSONIC-root-path/SuperSonic/utils/result>
+#The default caculate_time file for halide is in <SUPERSONIC-root-path/tasks/halide/app-halide>.
+(docker) $ cd <SUPERSONIC-root-path/tasks/halide/app-halide>
+#You can find the schedules in log file then add it into caculate_time file and compile.You can add after the comment ' //xx schedules'
 ```
 
 Estimated time: xx minutes
 
 - **For Intel:**
 
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0 --mode policy --steps 1 --total_steps 70
+
+# computer running time
+#The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
+(docker) $ cd <SUPERSONIC-root-path/SuperSonic/utils/result>
+#The default caculate_time file for halide is in <SUPERSONIC-root-path/tasks/halide/app-halide>.
+(docker) $ cd <SUPERSONIC-root-path/tasks/halide/app-halide>
+#You can find the schedules in log file then add it into caculate_time file and compile.You can add after the comment ' //xx schedules'
 ```
 
 Estimated time: xx minutes
-
-- [ ] ### **ChengZhang**
 
 ## Evaluation: Section `V.C`
 
@@ -96,20 +124,17 @@ Estimated time: 180 minutes
 
 Estimated time: 180 minutes
 
-````
 
 ## Evaluation: Section V.D
 
 Run the script to reproduce the results in Section V.D.
 
 ```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
+(docker) $ cd python SuperSonic/policy_search/ supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 (docker) $ ./test_precision.sh
 ```
 
 Estimated time: xx minutes
-
-- [ ] ### **YamengLu**
 
 ## Evaluation: Section V.E
 
@@ -121,5 +146,3 @@ Run the script to reproduce the results in Section V.E.
 ```
 
 Estimated time: xx minutes
-
-- [ ] ### **HuantingWang**
