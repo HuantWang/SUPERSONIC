@@ -182,6 +182,10 @@ class Halide:
             self.algorithm, self.task_config, self.environment_path
         )
 
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
+        return best_config
+
     def main(self):
         Halide.sql(self)
         Halide.startserve(self)
@@ -259,6 +263,10 @@ class Tvm:
         self.sql()
         self.startTVMServer()
         self.run()
+
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
+        return best_config
 
 class CSR:
     def __init__(self, policy):
@@ -338,8 +346,8 @@ class CSR:
             self.algorithm, self.task_config, self.environment_path
         )
 
-    def Config(self):
-        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path)
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
         return best_config
 
     def main(self):
@@ -417,6 +425,10 @@ class Stoke:
             "local_dir": self.local_dir,
         }
 
+    def Config(self,iterations):
+        best_config = ConfigSearch().Algorithms(self.algorithm, self.task_config, self.environment_path,iterations)
+        return best_config
+
     def startclient(self):
         """ Start client, to start environment and measurement engine (For a given optimization option,
         the measurement engine invokes the user-supplied run function to compile and execute the program
@@ -475,15 +487,15 @@ class TaskEngine:
         if task=="Tvm":
             Tvm(policy).main()
 
-    def Config(self,policy,task='CSR'):
+    def Config(self,policy,task='CSR',iterations=2):
         if task=="Stoke":
-            best_config=Stoke(policy).Config()
+            best_config=Stoke(policy).Config(iterations)
         if task=="Halide":
-            best_config=Halide(policy).Config()
+            best_config=Halide(policy).Config(iterations)
         if task=="CSR":
-            best_config=CSR(policy).Config()
+            best_config=CSR(policy).Config(iterations)
         if task=="Tvm":
-            best_config=Tvm(policy).Config()
+            best_config=Tvm(policy).Config(iterations)
 
         return best_config
 

@@ -19,15 +19,14 @@ class RLAlgorithms:
     def __init__(self):
         """Construct and initialize the RL algorithm parameters.
                 """
-        self.local_dir = "path_to_moidel_save"
         self.num_workers = 0
-        self.training_iteration = 5
-        self.ray_num_cpus = 4
-        self.rollout_fragment_length = 10
+        self.training_iteration = 50
+        self.ray_num_cpus = 10
+        self.rollout_fragment_length = 50
         self.train_batch_size = 50
         self.sgd_minibatch_size = 50
         self.lr = 1e-4
-        self.num_sgd_iter = 20
+        self.num_sgd_iter = 50
 
         # ray.init(num_cpus=self.ray_num_cpus, ignore_reinit_error=True)
 
@@ -172,7 +171,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "APPO",  # 内置算法PPO
             checkpoint_freq=1,
@@ -210,7 +209,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "A2C",  # 内置算法PPO
             checkpoint_freq=1,
@@ -346,7 +345,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "A3C",  # 内置算法PPO
             checkpoint_freq=1,
@@ -383,7 +382,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "ARS",  # 内置算法PPO
             checkpoint_freq=1,
@@ -398,43 +397,6 @@ class RLAlgorithms:
                 "lr": self.lr,
                 "train_batch_size": self.train_batch_size,
                 "rollout_fragment_length": self.rollout_fragment_length,
-            },
-            loggers=[TBXLogger],
-        )
-        ray.shutdown(exiting_interpreter=False)
-
-    def BC(self, task_config, environment_path):
-        """
-                 PPO, An interface to start RL agent with PPO algorithm.
-                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.
-                 Paper （https://arxiv.org/abs/1707.06347）
-
-                :param task_config: The task_config, parameters passed to RL agent.
-                :param environment_path: The environment_path, tasks' environment path that RL agent called.
-
-                """
-
-        if task_config.get("experiment") == "stoke":
-            self.child = subprocess.Popen(
-                f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
-                shell=True,
-            )
-
-        tune.run(
-            "BC",  # 内置算法PPO
-            checkpoint_freq=1,
-            stop={"training_iteration": self.training_iteration},
-            max_failures=0,
-            reuse_actors=True,
-            checkpoint_at_end=True,
-            local_dir=self.local_dir,
-            config={
-                "env": environment_path,
-                "env_config": task_config,
-                # "lr": self.lr,
-                # "train_batch_size": self.train_batch_size,
-                # "num_workers": 0,
-                # "rollout_fragment_length": self.rollout_fragment_length,
             },
             loggers=[TBXLogger],
         )
@@ -456,7 +418,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "ES",  # 内置算法PPO
             checkpoint_freq=1,
@@ -493,7 +455,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "MARWIL",  # 内置算法PPO
             checkpoint_freq=1,
@@ -530,7 +492,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "PG",  # 内置算法PPO
             checkpoint_freq=1,
@@ -567,7 +529,7 @@ class RLAlgorithms:
                 f"cd {task_config.get('stoke_path')} && python run_synch.py {task_config.get('stoke_path')} {task_config.get('obs_file')}",
                 shell=True,
             )
-
+        self.local_dir = task_config.get("local_dir")
         tune.run(
             "SimpleQ",  # 内置算法PPO
             checkpoint_freq=1,
@@ -612,8 +574,6 @@ class RLAlgorithms:
             RLAlgorithms().A3C(task_config, environment_path)
         if policy_algorithm == "ARS":
             RLAlgorithms().ARS(task_config, environment_path)
-        if policy_algorithm == "BC":
-            RLAlgorithms().BC(task_config, environment_path)
         if policy_algorithm == "ES":
             RLAlgorithms().ES(task_config, environment_path)
         if policy_algorithm == "MARWIL":

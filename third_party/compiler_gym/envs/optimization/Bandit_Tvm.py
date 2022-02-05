@@ -93,6 +93,7 @@ class BanditTvmEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
+
         reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
 
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
@@ -125,7 +126,7 @@ class BanditTvmEnv(gym.Env):
         obs = self.get_observation(action)
         done = True
 
-        return obs, reward, done, self.info
+        return [0], reward, done, self.info
 
     def reset(self):
         """ reset the RL environment.

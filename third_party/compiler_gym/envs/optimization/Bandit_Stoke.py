@@ -96,17 +96,15 @@ class BanditStokeEnv(gym.Env):
             data = json.load(f)
         try:
             reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
-
-            conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
-            c = conn.cursor()
-            sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
-                                                                  VALUES (?, ?, ?, ?)"
-            c.execute(sql, (self.num, "STOKE", action, reward))
-            conn.commit()
-            conn.close()
         except:
             reward = 0
-
+        conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
+        c = conn.cursor()
+        sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
+                                                              VALUES (?, ?, ?, ?)"
+        c.execute(sql, (self.num, "STOKE", action, reward))
+        conn.commit()
+        conn.close()
         return reward
 
     # def get_reward_1(self, action):

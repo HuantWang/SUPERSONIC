@@ -264,7 +264,7 @@ class ExperimentAnalysis(Analysis):
                 best_metric_score = metric_score
                 best_trial = trial
 
-        return best_trial
+        return best_trial,best_metric_score
 
     def get_best_config(self, metric, mode="max", scope="all"):
         """Retrieve the best config corresponding to the trial.
@@ -285,8 +285,8 @@ class ExperimentAnalysis(Analysis):
                 If `scope=all`, find each trial's min/max score for `metric`
                 based on `mode`, and compare trials based on `mode=[min,max]`.
         """
-        best_trial = self.get_best_trial(metric, mode, scope)
-        return best_trial.config if best_trial else None
+        best_trial,best_metric_score = self.get_best_trial(metric, mode, scope)
+        return best_trial.config if best_trial else None,best_metric_score
 
     def get_best_logdir(self, metric, mode="max", scope="all"):
         """Retrieve the logdir corresponding to the best trial.

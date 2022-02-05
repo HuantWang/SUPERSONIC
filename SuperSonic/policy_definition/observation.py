@@ -10,6 +10,15 @@ class observation_function:
     def __init__(self):
         """Construct and initialize state-transition method of different tasks."""
         self.obs_fun = "Doc2vec"
+        if os.path.exists("../../../../model/d2v.pkl"):
+            self.path = "../../../../model"
+        elif os.path.exists("../../../../../model"):
+            self.path = "../../../../../model"
+        elif os.path.exists("../model"):
+            self.path = "../model"
+        else:
+            # Input your pkl path
+            self.path = "/home/huanting/SuperSonic/SuperSonic/model"
 
     def get_observation(self, input_obs, obsv_size, obs_fun):
         """Get observation with specific trasition functions
@@ -21,12 +30,7 @@ class observation_function:
         self.input = input_obs[0]
         self.obs_fun = obs_fun
         self.obsv_size = obsv_size
-        if os.path.exists("../../../../model/d2v.pkl"):
-            self.path = "../../../../model/d2v.pkl"
-        elif os.path.exists("../../../../../model/d2v.pkl"):
-            self.path = "../../../../../model/d2v.pkl"
-        elif os.path.exists("../model/d2v.pkl"):
-            self.path = "../model/d2v.pkl"
+
 
         if self.obs_fun == "Doc2vec":
             # rootpath = os.path.abspath('./')
@@ -34,7 +38,7 @@ class observation_function:
             # print("!!!!!!!!!!!!!!!!!!!!!!!!!")
 
             observation = np.array(
-                Doc2Vec.load(self.path)
+                Doc2Vec.load(self.path+'/d2v.pkl')
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
@@ -43,7 +47,7 @@ class observation_function:
             self.input = input_obs[0]
             # TODO: preprocess before embedding
             observation = np.array(
-                Doc2Vec.load(self.path)
+                Doc2Vec.load(self.path+'/w2v.pkl')
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
@@ -52,7 +56,7 @@ class observation_function:
             self.input = input_obs[0]
             # TODO: preprocess before embedding
             observation = np.array(
-                Doc2Vec.load(self.path)
+                Doc2Vec.load(self.path+'/bert.pkl')
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
