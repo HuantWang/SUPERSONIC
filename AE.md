@@ -10,13 +10,13 @@ We provide a pre-configured live server with a [Python Jupyter Notebook]() and a
 
 # Section 1: Build and Run the Artifact
 
-For convenience, we have provided a pre-configured live server with a [Python Jupyter Notebook]() to work through our techiques (Please see the ReadMe document on the AE submission website on how to access the Notebook).
+For convenience, we have provided a pre-configured live server with a [Python Jupyter Notebook](http://1.14.76.177:7036/tree?) to work through our techiques (Please see the ReadMe document on the AE submission website on how to access the Notebook).
 
 See [INSTALL.md](https://github.com/NWU-NISL-Optimization/SuperSonic/blob/AE/INSTALL.md) to build SUPERSONIC. While it is possible to create your own copy of our Jupyter Notebook from [source code](https://github.com/NWU-NISL-Optimization/SuperSonic/blob/AE/INSTALL.md#building-from-source-fix), we recommend to use the [docker container](https://github.com/NWU-NISL-Optimization/SuperSonic/blob/AE/INSTALL.md#dockerfix) we provided.
 
 # Section 2: Jupyter - Experimental Evaluation
 
-You could refer [here]() for detailed instructions to reproduce the results with Python Jupyter Notebook.
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
 
 # Section 3: Docker - Experimental Evaluation
 
