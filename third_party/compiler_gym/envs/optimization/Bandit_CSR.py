@@ -86,10 +86,7 @@ class BanditCSREnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        try:
-            reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
-        except:
-            reward = 0
+        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
@@ -118,12 +115,12 @@ class BanditCSREnv(gym.Env):
         self.actions.append(action)
         reward = self.generate_reward(action)
         obs = self.get_observation(action)
-        # print("obs",obs)
-        # print("action", action)
+
+        print("action", action)
 
         done = True
 
-        return obs, reward, done, self.info  #
+        return [0], reward, done, self.info  #
 
     def reset(self):
         """ reset the RL environment.

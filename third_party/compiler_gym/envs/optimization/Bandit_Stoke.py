@@ -94,10 +94,19 @@ class BanditStokeEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
-        try:
-            reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
-        except:
-            reward = 0
+        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
+        # data = [json.loads(line) for line in open(full_path, "r")]
+        # reward_mean = data[-1]["episode_reward_mean"]
+        # reward_min = data[-1]["episode_reward_max"]
+        # reward_max = data[-1]["episode_reward_min"]
+        # total_loss = data[0]['info']['learner']['default_policy']['total_loss']
+        # print("reward is finished!!!!!!!!!!!!!!!!!!!!")
+        # result['policy'].append(action)
+        # result['reward_mean'].append(reward_mean)
+        # result['reward_min'].append(reward_min)
+        # result['reward_max'].append(reward_max)
+        # result['total_loss'].append(total_loss)
+
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
@@ -105,6 +114,7 @@ class BanditStokeEnv(gym.Env):
         c.execute(sql, (self.num, "STOKE", action, reward))
         conn.commit()
         conn.close()
+
         return reward
 
     # def get_reward_1(self, action):
@@ -178,7 +188,7 @@ class BanditStokeEnv(gym.Env):
         obs = self.get_observation(action)
         done = True
 
-        return obs, reward, done, self.info
+        return [0], reward, done, self.info
 
     def reset(self):
         """ reset the RL environment.
