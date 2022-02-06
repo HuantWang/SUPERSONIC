@@ -32,7 +32,7 @@ class BanditTvmEnv(gym.Env):
         Type: Discrete(n)
         Given a budget of 𝑛 candidate RL component configurations (or slot machines)
     Reward:
-        We then use the most frequently chosen policy architecture as the outcome of policy search.
+        We then use the most frequently chosen policy architecture as the outcome of policy search.
 
 
     """
@@ -93,8 +93,10 @@ class BanditTvmEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
-        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
-
+        try:
+            reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
+        except:
+            reward = 0
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
@@ -125,7 +127,7 @@ class BanditTvmEnv(gym.Env):
         obs = self.get_observation(action)
         done = True
 
-        return [0], reward, done, self.info
+        return obs, reward, done, self.info
 
     def reset(self):
         """ reset the RL environment.

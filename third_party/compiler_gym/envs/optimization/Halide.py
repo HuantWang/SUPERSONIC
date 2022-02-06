@@ -243,23 +243,12 @@ class HalideEnv(gym.Env):
                 self.min_exec_time_sec,
             ),
         )
-        # c.execute("INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \
-        #                               VALUES (code, self.actions, reward, self.min_exec_time_sec )")
         conn.commit()
         conn.close()
         # select dbl
 
-        # cursor = c.execute("SELECT RESULT,ACTIONS,REWARD,LOG  from HALIDE")
-        # for row in cursor:
-        #     print("RESULT = ", row[0])
-        #     print("ACTIONS = ", row[1])
-        #     print("REWARD = ", row[2])
-        #     print("LOG = ", row[3], "\n")
-        # conn.close()
-
         # embedding obs
         self.input = [code, self.actions]
-        self.state_function = "Actionhistory"
         self.state = observation_function().get_observation(
             self.input, self.obsv_size, self.state_function
         )

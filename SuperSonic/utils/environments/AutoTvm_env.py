@@ -35,7 +35,52 @@ logger = logging.getLogger(__name__)
 # NeuroVectorizer RL Environment
 # client
 class autotvm_rl(gym.Env):
+    """A :class:
+    This task targets DNN back-end code generation to find a good schedule. e.g., instruction orders and data
+    placement, to reduce execution time on a multi-core CPU.
+
+    Each benchmark comes with a schedule template that defines a set of tuning knobs like loop tiling parameters. We consider four actions in this task: adding or
+    removing a knob to the schedule sequence, and decreasing or
+    increasing the parameter value (by one) of a parameterized
+    knob in the optimization sequence. The number of tuning
+    configurations vary across benchmarks.
+
+
+
+    Observation:
+        Type: Box(100)
+            By default, the meta-optimizer runs each client RL for past few exploration
+        steps during a trial to allow it to converge before taking the
+        observation. We use the 100 most recently chosen policy architectures as the state.
+        Actions:
+        paper link:
+
+
+        Actions:
+            Type: Discrete(123)
+            Each TVM benchmark comes with a schedule template that defines a set of tuning
+            knobs like loop tiling parameters. We consider four actions in this task: adding or
+            removing a knob to the schedule sequence, and decreasing or
+            increasing the parameter value (by one) of a parameterized
+            knob in the optimization sequence. The number of tuning
+            configurations vary across benchmarks
+
+
+        Reward:
+            In all cases, high speed code size is better. We compute the code runtime by measuring
+             the ratio of entity PC reduction with respect to the origin model code  optimization option.
+
+        Starting State:
+            All observations are assigned a uniform random value in [-1..1]
+
+        """
+
     def __init__(self, env_config):
+        """
+        Defines the reinforcement leaning environment. Initialise with an environment.
+
+                    :param env_config: including  "state_function", "action_function", "reward_function", "observation_space"
+        """
         self.env = gym.make(
             "Tvm-v0",
             state_function=env_config.get("state_function"),
@@ -47,16 +92,15 @@ class autotvm_rl(gym.Env):
 
         self.interleave_action_meaning = [
             _ for _ in range(maxLen_start)
-        ]  # TODO: 根据需要更改action的空间
+        ]
         self.action_space = Discrete(
             maxLen_start
         )  # action_len
 
-        print(self.action_space, "/n=================action space=======/n")
 
         self.observation_space = Dict(
             {
-                "obs": self.env.observation_space,  
+                "obs": self.env.observation_space,
                 "action_mask": Box(low=0, high=1, shape=(self.action_space.n,)),
             }
         )
@@ -68,11 +112,18 @@ class autotvm_rl(gym.Env):
         # self.action_space.n/2
 
     def step(self, action):
-        with grpc.insecure_channel('localhost:50061') as channel:  
-            stub = schedule_pb2_grpc.ScheduleServiceStub(channel) 
+        """Take a step.
+
+        :param action: An action, or a sequence of actions. When multiple
+                actions are provided the observation and reward are returned after
+                running all of the actions.
+        :return: A tuple of observation, observation_mask, score, done, and info.
+        """
+        with grpc.insecure_channel('localhost:50061') as channel:
+            stub = schedule_pb2_grpc.ScheduleServiceStub(channel)
             response = stub.GetTvm(
                 schedule_pb2.TvmRequest(action=action)
-            )  
+            )
 
             obs, rew, done, info = self.env.step(
                 action, response.state, response.reward
@@ -83,9 +134,9 @@ class autotvm_rl(gym.Env):
             if self.maxLen != response.maxLen:
                 self.maxLen = response.maxLen
                 for _ in range(self.maxLen):
-                    init_space[_] = 1  
+                    init_space[_] = 1
                 for _ in range(self.maxLen, maxLen_start):
-                    init_space[_] = 0  
+                    init_space[_] = 0
             init_space[action] = 0
 
         return (
@@ -93,13 +144,22 @@ class autotvm_rl(gym.Env):
             score,
             done,
             info,
-        ) 
+        )
 
-    def set_state(self, state):  
+    def set_state(self, state):
+        """ Set policy to specific state and action mask.
+
+        :param state: Current reward and environments
+        :return: state and action mask
+        """
         self.running_reward = state[1]
         self.env = deepcopy(state[0])
         obs = np.array(list(self.env.unwrapped.state))
         return {"obs": obs, "action_mask": init_space}
 
     def get_state(self):
+        """Returns actor state.
+
+        :return: current environment and reward
+        """
         return deepcopy(self.env), self.running_reward

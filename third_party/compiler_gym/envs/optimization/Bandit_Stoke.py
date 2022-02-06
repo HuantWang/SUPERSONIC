@@ -94,79 +94,19 @@ class BanditStokeEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
-        reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
-        # data = [json.loads(line) for line in open(full_path, "r")]
-        # reward_mean = data[-1]["episode_reward_mean"]
-        # reward_min = data[-1]["episode_reward_max"]
-        # reward_max = data[-1]["episode_reward_min"]
-        # total_loss = data[0]['info']['learner']['default_policy']['total_loss']
-        # print("reward is finished!!!!!!!!!!!!!!!!!!!!")
-        # result['policy'].append(action)
-        # result['reward_mean'].append(reward_mean)
-        # result['reward_min'].append(reward_min)
-        # result['reward_max'].append(reward_max)
-        # result['total_loss'].append(total_loss)
-
+        try:
+            reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
+        except:
+            reward = 0
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")
         c = conn.cursor()
         sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) \
-                                                              VALUES (?, ?, ?, ?)"
+                                                       VALUES (?, ?, ?, ?)"
         c.execute(sql, (self.num, "STOKE", action, reward))
+        print("selfnum",self.num)
         conn.commit()
         conn.close()
-
         return reward
-
-    # def get_reward_1(self, action):
-    #
-    #     # the path to save execution performance
-    #     DocSave = "/home/huanting/SuperSonic/SuperSonic/logs/model_save"
-    #     name = "result.json"
-    #
-    #     # Delete dir
-    #     if os.path.exists(DocSave):
-    #         shutil.rmtree(DocSave)
-    #
-    #     exist_policy = self.all_policy[action]
-    #
-    #     self.num = self.num + 1
-    #     print("self.num : ", self.num)
-    #     import random
-    #
-    #     if action == 0:
-    #         reward = 0
-    #     else:
-    #         reward = random.randint(1, 10)
-    #
-    #     # load loss from json
-    #
-    #     print("reward is finished!!!!!!!!!!!!!!!!!!!!")
-    #     # result['policy'].append(action)
-    #     # result['reward_mean'].append(reward_mean)
-    #     # result['reward_min'].append(reward_min)
-    #     # result['reward_max'].append(reward_max)
-    #     # result['total_loss'].append(total_loss)
-    #
-    #     conn = sqlite3.connect("/home/huanting/SuperSonic/SuperSonic/SQL/supersonic.db")
-    #     c = conn.cursor()
-    #
-    #     sql = "INSERT INTO SUPERSONIC (ID,TASK,ACTION,REWARD) VALUES (?, ?, ?, ?)"
-    #     c.execute(sql, (self.num, "HALIDE", action, reward))
-    #     # c.execute("INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \
-    #     #                               VALUES (code, self.actions, reward, self.min_exec_time_sec )")
-    #
-    #     conn.commit()
-    #     conn.close()
-    #
-    #     # cursor = c.execute("SELECT ID,TASK,ACTION,REWARD,LOG  from SUPERSONIC")
-    #     # for row in cursor:
-    #     #     print("TASK = ", row[0])
-    #     #     print("ACTION = ", row[1])
-    #     #     print("REWARD = ", row[2])
-    #     #     print("LOG = ", row[3], "\n")
-    #     # conn.close()
-    #     # print("reward",reward)
-    #     return reward
 
     def step(self, action):
         """Take a step.
@@ -188,7 +128,7 @@ class BanditStokeEnv(gym.Env):
         obs = self.get_observation(action)
         done = True
 
-        return [0], reward, done, self.info
+        return obs, reward, done, self.info
 
     def reset(self):
         """ reset the RL environment.

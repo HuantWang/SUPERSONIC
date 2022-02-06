@@ -1,1 +1,2 @@
-_tick,_time,step,total_loss,mean_episode_return,pg_loss,baseline_loss,entropy_loss,mu,sigma,BanditHalideEnv-v0_step
+_tick,_time,step,total_loss,mean_episode_return,pg_loss,baseline_loss,entropy_loss,mu,sigma,BanditStokeEnv-v0_step
+_tick,_time,step,total_loss,mean_episode_return,pg_loss,baseline_loss,entropy_loss,mu,sigma,BanditStokeEnv-v0_step,BanditCSREnv-v0_step
