@@ -28,51 +28,7 @@ After you have successfully run the docker image, you can go the path:
 
 This directory contains the entire setup of our tool. This section provides details on how to evaluate the results section in our paper.
 
-## Evaluation: Section V.A
-
-Run the script to reproduce the results in Section V.A.
-
-- **For AMD:**
-
-```shell
-# Get experimental results
-(docker) $ cd <SUPERSONIC-root-path>/
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
-
-# Concatenate the result file with the original data file
-(docker) $ cd tasks/stoke/example/hacker/pxx
-(docker) $ stoke replace --config replace.conf
-
-# computer running time
-(docker) $ cd ../../
-(docker) $ python RunTime.py hacker/pxx 100000000
-(docker) $ python CalculateTime.py speedup
-```
-
-Estimated time: xx minutes
-
-- **For Intel:**
-
-```shell
-# Get experimental results
-(docker) $ cd <SUPERSONIC-root-path>/
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
-
-# Concatenate the result file with the original data file
-(docker) $ cd tasks/stoke/example/hacker/pxx
-(docker) $ stoke replace --config replace.conf
-
-# computer running time
-(docker) $ cd ../../
-(docker) $ python RunTime.py hacker/pxx 100000000
-(docker) $ python CalculateTime.py speedup
-```
-
-Estimated time: xx minutes
-
-- [ ] ### Zhangyu Liu
-
-## Evaluation: Section V.B
+## Evaluation: Section 5.1 Optimizing Image Pipelines
 
 - **For AMD:**
 
@@ -108,9 +64,8 @@ Estimated time: xx minutes
 
 Estimated time: xx minutes
 
-## Evaluation: Section `V.C`
 
-- **`For AMD`:**
+## Evaluation: Section 5.2 Neural Network Code Generation
 
 ```shell
 (docker) $ cd <SUPERSONIC-root-path>/
@@ -130,14 +85,56 @@ Estimated time: 180 minutes
 
 Estimated time: 180 minutes
 
+## Evaluation: Section 5.3 Code Size Reduction
 
-## Evaluation: Section V.D
+- **`For AMD`:**
 
-Run the script to reproduce the results in Section V.D.
+Run the script to reproduce the results in Section 5.3.
 
 ```
 (docker) $ cd python SuperSonic/policy_search/ supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 (docker) $ ./test_precision.sh
+```
+
+Estimated time: xx minutes
+
+
+## Evaluation: Section 5.4 Superoptimization
+
+- **For AMD:**
+
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+
+# Concatenate the result file with the original data file
+(docker) $ cd tasks/stoke/example/hacker/pxx
+(docker) $ stoke replace --config replace.conf
+
+# computer running time
+(docker) $ cd ../../
+(docker) $ python RunTime.py hacker/pxx 100000000
+(docker) $ python CalculateTime.py speedup
+```
+
+Estimated time: xx minutes
+
+- **For Intel:**
+
+```shell
+# Get experimental results
+(docker) $ cd <SUPERSONIC-root-path>/
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+
+# Concatenate the result file with the original data file
+(docker) $ cd tasks/stoke/example/hacker/pxx
+(docker) $ stoke replace --config replace.conf
+
+# computer running time
+(docker) $ cd ../../
+(docker) $ python RunTime.py hacker/pxx 100000000
+(docker) $ python CalculateTime.py speedup
 ```
 
 Estimated time: xx minutes
