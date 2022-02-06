@@ -37,14 +37,16 @@ Run the script to reproduce the results in Section V.A.
 ```shell
 # Get experimental results
 (docker) $ cd <SUPERSONIC-root-path>/
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "../../tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
 
 # Concatenate the result file with the original data file
-(docker) $ stoke search --config tasks/stoke/example/hacker/p01/replace.conf
+(docker) $ cd tasks/stoke/example/hacker/pxx
+(docker) $ stoke replace --config replace.conf
 
 # computer running time
-(docker) $ python tasks/stoke/example/hacker/p01/RunTime.py 100000000 tasks/stoke/example/hacker/p01
-(docker) $ Python tasks/stoke/example/hacker/p01/Calculate.py tasks/stoke/example/hacker/p01speedup
+(docker) $ cd ..
+(docker) $ python RunTime.py pxx/ 100000000
+(docker) $ python CalculateTime.py speedup
 ```
 
 Estimated time: xx minutes
@@ -54,17 +56,20 @@ Estimated time: xx minutes
 ```shell
 # Get experimental results
 (docker) $ cd <SUPERSONIC-root-path>/
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "../../tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70
 
 # Concatenate the result file with the original data file
-(docker) $stoke search --config tasks/stoke/example/hacker/p01/replace.conf
+(docker) $ cd tasks/stoke/example/hacker/pxx
+(docker) $ stoke replace --config replace.conf
 
 # computer running time
-(docker) $ python tasks/stoke/example/hacker/p01/RunTime.py 100000000 tasks/stoke/example/hacker/p01
-(docker) $ Python tasks/stoke/example/hacker/p01/Calculate.py tasks/stoke/example/hacker/p01speedup
+(docker) $ cd ..
+(docker) $ python RunTime.py pxx/ 100000000
+(docker) $ python CalculateTime.py speedup
 ```
 
 Estimated time: xx minutes
+
 
 ## Evaluation: Section V.B
 
@@ -102,6 +107,8 @@ Estimated time: xx minutes
 
 Estimated time: xx minutes
 
+- [ ] ### **ChengZhang**
+
 ## Evaluation: Section `V.C`
 
 - **`For AMD`:**
@@ -135,6 +142,8 @@ Run the script to reproduce the results in Section V.D.
 ```
 
 Estimated time: xx minutes
+
+- [ ] ### **YamengLu**
 
 ## Evaluation: Section V.E
 
