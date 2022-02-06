@@ -9,7 +9,7 @@ from ray.tune import Stopper
 from SuperSonic.policy_definition.Algorithm import *
 import SuperSonic.utils.environments.AutoTvm_env
 from third_party.rm_port import kill_pid
-
+from .config_search import ConfigSearch
 
 class TimeStopper(Stopper):
     """A :class: An interface for implementing a Tune experiment stopper.
@@ -182,6 +182,10 @@ class Halide:
             self.algorithm, self.task_config, self.environment_path
         )
 
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
+        return best_config
+
     def main(self):
         Halide.sql(self)
         Halide.startserve(self)
@@ -210,8 +214,6 @@ class Tvm:
         self.reward_function = policy["RewList"]
         self.algorithm = policy["AlgList"]
         self.experiment = "tvm"
-
-
         self.log_path = "../../tasks/CSR/result"
         self.obs_file = ("../../tasks/tvm/zjq/record/finish.txt")
         self.tvm_path = "../../tasks/tvm/zjq/grpc/"
@@ -261,6 +263,10 @@ class Tvm:
         self.sql()
         self.startTVMServer()
         self.run()
+
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
+        return best_config
 
 class CSR:
     def __init__(self, policy):
@@ -340,6 +346,10 @@ class CSR:
             self.algorithm, self.task_config, self.environment_path
         )
 
+    def Config(self,iterations):
+        best_config=ConfigSearch().Algorithms(self.algorithm,self.task_config, self.environment_path,iterations)
+        return best_config
+
     def main(self):
         # CSR.sql(self)
         # CSR.startserve(self)
@@ -415,6 +425,10 @@ class Stoke:
             "local_dir": self.local_dir,
         }
 
+    def Config(self,iterations):
+        best_config = ConfigSearch().Algorithms(self.algorithm, self.task_config, self.environment_path,iterations)
+        return best_config
+
     def startclient(self):
         """ Start client, to start environment and measurement engine (For a given optimization option,
         the measurement engine invokes the user-supplied run function to compile and execute the program
@@ -453,25 +467,37 @@ class TaskEngine:
     """A :class: An interface to run specific Task environment and agent.
 
             """
-    def __init__(self, policy, tasks_name="Stoke"):
+    def __init__(self, policy):
         """An interface to start environment and agent.
 
         :param policy: including "state_function", "action_function", "reward_function", "observation_space" transition
             methods.
         :param tasks_name: The task developer intend to optimize.
             """
-        self.tasks=tasks_name
+
         self.policy = policy
 
-    def run(self,policy):
-        if self.tasks=="Stoke":
+    def run(self,policy,task='CSR'):
+        if task=="Stoke":
             Stoke(policy).main()
-        if self.tasks=="Halide":
+        if task=="Halide":
             Halide(policy).main()
-        if self.tasks=="CSR":
+        if task=="CSR":
             CSR(policy).main()
-        if self.tasks=="Tvm":
+        if task=="Tvm":
             Tvm(policy).main()
+
+    def Config(self,policy,task='CSR',iterations=2):
+        if task=="Stoke":
+            best_config=Stoke(policy).Config(iterations)
+        if task=="Halide":
+            best_config=Halide(policy).Config(iterations)
+        if task=="CSR":
+            best_config=CSR(policy).Config(iterations)
+        if task=="Tvm":
+            best_config=Tvm(policy).Config(iterations)
+
+        return best_config
 
 
 
@@ -490,7 +516,8 @@ if __name__ == "__main__":
         "RewList": "weight",
         "AlgList": "PPO",
     }
-    Halide(policy).main()
+    CSR(policy).Config(policy)
+    # Halide(policy).main()
     #Halide = Halide(policy)
     #Halide.sql()
     #Halide.startserve()

@@ -145,8 +145,8 @@ class csr_rl:
 
         except Exception as e:
             print(e)
-
         obs, rew, done, info = self.env.step(action)
+        # print("action",action)
         self.running_reward += rew
         self.episode_reward = self.episode_reward + rew
 
