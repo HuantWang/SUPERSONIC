@@ -16,6 +16,36 @@ See [INSTALL.md](https://github.com/NWU-NISL-Optimization/SuperSonic/blob/AE/INS
 
 # Section 2: Jupyter - Experimental Evaluation
 
+## Evaluation: Section 5.1 Figure-3 Optimizing Image Pipelines
+
+- **For Intel:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+- **For AMD:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+## Evaluation: Section 5.2 Figure-4 Neural Network Code Generation
+
+- **For Intel:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+- **For AMD:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+## Evaluation: Section 5.3 Figure-5 Code Size Reduction
+
+- **For Intel:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+- **For AMD:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+## Evaluation: Section 5.4 Figure-6 Superoptimization
+
+- **For Intel:**
+You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
+
+- **For AMD:**
 You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions to reproduce the results with Python Jupyter Notebook.
 
 # Section 3: Docker - Experimental Evaluation
@@ -28,7 +58,7 @@ After you have successfully run the docker image, you can go the path:
 
 This directory contains the entire setup of our tool. This section provides details on how to evaluate the results section in our paper.
 
-## Evaluation: Section 5.1 Optimizing Image Pipelines
+## Evaluation: Section 5.1 Figure-3 Optimizing Image Pipelines
 
 - **For AMD:**
 
@@ -65,7 +95,7 @@ Estimated time: xx minutes
 Estimated time: xx minutes
 
 
-## Evaluation: Section 5.2 Neural Network Code Generation
+## Evaluation: Section 5.2 Figure-4 Neural Network Code Generation
 
 ```shell
 (docker) $ cd <SUPERSONIC-root-path>/
@@ -85,7 +115,7 @@ Estimated time: 180 minutes
 
 Estimated time: 180 minutes
 
-## Evaluation: Section 5.3 Code Size Reduction
+## Evaluation: Section 5.3 Figure-5 Code Size Reduction
 
 - **`For AMD`:**
 
@@ -99,7 +129,7 @@ Run the script to reproduce the results in Section 5.3.
 Estimated time: xx minutes
 
 
-## Evaluation: Section 5.4 Superoptimization
+## Evaluation: Section 5.4 Figure-6 Superoptimization
 
 - **For AMD:**
 
