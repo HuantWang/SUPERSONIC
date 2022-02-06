@@ -44,8 +44,8 @@ Run the script to reproduce the results in Section V.A.
 (docker) $ stoke replace --config replace.conf
 
 # computer running time
-(docker) $ cd ..
-(docker) $ python RunTime.py pxx/ 100000000
+(docker) $ cd ../../
+(docker) $ python RunTime.py hacker/pxx 100000000
 (docker) $ python CalculateTime.py speedup
 ```
 
@@ -63,13 +63,14 @@ Estimated time: xx minutes
 (docker) $ stoke replace --config replace.conf
 
 # computer running time
-(docker) $ cd ..
-(docker) $ python RunTime.py pxx/ 100000000
+(docker) $ cd ../../
+(docker) $ python RunTime.py hacker/pxx 100000000
 (docker) $ python CalculateTime.py speedup
 ```
 
 Estimated time: xx minutes
 
+- [ ] ### Zhangyu Liu
 
 ## Evaluation: Section V.B
 
@@ -106,8 +107,6 @@ Estimated time: xx minutes
 ```
 
 Estimated time: xx minutes
-
-- [ ] ### **ChengZhang**
 
 ## Evaluation: Section `V.C`
 
@@ -155,3 +154,5 @@ Run the script to reproduce the results in Section V.E.
 ```
 
 Estimated time: xx minutes
+
+- [ ] ### **HuantingWang**
