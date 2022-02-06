@@ -23,7 +23,7 @@ You could refer [here](http://1.14.76.177:7036/tree?) for detailed instructions 
 After you have successfully run the docker image, you can go the path:
 
 ```
-(docker) $ cd /usr/src/xx
+(docker) $ cd /home/SUPERSONIC-master/SuperSonic
 ```
 
 This directory contains the entire setup of our tool. This section provides details on how to evaluate the results section in our paper.
@@ -142,17 +142,3 @@ Run the script to reproduce the results in Section V.D.
 
 Estimated time: xx minutes
 
-- [ ] ### **YamengLu**
-
-## Evaluation: Section V.E
-
-Run the script to reproduce the results in Section V.E.
-
-```
-(docker) $ cd /usr/src/artifact-cgo/precision/test
-(docker) $ ./test_precision.sh
-```
-
-Estimated time: xx minutes
-
-- [ ] ### **HuantingWang**
