@@ -131,7 +131,6 @@ class stoke_rl:
         lock.acquire()
         global Action
         Action = action
-        # print("action",action)
         obs, rew, done, info = self.env.step(action, state_code, state_reward)
         self.running_reward += rew
         score = self.running_reward if done else 0
@@ -145,7 +144,7 @@ class stoke_rl:
             sql = "INSERT INTO STOKE (TIME, RESULT, REWARD) \
                             VALUES (?, ?, ?)"
             c.execute(
-                sql, (time.time(), state_code.replace("nop\n", ""), rew)
+                sql, (time.time() - self.tstart, state_code.replace("nop\n", ""), rew)
             )
             conn.commit()
             conn.close()

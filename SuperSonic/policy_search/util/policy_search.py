@@ -37,7 +37,91 @@ from policy_search.util.analysis.gradient_tracking import GradientTracker
 
 os.environ["OMP_NUM_THREADS"] = "1"  # Necessary for multithreading.
 
+# yapf: disable
+parser = argparse.ArgumentParser(description="PyTorch Scalable Agent")
+parser.add_argument("--env", type=str, default="PongNoFrameskip-v4",
+                    help="Gym environment.")
+# parser.add_argument("--mode", default="train",
+#                     choices=["train", "test", "test_render"],
+#                     help="Training or test mode.")
+parser.add_argument("--xpid", default='MultiTaskPopArt',
+                    help="Experiment id (default: None).")
+# Training settings.
+parser.add_argument("--disable_checkpoint", action="store_true",
+                    help="Disable saving checkpoint.")
+parser.add_argument("--savedir", default="./logs",
+                    help="Root dir where experiment data will be saved.")
+parser.add_argument("--num_actors", default=1, type=int, metavar="N",
+                    help="Number of actors per environment (default: 4).")
+parser.add_argument("--total_steps", default=1, type=int, metavar="T",
+                    help="Total environment steps to train for.")
+parser.add_argument("--batch_size", default=1, type=int, metavar="B",
+                    help="Learner batch size.") #steps
+parser.add_argument("--unroll_length", default=1, type=int, metavar="T",
+                    help="The unroll length (time dimension).")#steps
+parser.add_argument("--num_learner_threads", "--num_threads", default=1, type=int,
+                    metavar="N", help="Number learner threads.")#steps
+parser.add_argument("--disable_cuda", action="store_true",
+                    help="Disable CUDA.")
+parser.add_argument("--num_actions", default=6, type=int, metavar="A",
+                    help="Number of actions.")
+parser.add_argument("--use_lstm", action="store_true",
+                    help="Use LSTM in agent model.")
+parser.add_argument("--agent_type", type=str, default="resnet",
+                    help="The type of network to use for the agent.")
+parser.add_argument("--frame_height", type=int, default=84,
+                    help="Height to which frames are rescaled.")
+parser.add_argument("--frame_width", type=int, default=84,
+                    help="Width to which frames are rescaled.")
+parser.add_argument("--aaa_input_format", type=str, default="gray_stack", choices=["gray_stack", "rgb_last", "rgb_stack"],
+                    help="Color format of the frames as input for the AAA.")
+parser.add_argument("--use_popart", action="store_true",
+                    help="Use PopArt Layer.")
 
+# Loss settings.
+parser.add_argument("--entropy_cost", default=0.0006,
+                    type=float, help="Entropy cost/multiplier.")
+parser.add_argument("--baseline_cost", default=0.5,
+                    type=float, help="Baseline cost/multiplier.")
+parser.add_argument("--discounting", default=0.99,
+                    type=float, help="Discounting factor.")
+parser.add_argument("--reward_clipping", default="abs_one",
+                    choices=["abs_one", "none"],
+                    help="Reward clipping.")
+
+# Optimizer settings.
+parser.add_argument("--learning_rate", default=0.00048,
+                    type=float, metavar="LR", help="Learning rate.")
+parser.add_argument("--alpha", default=0.99, type=float,
+                    help="RMSProp smoothing constant.")
+parser.add_argument("--momentum", default=0, type=float,
+                    help="RMSProp momentum.")
+parser.add_argument("--epsilon", default=0.01, type=float,
+                    help="RMSProp epsilon.")
+parser.add_argument("--grad_norm_clipping", default=40.0, type=float,
+                    help="Global gradient norm clip.")
+
+# Misc settings.
+parser.add_argument("--write_profiler_trace", action="store_true",
+                    help="Collect and write a profiler trace "
+                    "for chrome://tracing/.")
+parser.add_argument("--save_model_every_nsteps", default=0, type=int,
+                    help="Save model every n steps")
+parser.add_argument("--beta", default=0.0001, type=float,
+                    help="PopArt parameter")
+
+# Test settings.
+parser.add_argument("--num_episodes", default=100, type=int,
+                    help="Number of episodes for Testing.")
+parser.add_argument("--actions",
+                    help="Use given action sequence.")
+
+# Policy search
+parser.add_argument("--Policy",
+                    help="Policy")
+parser.add_argument("--Dataset",
+                    help="Dataset")
+# yapf: enable
 
 
 logging.basicConfig(
@@ -704,6 +788,15 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
             else:
                 mean_return = ""
             total_loss = stats.get("total_loss", float("inf"))
+            # print("steps", step)
+            # logging.info(
+            #     "Steps %i @ %.1f SPS. Loss %f. %sStats:\n%s",
+            #     end_step,
+            #     sps,
+            #     total_loss,
+            #     mean_return,
+            #     pprint.pformat(stats),
+            # )
     except KeyboardInterrupt:
         gradient_tracker.print_total()
         return  # Try joining actors then quit.
@@ -718,15 +811,19 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
             actor.join(timeout=10)
         gradient_tracker.print_total()
 
-
     save_latest_model()
     # GIVE ME POLICY
     conn = sqlite3.connect("../SQL/supersonic.db")
     c = conn.cursor()
     cursor = c.execute("SELECT ACTION  from SUPERSONIC")
     a = cursor.fetchall()
+
     policynum = int(max(a, key=a.count)[0])
     bestpolicy = policy[0][policynum]
+
+    #
+
+    # plogger.close()
 
     return bestpolicy
 
@@ -754,3 +851,13 @@ def create_env(
         task=task,
     )
 
+
+
+def main(flags):
+    flags = parser.parse_args()
+    train(flags)
+
+
+if __name__ == "__main__":
+    flags = parser.parse_args()
+    main(flags)

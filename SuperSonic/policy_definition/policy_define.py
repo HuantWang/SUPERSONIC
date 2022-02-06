@@ -16,9 +16,7 @@ class SuperOptimizer:
         self,
         StateFunctions=["Word2vec", "Doc2vec", "Bert"],
         RewardFunctions=["relative_measure", "tan", "func", "weight"],
-        # A3C ARS ES need num_workers>0
-        RLAlgorithms=["MCTS", "PPO", "APPO", "A2C", "DQN", "QLearning",
-                      "MARWIL", "PG", "SimpleQ", "A3C", "ARS", "ES", "BC"],
+        RLAlgorithms=["MCTS", "PPO", "DQN", "QLearning"],
         ActionFunctions=["init"],
         datapath="",
     ):

@@ -13,7 +13,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--task", default="CSR", help="The task you want to optimize"
+    "--task", default="Stoke", help="The task you want to optimize"
 )
 
 # Training settings.
@@ -53,7 +53,7 @@ parser.add_argument(
 )  # steps
 parser.add_argument("--disable_cuda", action="store_true", help="Disable CUDA.")
 parser.add_argument(
-    "--num_actions", default=1, type=int, metavar="A", help="Number of actions."
+    "--num_actions", default=6, type=int, metavar="A", help="Number of actions."
 )
 parser.add_argument("--use_lstm", action="store_true", help="Use LSTM in agent model.")
 parser.add_argument(
@@ -120,7 +120,7 @@ parser.add_argument("--beta", default=0.0001, type=float, help="PopArt parameter
 
 # Test settings.
 parser.add_argument(
-    "--num_episodes", default=1, type=int, help="Number of episodes for Testing."
+    "--num_episodes", default=100, type=int, help="Number of episodes for Testing."
 )
 parser.add_argument("--actions", help="Use given action sequence.")
 
@@ -131,10 +131,10 @@ parser.add_argument("--num_buffers", type=int, default="32", help="num_buffers")
 parser.add_argument(
     "--env", type=str, default="BanditCSREnv-v0", help="Task environments"
 )
-parser.add_argument("--steps", type=int, default=1, help="Number of steps")
+parser.add_argument("--steps", type=int, default=100000, help="Number of steps")
 parser.add_argument(
     "--total_steps",
-    default=1,
+    default=50,
     type=int,
     metavar="T",
     help="Total environment steps to train for.",
@@ -142,7 +142,7 @@ parser.add_argument(
 parser.add_argument("--Policy", help="Policy")
 parser.add_argument("--Dataset", help="Dataset")
 parser.add_argument("--datapath",default="../../tasks/CSR/DATA", help="Input Data Path and split to train/valid")
-parser.add_argument("--mode",default="policy", help="policy/condig/deploy")
+parser.add_argument("--mode",default="train", help="train or test")
 
 class PolSearch_main:
     """:class:
@@ -153,16 +153,7 @@ class PolSearch_main:
     def __init__(self,flags):
         self.flags=flags
 
-    def policys(self):
-        self.flags.Policy = policy_define.SuperOptimizer(
-            StateFunctions=["Word2vec", "Doc2vec","Bert"],
-            RewardFunctions=["weight","tan"],
-            RLAlgorithms=["PPO","DQN","QLearning","MCTS"],
-            ActionFunctions=["init"],
-        ).PolicyDefined()
-        return self.flags.Policy
-
-    def start_engine(self,policy_candidate):
+    def start_engine(self):
         """Calling to policy_search() invokes SuperSonic meta-optimizer, where the developer can also limit the number of trials spent on client RL searching.
           using policy_define.SuperOptimizer() to define policy strategies and split dataset.
           using policy_search.train() to search best policy for objective task.
@@ -174,16 +165,31 @@ class PolSearch_main:
         )
         os.makedirs(directory)
 
-        self.flags.Policy=policy_candidate
+        self.flags.Policy = policy_define.SuperOptimizer(
+            StateFunctions=["Word2vec", "Doc2vec", "Bert"],
+            RewardFunctions=["weight"],
+            RLAlgorithms=["MCTS", "PPO", "DQN", "QLearning"],
+            ActionFunctions=["init"],
+        ).PolicyDefined()
 
         self.flags.Dataset = policy_define.SuperOptimizer(
             datapath=self.flags.datapath
             # datapath="../../tasks/stoke/example/hacker"
         ).cross_valid()
 
-        bestpolicy=policy_search.train(self.flags)
+        arguments = (
+            f"--env {self.flags.env} "
+            f"--savedir {directory} "
+            f"--total_steps {self.flags.steps} "
+            "--batch_size 32 "
+        )
 
-        return bestpolicy
+        bestpolicy = policy_search.train(self.flags)
+        print("The best policy strategy is", bestpolicy)
+
+        #TODO:tune parameters
+
+        print("starting to run the best policy for your task")
 
     def test_engine(self,
         policy = {
@@ -191,53 +197,19 @@ class PolSearch_main:
          "ActList": "Doc2vec",
          "RewList": "weight",
          "AlgList": "DQN",
-    }, task = 'CSR'
+    }
                     ):
         """Calling to TaskEngine().run() to test environments for different tasks"""
-        TaskEngine(self).run(policy,task)
+        TaskEngine(self).run(policy)
 
-    def conf_engine(self,
-        policy = {
+if __name__ == "__main__":
+    flags = parser.parse_args()
+    if flags.mode == 'test':
+        PolSearch_main(flags).test_engine(policy={
         "StatList": "Doc2vec",
          "ActList": "Doc2vec",
          "RewList": "weight",
          "AlgList": "DQN",
-    }, task = 'CSR',iterations=2
-                    ):
-        """Calling to TaskEngine().run() to test environments for different tasks"""
-        best_config=TaskEngine(self).Config(policy,task,iterations)
-
-        return best_config
-
-
-if __name__ == "__main__":
-    flags = parser.parse_args()
-
-    if flags.mode == 'policy':
-        # policy search
-        policy_candidate = PolSearch_main(flags).policys()
-        bestpolicy=PolSearch_main(flags).start_engine(policy_candidate)
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
-        print("The best policy strategy is", bestpolicy)
-        #config search
-        # best_config = PolSearch_main(flags).conf_engine(policy=bestpolicy, task=flags.task, iterations=2)
-        # policy deploy
-        # PolSearch_main(flags).test_engine(policy=bestpolicy,task=flags.task)
-    if flags.mode == 'deploy':
-        PolSearch_main(flags).test_engine(policy={
-            "StatList": "Doc2vec",
-            "ActList": "Doc2vec",
-            "RewList": "weight",
-            "AlgList": "PPO",},task=flags.task)
-    if flags.mode == 'config':
-        best_config = PolSearch_main(flags).conf_engine(policy={
-            "StatList": "Doc2vec",
-            "ActList": "Doc2vec",
-            "RewList": "weight",
-            "AlgList": "SimpleQ", }, task=flags.task, iterations=2)
-
+    })
+    else:
+        PolSearch_main(flags).start_engine()

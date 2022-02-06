@@ -93,7 +93,6 @@ class BanditTvmEnv(gym.Env):
                     full_path = os.path.join(relpath, _)
         with open(full_path, "r") as f:
             data = json.load(f)
-
         reward = data["checkpoints"][0]["last_result"]["episode_reward_max"]
 
         conn = sqlite3.connect("../../SuperSonic/SQL/supersonic.db")

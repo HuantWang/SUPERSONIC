@@ -10,15 +10,6 @@ class observation_function:
     def __init__(self):
         """Construct and initialize state-transition method of different tasks."""
         self.obs_fun = "Doc2vec"
-        if os.path.exists("../../../../model/d2v.pkl"):
-            self.path = "../../../../model"
-        elif os.path.exists("../../../../../model"):
-            self.path = "../../../../../model"
-        elif os.path.exists("../model"):
-            self.path = "../model"
-        else:
-            # Input your pkl path
-            self.path = "/home/huanting/SuperSonic/SuperSonic/model"
 
     def get_observation(self, input_obs, obsv_size, obs_fun):
         """Get observation with specific trasition functions
@@ -31,23 +22,27 @@ class observation_function:
         self.obs_fun = obs_fun
         self.obsv_size = obsv_size
 
-
         if self.obs_fun == "Doc2vec":
-            # rootpath = os.path.abspath('./')
-            # print(rootpath)
-            # print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+            if os.path.exists("../../../../model/d2v.pkl"):
+                path = "../../../../model/d2v.pkl"
+            else:
+                path = "../../../../../model/d2v.pkl"
 
             observation = np.array(
-                Doc2Vec.load(self.path+'/d2v.pkl')
+                Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
 
         if self.obs_fun == "Word2vec":
             self.input = input_obs[0]
+            if os.path.exists("../../../../model/w2v.pkl"):
+                path = "../../../../model/w2v.pkl"
+            else:
+                path = "../../../../../model/w2v.pkl"
             # TODO: preprocess before embedding
             observation = np.array(
-                Doc2Vec.load(self.path+'/w2v.pkl')
+                Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
@@ -55,15 +50,19 @@ class observation_function:
         if self.obs_fun == "Bert":
             self.input = input_obs[0]
             # TODO: preprocess before embedding
+            if os.path.exists("../../../../model/bert.pkl"):
+                path = "../../../../model/bert.pkl"
+            else:
+                path = "../../../../../model/bert.pkl"
             observation = np.array(
-                Doc2Vec.load(self.path+'/bert.pkl')
+                Doc2Vec.load(path)
                 .infer_vector(self.input.split(), steps=6, alpha=0.025)
                 .tolist()
             )[0 : self.obsv_size]
 
         if self.obs_fun == "Actionhistory":
             # TODO: STOKE cant do that, without a action record array
-            self.input = input_obs[1]
+            self.input = input_obs[0]
             if len(self.input) < self.obsv_size:
                 observation = np.hstack(
                     (np.array(self.input), np.zeros(self.obsv_size - len(self.input)))
