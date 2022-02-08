@@ -59,9 +59,14 @@ Then go to the root path of our framework:
 (docker) $ cd /home/sys/SUPERSONIC
 ```
 
-### 2. Evaluation of Optimizing Image Pipelines
-
-#### 2.1 Client RL search and deployment
+### 2. Evaluation
+The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baseline.
+  
+#### Case Study 1: **Optimizing Image Pipelines**
+  
+  The results correspond to Figure 3 of the submitted manuscript. 
+  
+##### 2.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -71,7 +76,7 @@ Then go to the root path of our framework:
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)
 
-#### 2.2 Computing running time and speedup for each result
+##### 2.2 Computing running time and speedup for each result
 
 ```shell
 # computer running time 
@@ -84,9 +89,11 @@ Then go to the root path of our framework:
 
 Using ```stoke replace``` to replace original benchmark with optimized one. Using ```RunTime.py``` to run ```hacker/pxx``` ```100000000``` times. Using ```CalculateTime.py``` to get a speedup.
 
-### 3. Evaluation of **Neural Network Code Generation**
+### 3. Case Study 2: **Neural Network Code Generation**
 
-#### 3.1 Client RL search and deployment
+  The results correspond to Figure 4 of the submitted manuscript. 
+
+##### 3.1 Client RL search and deployment
 
 (*approximate runtime:  ~3 hours*)
 
@@ -94,15 +101,17 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
 ```
 
-#### 3.2 Computing running time for each result
+##### 3.2 Computing running time for each result
 
 ```shell
 (docker) $ cd tasks/tvm/zjq/benchmark/ && python model_optimization.py --opt "rl" --do "test"
 ```
 
-### 4. Evaluation of Code Size Reduction
+### 4. Case Study 3: **Code Size Reduction**
+  
+    The results correspond to Figure 5 of the submitted manuscript. 
 
-#### 4.1 Find the best policy and deploy it to the client to get optimized results
+##### 4.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -112,13 +121,16 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)：
 
-### 5. Evaluation of Superoptimization
+### Case Study 4: **Superoptimization**
 
-#### 5.1 Setup environmental parameters:
+      The results correspond to Figure 6 of the submitted manuscript. 
+
+  
+##### 5.1 Setup environmental parameters:
 
 Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9.
 
-#### 5.2 Client RL search and deployment
+##### 5.2 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -128,14 +140,14 @@ Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy it to test benchmarks. ```--total_steps``` to set the number of trials spent on client RL searching)：
 
-#### 5.3 Computing running time for each result
+##### 5.3 Computing running time for each result
 
 ```shell
 # Concatenate the result file with the original data file
 (docker) $ cd tasks/stoke/example/hacker/pxx
 (docker) $ stoke replace --config replace.conf
 
-# computer running time
+# Computing running time
 (docker) $ cd ../../
 (docker) $ python RunTime.py hacker/pxx 100000000
 (docker) $ python CalculateTime.py speedup
