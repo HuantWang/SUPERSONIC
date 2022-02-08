@@ -111,7 +111,7 @@ Using ```stoke replace``` to replace original benchmark with the optimized one. 
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the test benchmark to the hacker dataset, set ```--mode policy``` to RL client search and tuning, and use ```--total_steps``` to set the number of trials spent on client RL search)
 
-### Case Study 4: **Superoptimization**
+### 5. Case Study 4: **Superoptimization**
 
       The results correspond to Figure 6 of the submitted manuscript. 
 
