@@ -35,15 +35,15 @@ cd SuperSonic
 docker load -i SuperSonic.tar
 ```
 
-#### 1.2 Setup environmental parameters:
+#### 1.2 Setup the Environment
 
-After importing the docker container **and getting into bash** in the container, make sure you run the below command to select the conda environment, before using any of the AE scripts:
+After importing the docker container **and getting into bash** in the container, run the following command to select the conda environment, before using any of the AE scripts:
 
 `````` shell
 $ conda activate ss
 ``````
 
-Then go to the root path of our framework:
+Then, go to the root directory of our tool:
 
 ```
 (docker) $ cd /home/sys/SUPERSONIC
