@@ -126,7 +126,7 @@ Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70 ```
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)：
+(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy it to test benchmarks. ```--total_steps``` to set the number of trials spent on client RL searching)：
 
 #### 5.3 Computing running time for each result
 
