@@ -115,7 +115,11 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 ### 5. Evaluation of Superoptimization
 
-#### 5.1 Find the best policy and deploy it to the client to get optimized results
+#### 5.1 Setup environmental parameters:
+
+Using [change grpc version instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md)[#grpc] to rebuild your grpc with gcc -4.9.
+
+#### 5.2 Find the best policy and deploy it to the client to get optimized results
 
 (*approximate runtime:  ~12 hours*)
 
@@ -125,7 +129,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)：
 
-#### 5.2 Computing running time for each result
+#### 5.3 Computing running time for each result
 
 ```shell
 # Concatenate the result file with the original data file
