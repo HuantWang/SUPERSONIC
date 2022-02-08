@@ -19,11 +19,7 @@ The main results of our work are presented in Figures 3-6 in the submitted paper
 We prepare our artifact within a [Docker image](https://zenodo.org/record/4675014) to run "out of the box". 
 Our docker image was tested on a host machine running Ubuntu 18.04.
 
-## ★ Artifact Contents
-
-The Docker image contains the following scripts for evaluation. 
-
-  
+## ★ Artifact Evaluation  
 
 Follow the instructions below to use our AE evaluation scripts.
 
