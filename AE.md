@@ -50,7 +50,7 @@ Then, go to the root directory of our tool:
 ```
 
 ### 2. Evaluation
-The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baseline.
+The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
   
 #### Case Study 1: **Optimizing Image Pipelines**
   
