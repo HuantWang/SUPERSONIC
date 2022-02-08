@@ -2,8 +2,7 @@
 
 We provide a [Docker Image](#docker) to support the artefact for our CC 2022 paper. The recommended approach is to use the pre-configured, interactive Jupyter notebook with the instructions given in the AE submission. 
 
-The following step-by-step instructions are given for evaluating using a  [Docker Image](#docker).  
-Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide schedule optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
+The following step-by-step instructions are given for evaluating using a  [Docker Image](#docker) running on a local host. Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide schedule optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
 
 *Disclaim:
 Although we have worked hard to ensure our AE scripts are robust, our tool remains a *research prototype*. It can still have glitches when used in complex, real-life settings. If you discover any bugs, please raise an issue, describing how you ran the program and what problem you encountered. We will get back to you ASAP. Thank you.*
