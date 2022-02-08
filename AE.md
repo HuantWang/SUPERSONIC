@@ -27,7 +27,7 @@ Follow the instructions below to use our AE evaluation scripts.
 
 #### 1.1  Load the Docker Image <br id="loaddi">
 
-After downloading the [docker image](#dockerimg), using the following commands to load the docker image (~30 minutes on a laptop for the reduced-sized image) on the host machine:
+After downloading the [docker image](#dockerimg), using the following commands to load the docker image (~30 minutes on a laptop) on the host machine:
 
 ```
 unzip SuperSonic.zip
