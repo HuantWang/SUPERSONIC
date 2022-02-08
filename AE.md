@@ -116,7 +116,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 #### 5.1 Setup environmental parameters:
 
-Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md)[#grpc] to rebuild grpc with gcc v4.9.
+Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9.
 
 #### 5.2 Find the best policy and deploy it to the client to get optimized results
 
