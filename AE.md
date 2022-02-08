@@ -23,12 +23,7 @@ Our docker image was tested on a host machine running Ubuntu 18.04.
 
 The Docker image contains the following scripts for evaluation. 
 
- * [01_supersonic_main.py](https://github.com/NWU-NISL-Fuzzing/COMFORT/tree/main/artifact_evaluation/src/01_evaluate_generator.py): A demonstration of training a GPT-2 model to generate JS programs. 
- * [02_RunTime.py](https://github.com/NWU-NISL-Fuzzing/COMFORT/tree/main/artifact_evaluation/src/02_evaluate_mutator.py): ?????
- * [03_CalculateTime.py](https://github.com/NWU-NISL-Fuzzing/COMFORT/tree/main/artifact_evaluation/src/03_evaluate_harness.py):?????
- * [04_HalideShell.py](https://github.com/NWU-NISL-Fuzzing/COMFORT/tree/main/artifact_evaluation/src/04_coverage_calculate.py): ?????
- * [05_model_optimization.py](https://github.com/NWU-NISL-Fuzzing/COMFORT/tree/main/artifact_evaluation/src/05_testcase_reducing.py): ????
-## AE Evaluation Steps
+  
 
 Follow the instructions below to use our AE evaluation scripts.
 
