@@ -69,15 +69,15 @@ The following steps describe how to evaluate each individual case study. In each
 ##### 2.2 Testing the tuned RL client
 
 ```shell
-# computer running time 
-#The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
-#The caculate time shell is in <SUPERSONIC-root-path/SuperSonic/tasks/halide>.
+# computing running time 
+#The default log file is stored in <SUPERSONIC-root-path/SuperSonic/utils/result>.
+#The script for computing time is stored at <SUPERSONIC-root-path/SuperSonic/tasks/halide>.
 (docker) $ cd <SUPERSONIC-root-path/SuperSonic/tasks/halide>
 (docker) $ python HalideShell.py  --algorithm_id <data_id> --log_file <log_file_path> 
-#The default result path is in <SUPERSONIC-root-path/tasks/halide/result>.You can find csv file in it.
+#By default, the results are stored at <SUPERSONIC-root-path/tasks/halide/result>, from which you can find csv file. 
 ```
 
-Using ```stoke replace``` to replace original benchmark with optimized one. Using ```RunTime.py``` to run ```hacker/pxx``` ```100000000``` times. Using ```CalculateTime.py``` to get a speedup.
+Using ```stoke replace``` to replace original benchmark with the optimized one. Using ```RunTime.py``` to run ```hacker/pxx``` ```100000000``` times. Using ```CalculateTime.py``` to compute the speedup.
 
 ### 3. Case Study 2: **Neural Network Code Generation**
 
@@ -91,7 +91,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
 ```
 
-##### 3.2 Computing running time for each result
+##### 3.2 Testing the tuned RL client
 
 ```shell
 (docker) $ cd tasks/tvm/zjq/benchmark/ && python model_optimization.py --opt "rl" --do "test"
@@ -109,7 +109,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 (docker) $ python  SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)：
+(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the test benchmark to the hacker dataset, set ```--mode policy``` to RL client search and tuning, and use ```--total_steps``` to set the number of trials spent on client RL search)
 
 ### Case Study 4: **Superoptimization**
 
@@ -130,14 +130,14 @@ Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master
 
 (set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy it to test benchmarks. ```--total_steps``` to set the number of trials spent on client RL searching)：
 
-##### 5.3 Computing running time for each result
+##### 5.3 Testing the tuned RL client
 
 ```shell
-# Concatenate the result file with the original data file
+# Concatenate the results with the original data file
 (docker) $ cd tasks/stoke/example/hacker/pxx
 (docker) $ stoke replace --config replace.conf
 
-# Computing running time
+# Computing the running time
 (docker) $ cd ../../
 (docker) $ python RunTime.py hacker/pxx 100000000
 (docker) $ python CalculateTime.py speedup
