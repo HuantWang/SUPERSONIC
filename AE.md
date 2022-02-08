@@ -12,7 +12,7 @@ Although we have worked hard to ensure our AE scripts are robust, our tool remai
 
 ## ★ Main Results <span id = "bug-list">
 
-The main results of our work are presented in Figures 3-6 in the submitted paper, which compares the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
+The main results of our work are presented in Figures 3-6 in the submitted paper, which compare the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
 
 ## ★ Docker Image <br id = "dockerimg">
 
