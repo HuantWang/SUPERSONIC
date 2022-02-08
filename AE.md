@@ -64,9 +64,9 @@ The following steps describe how to evaluate each individual case study. In each
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditHalideEnv-v0   --mode policy --steps 1 --total_steps 70  --datapath "tasks/halide/resource"
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy to benchmark. ```--total_steps``` to set the number of trials spent on client RL searching)
+(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the test benchmark to the hacker dataset, set ```--mode policy``` to RL client search and tuning, and use ```--total_steps``` to set the number of trials spent on client RL search)
 
-##### 2.2 Computing running time and speedup for each result
+##### 2.2 Testing the tuned RL client
 
 ```shell
 # computer running time 
