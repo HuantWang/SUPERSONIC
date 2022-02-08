@@ -1,19 +1,19 @@
-# Automating Reinforcement Learning Architecture Design for Code Optimization: Artifact
+# Automating Reinforcement Learning Architecture Design for Code Optimization: Artifact Instructions for Docker Image
 
-We provide a [Docker Image](#docker) to support artifact for our paper (SUPERSONIC) on CC 2022 paper on the performance of the client RL by our tools. 
+We provide a [Docker Image](#docker) to support the artefact for our CC 2022 paper. The recommended approach is to use the pre-configured, interactive Jupyter notebook with the instructions given in the AE submission. 
 
-Our docker image contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide schedule optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization. So, it is quite large (40 GB uncompressed), and we are working on using PyPI to distribute our framework. All of our code and data will be open-sourced upon publication and has been developed with extensibility as a primary goal.
-
-
-# Step-by-Step Instructions <br id = "docker">
+The following step-by-step instructions are given for evaluating using a  [Docker Image](#docker).  
+Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide schedule optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
 
 *Disclaim:
 Although we have worked hard to ensure our AE scripts are robust, our tool remains a *research prototype*. It can still have glitches when used in complex, real-life settings. If you discover any bugs, please raise an issue, describing how you ran the program and what problem you encountered. We will get back to you ASAP. Thank you.*
 
 
+# Step-by-Step Instructions <br id = "docker">
+
 ## ★ Main Results <span id = "bug-list">
 
-The main result of our work is that the RL architecture found by our work delivers better overall performance than alternative search techniques, including hand-tuned RL strategies in four case studies.
+The main results of our work are presented in Figures 3-6 in the submitted paper, which compares the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
 
 ## ★ Docker Image <br id = "dockerimg">
 
