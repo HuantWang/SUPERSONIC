@@ -61,7 +61,7 @@ Then go to the root path of our framework:
 
 ### 2. Evaluation of Optimizing Image Pipelines
 
-#### 2.1 Find the best policy and deploy it to the client to get optimized results
+#### 2.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -86,7 +86,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 ### 3. Evaluation of **Neural Network Code Generation**
 
-#### 3.1 Find the best policy and deploy it to the client to get optimized results
+#### 3.1 Client RL search and deployment
 
 (*approximate runtime:  ~3 hours*)
 
@@ -118,7 +118,7 @@ Using ```stoke replace``` to replace original benchmark with optimized one. Usin
 
 Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9.
 
-#### 5.2 Find the best policy and deploy it to the client to get optimized results
+#### 5.2 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
