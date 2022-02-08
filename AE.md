@@ -1,6 +1,6 @@
 # Automating Reinforcement Learning Architecture Design for Code Optimization: Artifact Instructions for Docker Image
 
-We provide a [Docker Image](#docker) to support the artefact for our CC 2022 paper. The recommended approach is to use the pre-configured, interactive Jupyter notebook with the instructions given in the AE submission. 
+The recommended approach for AE is to use the pre-configured, interactive Jupyter notebook with the instructions given in the AE submission. 
 
 The following step-by-step instructions are given for evaluating using a  [Docker Image](#docker) running on a local host. Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide schedule optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
 
