@@ -102,7 +102,7 @@ To measure the runtime of the resulting binary, we run each benchmark at least 1
 
 `--task`: The case to be calculated. In this case, we set it to halide.
 
-`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2, which is used for the *interpolate* dataset.
+`--data`: Representing different halide data . Options: _harris, interpolate, hist, max_filter, unsharp, nl_mean, lens_blur, local_laplacian, conv_layer, st_chain_.
 
 `--log_file`: The log file corresponds to the data is generated after the system-SuperSonic run. This  default log file path is in *<SUPERSONIC-root-path/SuperSonic/utils/result>*.
 
@@ -115,9 +115,8 @@ Notes: Make sure the environment can compiler the halide binary. The GCC version
 #The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
 #The caculate time shell is in <SUPERSONIC-root-path>.
 (docker) $ cd <SUPERSONIC-root-path>
-(docker) $ python tasks/get_runtime.py  --task halide --algorithm_id <data_id> --log_file <log_file_path> --result_path <result_to_save> 
-#demo:python tasks/get_runtime.py  --task halide --algorithm_id 2 --log_file  "tasks/get_runtime_save/interpolate_result.csv" --result_path 'tasks/get_runtime_save/'. You can find csv file in 'tasks/get_runtime_save/'.
-```
+(docker) $ python tasks/get_runtime.py  --task halide --data <halide_data> --log_file <log_file_path> --result_path <result_to_save>
+#demo:python tasks/get_runtime.py  --task halide --data 'interpolate' --log_file  "tasks/get_runtime_save/interpolate_result.csv" --result_path 'tasks/get_runtime_save/'. You can find csv file in 'tasks/get_runtime_save/'.
 
 
 
@@ -171,7 +170,16 @@ Notes: Make sure the environment can compiler the Stoke. (Following [this instru
 
 #### 2.5.2 Testing the tuned RL client
 
+#modified by lzy
+Using ```get_runtime.py``` to run data's running time. Here are some parameter setting to calculate the stoke' result.
+
+`--task`: The case to be calculated. In this case, we set it to stoke.
+
+`--data_number`: Representing different hacker data range 1-25. The default setting is 1 refer to data *p01*.
+
 ```shell
-# <data_number> from 1 to 25
-(docker) $ python tasks/get_runtime.py --task stoke --hacker_number <data_number>
-```
+#computer runnintg time
+#The caculate time shell is in <SUPERSONIC-root-path>.
+(docker) $ python tasks/get_runtime.py --task stoke --hacker_number <data_number>`  
+#demo:python tasks/get_runtime.py  --task stoke --hacker_number 1 
+#Now you have calculated the running time of data p01.
