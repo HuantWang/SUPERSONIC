@@ -8,13 +8,13 @@ The following step-by-step instructions are given for using a  [Docker Image](#d
 Although we have worked hard to ensure our AE scripts are robust, our tool remains a *research prototype*. It can still have glitches when used in complex, real-life settings. If you discover any bugs, please raise an issue, describing how you ran the program and what problem you encountered. We will get back to you ASAP. Thank you.*
 
 
-# Step-by-Step Instructions <br id = "docker">
+# Step-by-Step Instructions 
 
-## ★ Main Results <span id = "bug-list">
+## ★ Main Results 
 
-The main results of our work are presented in Figures 3-6 in the submitted paper, which compare the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
+The main results of our work are presented in Figures 3-6 in the submitted paper, which compares the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
 
-## ★ Docker Image <br id = "dockerimg">
+## ★ Docker Image 
 
 We prepare our artifact within a [Docker image](https://zenodo.org/record/4675014) to run "out of the box". 
 Our docker image was tested on a host machine running Ubuntu 18.04.
@@ -50,87 +50,154 @@ Then, go to the root directory of our tool:
 ```
 
 ### 2. Evaluation
+
 The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
-  
-#### Case Study 1: **Optimizing Image Pipelines**
-  
+
+
+
+#### 2.1 Task definition
+
+A compiler developer can use the Supersonic API to define the optimization problem. This is done by creating an RL policy interface. The definition includes a list of client RL components for the meta-optimizer to search over.
+
+You can modify elements from  statefs (state functions), rewards, rl_algs and actions to define the optimization problem from ```SuperSonic/policy_search/supersonic_main.py Policys()```.
+
+```python
+(python) 
+#Candidate state functions
+StateFunctions=["Word2vec", "Doc2vec", "Bert", "Actionhistory"]
+#Candidate reward functions
+RewardFunctions=["relative_measure", "tan", "func", "weight"]
+#Candidate RL algorithms
+RLAlgorithms=["MCTS", "PPO", "APPO", "A2C", "DQN", "QLearning"
+        "MARWIL", "PG", "SimpleQ", "BC"]
+#Candidate Action methods
+ActionFunctions=["init"]
+```
+
+
+
+#### 2.2. Case Study 1: **Optimizing Image Pipelines**
+
   The results correspond to Figure 3 of the submitted manuscript. 
-  
-##### 2.1 Client RL search and deployment
+
+##### 2.2.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
 ```shell
-(docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditHalideEnv-v0   --mode policy --steps 1 --total_steps 70  --datapath "tasks/halide/resource"
+(docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditHalideEnv-v0   --mode policy --total_steps 70  --datapath "tasks/halide/resource"
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the test benchmark to the hacker dataset, set ```--mode policy``` to RL client search and tuning, and use ```--total_steps``` to set the number of trials spent on client RL search)
+You can change the following parameters:
 
-##### 2.2 Testing the tuned RL client
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditHalideEnv-v0. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "tasks/halide/resource". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
+
+##### 2.2.2 Testing the tuned RL client
+
+To measure the runtime of the resulting binary, we run each benchmark at least 100 times on an unloaded machine. Using ```get_runtime.py``` to run data's result and get a speedup. Here are some parameter setting to calculate the halide' result.
+
+`--task`: The case to be calculated. In this case, we set it to halide.
+
+`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2 refer data *interpolate*.
+
+`--log_file`: The log file corresponds to the data is generated after the system-SuperSonic run. This  default log file path is in *<SUPERSONIC-root-path/SuperSonic/utils/result>*.
+
+`--result_path`: The path to save results. The default result path is*<SUPERSONIC-root-path/tasks/get_runtime_save/>*.
+
+Notes: Make sure the environment can compiler the halide binary. The GCC version is 7.5.
 
 ```shell
-# computing running time 
-#The default log file is stored in <SUPERSONIC-root-path/SuperSonic/utils/result>.
-#The script for computing time is stored at <SUPERSONIC-root-path/SuperSonic/tasks/halide>.
-(docker) $ cd <SUPERSONIC-root-path/SuperSonic/tasks/halide>
-(docker) $ python HalideShell.py  --algorithm_id <data_id> --log_file <log_file_path> 
-#By default, the results are stored at <SUPERSONIC-root-path/tasks/halide/result>, from which you can find csv file. 
+# computer running time 
+#The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
+#The caculate time shell is in <SUPERSONIC-root-path>.
+(docker) $ cd <SUPERSONIC-root-path>
+(docker) $ python tasks/get_runtime.py  --task halide --algorithm_id <data_id> --log_file <log_file_path> --result_path <result_to_save> 
+#demo:python tasks/get_runtime.py  --task halide --algorithm_id 2 --log_file  "tasks/get_runtime_save/interpolate_result.csv" --result_path 'tasks/get_runtime_save/'. You can find csv file in 'tasks/get_runtime_save/'.
 ```
 
-Using ```stoke replace``` to replace original benchmark with the optimized one. Using ```RunTime.py``` to run ```hacker/pxx``` ```100000000``` times. Using ```CalculateTime.py``` to compute the speedup.
 
-### 3. Case Study 2: **Neural Network Code Generation**
+
+### 2.3. Case Study 2: **Neural Network Code Generation**
 
   The results correspond to Figure 4 of the submitted manuscript. 
 
-##### 3.1 Client RL search and deployment
+##### 2.3.1 Find the best policy and deploy it to the client to get optimized results
 
 (*approximate runtime:  ~3 hours*)
+
+Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 
 ```shell
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
 ```
 
-##### 3.2 Testing the tuned RL client
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditTvmEnv-v0. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "tasks/tvm/zjq/benchmark/". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
+
+##### 2.3.2 Testing the tuned RL client
 
 ```shell
 (docker) $ cd tasks/tvm/zjq/benchmark/ && python model_optimization.py --opt "rl" --do "test"
 ```
 
-### 4. Case Study 3: **Code Size Reduction**
-  
-    The results correspond to Figure 5 of the submitted manuscript. 
+### 2.4. Case Study 3: **Code Size Reduction**
 
-##### 4.1 Client RL search and deployment
+The results correspond to Figure 5 of the submitted manuscript. 
+
+##### 2.4.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
+
+Notes: Make sure the environment can import the compiler_gym.
 
 ```shell
 (docker) $ python  SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to change the test benchmark to the hacker dataset, set ```--mode policy``` to RL client search and tuning, and use ```--total_steps``` to set the number of trials spent on client RL search)
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditCSREnv-v0. 
 
-### 5. Case Study 4: **Superoptimization**
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "../../tasks/CSR/DATA". 
 
-      The results correspond to Figure 6 of the submitted manuscript. 
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
 
-  
-##### 5.1 Setup environmental parameters:
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
-Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9.
 
-##### 5.2 Client RL search and deployment
+
+### 2.5. Case Study 4: **Superoptimization**
+
+The results correspond to Figure 6 of the submitted manuscript. 
+
+##### 2.5.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
+
+Notes: Make sure the environment can compiler the Stoke. (Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9. )
 
 ```shell
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70 ```
 ```
 
-(set ```--env BanditStokeEnv-v0``` to evaluate the Stoke, set ```--datapath "tasks/stoke/example/hacker"``` to set the benchmark to hacker, ```--mode policy``` to start our engine to find the best policy and deploy it to test benchmarks. ```--total_steps``` to set the number of trials spent on client RL searching)：
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditStokeEnv-v0. 
 
-##### 5.3 Testing the tuned RL client
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "tasks/stoke/example/hacker". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
+
+##### 2.5.2 Testing the tuned RL client
 
 ```shell
 # Concatenate the results with the original data file
