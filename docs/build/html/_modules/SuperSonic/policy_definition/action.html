@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.policy_definition.action &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>SuperSonic.policy_definition.action</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for SuperSonic.policy_definition.action</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">spaces</span>
+
+
+<div class="viewcode-block" id="action_functions"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.action.action_functions">[docs]</a><span class="k">class</span> <span class="nc">action_functions</span><span class="p">:</span>
+    <span class="c1">#TODO: This class should be extended in the future.</span>
+    <span class="sd">&quot;&quot;&quot;:class:</span>
+<span class="sd">                action_functions, defines the action space, ovservation space</span>
+<span class="sd">                by inheriting a default Action class.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="action_functions.init_actions"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.action.action_functions.init_actions">[docs]</a>    <span class="k">def</span> <span class="nf">init_actions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interleave_action_length</span><span class="p">,</span> <span class="n">obsv_low</span><span class="p">,</span> <span class="n">obsv_high</span><span class="p">,</span> <span class="n">obsv_size</span><span class="p">,</span> <span class="n">method</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct and initialize action and observation space of different tasks.</span>
+
+<span class="sd">                :param interleave_action_length: Action space. This must be defined for single-agent envs.</span>
+<span class="sd">                :param obsv_low: lower boundary of observation space.</span>
+<span class="sd">                :param obsv_high: higher boundary of observation space.</span>
+<span class="sd">                :param obsv_size: Observation space. This must be defined for single-agent envs.</span>
+<span class="sd">                :param method: Action methods, different parameters mapping to different definition approaches.</span>
+
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="n">interleave_action_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+            <span class="n">low</span><span class="o">=</span><span class="n">obsv_low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">obsv_high</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">obsv_size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span></div></div>
+
+        <span class="c1"># if method == &quot;transform&quot;:</span>
+        <span class="c1">#     interleave_action_meaning = [0, 1, 2, 3, 4, 5, 6, 7, 8]</span>
+        <span class="c1">#     action_space = spaces.Discrete(len(interleave_action_meaning))</span>
+        <span class="c1">#     observation_space = spaces.Box(low=-1, high=1, shape=(128,), dtype=np.float64)</span>
+        <span class="c1">#     return interleave_action_meaning, action_space, observation_space</span>
+        <span class="c1">#</span>
+        <span class="c1"># if method == &quot;map&quot;:</span>
+        <span class="c1">#     interleave_action_meaning = [_ for _ in range(2000)] #</span>
+        <span class="c1">#     action_space = spaces.Discrete(len(interleave_action_meaning))  # action_len</span>
+        <span class="c1">#     observation_space = spaces.Box(low=-1,high=1,shape=(128,))</span>
+        <span class="c1">#     return interleave_action_meaning, action_space, observation_space</span>
+        <span class="c1">#</span>
+        <span class="c1"># # TODO: all possible schedule</span>
+        <span class="c1"># if method == &quot;action_space&quot;:</span>
+        <span class="c1">#     interleave_action_meaning = [0, 1, 2, 3, 4]</span>
+        <span class="c1">#     action_space = spaces.Discrete(len(interleave_action_meaning))</span>
+        <span class="c1">#     observation_space = spaces.Box(low=-1, high=1, shape=(128,), dtype=np.float64)</span>
+        <span class="c1">#     return interleave_action_meaning, action_space, observation_space</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

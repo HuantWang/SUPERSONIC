@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.utils.environments.AutoTvm_env &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>SuperSonic.utils.environments.AutoTvm_env</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for SuperSonic.utils.environments.AutoTvm_env</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">grpc</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.service</span> <span class="kn">import</span> <span class="n">schedule_pb2</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.service</span> <span class="kn">import</span> <span class="n">schedule_pb2_grpc</span>
+<span class="c1"># 因为 RPC 应该长时间运行，考虑到性能，还需要用到并发的库。</span>
+<span class="kn">import</span> <span class="nn">time</span>  <span class="c1"># 设置系统延时,</span>
+<span class="kn">from</span> <span class="nn">concurrent</span> <span class="kn">import</span> <span class="n">futures</span>
+
+<span class="n">_ONE_DAY_IN_SECONDS</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span>  <span class="c1"># 设置服务器运行的默认时间长度</span>
+<span class="c1"># add by zc</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># 同步锁</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+
+<span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+<span class="n">lock_s</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+<span class="n">maxLen_start</span> <span class="o">=</span> <span class="mi">4000</span>
+<span class="n">init_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4000</span><span class="p">)])</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">gensim.models.doc2vec</span> <span class="kn">import</span> <span class="n">Doc2Vec</span><span class="p">,</span> <span class="n">LabeledSentence</span>
+<span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">import</span> <span class="nn">compiler_gym</span>
+<span class="kn">from</span> <span class="nn">gym.spaces</span> <span class="kn">import</span> <span class="n">Discrete</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Box</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">spaces</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># end by zc grpc</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># NeuroVectorizer RL Environment</span>
+<span class="c1"># client</span>
+<div class="viewcode-block" id="autotvm_rl"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl">[docs]</a><span class="k">class</span> <span class="nc">autotvm_rl</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+            <span class="s2">&quot;Tvm-v0&quot;</span><span class="p">,</span>
+            <span class="n">state_function</span><span class="o">=</span><span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state_function&quot;</span><span class="p">),</span>
+            <span class="n">action_function</span><span class="o">=</span><span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action_function&quot;</span><span class="p">),</span>
+            <span class="n">reward_function</span><span class="o">=</span><span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reward_function&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxLen</span> <span class="o">=</span> <span class="mi">200</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interleave_action_meaning</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxLen_start</span><span class="p">)</span>
+        <span class="p">]</span>  <span class="c1"># TODO: 根据需要更改action的空间</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">Discrete</span><span class="p">(</span>
+            <span class="n">maxLen_start</span>
+        <span class="p">)</span>  <span class="c1"># action_len</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="s2">&quot;/n=================action space=======/n&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span>  
+                <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">,)),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="autotvm_rl.reset"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(),</span> <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">init_space</span><span class="p">}</span></div>
+        <span class="c1"># self.action_space.n/2</span>
+
+<div class="viewcode-block" id="autotvm_rl.step"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.AutoTvm_env.autotvm_rl.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">grpc</span><span class="o">.</span><span class="n">insecure_channel</span><span class="p">(</span><span class="s1">&#39;localhost:50061&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">channel</span><span class="p">:</span>  
+            <span class="n">stub</span> <span class="o">=</span> <span class="n">schedule_pb2_grpc</span><span class="o">.</span><span class="n">ScheduleServiceStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span> 
+            <span class="n">response</span> <span class="o">=</span> <span class="n">stub</span><span class="o">.</span><span class="n">GetTvm</span><span class="p">(</span>
+                <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">TvmRequest</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+            <span class="p">)</span>  
+
+            <span class="n">obs</span><span class="p">,</span> <span class="n">rew</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span>
+                <span class="n">action</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">reward</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">+=</span> <span class="n">rew</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxLen</span> <span class="o">!=</span> <span class="n">response</span><span class="o">.</span><span class="n">maxLen</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">maxLen</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">maxLen</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxLen</span><span class="p">):</span>
+                    <span class="n">init_space</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxLen</span><span class="p">,</span> <span class="n">maxLen_start</span><span class="p">):</span>
+                    <span class="n">init_space</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  
+            <span class="n">init_space</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span> <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">init_space</span><span class="p">},</span>
+            <span class="n">score</span><span class="p">,</span>
+            <span class="n">done</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span> </div>
+
+    <span class="k">def</span> <span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span> <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">init_space</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

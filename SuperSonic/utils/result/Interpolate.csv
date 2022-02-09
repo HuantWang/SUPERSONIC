@@ -1,0 +1,7 @@
+t,best_exec,best_schedule
+392.820685,0.001877852,"interpolated[2].unroll(c, 3); downsampled[3].parallel(c); "
+1062.915343,0.001872101,"interpolated[2].split(y, yi, 8); interpolated[6].tile(x, y, xi, yi, 512, 256); "
+25962.46716,0.001844871,"interpolated[5].unroll(c, 3); downsampled[6].parallel(y); "
+25969.55933,0.001208416,"downsampled[5].tile(x, y, xi, yi, 8, 64); downsampled[2].vectorize(x, 8); normalize.unroll(x, 2); "
+52707.25663,0.001182415,"downsampled[2].tile(x, y, xi, yi, 16, 8); interpolated[4].unroll(x, 2); normalize.unroll(x, 2); "
+68639.98484,0.001162775,"normalize.split(y, yi, 8); normalize.unroll(x, 2); "

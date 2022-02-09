@@ -1,0 +1,491 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.policy_definition.Algorithm &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>SuperSonic.policy_definition.Algorithm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for SuperSonic.policy_definition.Algorithm</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ray</span>
+<span class="kn">from</span> <span class="nn">ray.rllib.models.catalog</span> <span class="kn">import</span> <span class="n">ModelCatalog</span>
+<span class="kn">from</span> <span class="nn">ray</span> <span class="kn">import</span> <span class="n">tune</span>
+<span class="kn">from</span> <span class="nn">ray.tune.logger</span> <span class="kn">import</span> <span class="n">TBXLogger</span><span class="p">,</span> <span class="n">CSVLogger</span><span class="p">,</span> <span class="n">JsonLogger</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">third_party.contrib.alpha_zero.models.custom_torch_models</span>
+
+<div class="viewcode-block" id="RLAlgorithms"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms">[docs]</a><span class="k">class</span> <span class="nc">RLAlgorithms</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;:class:</span>
+<span class="sd">            SuperSonic currently supports 23 RL algorithms from RLLib, covering a wide range of established RL algorithms.</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+    <span class="c1"># cleanpid(&quot;50055&quot;)</span>
+    <span class="c1"># if ray.is_initialized():</span>
+    <span class="c1">#    ray.shutdown()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct and initialize the RL algorithm parameters.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/huanting/SuperSonic/SuperSonic/logs/model_save&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_iteration</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ray_num_cpus</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_fragment_length</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgd_minibatch_size</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">1e-4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_sgd_iter</span> <span class="o">=</span> <span class="mi">20</span>
+
+        <span class="c1"># ray.init(num_cpus=self.ray_num_cpus, ignore_reinit_error=True)</span>
+
+
+<div class="viewcode-block" id="RLAlgorithms.MCTS"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms.MCTS">[docs]</a>    <span class="k">def</span> <span class="nf">MCTS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MCTS, An interface to start RL agent with MCTS algorithm.</span>
+<span class="sd">        MCTS is an RL agent originally designed for two-player games.</span>
+<span class="sd">        This version adapts it to handle single player games. The code can</span>
+<span class="sd">        be sscaled to any number of workers. It also implements the ranked</span>
+<span class="sd">        rewards (R2) strategy to enable self-play even in the one-player setting.</span>
+<span class="sd">        The code is mainly purposed to be used for combinatorial optimization.</span>
+
+<span class="sd">        :param task_config: The task_config, parameters passed to RL agent.</span>
+<span class="sd">        :param environment_path: The environment_path, tasks&#39; environment path that RL agent called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mcts_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;puct_coefficient&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
+            <span class="s2">&quot;num_simulations&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;dirichlet_epsilon&quot;</span><span class="p">:</span> <span class="mf">0.20</span><span class="p">,</span>
+            <span class="s2">&quot;dirichlet_noise&quot;</span><span class="p">:</span> <span class="mf">0.03</span><span class="p">,</span>
+            <span class="s2">&quot;argmax_tree_policy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;add_dirichlet_noise&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ranked_rewards</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;custom_model&quot;</span><span class="p">:</span> <span class="s2">&quot;dense_model&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ModelCatalog</span><span class="o">.</span><span class="n">register_custom_model</span><span class="p">(</span>
+            <span class="s2">&quot;dense_model&quot;</span><span class="p">,</span>
+            <span class="n">third_party</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">alpha_zero</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">custom_torch_models</span><span class="o">.</span><span class="n">DenseModel</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;init </span><span class="si">{</span><span class="n">task_config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_dir&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;experiment&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stoke&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> &amp;&amp; python run_synch.py </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obs_file&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;subprocess error&quot;</span><span class="p">)</span>
+
+        <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="s2">&quot;contrib/MCTS&quot;</span><span class="p">,</span>
+            <span class="n">checkpoint_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">),</span>
+            <span class="n">max_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">reuse_actors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">checkpoint_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">local_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">environment_path</span><span class="p">,</span>
+                <span class="s2">&quot;env_config&quot;</span><span class="p">:</span> <span class="n">task_config</span><span class="p">,</span>
+                <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+                <span class="s2">&quot;rollout_fragment_length&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_fragment_length</span><span class="p">,</span>
+                <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">,</span>
+                <span class="s2">&quot;sgd_minibatch_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgd_minibatch_size</span><span class="p">,</span>
+                <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+                <span class="s2">&quot;num_sgd_iter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_sgd_iter</span><span class="p">,</span>
+                <span class="s2">&quot;mcts_config&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcts_config</span><span class="p">,</span>
+                <span class="s2">&quot;ranked_rewards&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_rewards</span><span class="p">,</span>
+                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">loggers</span><span class="o">=</span><span class="p">[</span><span class="n">TBXLogger</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">exiting_interpreter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct and initialize a CompilerGym service environment.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="RLAlgorithms.PPO"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms.PPO">[docs]</a>    <span class="k">def</span> <span class="nf">PPO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                 PPO, An interface to start RL agent with PPO algorithm.</span>
+<span class="sd">                 PPO’s clipped objective supports multiple SGD passes over the same batch of experiences.</span>
+<span class="sd">                 Paper （https://arxiv.org/abs/1707.06347）</span>
+
+<span class="sd">                :param task_config: The task_config, parameters passed to RL agent.</span>
+<span class="sd">                :param environment_path: The environment_path, tasks&#39; environment path that RL agent called.</span>
+
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lamda</span> <span class="o">=</span> <span class="mf">0.95</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kl_coeff</span> <span class="o">=</span> <span class="mf">0.2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_clip_param</span> <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entropy_coeff</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fcnet_hiddens&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_dir&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;experiment&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stoke&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> &amp;&amp; python run_synch.py </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obs_file&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="s2">&quot;PPO&quot;</span><span class="p">,</span>  <span class="c1"># 内置算法PPO</span>
+            <span class="n">checkpoint_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;training_iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_iteration</span><span class="p">},</span>
+            <span class="n">max_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">reuse_actors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">checkpoint_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">local_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">environment_path</span><span class="p">,</span>
+                <span class="s2">&quot;env_config&quot;</span><span class="p">:</span> <span class="n">task_config</span><span class="p">,</span>
+                <span class="s2">&quot;lambda&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lamda</span><span class="p">,</span>
+                <span class="s2">&quot;kl_coeff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kl_coeff</span><span class="p">,</span>
+                <span class="s2">&quot;vf_clip_param&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_clip_param</span><span class="p">,</span>
+                <span class="s2">&quot;entropy_coeff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_coeff</span><span class="p">,</span>
+                <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+                <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">,</span>
+                <span class="s2">&quot;sgd_minibatch_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgd_minibatch_size</span><span class="p">,</span>
+                <span class="s2">&quot;num_sgd_iter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_sgd_iter</span><span class="p">,</span>
+                <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+                <span class="s2">&quot;rollout_fragment_length&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_fragment_length</span><span class="p">,</span>
+                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">loggers</span><span class="o">=</span><span class="p">[</span><span class="n">TBXLogger</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">exiting_interpreter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RLAlgorithms.DQN"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms.DQN">[docs]</a>    <span class="k">def</span> <span class="nf">DQN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         DQN, An interface to start RL agent with DQN algorithm.</span>
+<span class="sd">         A deep learning model to successfully learn control policies directly from high-dimensional sensory</span>
+<span class="sd">         input using reinforcement learning. The model is a convolutional neural network, trained with a</span>
+<span class="sd">         variant of Q-learning, whose input is raw pixels and whose output is a value function estimating future rewards.</span>
+
+<span class="sd">        :param task_config: The task_config, parameters passed to RL agent.</span>
+<span class="sd">        :param environment_path: The environment_path, tasks&#39; environment path that RL agent called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fcnet_hiddens&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_dir&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;experiment&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stoke&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> &amp;&amp; python run_synch.py </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obs_file&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="s2">&quot;DQN&quot;</span><span class="p">,</span>
+            <span class="n">checkpoint_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;training_iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_iteration</span><span class="p">},</span>
+            <span class="n">max_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">reuse_actors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">checkpoint_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">local_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">environment_path</span><span class="p">,</span>
+                <span class="s2">&quot;env_config&quot;</span><span class="p">:</span> <span class="n">task_config</span><span class="p">,</span>
+                <span class="s2">&quot;num_atoms&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;v_min&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">10.0</span><span class="p">,</span>
+                <span class="s2">&quot;v_max&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+                <span class="s2">&quot;noisy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;sigma0&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+                <span class="s2">&quot;dueling&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;hiddens&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">256</span><span class="p">],</span>
+                <span class="s2">&quot;double_q&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;n_step&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;prioritized_replay&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;prioritized_replay_alpha&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+                <span class="s2">&quot;prioritized_replay_beta&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
+                <span class="s2">&quot;final_prioritized_replay_beta&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
+                <span class="s2">&quot;prioritized_replay_beta_annealing_timesteps&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                <span class="s2">&quot;prioritized_replay_eps&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
+                <span class="s2">&quot;before_learn_on_batch&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;training_intensity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;worker_side_prioritization&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+                <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+                <span class="s2">&quot;rollout_fragment_length&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="s2">&quot;timesteps_per_iteration&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;learning_starts&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;normalize_actions&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">loggers</span><span class="o">=</span><span class="p">[</span><span class="n">TBXLogger</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">exiting_interpreter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RLAlgorithms.QLearning"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms.QLearning">[docs]</a>    <span class="k">def</span> <span class="nf">QLearning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         Q-networks, An interface to start RL agent with Q-networks algorithm.</span>
+<span class="sd">         Use two Q-networks (instead of one) for action-value estimation.</span>
+<span class="sd">         Each Q-network will have its own target network.</span>
+
+<span class="sd">        :param task_config: The task_config, parameters passed to RL agent.</span>
+<span class="sd">        :param environment_path: The environment_path, tasks&#39; environment path that RL agent called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_dir&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;experiment&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stoke&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> &amp;&amp; python run_synch.py </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stoke_path&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obs_file&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="s2">&quot;SAC&quot;</span><span class="p">,</span>
+            <span class="n">checkpoint_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;training_iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_iteration</span><span class="p">},</span>
+            <span class="n">max_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">reuse_actors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">checkpoint_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">local_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">environment_path</span><span class="p">,</span>
+                <span class="s2">&quot;env_config&quot;</span><span class="p">:</span> <span class="n">task_config</span><span class="p">,</span>
+                <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">,</span>
+                <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+                <span class="s2">&quot;rollout_fragment_length&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_fragment_length</span><span class="p">,</span>
+                <span class="s2">&quot;timesteps_per_iteration&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;learning_starts&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;normalize_actions&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="c1"># &quot;model&quot;: self.model,</span>
+            <span class="p">},</span>
+            <span class="n">loggers</span><span class="o">=</span><span class="p">[</span><span class="n">TBXLogger</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">exiting_interpreter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RLAlgorithms.Algorithms"><a class="viewcode-back" href="../../../supersonic/TaskDefinition.html#SuperSonic.policy_definition.Algorithm.RLAlgorithms.Algorithms">[docs]</a>    <span class="k">def</span> <span class="nf">Algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy_algorithm</span><span class="p">,</span> <span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Algorithms, using to call different RL algorithms</span>
+
+<span class="sd">        :param policy_algorithm:</span>
+<span class="sd">        :param task_config: The task_config, parameters passed to RL agent.</span>
+<span class="sd">        :param environment_path: The environment_path, tasks&#39; environment path that RL agent called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">policy_algorithm</span> <span class="o">==</span> <span class="s2">&quot;MCTS&quot;</span><span class="p">:</span>
+            <span class="n">RLAlgorithms</span><span class="p">()</span><span class="o">.</span><span class="n">MCTS</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">policy_algorithm</span> <span class="o">==</span> <span class="s2">&quot;PPO&quot;</span><span class="p">:</span>
+            <span class="n">RLAlgorithms</span><span class="p">()</span><span class="o">.</span><span class="n">PPO</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">policy_algorithm</span> <span class="o">==</span> <span class="s2">&quot;DQN&quot;</span><span class="p">:</span>
+            <span class="n">RLAlgorithms</span><span class="p">()</span><span class="o">.</span><span class="n">DQN</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">policy_algorithm</span> <span class="o">==</span> <span class="s2">&quot;QLearning&quot;</span><span class="p">:</span>
+            <span class="n">RLAlgorithms</span><span class="p">()</span><span class="o">.</span><span class="n">QLearning</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="n">environment_path</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

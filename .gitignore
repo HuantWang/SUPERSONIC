@@ -1,0 +1,28 @@
+# add by zjq
+SuperSonic/logs/
+SuperSonic/SQL/
+logs
+AE/
+
+tasks/*
+
+
+SuperSonic/policy_search/logs
+SuperSonic/policy_search/SuperSonic
+test.py
+
+third_party/googletest-main*
+third_party/grpc*
+third_party/ray*
+
+.vscode
+.pkl*
+.idea
+.git_old
+
+
+
+git branch -m latest master
+git fetch origin
+git branch -u origin/master master
+git remote set-head origin -a

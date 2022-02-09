@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="About" href="about.html" />
+    <link rel="prev" title="Indices and tables" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-supersonic">Installing SuperSonic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>SuperSonic, a new open-source framework to allow compiler developers to integrate
+RL into compilers easily, regardless of their RL expertise. SuperSonic supports
+customizable RL architecture compositions to target a wide range of optimization
+tasks. A key feature of SuperSonic is the use of deep RL and multi-task learning
+techniques to develop a meta-optimizer to automatically find and tune the right RL
+architecture from training benchmarks. It uses the <a class="reference external" href="https://compilergym.com/">CompilerGym</a>,
+<a class="reference external" href="https://gym.openai.com/">OpenAI Gym</a>, <a class="reference external" href="https://docs.ray.io/en/latest/">Ray</a>
+interfaces to expose reinforcement learning.</p>
+<div class="contents local topic" id="topics-covered">
+<p class="topic-title">Topics covered:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#key-concepts" id="id1">Key Concepts</a></p></li>
+<li><p><a class="reference internal" href="#installing-supersonic" id="id2">Installing SuperSonic</a></p></li>
+</ul>
+</div>
+<section id="key-concepts">
+<h2><a class="toc-backref" href="#id1">Key Concepts</a><a class="headerlink" href="#key-concepts" title="Permalink to this headline">¶</a></h2>
+<p>Supersonic enables developers to express the optimization space. It automatically
+searches for the optimal RL policy, and provides an automated RL servicing
+environment.</p>
+<img alt="_images/overview.png" src="_images/overview.png" />
+<p>The ingredients for reinforcement learning that SuperSonic provides are:</p>
+<ul class="simple">
+<li><p><strong>Task Definition</strong>:</p></li>
+</ul>
+<p>The user-defined client RL search space typically includes candidate functions
+(or models) for representing the environment state, objective
+functions for computing the reward, and the set of possible actions that can be
+taken from a given state. This search space definition can optionally include a
+chosen set of RL exploration algorithms and transition functions to be used by a
+client RL algorithm. Furthermore, the compiler engineer also needs to provide a
+run function, which provides the measurement of an action to compute the reward.</p>
+<ul class="simple">
+<li><p><strong>Client RL search</strong>:</p></li>
+</ul>
+<p>Given a client RL search space, the SuperSonic meta-optimizer automatically finds a suitable client RL architecture (i.e.,
+&lt;state function, transition function, reward function, RL
+algorithm&gt; and potentially a value function) from training benchmarks
+using up to 𝑛 trial runs.</p>
+<ul class="simple">
+<li><p><strong>Client RL Deployment</strong>:</p></li>
+</ul>
+<p>SuperSonic provides APIs to load and reuse the stored objects
+to optimize any new program. To apply amtuned RL, SuperSonic
+creates a session to apply a standard
+RL loop to optimize the input program by using the chosen
+RL exploration algorithms to select an action for a given
+state. For example, the state could be a vector recording the
+last 𝑛 compiler options added into the compiler flags or a
+DNN.</p>
+<p>Our goal is to allow compiler developers to integrate RL
+into compilers easily, regardless of their RL expertise.</p>
+</section>
+<section id="installing-supersonic">
+<h2><a class="toc-backref" href="#id2">Installing SuperSonic</a><a class="headerlink" href="#installing-supersonic" title="Permalink to this headline">¶</a></h2>
+<p>Checkout to <a class="reference external" href="https://github.com/HuantWang/SUPERSONIC">install SuperSonic from source</a>.
+Installing from source gives you the maximum flexibility to configure the build effectively from the official source releases.
+Install the latest CompilerGym release: See <a class="reference external" href="https://github.com/HuantWang/SUPERSONIC/blob/master/INSTALL.md">INSTALL.md</a> for alternative installation methods.</p>
+<p>If you would like to quickly try out SuperSonic or run some demo and tutorials, you can checkout install from Docker.</p>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="about.html" class="btn btn-neutral float-right" title="About" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Indices and tables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SuperSonic.utils.environments.CSR_env &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>SuperSonic.utils.environments.CSR_env</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for SuperSonic.utils.environments.CSR_env</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">gym.spaces</span> <span class="kn">import</span> <span class="n">Discrete</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Box</span>
+<span class="kn">from</span> <span class="nn">compiler_gym.envs.llvm.llvm_env</span> <span class="kn">import</span> <span class="n">make_benchmark</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+
+
+<div class="viewcode-block" id="csr_rl"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.CSR_env.csr_rl">[docs]</a><span class="k">class</span> <span class="nc">csr_rl</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A :class:</span>
+<span class="sd">            This task is concerned with determining the LLVM passes and their order to minimize the code size.</span>
+<span class="sd">            Following the setup of CompilerGym, we compute the code size reduction by measuring the ratio of</span>
+<span class="sd">            LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.</span>
+<span class="sd">            This metric is platform-independent and deterministic.</span>
+
+<span class="sd">        Source:</span>
+<span class="sd">            This environment is following the setup of CompilerGym(https://github.com/facebookresearch/CompilerGym).</span>
+
+
+<span class="sd">        Observation:</span>
+<span class="sd">            Type: Box(0, 9223372036854775807, (56,), int64)</span>
+<span class="sd">            The Autophase observation space is a 56-dimension integer feature vector summarizing the static LLVM-IR representation.</span>
+<span class="sd">            It is described in &#39;AutoPhase: Juggling HLS phase orderings in random forests with deep reinforcement learning&#39;.</span>
+<span class="sd">            paper link: https://proceedings.mlsys.org/paper/2020/file/4e732ced3463d06de0ca9a15b6153677-Paper.pdf</span>
+
+
+<span class="sd">        Actions:</span>
+<span class="sd">            Type: Discrete(123)</span>
+<span class="sd">            Num      Action                         Description</span>
+<span class="sd">            0        -add-discriminators            Add DWARF path discriminators.</span>
+<span class="sd">            1        -adce                          Aggressive Dead Code Elimination.</span>
+<span class="sd">            2        -aggressive-instcombine        Combine pattern based expressions.</span>
+<span class="sd">            3        -alignment-from-assumptions    Replaces an instruction&#39;s opcode with a new one that takes operands of the same type.</span>
+<span class="sd">            4        -always-inline                 Inliner for always_inline functions.</span>
+<span class="sd">            ... ...</span>
+
+<span class="sd">            120      -strip                         Strip all symbols from a module.</span>
+<span class="sd">            121      -tailcallelim                  Tail Call Elimination.</span>
+<span class="sd">            122      -mergereturn                   Unify function exit nodes.</span>
+
+
+<span class="sd">        Reward:</span>
+<span class="sd">            In all cases, lower code size is better. We compute the code size reduction by measuring the ratio of</span>
+<span class="sd">            LLVM IR instruction count reduction with respect to the LLVM -Oz code size optimization option.</span>
+
+<span class="sd">        Starting State:</span>
+<span class="sd">            All observations are assigned a uniform random value in [-1..1]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Defines the reinforcement leaning environment. Initialise with an environment.</span>
+
+<span class="sd">                    :param env_config: including  &quot;state_function&quot;, &quot;action_function&quot;, &quot;reward_function&quot;, &quot;observation_space&quot;</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="c1"># self.init_from_env_config(env_config)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sql_path</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sql_path&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarks</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;benchmark&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_path&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pass_path</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pass_path&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deadline</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;deadline&quot;</span><span class="p">)</span>
+        <span class="c1"># print(self.benchmarks)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+            <span class="s2">&quot;llvm-autophase-ic-v0&quot;</span><span class="p">,</span>  <span class="c1"># selects the compiler to use</span>
+            <span class="n">benchmark</span><span class="o">=</span><span class="n">make_benchmark</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmarks</span><span class="p">]</span>
+            <span class="p">),</span>  <span class="c1"># selects the program to compile</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">Discrete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span>
+                <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">,)),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">episode_reward</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># record best</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;seed&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_command</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">env_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;seed&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># self.env.init()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;seed:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="csr_rl.reset"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.CSR_env.csr_rl.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; reset the RL environment.</span>
+<span class="sd">                        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">episode_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(),</span>
+            <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="csr_rl.step"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.CSR_env.csr_rl.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take a step.</span>
+
+<span class="sd">        :param action: An action, or a sequence of actions. When multiple</span>
+<span class="sd">                actions are provided the observation and reward are returned after</span>
+<span class="sd">                running all of the actions.</span>
+<span class="sd">        :return: A tuple of observation, observation_mask, score, done, and info.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">used_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">benchmarks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarks</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pass_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">benchmarks</span><span class="si">}</span><span class="s2">_pass.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;=================Step======================</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">actions:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">actions</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;command line:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">commandline</span><span class="p">()</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;time=</span><span class="si">{</span><span class="n">used_time</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">,action_len=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span><span class="si">}</span><span class="s2">,episode_reward=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">episode_reward</span><span class="si">:</span><span class="s2">.3%</span><span class="si">}</span><span class="s2">,reward_all=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="si">:</span><span class="s2">.3%</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sql_path</span>
+            <span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;INSERT or IGNORE INTO CSR (TIME, BENCHMARK, RESULT, REWARD) </span><span class="se">\</span>
+<span class="s2">                            VALUES (?, ?, ?, ?)&quot;</span>
+            <span class="c1"># print(&quot;time&quot;,round(time.time() - self.time))</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">sql</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                    <span class="n">benchmarks</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">commandline</span><span class="p">(),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">episode_reward</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="n">obs</span><span class="p">,</span> <span class="n">rew</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">+=</span> <span class="n">rew</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">episode_reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_reward</span> <span class="o">+</span> <span class="n">rew</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">episode_reward</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">episode_reward</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">actions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">commandline</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
+            <span class="n">used_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+
+            <span class="k">if</span> <span class="n">used_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">deadline</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">benchmarks</span><span class="si">}</span><span class="s2">_result_ppo.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="c1"># pass_time = time.time() - self.time</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;actions</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_actions</span><span class="p">)</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">command_line:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">best_command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;seeds:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">reward: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2"> &quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="c1"># print(f&quot;time={used_time},quality_finally={self.view:.3%}&quot;)</span>
+            <span class="c1"># print(&quot;action_masks&quot;,np.ones((self.env.action_space.n,)))</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span> <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)},</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">,</span>
+            <span class="n">done</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="csr_rl.set_state"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.CSR_env.csr_rl.set_state">[docs]</a>    <span class="k">def</span> <span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set policy to specific state and action mask.</span>
+
+<span class="sd">        :param state: Current reward and environments</span>
+<span class="sd">        :return: state and action mask</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fork</span><span class="p">()</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">observation</span><span class="p">[</span><span class="s2">&quot;Autophase&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span>
+            <span class="s2">&quot;action_mask&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="csr_rl.get_state"><a class="viewcode-back" href="../../../../supersonic/utils.html#SuperSonic.utils.environments.CSR_env.csr_rl.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns actor state.</span>
+
+<span class="sd">        :return: current environment and reward</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">env_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">fork</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">env_1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_reward</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

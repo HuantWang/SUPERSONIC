@@ -1,0 +1,586 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>compiler_gym.envs.optimization.Halide &mdash; SuperSonic 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> SuperSonic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Frequently Asked Questions</a></li>
+</ul>
+<p><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/TaskDefinition.html">SuperSonic.TasksDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/policy_search.html">SuperSonic.policy_search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supersonic/utils.html">SuperSonic.utils</a></li>
+</ul>
+<p><span class="caption-text">Tutorial Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Halide.html">Tutorial.Halide.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/TVM.html">Tutorial.AutoTvm.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/CSR.html">Tutorial.CSR.Env_register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../case_study/Stoke.html">Tutorial.Stoke.Env_register</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SuperSonic</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>compiler_gym.envs.optimization.Halide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for compiler_gym.envs.optimization.Halide</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classic cart-pole system implemented by Rich Sutton et al.</span>
+<span class="sd">Copied from http://incompleteideas.net/sutton/book/code/pole.c</span>
+<span class="sd">permalink: https://perma.cc/C9ZM-652R</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">spaces</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">gym.utils</span> <span class="kn">import</span> <span class="n">seeding</span>
+<span class="kn">from</span> <span class="nn">gym.spaces</span> <span class="kn">import</span> <span class="n">Discrete</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Box</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">gensim.models.doc2vec</span> <span class="kn">import</span> <span class="n">Doc2Vec</span>
+
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.action</span> <span class="kn">import</span> <span class="n">action_functions</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.observation</span> <span class="kn">import</span> <span class="n">observation_function</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.policy_definition.reward</span> <span class="kn">import</span> <span class="n">reward_function</span>
+
+<span class="c1"># add by zc</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># import shutilobservation_function</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">grpc</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.service</span> <span class="kn">import</span> <span class="n">schedule_pb2</span>
+<span class="kn">from</span> <span class="nn">SuperSonic.service</span> <span class="kn">import</span> <span class="n">schedule_pb2_grpc</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+
+<span class="c1"># add for logging</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">stuball</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">f</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="HalideEnv"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv">[docs]</a><span class="k">class</span> <span class="nc">HalideEnv</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A :class:</span>
+<span class="sd">        Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages.</span>
+<span class="sd">        This task builds upon Halide version 10. Our evaluation uses ten Halide applications that have been heavily tested on the Halide</span>
+<span class="sd">        compiler. We measure the execution time of each benchmark when processing three image datasets provided by the Halide benchmark suite.</span>
+<span class="sd">        The benchmarks are optimized to run on a multi-core CPU.</span>
+
+<span class="sd">    Source:</span>
+<span class="sd">        This environment corresponds to the version of the Halide. (https://github.com/halide/Halide)</span>
+<span class="sd">        paper link: https://people.csail.mit.edu/jrk/halide-pldi13.pdf</span>
+
+<span class="sd">    Observation:</span>
+<span class="sd">        Type: Box(100)</span>
+<span class="sd">        Pipeline’s schedule will be convert to vectors by different embedding approaches,</span>
+<span class="sd">        e.g. Word2vec, Doc2vec, CodeBert ...</span>
+
+<span class="sd">    Actions:</span>
+<span class="sd">        Type: Discrete(4)</span>
+<span class="sd">        Num      Action      Description</span>
+<span class="sd">        0        adding      Adds an optimization to the stage.</span>
+<span class="sd">        1        removing    Removes an optimization to the stage.</span>
+<span class="sd">        2        decreasing  Decreases the value (by one) of an enabled parameterized option.</span>
+<span class="sd">        3        increasing  Increases the value (by one) of an enabled parameterized option.</span>
+
+
+<span class="sd">    Reward:</span>
+<span class="sd">        In all cases, lower cost is better. We measure the execution time of each benchmark when processing three image</span>
+<span class="sd">        datasets provided by the Halide benchmark suite.</span>
+
+<span class="sd">    Starting State:</span>
+<span class="sd">        All observations are assigned a uniform random value in [-1..1]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">algorithm_id</span><span class="p">,</span>
+        <span class="n">input_image</span><span class="p">,</span>
+        <span class="n">max_stage_directive</span><span class="p">,</span>
+        <span class="n">log_path</span><span class="p">,</span>
+        <span class="n">state_function</span><span class="p">,</span>
+        <span class="n">action_function</span><span class="p">,</span>
+        <span class="n">reward_function</span><span class="p">,</span>
+    <span class="p">):</span>  <span class="c1"># get</span>
+        <span class="sd">&quot;&quot;&quot; Defines the reinforcement leaning environment. Initialise with an environment.</span>
+
+<span class="sd">        :param algorithm_id: Encoding of halide benchmark.</span>
+<span class="sd">        :param input_image: The image datasets to measure halide benchmark.</span>
+<span class="sd">        :param max_stage_directive:  Max scheduling directives that will be applied to the pipeline stages.</span>
+<span class="sd">        :param log_path:The path to save result.</span>
+<span class="sd">        :param state_function:  a state function that can summarize the program after each action as a</span>
+<span class="sd">                                finite feature vector.</span>
+<span class="sd">        :param action_function: an action function that can discrete set of actions or transformations that can be applied</span>
+<span class="sd">                                to a program, such as passes in a compiler</span>
+<span class="sd">        :param reward_function: a reward function that reports the quality of the actions taken so far.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">insecure_channel</span><span class="p">(</span><span class="s2">&quot;localhost:50051&quot;</span><span class="p">)</span>
+        <span class="k">global</span> <span class="n">stuball</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">csv_writer</span>
+        <span class="n">stuball</span> <span class="o">=</span> <span class="n">schedule_pb2_grpc</span><span class="o">.</span><span class="n">ScheduleServiceStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;result.csv&quot;</span><span class="p">),</span> <span class="s2">&quot;w+&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+        <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;best_exec&quot;</span><span class="p">,</span> <span class="s2">&quot;best_schedule&quot;</span><span class="p">])</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleInitRequest</span><span class="p">(</span>
+            <span class="n">algorithm_id</span><span class="o">=</span><span class="n">algorithm_id</span><span class="p">,</span>
+            <span class="n">input_image</span><span class="o">=</span><span class="n">input_image</span><span class="p">,</span>
+            <span class="n">max_stage_directive</span><span class="o">=</span><span class="n">max_stage_directive</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">stuball</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">max_stage</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">max_directive</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">schedule_map_range</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">init_time_sec</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_exec_time_sec</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">init_time_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_exec_time_sec</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">init_time_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_stage</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">max_stage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_stage_directive</span> <span class="o">=</span> <span class="n">max_stage_directive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_count</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># find mdp interface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_function</span> <span class="o">=</span> <span class="n">state_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_function</span> <span class="o">=</span> <span class="n">action_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span> <span class="o">=</span> <span class="n">reward_function</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_scale</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="n">response</span><span class="o">.</span><span class="n">init_time_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_reward</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout_error_reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_reward</span> <span class="o">*</span> <span class="n">response</span><span class="o">.</span><span class="n">max_stage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noop_reward</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_low</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_high</span> <span class="o">=</span> <span class="mi">1000</span>
+
+        <span class="c1"># obsv_size = response.max_stage * max_stage_directive * (2 + response.max_param)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">action_functions</span><span class="p">()</span><span class="o">.</span><span class="n">init_actions</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">schedule_map_range</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_low</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_high</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_function</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># self.action_space = spaces.Discrete(response.schedule_map_range)</span>
+        <span class="c1"># self.observation_space = spaces.Box(low=obsv_low, high=obsv_high, shape=(self.obsv_size,), dtype=np.int32)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="n">seeding</span><span class="o">.</span><span class="n">np_random</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># #add for grpc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<div class="viewcode-block" id="HalideEnv.get_reward"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.get_reward">[docs]</a>    <span class="k">def</span> <span class="nf">get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate reward with method &quot;reward_function&quot;.</span>
+
+<span class="sd">                    :param action: What will agent do in next step.</span>
+<span class="sd">                    :return: return a reward score after calculating.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="n">reward</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span> <span class="o">=</span> <span class="n">reward_function</span><span class="p">()</span><span class="o">.</span><span class="n">get_reward</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">exec_time_sec</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span><span class="p">,</span>
+            <span class="n">weight</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_scale</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_function</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">reward</span></div>
+        <span class="c1"># if self.response.exec_time_sec &lt; self.min_exec_time_sec:</span>
+        <span class="c1">#     exec_diff = self.min_exec_time_sec - self.response.exec_time_sec</span>
+        <span class="c1">#     self.min_exec_time_sec = self.response.exec_time_sec</span>
+        <span class="c1">#     return exec_diff * self.reward_scale</span>
+        <span class="c1"># return 0.0</span>
+
+<div class="viewcode-block" id="HalideEnv.get_map"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.get_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; encode the schedule as observation.</span>
+<span class="sd">                    :param request: This is requset from grpc.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="c1"># collect the map number of self.map</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">elem_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">elem_id</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">p</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">map_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_count</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+        <span class="c1"># return observation</span>
+
+<div class="viewcode-block" id="HalideEnv.get_obs"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.get_obs">[docs]</a>    <span class="k">def</span> <span class="nf">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; feedback the observation with method &quot;observation_function&quot;.</span>
+
+<span class="sd">                    :param reward:A reward, to describe how the agent &quot;ought&quot; to behave.</span>
+<span class="sd">                    :param done: The RL engine&#39;s state,ture or false.</span>
+<span class="sd">                    :return: A tuple of observation, observation_mask, score, done, and info.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="n">ek</span> <span class="o">=</span> <span class="s2">&quot;best_exec&quot;</span>
+        <span class="n">sk</span> <span class="o">=</span> <span class="s2">&quot;best_schedule&quot;</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="n">ek</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span><span class="p">,</span> <span class="n">sk</span><span class="p">:</span> <span class="s2">&quot;n/a&quot;</span><span class="p">}</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\$[0-9]*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">error</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_exec_time_sec</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_exec_time_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">info</span><span class="p">[</span><span class="n">sk</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\$[0-9]*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+            <span class="n">epinfo</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+                <span class="s2">&quot;best_exec&quot;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">ek</span><span class="p">],</span>
+                <span class="s2">&quot;best_schedule&quot;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">sk</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">epinfo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">csv_writer</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;enter write&quot;</span><span class="p">)</span>
+                <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span>
+                    <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">info</span><span class="p">[</span><span class="n">ek</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="n">sk</span><span class="p">]]</span>
+                <span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="s2">&quot;/home/SuperSonic/tasks/src/opt_test/MCTS/examples/supersonic.db&quot;</span>
+        <span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;INSERT INTO HALIDE (TIME, RESULT,ACTIONS,REWARD,LOG) </span><span class="se">\</span>
+<span class="s2">                                      VALUES (?, ?, ?, ?, ?)&quot;</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">sql</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="p">),</span>
+                <span class="n">code</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">),</span>
+                <span class="n">reward</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># c.execute(&quot;INSERT INTO HALIDE (RESULT,ACTIONS,REWARD,LOG) \</span>
+        <span class="c1">#                               VALUES (code, self.actions, reward, self.min_exec_time_sec )&quot;)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># select dbl</span>
+
+        <span class="c1"># cursor = c.execute(&quot;SELECT RESULT,ACTIONS,REWARD,LOG  from HALIDE&quot;)</span>
+        <span class="c1"># for row in cursor:</span>
+        <span class="c1">#     print(&quot;RESULT = &quot;, row[0])</span>
+        <span class="c1">#     print(&quot;ACTIONS = &quot;, row[1])</span>
+        <span class="c1">#     print(&quot;REWARD = &quot;, row[2])</span>
+        <span class="c1">#     print(&quot;LOG = &quot;, row[3], &quot;\n&quot;)</span>
+        <span class="c1"># conn.close()</span>
+
+        <span class="c1"># embedding obs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_function</span> <span class="o">=</span> <span class="s2">&quot;Actionhistory&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">observation_function</span><span class="p">()</span><span class="o">.</span><span class="n">get_observation</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsv_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_function</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">done</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">error</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_stage</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_stage_directive</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_stage</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_stage_directive</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">()</span>
+
+        <span class="c1"># print(np.array(self.map))</span>
+        <span class="c1"># done = True</span>
+        <span class="c1"># print(f&quot;done:f{done}&quot;)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+<div class="viewcode-block" id="HalideEnv.step"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># get</span>
+        <span class="sd">&quot;&quot;&quot;Take a step.</span>
+
+<span class="sd">                    :param action: An action, or a sequence of actions. When multiple</span>
+<span class="sd">                            actions are provided the observation and reward are returned after</span>
+<span class="sd">                            running all of the actions.</span>
+<span class="sd">                    :return: A tuple of observation, reward, done, and info. Observation and</span>
+<span class="sd">                            reward are None if default observation/reward is not set. If done is</span>
+<span class="sd">                            True, observation and reward may also be None (e.g. because the</span>
+<span class="sd">                            service failed).</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">action</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) invalid&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">action</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">action</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noop_reward</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_reward</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleStepRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">map_code</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">stuball</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">exec_timeout</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">exec_error</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout_error_reward</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">exec_error</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_reward</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_map</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_reward</span><span class="p">(</span><span class="n">action</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HalideEnv.reset"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># get</span>
+        <span class="sd">&quot;&quot;&quot; reset the RL environment.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleResetRequest</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">stuball</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_exec_time_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_exec_time_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_count</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># random a num in actions</span>
+
+        <span class="c1"># get_request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleStepRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">map_code</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">stuball</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>  <span class="c1"># reset-&gt;step</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">exec_error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">response</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_map</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>  <span class="c1"># 对比此处_state函数应该对比get_obs函数</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_reward</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HalideEnv.render"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">):</span>  <span class="c1"># get</span>
+        <span class="sd">&quot;&quot;&quot; record the schedule.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleRenderRequest</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">stuball</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line_content</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">schedule_str</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line_content</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HalideEnv.close"><a class="viewcode-back" href="../../../../case_study/Halide.html#compiler_gym.envs.optimization.HalideEnv.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># get</span>
+        <span class="sd">&quot;&quot;&quot; close grpc connection.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">schedule_pb2</span><span class="o">.</span><span class="n">ScheduleCloseRequest</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stub</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#     channel = grpc.insecure_channel(&quot;localhost:50051&quot;)</span>
+<span class="c1">#     stub = schedule_pb2_grpc.ScheduleServiceStub(channel)</span>
+<span class="c1">#     env = HalideEnv(algorithm_id=11,input_image=&#39;alfaromeo_gray_64x.png&#39;,max_stage_directive=8,log_path=&quot;result&quot;,stub=stub)</span>
+<span class="c1">#     env.reset()</span>
+<span class="c1">#     env.step(env.action_space.sample())</span>
+<span class="c1">#     print(env.state)</span>
+<span class="c1">#     env.step(env.action_space.sample())</span>
+<span class="c1">#     print(env.state)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright University of Leeds, Northwest University
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
