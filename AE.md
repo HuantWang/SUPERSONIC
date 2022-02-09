@@ -55,7 +55,7 @@ The following steps describe how to evaluate each individual case study. In each
 
 
 
-#### 2.1 Task definition
+### 2.1 Task definition
 
 A compiler developer can use the Supersonic API to define the optimization problem. This is done by creating an RL policy interface. The definition includes a list of client RL components for the meta-optimizer to search over.
 
@@ -76,7 +76,7 @@ ActionFunctions=["init"]
 
 
 
-#### 2.2. Case Study 1: **Optimizing Image Pipelines**
+### 2.2. Case Study 1: **Optimizing Image Pipelines**
 
   The results correspond to Figure 3 of the submitted manuscript. 
 
