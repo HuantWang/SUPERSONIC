@@ -53,9 +53,7 @@ Then, go to the root directory of our tool:
 
 The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
 
-
-
-### 2.1 Task definition
+#### 2.1 Task definition
 
 A compiler developer can use the Supersonic API to define the optimization problem. This is done by creating an RL policy interface. The definition includes a list of client RL components for the meta-optimizer to search over.
 
@@ -80,7 +78,7 @@ ActionFunctions=["init"]
 
   The results correspond to Figure 3 of the submitted manuscript. 
 
-##### 2.2.1 Client RL search and deployment
+#### 2.2.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -98,7 +96,7 @@ You can change the following parameters:
 
 ```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
-##### 2.2.2 Testing the tuned RL client
+#### 2.2.2 Testing the tuned RL client
 
 To measure the runtime of the resulting binary, we run each benchmark at least 100 times on an unloaded machine. Using ```get_runtime.py``` to run data's result and get a speedup. Here are some parameter setting to calculate the halide' result.
 
@@ -127,7 +125,7 @@ Notes: Make sure the environment can compiler the halide binary. The GCC version
 
   The results correspond to Figure 4 of the submitted manuscript. 
 
-##### 2.3.1 Find the best policy and deploy it to the client to get optimized results
+#### 2.3.1 Find the best policy and deploy it to the client to get optimized results
 
 (*approximate runtime:  ~3 hours*)
 
@@ -145,7 +143,7 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 
 ```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
-##### 2.3.2 Testing the tuned RL client
+#### 2.3.2 Testing the tuned RL client
 
 ```shell
 (docker) $ cd tasks/tvm/zjq/benchmark/ && python model_optimization.py --opt "rl" --do "test"
@@ -155,7 +153,7 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 
 The results correspond to Figure 5 of the submitted manuscript. 
 
-##### 2.4.1 Client RL search and deployment
+#### 2.4.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -179,7 +177,7 @@ Notes: Make sure the environment can import the compiler_gym.
 
 The results correspond to Figure 6 of the submitted manuscript. 
 
-##### 2.5.1 Client RL search and deployment
+#### 2.5.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -197,7 +195,7 @@ Notes: Make sure the environment can compiler the Stoke. (Following [this instru
 
 ```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
-##### 2.5.2 Testing the tuned RL client
+#### 2.5.2 Testing the tuned RL client
 
 ```shell
 # Concatenate the results with the original data file
