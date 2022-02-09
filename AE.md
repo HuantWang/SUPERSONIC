@@ -78,7 +78,7 @@ ActionFunctions=["init"]
 
   The results correspond to Figure 3 of the submitted manuscript. 
 
-#### 2.2.1 Client RL search and deployment
+#### 2.2.1 Client RL search and testing
 
 (*approximate runtime:  ~12 hours*)
 
@@ -125,7 +125,7 @@ Notes: Make sure the environment can compiler the halide binary. The GCC version
 
   The results correspond to Figure 4 of the submitted manuscript. 
 
-#### 2.3.1 Find the best policy and deploy it to the client to get optimized results
+#### 2.3.1 Find the best policy and testing
 
 (*approximate runtime:  ~3 hours*)
 
@@ -153,7 +153,7 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 
 The results correspond to Figure 5 of the submitted manuscript. 
 
-#### 2.4.1 Client RL search and deployment
+#### 2.4.1 Client RL search and testing
 
 (*approximate runtime:  ~12 hours*)
 
@@ -177,7 +177,7 @@ Notes: Make sure the environment can import the compiler_gym.
 
 The results correspond to Figure 6 of the submitted manuscript. 
 
-#### 2.5.1 Client RL search and deployment
+#### 2.5.1 Client RL search and testing
 
 (*approximate runtime:  ~12 hours*)
 
