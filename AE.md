@@ -12,7 +12,7 @@ Although we have worked hard to ensure our AE scripts are robust, our tool remai
 
 ## ★ Main Results 
 
-The main results of our work are presented in Figures 3-6 in the submitted paper, which compare the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
+The main results of our work are presented in Figures 3-6 in the submitted paper, which compares the SuperSonic-tuned RL client against alternative search techniques on each of the four case studies. 
 
 ## ★ Docker Image 
 
@@ -102,7 +102,7 @@ To measure the runtime of the resulting binary, we run each benchmark at least 1
 
 `--task`: The case to be calculated. In this case, we set it to halide.
 
-`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2， which is used for the *interpolate* dataset. 
+`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2 refer data *interpolate*.
 
 `--log_file`: The log file corresponds to the data is generated after the system-SuperSonic run. This  default log file path is in *<SUPERSONIC-root-path/SuperSonic/utils/result>*.
 
@@ -135,6 +135,13 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
 ```
 
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditTvmEnv-v0. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "tasks/tvm/zjq/benchmark/". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
 #### 2.3.2 Testing the tuned RL client
 
@@ -146,7 +153,7 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 
 The results correspond to Figure 5 of the submitted manuscript. 
 
-#### 2.4.1 Client RL search and testing
+#### 2.4.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -156,6 +163,13 @@ Notes: Make sure the environment can import the compiler_gym.
 (docker) $ python  SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 ```
 
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditCSREnv-v0. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "../../tasks/CSR/DATA". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
 
 
@@ -163,7 +177,7 @@ Notes: Make sure the environment can import the compiler_gym.
 
 The results correspond to Figure 6 of the submitted manuscript. 
 
-#### 2.5.1 Client RL search and testing
+#### 2.5.1 Client RL search and deployment
 
 (*approximate runtime:  ~12 hours*)
 
@@ -173,16 +187,17 @@ Notes: Make sure the environment can compiler the Stoke. (Following [this instru
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70 ```
 ```
 
+```--env ``` The task environment that passed to RL client (Include 4 cases: BanditStokeEnv-v0, BanditTvmEnv-v0, BanditCSREnv-v0, BanditHalideEnv-v0). In this case, we set to BanditStokeEnv-v0. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the halide benchmarks' path "tasks/stoke/example/hacker". 
+
+ ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
+
+```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
 
 #### 2.5.2 Testing the tuned RL client
 
 ```shell
-# Concatenate the results with the original data file
-(docker) $ cd tasks/stoke/example/hacker/pxx
-(docker) $ stoke replace --config replace.conf
-
-# Computing the running time
-(docker) $ cd ../../
-(docker) $ python RunTime.py hacker/pxx 100000000
-(docker) $ python CalculateTime.py speedup
+# <data_number> from 1 to 25
+(docker) $ python tasks/get_runtime.py --task stoke --hacker_number <data_number>
 ```
