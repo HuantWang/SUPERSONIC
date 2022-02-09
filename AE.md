@@ -102,7 +102,7 @@ To measure the runtime of the resulting binary, we run each benchmark at least 1
 
 `--task`: The case to be calculated. In this case, we set it to halide.
 
-`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2 refer data *interpolate*.
+`--algorithm_id`: Representing different halide data range 1-10. The default setting is 2, which is used for the *interpolate* dataset.
 
 `--log_file`: The log file corresponds to the data is generated after the system-SuperSonic run. This  default log file path is in *<SUPERSONIC-root-path/SuperSonic/utils/result>*.
 
