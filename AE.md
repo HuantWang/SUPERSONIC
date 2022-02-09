@@ -117,7 +117,7 @@ Notes: Make sure the environment can compiler the halide binary. The GCC version
 (docker) $ cd <SUPERSONIC-root-path>
 (docker) $ python tasks/get_runtime.py  --task halide --data <halide_data> --log_file <log_file_path> --result_path <result_to_save>
 #demo:python tasks/get_runtime.py  --task halide --data 'interpolate' --log_file  "tasks/get_runtime_save/interpolate_result.csv" --result_path 'tasks/get_runtime_save/'. You can find csv file in 'tasks/get_runtime_save/'.
-
+```
 
 
 ### 2.3. Case Study 2: **Neural Network Code Generation**
