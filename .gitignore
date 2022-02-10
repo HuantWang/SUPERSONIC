@@ -12,8 +12,9 @@ SuperSonic/policy_search/SuperSonic
 test.py
 
 third_party/googletest-main*
-third_party/grpc*
-third_party/ray*
+third_party/grpc_zc
+third_party/ray_0209
+third_party/ray_original
 
 .vscode
 .pkl*
