@@ -497,15 +497,15 @@ class TaskEngine:
         if task=="Tvm":
             Tvm(policy,data).main()
 
-    def Config(self,policy,task='CSR',iterations=2):
+    def Config(self,policy,task='CSR',iterations=2,data=''):
         if task=="Stoke":
-            best_config=Stoke(policy).Config(iterations)
+            best_config=Stoke(policy,data).Config(iterations)
         if task=="Halide":
-            best_config=Halide(policy).Config(iterations)
+            best_config=Halide(policy,data).Config(iterations)
         if task=="CSR":
-            best_config=CSR(policy).Config(iterations)
+            best_config=CSR(policy,data).Config(iterations)
         if task=="Tvm":
-            best_config=Tvm(policy).Config(iterations)
+            best_config=Tvm(policy,data).Config(iterations)
 
         return best_config
 

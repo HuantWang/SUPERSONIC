@@ -131,7 +131,7 @@ class stoke_rl:
         lock.acquire()
         global Action
         Action = action
-        print("action",action)
+        # print("action",action)
         obs, rew, done, info = self.env.step(action, state_code, state_reward)
 
         self.running_reward += rew

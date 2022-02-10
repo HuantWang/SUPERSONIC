@@ -172,9 +172,12 @@ class BanditStokeEnv(gym.Env):
         """
         assert self.action_space.contains(action)
         self.num = self.num + 1
+        print("！！！！！！！！！！！！！",self.num)
         self.actions.append(action)
-        # reward = self.get_reward_1(action)
-        reward = self.generate_reward(action)
+        reward = 0
+        import time
+        # time.sleep(10)
+        # reward = self.generate_reward(action)
         obs = self.get_observation(action)
         done = True
 

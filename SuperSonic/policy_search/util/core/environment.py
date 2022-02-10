@@ -59,7 +59,6 @@ class Environment:
         reward = torch.tensor(reward).view(1, 1)
         done = torch.tensor(done).view(1, 1)
         task = torch.tensor(task).view(1, 1)
-
         return dict(
             frame=frame,
             reward=reward,

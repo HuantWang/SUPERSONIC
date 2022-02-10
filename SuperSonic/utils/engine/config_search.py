@@ -28,6 +28,55 @@ class ConfigSearch:
         os.environ['http_proxy'] = ''
         os.environ['https_proxy'] = ''
 
+    def Algorithms(self, policy_algorithm, task_config, environment_path, iterations):
+        """
+        Algorithms, using to call different RL algorithms
+
+        :param policy_algorithm:
+        :param task_config: The task_config, parameters passed to RL agent.
+        :param environment_path: The environment_path, tasks' environment path that RL agent called.
+
+        """
+        reward_list = []
+        config_list = []
+        best_config =''
+        reward = 0
+        for i in range(iterations):
+            try:
+                if policy_algorithm == "MCTS":
+                    best_config, reward = ConfigSearch().MCTS(task_config, environment_path)
+                if policy_algorithm == "PPO":
+                    best_config, reward = ConfigSearch().PPO(task_config, environment_path)
+                if policy_algorithm == "DQN":
+                    best_config, reward = ConfigSearch().DQN(task_config, environment_path)
+                if policy_algorithm == "QLearning":
+                    best_config, reward = ConfigSearch().QLearning(task_config, environment_path)
+                if policy_algorithm == "APPO":
+                    best_config, reward = ConfigSearch().APPO(task_config, environment_path)
+                if policy_algorithm == "A2C":
+                    best_config, reward = ConfigSearch().A2C(task_config, environment_path)
+                if policy_algorithm == "A3C":
+                    best_config, reward = ConfigSearch().A3C(task_config, environment_path)
+                if policy_algorithm == "ARS":
+                    best_config, reward = ConfigSearch().ARS(task_config, environment_path)
+                if policy_algorithm == "ES":
+                    best_config, reward = ConfigSearch().ES(task_config, environment_path)
+                if policy_algorithm == "MARWIL":
+                    best_config, reward = ConfigSearch().MARWIL(task_config, environment_path)
+                if policy_algorithm == "PG":
+                    best_config, reward = ConfigSearch().PG(task_config, environment_path)
+                if policy_algorithm == "SimpleQ":
+                    best_config, reward = ConfigSearch().SimpleQ(task_config, environment_path)
+            except:
+                pass
+            config_list.append(best_config)
+            reward_list.append(reward)
+
+        index = reward_list.index(max(reward_list))
+        best_config = config_list[index]
+
+        return best_config
+
     def PPO(self, task_config, environment_path):
         self.lamda = 0.95
         self.kl_coeff = 0.2
@@ -60,7 +109,6 @@ class ConfigSearch:
         ray.shutdown(exiting_interpreter=False)
         # get the best config
         best_config,best_metric_score = analysis.get_best_config(metric="episode_reward_mean", mode="max")
-
 
         return best_config,best_metric_score
 
@@ -528,47 +576,3 @@ class ConfigSearch:
 
         return best_config,best_metric_score
 
-    def Algorithms(self, policy_algorithm, task_config, environment_path,iterations):
-        """
-        Algorithms, using to call different RL algorithms
-
-        :param policy_algorithm:
-        :param task_config: The task_config, parameters passed to RL agent.
-        :param environment_path: The environment_path, tasks' environment path that RL agent called.
-
-        """
-        reward_list = []
-        config_list = []
-        for i in range(iterations):
-            if policy_algorithm == "MCTS":
-                best_config,reward=ConfigSearch().MCTS(task_config, environment_path)
-            if policy_algorithm == "PPO":
-                best_config,reward=ConfigSearch().PPO(task_config, environment_path)
-            if policy_algorithm == "DQN":
-                best_config,reward=ConfigSearch().DQN(task_config, environment_path)
-            if policy_algorithm == "QLearning":
-                best_config,reward=ConfigSearch().QLearning(task_config, environment_path)
-            if policy_algorithm == "APPO":
-                best_config,reward=ConfigSearch().APPO(task_config, environment_path)
-            if policy_algorithm == "A2C":
-                best_config,reward=ConfigSearch().A2C(task_config, environment_path)
-            if policy_algorithm == "A3C":
-                best_config,reward=ConfigSearch().A3C(task_config, environment_path)
-            if policy_algorithm == "ARS":
-                best_config,reward=ConfigSearch().ARS(task_config, environment_path)
-            if policy_algorithm == "ES":
-                best_config,reward=ConfigSearch().ES(task_config, environment_path)
-            if policy_algorithm == "MARWIL":
-                best_config,reward=ConfigSearch().MARWIL(task_config, environment_path)
-            if policy_algorithm == "PG":
-                best_config,reward=ConfigSearch().PG(task_config, environment_path)
-            if policy_algorithm == "SimpleQ":
-                best_config,reward=ConfigSearch().SimpleQ(task_config, environment_path)
-
-            config_list.append(best_config)
-            reward_list.append(reward)
-        index=reward_list.index(max(reward_list))
-        best_config = config_list[index]
-
-        print("Best config is:", best_config)
-        return best_config

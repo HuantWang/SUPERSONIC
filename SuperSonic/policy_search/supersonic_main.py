@@ -126,7 +126,7 @@ parser.add_argument("--actions", help="Use given action sequence.")
 
 
 # yapf: enable
-parser.add_argument("--num_buffers", type=int, default="32", help="num_buffers")
+parser.add_argument("--num_buffers", type=int, default="2", help="num_buffers")
 
 parser.add_argument(
     "--env", type=str, default="BanditCSREnv-v0", help="Task environments"
@@ -143,6 +143,7 @@ parser.add_argument("--Policy", help="Policy")
 parser.add_argument("--Dataset", help="Dataset")
 parser.add_argument("--datapath",default="../../tasks/CSR/DATA", help="Input Data Path and split to train/valid")
 parser.add_argument("--mode",default="policy", help="policy/condig/deploy")
+parser.add_argument("--iterations",type=int,default=2, help="steps for tuning parameters")
 
 class PolSearch_main:
     """:class:
@@ -206,6 +207,7 @@ class PolSearch_main:
                     ):
         """Calling to TaskEngine().run() to test environments for different tasks"""
         best_config=TaskEngine(self).Config(policy,task,iterations)
+        print("best config :", best_config)
 
         return best_config
 
@@ -222,6 +224,7 @@ if __name__ == "__main__":
         # best_config = PolSearch_main(flags).conf_engine(policy=bestpolicy, task=flags.task, iterations=2)
         # policy deploy
         # PolSearch_main(flags).test_engine(policy=bestpolicy,task=flags.task)
+
     if flags.mode == 'deploy':
         PolSearch_main(flags).test_engine(
             policy={
@@ -238,5 +241,6 @@ if __name__ == "__main__":
             "StatList": "Doc2vec",
             "ActList": "Doc2vec",
             "RewList": "weight",
-            "AlgList": "SimpleQ", }, task=flags.task, iterations=2)
+            "AlgList": "QLearning", }, task=flags.task, iterations=flags.iterations)
 
+        print("best config is : ",best_config)

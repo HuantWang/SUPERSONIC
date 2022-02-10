@@ -18,7 +18,7 @@ class observation_function:
             self.path = "../model"
         else:
             # Input your pkl path
-            self.path = "SuperSonic/model"
+            self.path = "/home/sys/SUPERSONIC/SuperSonic/model"
 
     def get_observation(self, input_obs, obsv_size, obs_fun):
         """Get observation with specific trasition functions

@@ -83,7 +83,7 @@ class BanditHalideEnv(gym.Env):
 
         print(f"exist_policy:{exist_policy}")
 
-        start_engine.Halide(exist_policy).main()
+        start_engine.Halide(exist_policy,self.dataset).main()
 
         # load loss from json
 

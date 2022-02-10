@@ -634,7 +634,8 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
 
     # start as many learner threads as specified => could in principle do PBT
     threads = []
-    for i in range(flags.num_learner_threads):
+
+    for i in range(1):
         thread = threading.Thread(
             target=batch_and_learn, name="batch-and-learn-%d" % i, args=(i,)
         )
@@ -717,7 +718,7 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
         for _ in range(flags.num_actors):
             free_queue.put(None)  # send quit signal to actors
         for actor in actor_processes:
-            actor.join(timeout=10)
+            actor.join(timeout=5)
         gradient_tracker.print_total()
 
 
