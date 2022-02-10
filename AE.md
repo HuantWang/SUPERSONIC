@@ -134,10 +134,28 @@ Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
 (docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
 ```
 
+You can change the following parameters:
+
+```--env ``` The task environment that passed to RL client (Include 4 cases: `BanditStokeEnv-v0`, `BanditTvmEnv-v0`, `BanditCSREnv-v0`, `BanditHalideEnv-v0`). In this case, we set to `BanditTvmEnv-v0`. 
+
+```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the `tvm` benchmarks' path `tasks/tvm/zjq/benchmark/`.
+
 #### 2.3.2 Testing the tuned RL client
 
+Using ```get_runtime.py``` to run data's running time. Here are some parameter setting to calculate the tvm' result.
+
+`--task`: The case to be calculated. In this case, we set it to tvm
+
+`--network`: from "mobilenet", "mxnet", "resnet-18", "squeezenet_v1.1", "vgg-11" choose a network to optimize
+
+`--cycle`: set cycle times
+
 ```shell
-(docker) $ cd tasks/tvm/zjq/benchmark/ && python model_optimization.py --opt "rl" --do "test"
+#computer runnintg time
+#The caculate time shell is in <SUPERSONIC-root-path>.
+(docker) $ python tasks/get_runtime.py --task tvm --network <string> --cycle <int>
+#demo:python tasks/get_runtime.py  --task tvm --network mxnet --cycle 10
+#Now you have calculated the running time of mxnet'CNN layer
 ```
 
 ### 2.4. Case Study 3: **Code Size Reduction**
@@ -153,6 +171,12 @@ Notes: Make sure the environment can import the compiler_gym.
 ```shell
 (docker) $ python  SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
 ```
+
+#### 2.4.2 Testing the tuned RL client
+```shell
+#computer runnintg time
+#The caculate time shell is in <SUPERSONIC-root-path>.
+(docker) $ python tasks/get_runtime.py --task csr--benchmark <>
 
 ### 2.5. Case Study 4: **Superoptimization**
 
