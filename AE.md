@@ -175,11 +175,11 @@ Using ```get_runtime.py``` to run data's running time. Here are some parameter s
 
 `--task`: The case to be calculated. In this case, we set it to stoke.
 
-`--data_number`: Representing different hacker data range 1-25. The default setting is 1 refer to data *p01*.
+`--hacker_number`: ID of the hack benchmark dataset, taking values between 1 and 25
 
 ```shell
 #computer runnintg time
 #The caculate time shell is in <SUPERSONIC-root-path>.
-(docker) $ python tasks/get_runtime.py --task stoke --hacker_number <data_number>`  
+(docker) $ python tasks/get_runtime.py --task stoke --hacker_number 1`  
 #demo:python tasks/get_runtime.py  --task stoke --hacker_number 1 
 #Now you have calculated the running time of data p01.
