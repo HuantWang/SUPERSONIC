@@ -111,7 +111,7 @@ To measure the runtime of the resulting binary, we run each benchmark at least 1
 Notes: Make sure the environment can compiler the halide binary. The GCC version is 7.5.
 
 ```shell
-# computer running time 
+# compute running time 
 #The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
 #The caculate time shell is in <SUPERSONIC-root-path>.
 (docker) $ cd <SUPERSONIC-root-path>
