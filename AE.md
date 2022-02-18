@@ -221,7 +221,7 @@ This demo corresponds to Figure 5 of the submitted manuscript.
 
 ***Notes***:
 
-Choose gcc v4.9 and an other gRPC for this demo as the stoke implementation only works for this setting.  
+Follow the following instructions to choose *gcc v4.9 and an other gRPC* for this demo as the stoke implementation only works for this setting.  
 
 
 ```shell
