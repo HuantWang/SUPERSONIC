@@ -16,7 +16,7 @@ To check the list of images, run:
 
 ```
 $ sudo docker images
-REPOSITORY               				 TAG                 IMAGE ID            CREATED             SIZE
+REPOSITORY                                   TAG                 IMAGE ID            CREATED             SIZE
 ssimages/supersonic_intel_0.1		     latest              ac6b624d06de        2 hours ago         41.8GB
 ```
 
