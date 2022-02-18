@@ -215,9 +215,8 @@ This demo corresponds to Figure 5 of the submitted manuscript.
 
 ***Notes***:
 
-Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with **gcc v4.9** as the stoke implementation only works for a particular version of grpc. 
+Choose gcc v4.9 and an other gRPC for this demo as the stoke implementation only works for this setting.  
 
-**Choose gcc-4.9**:
 
 ```shell
 (ss)root@2d2dbe667d18:SUPERSONIC# update-alternatives --config gcc
