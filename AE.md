@@ -123,11 +123,11 @@ You may encounter an error of failed tests. This is because we reduce the RL cli
 
 ```shell
 #Client RL search
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode policy --total_steps 10 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode policy --total_steps 10 2>/dev/null
 #Client RL Parameter Tuning
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode config --iterations 10 --task Halide 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode config --iterations 10 --task Halide 2>/dev/null
 #Client RL Deployment
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode deploy --training_iterations 50 --task Halide 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode deploy --training_iterations 50 --task Halide 2>/dev/null
 ```
 
 You can change the following parameters:
@@ -169,11 +169,11 @@ You may encounter an error of failed tests. This is because we reduce the RL cli
 
 ```shell
 #Client RL search
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode policy --total_steps 10 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode policy --total_steps 10 2>/dev/null
 #Client RL Parameter Tuning
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode config --iterations 10 --task Tvm 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode config --iterations 10 --task Tvm 2>/dev/null
 #Client RL Deployment
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode deploy --training_iterations 50 --task Tvm 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode deploy --training_iterations 50 --task Tvm 2>/dev/null
 ```
 
 #### 2.3.2 Performance evaluation on benchmarks
@@ -206,11 +206,11 @@ This demo shows how to apply the saved client RL to optimize a test program for 
 
 ```shell
 #Client RL search
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode policy --total_steps 10 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode policy --total_steps 10 2>/dev/null
 #Client RL Parameter Tuning
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode config --iterations 10 --task CSR 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode config --iterations 10 --task CSR 2>/dev/null
 #Client RL Deployment
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode deploy --training_iterations 50 --task CSR 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode deploy --training_iterations 50 --task CSR 2>/dev/null
 ```
 
 #### 2.4.2 Performance evaluation on benchmarks
@@ -259,11 +259,11 @@ This demo shows how to apply the saved client RL to optimize a test program for 
 
 ```shell
 #Client RL search
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --total_steps 10 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --total_steps 10 2>/dev/null
 #Client RL Parameter Tuning
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode config --iterations 10 --task Stoke 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode config --iterations 10 --task Stoke 2>/dev/null
 #Client RL Deployment
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker/p20" --mode deploy --training_iterations 50 --task Stoke 2>/dev/null```
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker/p20" --mode deploy --training_iterations 50 --task Stoke 2>/dev/null
 ```
 
 #### 2.5.2 Performance evaluation on benchmarks
