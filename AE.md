@@ -143,7 +143,7 @@ This demo corresponds to Figure 4 of the submitted manuscript.
 
 ***Note:***
 
-Like case study 1, choose gcc-7 for this demo. 
+**Like case study 1, choose gcc-7 for this demo**. 
 
 You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
