@@ -141,7 +141,7 @@ This demo corresponds to Figure 4 of the submitted manuscript.
 
 ***Note:***
 
-Make sure the environment can compiler the halide binary. The GCC version is **7.5**.
+Like case study 1, choose gcc-7 for this demo. 
 
 You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
@@ -215,7 +215,9 @@ This demo corresponds to Figure 5 of the submitted manuscript.
 
 ***Notes***:
 
-Make sure the environment can compiler the Stoke. (Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9. )
+Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with **gcc v4.9** as the stoke implementation only works for a particular version of grpc. 
+
+**Choose gcc-4.9**:
 
 ```shell
 (ss)root@2d2dbe667d18:SUPERSONIC# update-alternatives --config gcc
