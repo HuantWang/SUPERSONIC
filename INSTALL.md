@@ -28,7 +28,6 @@ $ docker start supersonic
 $ docker exec -it supersonic /bin/bash
 ```
 
-This command will load and run the docker image, and `-it` option attaches you an interactive tty container.
 
 ## Building from Source
 
