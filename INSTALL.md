@@ -2,7 +2,7 @@
 
 SUPERSONIC was tested with Python 3.8, CompilerGym 0.1.8, ray 0.8.6 and Ubuntu 18.04.
 
-## DOCKER (TODO.)
+## DOCKER
 
 Install docker engine by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
