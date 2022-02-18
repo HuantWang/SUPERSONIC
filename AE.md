@@ -25,7 +25,7 @@ Follow the instructions below to use our AE evaluation scripts.
 
 ### 1. Setup
 
-#### 1.1  Load the Docker Image
+#### 1.1  Fetch the Docker Image
 
 Install docker engine by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
