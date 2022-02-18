@@ -2,7 +2,7 @@
 
 The recommended approach for AE is to use the pre-configured, interactive Jupyter notebook with the instructions given in the AE submission. 
 
-The following step-by-step instructions are given for using a  [Docker Image](#docker) running on a local host. Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide image pipeline optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
+The following step-by-step instructions are given for using a  Docker Image running on a local host. Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide image pipeline optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
 
 *Disclaim:
 Although we have worked hard to ensure our AE scripts are robust, our tool remains a *research prototype*. It can still have glitches when used in complex, real-life settings. If you discover any bugs, please raise an issue, describing how you ran the program and what problem you encountered. We will get back to you ASAP. Thank you.*
@@ -16,7 +16,7 @@ The main results of our work are presented in Figures 3-6 in the submitted paper
 
 ## ★ Docker Image 
 
-We prepare our artifact within a [Docker image](https://zenodo.org/record/4675014) to run "out of the box". 
+We prepare our artifact within a Docker image to run "out of the box". 
 Our docker image was tested on a host machine running Ubuntu 18.04.
 
 ## ★ Artifact Evaluation  
@@ -25,7 +25,7 @@ Follow the instructions below to use our AE evaluation scripts.
 
 ### 1. Setup
 
-#### 1.1  Load the Docker Image <br id="loaddi">
+#### 1.1  Load the Docker Image
 
 After downloading the [docker image](#dockerimg), using the following commands to load the docker image (~30 minutes on a laptop) on the host machine:
 
@@ -51,13 +51,13 @@ Then, go to the root directory of our tool:
 
 ### 2. Evaluation
 
-The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We   then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
+The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
 
 #### 2.1 Task definition
 
 A compiler developer can use the Supersonic API to define the optimization problem. This is done by creating an RL policy interface. The definition includes a list of client RL components for the meta-optimizer to search over.
 
-You can modify elements from  statefs (state functions), rewards, rl_algs and actions to define the optimization problem from ```SuperSonic/policy_search/supersonic_main.py Policys()```.
+You can modify elements from statefs (state functions), rewards, rl_algs, and actions to define the optimization search space.
 
 ```python
 (python) 
@@ -72,18 +72,45 @@ RLAlgorithms=["MCTS", "PPO", "APPO", "A2C", "DQN", "QLearning"
 ActionFunctions=["init"]
 ```
 
-
-
 ### 2.2. Case Study 1: **Optimizing Image Pipelines**
 
-  The results correspond to Figure 3 of the submitted manuscript. 
+This task aims to improve the optimization heuristic of the Halide compiler framework. Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages. A Halide program separates the expression of the computation kernels and the application processing pipeline from the pipeline’s schedule. Here, the schedule defines the order of execution and placement of data on the hardware. The goal of this task is to automatically synthesize schedules to minimize the execution time of the benchmark.
+
+***Note:***
+
+ Make sure the environment can compiler the halide binary. The GCC version is **7.5**.
+
+```shell
+(ss)root@2d2dbe667d18:SUPERSONIC# update-alternatives --config gcc
+
+There are 2 choices for the alternative gcc (providing /usr/bin/gcc).
+
+  Selection    Path              Priority   Status
+------------------------------------------------------------
+  0            /usr/bin/gcc-7     100       auto mode
+* 1            /usr/bin/gcc-4.9   80        manual mode
+  2            /usr/bin/gcc-7     100       manual mode
+Press <enter> to keep the current choice[*], or type selection number: 0
+update-alternatives: using /usr/bin/gcc-7 to provide /usr/bin/gcc (gcc) in manual mode
+
+(ss)root@2d2dbe667d18:SUPERSONIC# cd /home/sys/SUPERSONIC/third_party && ./changeGRPC.sh /home/sys/SUPERSONIC/third_party/grpc/
+```
 
 #### 2.2.1 Client RL search and testing
 
-(*approximate runtime:  ~12 hours*)
+(*approximate runtime:  **~ 30 minutes***)
+
+##### Note:
+
+You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
 ```shell
-(docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditHalideEnv-v0   --mode policy --total_steps 70  --datapath "tasks/halide/resource"
+#Client RL search
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode policy --total_steps 10 2>/dev/null```
+#Client RL Parameter Tuning
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode config --iterations 10 --task Halide 2>/dev/null```
+#Client RL Deployment
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditHalideEnv-v0  --datapath "tasks/halide/resource" --mode deploy --training_iterations 50 --task Halide 2>/dev/null```
 ```
 
 You can change the following parameters:
@@ -94,21 +121,13 @@ You can change the following parameters:
 
  ```--mode ``` "policy" - An automatic process includes RL Policy Search, and deploy the policy as well as parameters to the task; "config" - Parameters Tuning;  "deploy" - Deploy Policy and Parameter; We set it to "policy" to do the entire process.
 
-```--total_steps``` to set the number of trials spent on client RL search. ( It should be set to > 70 )
+```--total_steps``` to set the number of trials spent on client RL search. 
 
-#### 2.2.2 Testing the tuned RL client
+#### 2.2.2 Performance evaluation on benchmarks
 
-To measure the runtime of the resulting binary, we run each benchmark at least 100 times on an unloaded machine. Using ```get_runtime.py``` to run data's result and get a speedup. Here are some parameter setting to calculate the halide' result.
+The results correspond to Figure 3 of the submitted manuscript.
 
-`--task`: The case to be calculated. In this case, we set it to halide.
-
-`--data`: Representing different halide data . Options: _harris, interpolate, hist, max_filter, unsharp, nl_mean, lens_blur, local_laplacian, conv_layer, st_chain_.
-
-`--log_file`: The log file corresponds to the data is generated after the system-SuperSonic run. This  default log file path is in *<SUPERSONIC-root-path/SuperSonic/utils/result>*.
-
-`--result_path`: The path to save results. The default result path is*<SUPERSONIC-root-path/tasks/get_runtime_save/>*.
-
-Notes: Make sure the environment can compiler the halide binary. The GCC version is 7.5.
+*approximate runtime ~60 minutes for one benchmark*
 
 ```shell
 # compute running time 
@@ -122,33 +141,34 @@ Notes: Make sure the environment can compiler the halide binary. The GCC version
 
 ### 2.3. Case Study 2: **Neural Network Code Generation**
 
-  The results correspond to Figure 4 of the submitted manuscript. 
+This task targets DNN back-end code generation to find a good schedule. e.g., instruction orders and data placement to reduce execution time on a multi-core CPU.
+
+This demo corresponds to Figure 4 of the submitted manuscript.
+
+***Note:***
+
+Make sure the environment can compiler the halide binary. The GCC version is **7.5**.
+
+You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
 #### 2.3.1 Find the best policy and testing
 
-(*approximate runtime:  ~3 hours*)
-
-Notes: Make sure the environment can import the TVM. The GCC version is 7.5.
+(*approximate runtime:  **~ 30 minutes***)
 
 ```shell
-(docker) $ python SuperSonic/policy_search/supersonic_main.py  --env BanditTvmEnv-v0 --datapath tasks/tvm/zjq/benchmark/
+#Client RL search
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode policy --total_steps 10 2>/dev/null```
+#Client RL Parameter Tuning
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode config --iterations 10 --task Tvm 2>/dev/null```
+#Client RL Deployment
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode deploy --training_iterations 50 --task Tvm 2>/dev/null```
 ```
 
-You can change the following parameters:
+#### 2.3.2 Performance evaluation on benchmarks
 
-```--env ``` The task environment that passed to RL client (Include 4 cases: `BanditStokeEnv-v0`, `BanditTvmEnv-v0`, `BanditCSREnv-v0`, `BanditHalideEnv-v0`). In this case, we set to `BanditTvmEnv-v0`. 
+This demo corresponds to Figure 4 of the submitted manuscript.
 
-```--datapath``` Data path ( Change data path to use different benchmarks to support RL policy search). In this case, we set to the `tvm` benchmarks' path `tasks/tvm/zjq/benchmark/`.
-
-#### 2.3.2 Testing the tuned RL client
-
-Using ```get_runtime.py``` to run data's running time. Here are some parameter setting to calculate the tvm' result.
-
-`--task`: The case to be calculated. In this case, we set it to tvm
-
-`--network`: from "mobilenet", "mxnet", "resnet-18", "squeezenet_v1.1", "vgg-11" choose a network to optimize
-
-`--cycle`: set cycle times
+*approximate runtime = 10 minutes for one benchmark*
 
 ```shell
 #computer runnintg time
@@ -160,47 +180,91 @@ Using ```get_runtime.py``` to run data's running time. Here are some parameter s
 
 ### 2.4. Case Study 3: **Code Size Reduction**
 
-The results correspond to Figure 5 of the submitted manuscript. 
+This task is concerned with determining the LLVM passes and their order to minimize the code size.
+
+This demo corresponds to Figure 5 of the submitted manuscript.
+
+***Note:***
+
+Make sure the environment can import the compiler_gym.
+
+You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
 #### 2.4.1 Client RL search and testing
 
-(*approximate runtime:  ~12 hours*)
+This demo shows how to apply the saved client RL to optimize a test program for Code Size Reduction.
 
-Notes: Make sure the environment can import the compiler_gym.
+*approximate runtime ~ 20 minutes*
 
 ```shell
-(docker) $ python  SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0 --datapath "../../tasks/CSR/DATA" --mode policy --steps 1 --total_steps 70
+#Client RL search
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode policy --total_steps 10 2>/dev/null```
+#Client RL Parameter Tuning
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode config --iterations 10 --task CSR 2>/dev/null```
+#Client RL Deployment
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode deploy --training_iterations 50 --task CSR 2>/dev/null```
 ```
 
-#### 2.4.2 Testing the tuned RL client
+#### 2.4.2 Performance evaluation on benchmarks
+
+The results correspond to Figure 5 of the submitted manuscript.
+
+*approximate runtime ~30 minutes for one benchmark*
+
 ```shell
 #computer runnintg time
 #The caculate time shell is in <SUPERSONIC-root-path>.
 (docker) $ python tasks/get_runtime.py --task csr--benchmark <>
 ```
 
+
+
 ### 2.5. Case Study 4: **Superoptimization**
 
-The results correspond to Figure 6 of the submitted manuscript. 
+This classical compiler optimization task finds a valid code sequence to maximize the performance of a loop-free sequence of instructions. Superoptimizaiton is an expensive optimization technique as the number of possible configurations grows exponentially as the instruction count to be optimized increases.
+
+This demo corresponds to Figure 5 of the submitted manuscript.
+
+***Notes***:
+
+Make sure the environment can compiler the Stoke. (Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9. )
+
+```shell
+(ss)root@2d2dbe667d18:SUPERSONIC# update-alternatives --config gcc
+
+There are 2 choices for the alternative gcc (providing /usr/bin/gcc).
+
+  Selection    Path              Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/gcc-7     100       auto mode
+  1            /usr/bin/gcc-4.9   80        manual mode
+  2            /usr/bin/gcc-7     100       manual mode
+Press <enter> to keep the current choice[*], or type selection number: 1
+update-alternatives: using /usr/bin/gcc-4.9 to provide /usr/bin/gcc (gcc) in manual mode
+
+(ss)root@2d2dbe667d18:SUPERSONIC# cd /home/sys/SUPERSONIC/third_party && ./changeGRPC.sh /home/sys/SUPERSONIC/third_party/grpc/
+```
 
 #### 2.5.1 Client RL search and testing
 
-(*approximate runtime:  ~12 hours*)
+This demo shows how to apply the saved client RL to optimize a test program for Superoptimization.
 
-Notes: Make sure the environment can compiler the Stoke. (Following [this instruction](https://github.com/HuantWang/SUPERSONIC/edit/master/INSTALL.md#grpc) to rebuild grpc with gcc v4.9. )
+*approximate runtime ~ 30 minutes*
 
 ```shell
-(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --steps 1 --total_steps 70 ```
-```                      
+#Client RL search
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode policy --total_steps 10 2>/dev/null```
+#Client RL Parameter Tuning
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker" --mode config --iterations 10 --task Stoke 2>/dev/null```
+#Client RL Deployment
+(docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker/p20" --mode deploy --training_iterations 50 --task Stoke 2>/dev/null```
+```
 
-#### 2.5.2 Testing the tuned RL client
+#### 2.5.2 Performance evaluation on benchmarks
 
-#modified by lzy
-Using ```get_runtime.py``` to run data's running time. Here are some parameter setting to calculate the stoke' result.
+The results correspond to Figure 6 of the submitted manuscript.
 
-`--task`: The case to be calculated. In this case, we set it to stoke.
-
-`--hacker_number`: ID of the hack benchmark dataset, taking values between 1 and 25
+*approximate runtime ~15 minutes for one benchmark*
 
 ```shell
 #computer runnintg time
@@ -208,3 +272,4 @@ Using ```get_runtime.py``` to run data's running time. Here are some parameter s
 (docker) $ python tasks/get_runtime.py --task stoke --hacker_number 1`  
 #demo:python tasks/get_runtime.py  --task stoke --hacker_number 1 
 #Now you have calculated the running time of data p01.
+```
