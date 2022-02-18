@@ -9,28 +9,21 @@ Install docker engine by following the instructions [here](https://docs.docker.c
 1. Fetch the docker image from docker hub.
 
 ```
-$ sudo docker pull CC/SuperSonic:latest
-```
-
-Alternatively, you can build the docker image from scratch by the following instruction.
-
-```
-$ ./build_docker.sh
+$ sudo docker pull ssimages/supersonic_intel_0.1
 ```
 
 To check the list of images, run:
 
 ```
 $ sudo docker images
-REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
-CC/SuperSonic		     latest              d5bc1be66342        2 hours ago         14.2GB
+REPOSITORY               				 TAG                 IMAGE ID            CREATED             SIZE
+ssimages/supersonic_intel_0.1		     latest              ac6b624d06de        2 hours ago         41.8GB
 ```
 
 1. Run the docker image.
 
 ```
-$ sudo docker run -it CGO/SuperSonic /bin/bash
-$ export PS1="(docker) $PS1"
+$ sudo docker run -it ssimages/supersonic_intel_0.1 /bin/bash
 ```
 
 This command will load and run the docker image, and `-it` option attaches you an interactive tty container.
@@ -214,4 +207,3 @@ Run with code：
 ```shell 
 $ python supersonic_main.py --task Stoke  --mode test
 ```
-
