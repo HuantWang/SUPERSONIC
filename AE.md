@@ -24,11 +24,9 @@ Our docker image was tested on a host machine running Ubuntu 18.04.
 Follow the instructions below to use our AE evaluation scripts.
 
 ### 1. Setup
-
-#### 1.1  Fetch the Docker Image
-
 Install Docker by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). The following instructions assume the host OS runs Linux.
 
+#### 1.1  Fetch the Docker Image
 Fetch the docker image from docker hub.
 
 ```
