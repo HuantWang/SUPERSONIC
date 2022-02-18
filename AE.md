@@ -27,13 +27,29 @@ Follow the instructions below to use our AE evaluation scripts.
 
 #### 1.1  Load the Docker Image
 
-After downloading the [docker image](#dockerimg), using the following commands to load the docker image (~30 minutes on a laptop) on the host machine:
+Install docker engine by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
+
+1. Fetch the docker image from docker hub.
 
 ```
-unzip SuperSonic.zip
-cd SuperSonic
-docker load -i SuperSonic.tar
+$ sudo docker pull ssimages/supersonic_intel_0.1
 ```
+
+To check the list of images, run:
+
+```
+$ sudo docker images
+REPOSITORY                                   TAG                 IMAGE ID            CREATED             SIZE
+ssimages/supersonic_intel_0.1		     latest              ac6b624d06de        2 hours ago         41.8GB
+```
+
+1. Run the docker image.
+
+```
+$ sudo docker run -it ssimages/supersonic_intel_0.1 /bin/bash
+```
+
+This command will load and run the docker image, and `-it` option attaches you an interactive tty container.
 
 #### 1.2 Setup the Environment
 
@@ -130,12 +146,7 @@ The results correspond to Figure 3 of the submitted manuscript.
 *approximate runtime ~60 minutes for one benchmark*
 
 ```shell
-# compute running time 
-#The default log file is in <SUPERSONIC-root-path/SuperSonic/utils/result>.
-#The caculate time shell is in <SUPERSONIC-root-path>.
-(docker) $ cd <SUPERSONIC-root-path>
-(docker) $ python tasks/get_runtime.py  --task halide --data <halide_data> --log_file <log_file_path> --result_path <result_to_save>
-#demo:python tasks/get_runtime.py  --task halide --data 'interpolate' --log_file  "tasks/get_runtime_save/interpolate_result.csv" --result_path 'tasks/get_runtime_save/'. You can find csv file in 'tasks/get_runtime_save/'.
+(docker) $ python tasks/halide/run.py
 ```
 
 
@@ -171,11 +182,7 @@ This demo corresponds to Figure 4 of the submitted manuscript.
 *approximate runtime = 10 minutes for one benchmark*
 
 ```shell
-#computer runnintg time
-#The caculate time shell is in <SUPERSONIC-root-path>.
-(docker) $ python tasks/get_runtime.py --task tvm --network <string> --cycle <int>
-#demo:python tasks/get_runtime.py  --task tvm --network mxnet --cycle 10
-#Now you have calculated the running time of mxnet'CNN layer
+(docker) $ python tasks/tvm/run.py
 ```
 
 ### 2.4. Case Study 3: **Code Size Reduction**
@@ -212,9 +219,7 @@ The results correspond to Figure 5 of the submitted manuscript.
 *approximate runtime ~30 minutes for one benchmark*
 
 ```shell
-#computer runnintg time
-#The caculate time shell is in <SUPERSONIC-root-path>.
-(docker) $ python tasks/get_runtime.py --task csr--benchmark <>
+(docker) $ python tasks/CSR/run.py
 ```
 
 
@@ -267,9 +272,5 @@ The results correspond to Figure 6 of the submitted manuscript.
 *approximate runtime ~15 minutes for one benchmark*
 
 ```shell
-#computer runnintg time
-#The caculate time shell is in <SUPERSONIC-root-path>.
-(docker) $ python tasks/get_runtime.py --task stoke --hacker_number 1`  
-#demo:python tasks/get_runtime.py  --task stoke --hacker_number 1 
-#Now you have calculated the running time of data p01.
+(docker) $ python tasks/stoke/run.py
 ```
