@@ -77,7 +77,7 @@ This task aims to improve the optimization heuristic of the Halide compiler fram
 
 ***Note:***
 
- Make sure the GCC version **7** is chosen. 
+ Make sure gcc  v**7** is chosen. 
 
 ```shell
 (ss)root@2d2dbe667d18:SUPERSONIC# update-alternatives --config gcc
