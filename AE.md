@@ -29,7 +29,7 @@ Follow the instructions below to use our AE evaluation scripts.
 
 Install docker engine by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-1. Fetch the docker image from docker hub.
+Fetch the docker image from docker hub.
 
 ```
 $ sudo docker pull nwussimage/supersonic_0.1
@@ -43,7 +43,7 @@ REPOSITORY                                   TAG                 IMAGE ID       
 nwussimage/supersonic_0.1		     latest              ac6b624d06de        2 hours ago         41.8GB
 ```
 
-1. Run the docker image.
+Run the docker image.
 
 ```
 $ docker run -dit -P --name=supersonic nwussimage/supersonic_0.1 /bin/bash
