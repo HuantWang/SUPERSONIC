@@ -70,26 +70,8 @@ Then, go to the root directory of our tool:
 
 The following steps describe how to evaluate each individual case study. In each case study, we first describe how to use SuperSonic to search the RL client architecture. We then show how to apply the searched client RL to test benchmarks and compare the results against the baselines.
 
-#### 2.1 Task definition
 
-A compiler developer can use the Supersonic API to define the optimization problem. This is done by creating an RL policy interface. The definition includes a list of client RL components for the meta-optimizer to search over.
-
-You can modify elements from statefs (state functions), rewards, rl_algs, and actions to define the optimization search space.
-
-```python
-(python) 
-#Candidate state functions
-StateFunctions=["Word2vec", "Doc2vec", "Bert", "Actionhistory"]
-#Candidate reward functions
-RewardFunctions=["relative_measure", "tan", "func", "weight"]
-#Candidate RL algorithms
-RLAlgorithms=["MCTS", "PPO", "APPO", "A2C", "DQN", "QLearning"
-        "MARWIL", "PG", "SimpleQ", "BC"]
-#Candidate Action methods
-ActionFunctions=["init"]
-```
-
-### 2.2. Case Study 1: **Optimizing Image Pipelines**
+### 2.1. Case Study 1: **Optimizing Image Pipelines**
 
 This task aims to improve the optimization heuristic of the Halide compiler framework. Halide is a domain-specific language and compiler for image processing pipelines (or graphs) with multiple computation stages. A Halide program separates the expression of the computation kernels and the application processing pipeline from the pipeline’s schedule. Here, the schedule defines the order of execution and placement of data on the hardware. The goal of this task is to automatically synthesize schedules to minimize the execution time of the benchmark.
 
@@ -113,7 +95,7 @@ update-alternatives: using /usr/bin/gcc-7 to provide /usr/bin/gcc (gcc) in manua
 (ss)root@2d2dbe667d18:SUPERSONIC# cd /home/sys/SUPERSONIC/third_party && ./changeGRPC.sh /home/sys/SUPERSONIC/third_party/grpc/
 ```
 
-#### 2.2.1 Client RL search and testing
+#### 2.1.1 Client RL search and testing
 
 (*approximate runtime:  **~ 30 minutes***)
 
@@ -140,7 +122,7 @@ You can change the following parameters:
 
 ```--total_steps``` to set the number of trials spent on client RL search. 
 
-#### 2.2.2 Performance evaluation on benchmarks
+#### 2.1.2 Performance evaluation on benchmarks
 
 The results correspond to Figure 3 of the submitted manuscript.
 
@@ -151,7 +133,7 @@ The results correspond to Figure 3 of the submitted manuscript.
 ```
 
 
-### 2.3. Case Study 2: **Neural Network Code Generation**
+### 2.2. Case Study 2: **Neural Network Code Generation**
 
 This task targets DNN back-end code generation to find a good schedule. e.g., instruction orders and data placement to reduce execution time on a multi-core CPU.
 
@@ -163,7 +145,7 @@ Make sure the environment can compiler the halide binary. The GCC version is **7
 
 You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
-#### 2.3.1 Find the best policy and testing
+#### 2.2.1 Find the best policy and testing
 
 (*approximate runtime:  **~ 30 minutes***)
 
@@ -176,7 +158,7 @@ You may encounter an error of failed tests. This is because we reduce the RL cli
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditTvmEnv-v0  --datapath "tasks/tvm/zjq/benchmark/" --mode deploy --training_iterations 50 --task Tvm 2>/dev/null
 ```
 
-#### 2.3.2 Performance evaluation on benchmarks
+#### 2.2.2 Performance evaluation on benchmarks
 
 This demo corresponds to Figure 4 of the submitted manuscript.
 
@@ -186,7 +168,7 @@ This demo corresponds to Figure 4 of the submitted manuscript.
 (docker) $ python tasks/tvm/run.py
 ```
 
-### 2.4. Case Study 3: **Code Size Reduction**
+### 2.3. Case Study 3: **Code Size Reduction**
 
 This task is concerned with determining the LLVM passes and their order to minimize the code size.
 
@@ -198,7 +180,7 @@ Make sure the environment can import the compiler_gym.
 
 You may encounter an error of failed tests. This is because we reduce the RL client search steps to make the search time manageable for the demo. Such failure did occur during our full-scale evaluation.
 
-#### 2.4.1 Client RL search and testing
+#### 2.3.1 Client RL search and testing
 
 This demo shows how to apply the saved client RL to optimize a test program for Code Size Reduction.
 
@@ -213,7 +195,7 @@ This demo shows how to apply the saved client RL to optimize a test program for 
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditCSREnv-v0  --datapath "tasks/CSR/DATA" --mode deploy --training_iterations 50 --task CSR 2>/dev/null
 ```
 
-#### 2.4.2 Performance evaluation on benchmarks
+#### 2.3.2 Performance evaluation on benchmarks
 
 The results correspond to Figure 5 of the submitted manuscript.
 
@@ -225,7 +207,7 @@ The results correspond to Figure 5 of the submitted manuscript.
 
 
 
-### 2.5. Case Study 4: **Superoptimization**
+### 2.4. Case Study 4: **Superoptimization**
 
 This classical compiler optimization task finds a valid code sequence to maximize the performance of a loop-free sequence of instructions. Superoptimizaiton is an expensive optimization technique as the number of possible configurations grows exponentially as the instruction count to be optimized increases.
 
@@ -251,7 +233,7 @@ update-alternatives: using /usr/bin/gcc-4.9 to provide /usr/bin/gcc (gcc) in man
 (ss)root@2d2dbe667d18:SUPERSONIC# cd /home/sys/SUPERSONIC/third_party && ./changeGRPC.sh /home/sys/SUPERSONIC/third_party/grpc/
 ```
 
-#### 2.5.1 Client RL search and testing
+#### 2.4.1 Client RL search and testing
 
 This demo shows how to apply the saved client RL to optimize a test program for Superoptimization.
 
@@ -266,7 +248,7 @@ This demo shows how to apply the saved client RL to optimize a test program for 
 (docker) $ python SuperSonic/policy_search/supersonic_main.py --env BanditStokeEnv-v0  --datapath "tasks/stoke/example/hacker/p20" --mode deploy --training_iterations 50 --task Stoke 2>/dev/null
 ```
 
-#### 2.5.2 Performance evaluation on benchmarks
+#### 2.4.2 Performance evaluation on benchmarks
 
 The results correspond to Figure 6 of the submitted manuscript.
 
