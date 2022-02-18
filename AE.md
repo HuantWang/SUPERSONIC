@@ -47,6 +47,8 @@ nwussimage/supersonic_0.1		     latest              ac6b624d06de        2 hours 
 
 ```
 $ docker run -dit -P --name=supersonic nwussimage/supersonic_0.1 /bin/bash
+$ docker start supersonic 
+$ docker exec -it supersonic /bin/bash
 ```
 
 
