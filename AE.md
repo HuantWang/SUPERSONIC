@@ -130,6 +130,8 @@ The results correspond to Figure 3 of the submitted manuscript.
 
 ```shell
 (docker) $ python tasks/halide/run.py
+# download the PDF from docker container to your PC
+(docker) $ sz /home/sys/SUPERSONIC/AE/halide/graph/*
 ```
 
 
@@ -166,6 +168,8 @@ This demo corresponds to Figure 4 of the submitted manuscript.
 
 ```shell
 (docker) $ python tasks/tvm/run.py
+# download the PDF from docker container to your PC
+(docker) $ sz /home/sys/SUPERSONIC/AE/tvm/graph/*
 ```
 
 ### 2.3. Case Study 3: **Code Size Reduction**
@@ -203,6 +207,8 @@ The results correspond to Figure 5 of the submitted manuscript.
 
 ```shell
 (docker) $ python tasks/CSR/run.py
+# download the PDF from docker container to your PC
+(docker) $ sz /home/sys/SUPERSONIC/AE/csr/graph/*
 ```
 
 
@@ -257,4 +263,6 @@ The results correspond to Figure 6 of the submitted manuscript.
 
 ```shell
 (docker) $ python tasks/stoke/run.py
+# download the PDF from docker container to your PC
+(docker) $ sz /home/sys/SUPERSONIC/AE/stoke/graph/*
 ```
