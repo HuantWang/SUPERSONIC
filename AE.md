@@ -4,6 +4,10 @@ The recommended approach for AE is to use the pre-configured, interactive Jupyte
 
 The following step-by-step instructions are given for using a  Docker Image running on a local host. Our docker image (40 GB uncompressed) contains the entire execution environment (including python and system dependencies), benchmarks, and source code which includes four optimization tasks: Halide image pipeline optimization, neural network code generation, compiler phase ordering for code size reduction, and superoptimization.  All of our code and data are open-sourced has been developed with extensibility as a primary goal.
 
+Check
+    <a href="http://1.14.76.177:7033/index.html">the website</a>
+    for documents and more information of Supersonic. 
+
 *Disclaim:
 Although we have worked hard to ensure our AE scripts are robust, our tool remains a *research prototype*. It can still have glitches when used in complex, real-life settings. If you discover any bugs, please raise an issue, describing how you ran the program and what problem you encountered. We will get back to you ASAP. Thank you.*
 
