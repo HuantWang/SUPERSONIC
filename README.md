@@ -54,7 +54,7 @@ If you use Supersonic in any of your work, please cite [our paper](https://dl.ac
 
 ```
 @inproceedings{10.1145/3497776.3517769,
-author = {Wang, Huanting and Tang, Zhanyong and Zhang, Cheng and Zhao, Jiaqi and Cummins, Chris and Leather, Hugh and Wang, Zheng},
+author = {Huanting Wang, Zhanyong Tang, Cheng Zhang, Jiaqi Zhao, Chris Cummins, Hugh Leather, and Zheng Wang},
 title = {Automating Reinforcement Learning Architecture Design for Code Optimization},
 year = {2022},
 isbn = {9781450391832},
