@@ -49,3 +49,22 @@ See [artifact_evaluation](https://github.com/HuantWang/SUPERSONIC/blob/master/AE
 We welcome contributions to SuperSonic. If you are interested in contributing please see
 [this document](https://github.com/HuantWang/SUPERSONIC/blob/master/CONTRIBUTING.md).
 
+## Citation
+If you use Supersonic in any of your work, please cite [our paper](https://dl.acm.org/doi/10.1145/3497776.3517769):
+
+@inproceedings{10.1145/3497776.3517769,
+author = {Wang, Huanting and Tang, Zhanyong and Zhang, Cheng and Zhao, Jiaqi and Cummins, Chris and Leather, Hugh and Wang, Zheng},
+title = {Automating Reinforcement Learning Architecture Design for Code Optimization},
+year = {2022},
+isbn = {9781450391832},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3497776.3517769},
+doi = {10.1145/3497776.3517769},
+booktitle = {Proceedings of the 31st ACM SIGPLAN International Conference on Compiler Construction},
+pages = {129–143},
+numpages = {15},
+keywords = {Compiler optimization, reinforcement learning, code optimization},
+location = {Seoul, South Korea},
+series = {CC 2022}
+}
