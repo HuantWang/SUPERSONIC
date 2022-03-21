@@ -52,6 +52,7 @@ We welcome contributions to SuperSonic. If you are interested in contributing pl
 ## Citation
 If you use Supersonic in any of your work, please cite [our paper](https://dl.acm.org/doi/10.1145/3497776.3517769):
 
+```
 @inproceedings{10.1145/3497776.3517769,
 author = {Wang, Huanting and Tang, Zhanyong and Zhang, Cheng and Zhao, Jiaqi and Cummins, Chris and Leather, Hugh and Wang, Zheng},
 title = {Automating Reinforcement Learning Architecture Design for Code Optimization},
@@ -68,3 +69,4 @@ keywords = {Compiler optimization, reinforcement learning, code optimization},
 location = {Seoul, South Korea},
 series = {CC 2022}
 }
+```
