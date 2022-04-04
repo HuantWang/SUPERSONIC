@@ -1,0 +1,14 @@
+./third_party
+supersonic.db
+SuperSonic/policy_search/logs
+SuperSonic/policy_search/SuperSonic
+
+logs
+.vscode
+.pkl*
+.idea
+.git_old
+__pycache__
+
+
+
