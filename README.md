@@ -23,7 +23,7 @@ SUPERSONIC is a tool to automate reinforcement learning (RL) policy searching an
 
 Given an RL search space defined by the Supersonic Python API, the Supersonic meta-optimizer automatically searches for a suitable RL component composition for an optimization task. It also automatically tunes a set of tunable hyperparameters of the chosen components. No RL expertise is needed to use Supersonic. 
 
-*Check [our paper](https://dl.acm.org/doi/10.1145/3497776.3517769) for detailed information.*
+*Check [our paper](https://dl.acm.org/doi/10.1145/3497776.3517769) or [presentation slides](https://github.com/HuantWang/SUPERSONIC/blob/master/docs/Supersonic.pdf) for detailed information.*
 
 ## Installation
 
