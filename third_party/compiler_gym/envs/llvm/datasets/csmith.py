@@ -187,7 +187,29 @@ class CsmithDataset(Dataset):
             dir=transient_cache_path("."), prefix="csmith-"
         ) as d:
             with tarfile.open(fileobj=tar_data, mode="r:gz") as arc:
-                arc.extractall(d)
+                
+                import os
+                
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner=numeric_owner) 
+                    
+                
+                safe_extract(arc, d)
 
             # The path of the extracted sources.
             src_dir = Path(d) / "csmith-csmith-2.3.0"
