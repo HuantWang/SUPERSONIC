@@ -1,3 +1,23 @@
+
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-YES-green.svg)](https://github.com/HuantWang/SUPERSONIC/graphs/commit-activity)
+[![License CC-BY-4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](https://github.com/HuantWang/SUPERSONIC/blob/master/LICENSE)
+[![Documentation Status](https://readthedocs.org/projects/supersonic/badge/?version=latest)](https://supersonic.readthedocs.io/en/latest/?badge=latest)
+
+<div align="center">
+ <img src="./sslogo.png">
+</div>
+
+<p align="center">
+  <i>Automating reinforcement learning architecture design for code optimization.</i>
+</p>
+<p align="center">
+  <i>
+    Check
+    <a href="http://1.14.76.177:7033/index.html">the website</a>
+    for more information.
+  </i>
+</p>
+
 # **Compiler phase ordering optimisation**
 
 This script eanbles the use of RL to tune the LLVM compiler phase order for code resize reduction or runtime optimisation. 
